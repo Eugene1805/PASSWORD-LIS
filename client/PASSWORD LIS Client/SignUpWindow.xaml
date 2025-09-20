@@ -6,62 +6,69 @@
         xmlns:local="clr-namespace:PASSWORD_LIS_Client"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="SignUpWindow" Height="550" Width="320">
-    <!--
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="20">
+        Title="SignUpWindow" Height="550" Width="600">
+    <Grid>
+        <Grid.Background>
+            <ImageBrush ImageSource="/BackgroudImage.png"/>
+        </Grid.Background>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="20">
 
-            <TextBlock Text="{x:Static language:Lang.createAccountText}" 
-                   FontSize="20" 
-                   FontWeight="Bold" 
-                   HorizontalAlignment="Center" 
-                   Margin="0,0,0,20"/>
+                <TextBlock Text="a{x:Static language:Lang.createAccountText}" 
+               FontSize="20" 
+               FontWeight="Bold" 
+               HorizontalAlignment="Center" 
+               Margin="0,0,0,20"/>
 
-            <Label Content="{x:Static language:Lang.nameText}"/>
-            <TextBox x:Name="firstNameTextBox" Text="{Binding FirstName, UpdateSourceTrigger=PropertyChanged}" Width="250"/>
+                <Label Content="a{x:Static language:Lang.nameText}"/>
+                <TextBox x:Name="firstNameTextBox" Width="250"/>
 
-            <Label Content="{x:Static language:Lang.lastNameText}"/>
-            <TextBox x:Name="lastNameTextBox" Text="{Binding LastName, UpdateSourceTrigger=PropertyChanged}" Width="250"/>
+                <Label Content="a{x:Static language:Lang.lastNameText}"/>
+                <TextBox x:Name="lastNameTextBox" Width="250"/>
 
-            <Label Content="{x:Static language:Lang.nicknameText}"/>
-            <TextBox x:Name="nicknameTextBox" Text="{Binding Nickname, UpdateSourceTrigger=PropertyChanged}" Width="250"/>
+                <Label Content="a{x:Static language:Lang.nicknameText}"/>
+                <TextBox x:Name="nicknameTextBox" Width="250"/>
 
-            <Label Content="{x:Static language:Lang.emailText}"/>
-            <TextBox x:Name="emailTextBox" Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Width="250"/>
+                <Label Content="a{x:Static language:Lang.emailText}"/>
+                <TextBox x:Name="emailTextBox" Width="250"/>
 
-            <Label Content="{x:Static language:Lang.userPasswordText}"/>
-            <PasswordBox x:Name="passwordBox" helpers:PasswordBoxHelper.Password="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="250"/>
+                <Label Content="a{x:Static language:Lang.userPasswordText}"/>
+                <PasswordBox x:Name="passwordBox" Width="250"/>
 
-            <Label Content="{x:Static language:Lang.confirmUserPasswordText}"/>
-            <PasswordBox x:Name="confirmPasswordBox" helpers:PasswordBoxHelper.Password="{Binding ConfirmPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="250"/>
+                <Label Content="a{x:Static language:Lang.confirmUserPasswordText}"/>
+                <PasswordBox x:Name="confirmPasswordBox" Width="250"/>
 
-            <TextBlock TextWrapping="Wrap" Margin="0,10,0,0">
-            <Hyperlink> 
-                <Run Text="{x:Static language:Lang.termsAndConditionsText}"/>
-            </Hyperlink>
-            </TextBlock>
+                <TextBlock TextWrapping="Wrap" Margin="0,10,0,0">
+        <Hyperlink> 
+            <Run Text="a{x:Static language:Lang.termsAndConditionsText}"/>
+        </Hyperlink>
+                </TextBlock>
 
-            <Button Content="{x:Static language:Lang.signUpText}" 
-                FontWeight="Bold" 
-                Width="250" 
-                Height="35" 
-                Margin="0,15,0,10" 
-                HorizontalAlignment="Center"
-                Click="SignUpClick"
-                Command="{Binding SignUpCommand}"/>
+                <Button Content="a{x:Static language:Lang.signUpText}" 
+            FontWeight="Bold" 
+            Width="250" 
+            Height="35" 
+            Margin="0,15,0,10" 
+            HorizontalAlignment="Center"
+            />
 
-            <TextBlock TextWrapping="Wrap" 
-                   TextAlignment="Center" 
-                   FontSize="12" 
-                   Foreground="Gray">
-            <Run Text="{x:Static language:Lang.alreadyHaveAccountText}"/>
-            <Hyperlink Click="LogInClick"> 
-                <Run Text="{x:Static language:Lang.loginText}"/>
-            </Hyperlink>
-            <LineBreak/>
-            <Run Text="{x:Static language:Lang.codeActivationMessageText}"/>
-            </TextBlock>
+                <TextBlock TextWrapping="Wrap" 
+               TextAlignment="Center" 
+               FontSize="12" 
+               Foreground="Gray">
+        <Run Text="a{x:Static language:Lang.alreadyHaveAccountText}"/>
+        <Hyperlink> 
+            <Run Text="a{x:Static language:Lang.loginText}"/>
+        </Hyperlink>
+        <LineBreak/>
+        <Run Text="a{x:Static language:Lang.codeActivationMessageText}"/>
+                </TextBlock>
 
-        </StackPanel>
-    </ScrollViewer>-->
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
 </Window>
