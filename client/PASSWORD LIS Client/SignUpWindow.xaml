@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:PASSWORD_LIS_Client"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
+        MinHeight="550" MinWidth="600"
         Title="SignUpWindow" Height="550" Width="600">
     <Grid>
         <Grid.Background>

@@ -23,7 +23,7 @@ namespace PASSWORD_LIS_Client
         public MainWindow()
         {
             InitializeComponent();
-            new SignUpWindow().Show();
+            new LoginWindow().Show();
         }
     }
 }
