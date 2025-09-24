@@ -1,0 +1,22 @@
+﻿<Window x:Class="PASSWORD_LIS_Client.HowToPlayWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PASSWORD_LIS_Client"
+        mc:Ignorable="d"
+        Title="HowToPlayWindow" Height="450" Width="500"
+        Background="#EEEFF0">
+    <Grid>
+        <ScrollViewer Margin="20,20,20,20">
+            <TextBlock Text="a{x:Static language:Lang.rulesGameText}"
+                       TextWrapping="Wrap"
+                       TextAlignment="Justify"
+                       LineHeight="22"
+                       FontSize="14"
+                       FontFamily="Sans Serif Collection" 
+                       Margin="20,20,20,20" Width="418"/>
+        </ScrollViewer>
+
+    </Grid>
+</Window>

@@ -1,0 +1,372 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="alreadyHaveAccountText" xml:space="preserve">
+    <value>Already have an Account?</value>
+  </data>
+  <data name="backToLobbyText" xml:space="preserve">
+    <value>Back to Lobby</value>
+  </data>
+  <data name="blueTeamText" xml:space="preserve">
+    <value>Blue Team</value>
+  </data>
+  <data name="changedSavedText" xml:space="preserve">
+    <value>Changes Saved Succesfully</value>
+  </data>
+  <data name="changePasswordText" xml:space="preserve">
+    <value>Change Password</value>
+  </data>
+  <data name="clueText" xml:space="preserve">
+    <value>Clue</value>
+  </data>
+  <data name="codeActivationMessageText" xml:space="preserve">
+    <value>A confirmation code will be sent to the registered e-mail address to activate the account</value>
+  </data>
+  <data name="codeWordText" xml:space="preserve">
+    <value>Code:</value>
+  </data>
+  <data name="confirmUserPasswordText" xml:space="preserve">
+    <value>Confirm Password</value>
+  </data>
+  <data name="createAccountText" xml:space="preserve">
+    <value>Sign Up for Free</value>
+  </data>
+  <data name="currentRoundText" xml:space="preserve">
+    <value>Round 1 of 3</value>
+  </data>
+  <data name="currentWordText" xml:space="preserve">
+    <value>Word 2 of 5</value>
+  </data>
+  <data name="emailRetrievePasswordText" xml:space="preserve">
+    <value>Type your e-mail to reset your password</value>
+  </data>
+  <data name="emailText" xml:space="preserve">
+    <value>E-mail</value>
+  </data>
+  <data name="enterCodeToJoinText" xml:space="preserve">
+    <value>Enter a Match Code to Join</value>
+  </data>
+  <data name="forgotUserPasswordText" xml:space="preserve">
+    <value>Forgot Password</value>
+  </data>
+  <data name="friendsListText" xml:space="preserve">
+    <value>Friends LIst</value>
+  </data>
+  <data name="groupChatText" xml:space="preserve">
+    <value>Group Chat</value>
+  </data>
+  <data name="guessPasswordWithText" xml:space="preserve">
+    <value>Try to guess the PASSWORD with!</value>
+  </data>
+  <data name="howToPlayText" xml:space="preserve">
+    <value>How to Play?</value>
+  </data>
+  <data name="invalidEmailErrorText" xml:space="preserve">
+    <value>The E-mail isn't valid</value>
+  </data>
+  <data name="invitationMailText" xml:space="preserve">
+    <value>Invitation by Mail</value>
+  </data>
+  <data name="inviteYourFriendsText" xml:space="preserve">
+    <value>Invite your Friends</value>
+  </data>
+  <data name="joingGameText" xml:space="preserve">
+    <value>Join Game</value>
+  </data>
+  <data name="lastNameText" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="logInText" xml:space="preserve">
+    <value>Log In</value>
+  </data>
+  <data name="logOutText" xml:space="preserve">
+    <value>Log Out</value>
+  </data>
+  <data name="loosersMessageText" xml:space="preserve">
+    <value>Good luck next time!</value>
+  </data>
+  <data name="loosersText" xml:space="preserve">
+    <value>Loosers</value>
+  </data>
+  <data name="matchingPasswordErrorText" xml:space="preserve">
+    <value>Verify that both passwords match</value>
+  </data>
+  <data name="musicText" xml:space="preserve">
+    <value>Music</value>
+  </data>
+  <data name="nameText" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="nextRoundText" xml:space="preserve">
+    <value>Next Round</value>
+  </data>
+  <data name="nicknameText" xml:space="preserve">
+    <value>Nickname</value>
+  </data>
+  <data name="noAccountText" xml:space="preserve">
+    <value>Don't have an Account?</value>
+  </data>
+  <data name="oneMoreWordQuestionText" xml:space="preserve">
+    <value>Was more than one word given as a clue?</value>
+  </data>
+  <data name="passText" xml:space="preserve">
+    <value>Pass</value>
+  </data>
+  <data name="passwordToGuessText" xml:space="preserve">
+    <value>The PASSWORD to guess is:</value>
+  </data>
+  <data name="playAgainText" xml:space="preserve">
+    <value>Play Again</value>
+  </data>
+  <data name="playersText" xml:space="preserve">
+    <value>Players</value>
+  </data>
+  <data name="playText" xml:space="preserve">
+    <value>Play</value>
+  </data>
+  <data name="profileText" xml:space="preserve">
+    <value>Profile</value>
+  </data>
+  <data name="redTeamText" xml:space="preserve">
+    <value>Red Team</value>
+  </data>
+  <data name="requiredFieldsText" xml:space="preserve">
+    <value>Please complete the required fields</value>
+  </data>
+  <data name="retrieveUserPasswordText" xml:space="preserve">
+    <value>Retrieve Password</value>
+  </data>
+  <data name="roundValidationText" xml:space="preserve">
+    <value>Round Validation</value>
+  </data>
+  <data name="rulesGameText" xml:space="preserve">
+    <value>Each game will consist of two teams of two members.
+The teams will be made up of a "Clue Guy," who will be the player who will see the current password and will be responsible for giving one word per turn as a clue, and a "Guesser," who will be responsible for guessing the secret word based on the clues given by the other player.
+Each game will consist of five rounds of one minute each, with five passwords that the "Guesser" will have to guess.
+Each password correctly guessed will be worth one point for the team.
+If a team uses synonyms from the defined list, they will be banned with a penalty of two points for the team.
+The use of synonyms as clues is not permitted.
+The use of antonyms by the "Clue Guy" is permitted.
+The "Clue Guy" is not allowed to say more than one word per turn, otherwise the team will be penalized with one point less.
+The opposing team must confirm at the end of the round that they have not violated the rule by using two words or synonyms during the round, and they will be penalized accordingly.
+The "Clue Guy" is allowed to say "PASS" if they wish to skip the password during their turn; however, they will be limited to one per round. Those skipped words will be discarded from the game.
+The team with the most points across all rounds wins.
+The Guesser can use a help button that will give them a description of the current turn's password; it can only be used once per round.
+If both teams tie, a sudden death will occur until one team scores fewer points in the round.</value>
+  </data>
+  <data name="saveChangesText" xml:space="preserve">
+    <value>Save Changes</value>
+  </data>
+  <data name="scoreTopText" xml:space="preserve">
+    <value>Score</value>
+  </data>
+  <data name="selectAvatarText" xml:space="preserve">
+    <value>Choose an Avatar</value>
+  </data>
+  <data name="sendCodeText" xml:space="preserve">
+    <value>Send Code</value>
+  </data>
+  <data name="sendInvitationText" xml:space="preserve">
+    <value>Send Invitation</value>
+  </data>
+  <data name="sendText" xml:space="preserve">
+    <value>Send</value>
+  </data>
+  <data name="settingsText" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="signUpErrorText" xml:space="preserve">
+    <value>Error registering user. Please try again later</value>
+  </data>
+  <data name="signUpText" xml:space="preserve">
+    <value>Sign Up</value>
+  </data>
+  <data name="sinonymsQuestionText" xml:space="preserve">
+    <value>Were synonyms used?</value>
+  </data>
+  <data name="socialMediaText" xml:space="preserve">
+    <value>Social Media</value>
+  </data>
+  <data name="soundEffectsText" xml:space="preserve">
+    <value>Sound Effects</value>
+  </data>
+  <data name="startGameText" xml:space="preserve">
+    <value>Start Game</value>
+  </data>
+  <data name="successfulLoginText" xml:space="preserve">
+    <value>Successful Login</value>
+  </data>
+  <data name="successfulPasswordsText" xml:space="preserve">
+    <value>Successful PASSWORDS:</value>
+  </data>
+  <data name="successfulSignUpText" xml:space="preserve">
+    <value>Registration Successful</value>
+  </data>
+  <data name="termsAndConditionsText" xml:space="preserve">
+    <value>By Signing Up you Agree to our Terms &amp; Conditions</value>
+  </data>
+  <data name="topPlayersText" xml:space="preserve">
+    <value>Top Players</value>
+  </data>
+  <data name="typePasswordText" xml:space="preserve">
+    <value>Type your New Password</value>
+  </data>
+  <data name="userAlreadyExistText" xml:space="preserve">
+    <value>User already exist with that e-mail</value>
+  </data>
+  <data name="userPasswordText" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="usserPasswordRequirementsText" xml:space="preserve">
+    <value>Use 8-15 characters including at least one uppercase, one lowercase, one numeric character and one symbol</value>
+  </data>
+  <data name="validateRoundText" xml:space="preserve">
+    <value>Validate Round</value>
+  </data>
+  <data name="verifyCodeMessageText" xml:space="preserve">
+    <value>Type the 4 digit code sent to the e-mail:</value>
+  </data>
+  <data name="verifyCodeNotSendText" xml:space="preserve">
+    <value>Didn't receive the code?</value>
+  </data>
+  <data name="verifyCodeResendCodeText" xml:space="preserve">
+    <value>Resend Code</value>
+  </data>
+  <data name="verifyCodeText" xml:space="preserve">
+    <value>Verify Code</value>
+  </data>
+  <data name="winnersMessageText" xml:space="preserve">
+    <value>Congratulations you won PASSWORD</value>
+  </data>
+  <data name="winnersText" xml:space="preserve">
+    <value>Winners</value>
+  </data>
+  <data name="writeClueText" xml:space="preserve">
+    <value>Write a clue for your teammate:</value>
+  </data>
+  <data name="writeEmailToInviteText" xml:space="preserve">
+    <value>Enter your friend's email address to invite:</value>
+  </data>
+  <data name="writePasswordText" xml:space="preserve">
+    <value>Write the PASSWORD that you think is</value>
+  </data>
+  <data name="wrongCredentialsText" xml:space="preserve">
+    <value>Incorrect e-mail or password</value>
+  </data>
+</root>
