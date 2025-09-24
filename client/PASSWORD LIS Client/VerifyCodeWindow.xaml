@@ -4,10 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PASSWORD_LIS_Client"
+        xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         MinHeight="350" MinWidth="450"
-        Title="VerifyCodeWindow" Height="350" Width="450">
+        Title="{x:Static language:Lang.verifyCodeText}" Height="350" Width="450">
     <Grid>
         <Grid.Background>
             <ImageBrush ImageSource="/BackgroudImage.png"/>
@@ -18,8 +19,8 @@
         </Grid.ColumnDefinitions>
         <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="20">
-                <TextBlock Text="a{x:Static language:Lang.verifyCodeMessageText}" 
-                   FontSize="20"  
+                <TextBlock Text="{x:Static language:Lang.verifyCodeMessageText}" 
+                   FontSize="18"  
                    TextWrapping="Wrap"
                    HorizontalAlignment="Center" 
                    Margin="0,0,0,20"/>
@@ -28,18 +29,20 @@
                     Margin="0,0,0,20"/>
                 
                 <TextBox x:Name="verificationCodeTextBox" Width="250"/>
-                <Button Content="a{x:Static language:Lang.verifyText}" 
+                <Button Content="{x:Static language:Lang.verifyCodeText}" 
                 FontWeight="Bold" 
-                Width="250" 
+                Width="180" 
                 Height="35" 
-                Margin="0,15,0,10" 
-                HorizontalAlignment="Center"
+                Margin="0,15,0,10"
+                HorizontalAlignment="Center" FontSize="14"
                 />
-                <TextBlock Text="a{x:Static language.Lang.verifycodeText}"
-                   TextWrapping="Wrap" 
-                   HorizontalAlignment="Center">
+                <Label Content="{x:Static language:Lang.verifyCodeNotSendText}"
+                   HorizontalAlignment="Center"/>
+                <TextBlock 
+                    TextWrapping="Wrap"
+                    HorizontalAlignment="Center">
                     <Hyperlink> 
-                        <Run Text="a{x:Static language:Lang.resendCodeText}"/>
+                        <Run Text="{x:Static language:Lang.verifyCodeResendCodeText}"/>
                     </Hyperlink>
                 </TextBlock>
             </StackPanel>
