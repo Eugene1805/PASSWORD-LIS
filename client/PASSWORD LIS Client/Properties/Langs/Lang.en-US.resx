@@ -148,10 +148,10 @@
     <value>Sign Up for Free</value>
   </data>
   <data name="currentRoundText" xml:space="preserve">
-    <value>Round 1 of 3</value>
+    <value>Round:</value>
   </data>
   <data name="currentWordText" xml:space="preserve">
-    <value>Word 2 of 5</value>
+    <value>Word:</value>
   </data>
   <data name="emailRetrievePasswordText" xml:space="preserve">
     <value>Type your e-mail to reset your password</value>
@@ -221,6 +221,9 @@
   </data>
   <data name="noAccountText" xml:space="preserve">
     <value>Don't have an Account?</value>
+  </data>
+  <data name="ofText" xml:space="preserve">
+    <value>of</value>
   </data>
   <data name="oneMoreWordQuestionText" xml:space="preserve">
     <value>Was more than one word given as a clue?</value>

@@ -22,7 +22,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Lang {
+    public class Lang {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         ///   Devuelve la instancia de ResourceManager almacenada en caché utilizada por esta clase.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PASSWORD_LIS_Client.Properties.Langs.Lang", typeof(Lang).Assembly);
@@ -51,7 +51,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         ///   búsquedas de recursos mediante esta clase de recurso fuertemente tipado.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,7 +63,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Already have an Account?.
         /// </summary>
-        internal static string alreadyHaveAccountText {
+        public static string alreadyHaveAccountText {
             get {
                 return ResourceManager.GetString("alreadyHaveAccountText", resourceCulture);
             }
@@ -72,7 +72,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Back to Lobby.
         /// </summary>
-        internal static string backToLobbyText {
+        public static string backToLobbyText {
             get {
                 return ResourceManager.GetString("backToLobbyText", resourceCulture);
             }
@@ -81,7 +81,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Blue Team.
         /// </summary>
-        internal static string blueTeamText {
+        public static string blueTeamText {
             get {
                 return ResourceManager.GetString("blueTeamText", resourceCulture);
             }
@@ -90,7 +90,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Changes Saved Succesfully.
         /// </summary>
-        internal static string changedSavedText {
+        public static string changedSavedText {
             get {
                 return ResourceManager.GetString("changedSavedText", resourceCulture);
             }
@@ -99,7 +99,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Change Password.
         /// </summary>
-        internal static string changePasswordText {
+        public static string changePasswordText {
             get {
                 return ResourceManager.GetString("changePasswordText", resourceCulture);
             }
@@ -108,7 +108,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Clue.
         /// </summary>
-        internal static string clueText {
+        public static string clueText {
             get {
                 return ResourceManager.GetString("clueText", resourceCulture);
             }
@@ -117,7 +117,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a A confirmation code will be sent to the registered e-mail address to activate the account.
         /// </summary>
-        internal static string codeActivationMessageText {
+        public static string codeActivationMessageText {
             get {
                 return ResourceManager.GetString("codeActivationMessageText", resourceCulture);
             }
@@ -126,7 +126,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Code:.
         /// </summary>
-        internal static string codeWordText {
+        public static string codeWordText {
             get {
                 return ResourceManager.GetString("codeWordText", resourceCulture);
             }
@@ -135,7 +135,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Confirm Password.
         /// </summary>
-        internal static string confirmUserPasswordText {
+        public static string confirmUserPasswordText {
             get {
                 return ResourceManager.GetString("confirmUserPasswordText", resourceCulture);
             }
@@ -144,25 +144,25 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Sign Up for Free.
         /// </summary>
-        internal static string createAccountText {
+        public static string createAccountText {
             get {
                 return ResourceManager.GetString("createAccountText", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Busca una cadena traducida similar a Round 1 of 3.
+        ///   Busca una cadena traducida similar a Round:.
         /// </summary>
-        internal static string currentRoundText {
+        public static string currentRoundText {
             get {
                 return ResourceManager.GetString("currentRoundText", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Busca una cadena traducida similar a Word 2 of 5.
+        ///   Busca una cadena traducida similar a Word:.
         /// </summary>
-        internal static string currentWordText {
+        public static string currentWordText {
             get {
                 return ResourceManager.GetString("currentWordText", resourceCulture);
             }
@@ -171,7 +171,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Type your e-mail to reset your password.
         /// </summary>
-        internal static string emailRetrievePasswordText {
+        public static string emailRetrievePasswordText {
             get {
                 return ResourceManager.GetString("emailRetrievePasswordText", resourceCulture);
             }
@@ -180,7 +180,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a E-mail.
         /// </summary>
-        internal static string emailText {
+        public static string emailText {
             get {
                 return ResourceManager.GetString("emailText", resourceCulture);
             }
@@ -189,7 +189,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Enter a Match Code to Join.
         /// </summary>
-        internal static string enterCodeToJoinText {
+        public static string enterCodeToJoinText {
             get {
                 return ResourceManager.GetString("enterCodeToJoinText", resourceCulture);
             }
@@ -198,7 +198,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Forgot Password.
         /// </summary>
-        internal static string forgotUserPasswordText {
+        public static string forgotUserPasswordText {
             get {
                 return ResourceManager.GetString("forgotUserPasswordText", resourceCulture);
             }
@@ -207,7 +207,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Friends List.
         /// </summary>
-        internal static string friendsListText {
+        public static string friendsListText {
             get {
                 return ResourceManager.GetString("friendsListText", resourceCulture);
             }
@@ -216,7 +216,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Group Chat.
         /// </summary>
-        internal static string groupChatText {
+        public static string groupChatText {
             get {
                 return ResourceManager.GetString("groupChatText", resourceCulture);
             }
@@ -225,7 +225,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Try to guess the PASSWORD with!.
         /// </summary>
-        internal static string guessPasswordWithText {
+        public static string guessPasswordWithText {
             get {
                 return ResourceManager.GetString("guessPasswordWithText", resourceCulture);
             }
@@ -234,7 +234,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a How to Play?.
         /// </summary>
-        internal static string howToPlayText {
+        public static string howToPlayText {
             get {
                 return ResourceManager.GetString("howToPlayText", resourceCulture);
             }
@@ -243,7 +243,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a The E-mail isn&apos;t valid.
         /// </summary>
-        internal static string invalidEmailErrorText {
+        public static string invalidEmailErrorText {
             get {
                 return ResourceManager.GetString("invalidEmailErrorText", resourceCulture);
             }
@@ -252,7 +252,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Invitation by Mail.
         /// </summary>
-        internal static string invitationMailText {
+        public static string invitationMailText {
             get {
                 return ResourceManager.GetString("invitationMailText", resourceCulture);
             }
@@ -261,7 +261,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Invite your Friends.
         /// </summary>
-        internal static string inviteYourFriendsText {
+        public static string inviteYourFriendsText {
             get {
                 return ResourceManager.GetString("inviteYourFriendsText", resourceCulture);
             }
@@ -270,7 +270,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Join Game.
         /// </summary>
-        internal static string joingGameText {
+        public static string joingGameText {
             get {
                 return ResourceManager.GetString("joingGameText", resourceCulture);
             }
@@ -279,7 +279,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Last Name.
         /// </summary>
-        internal static string lastNameText {
+        public static string lastNameText {
             get {
                 return ResourceManager.GetString("lastNameText", resourceCulture);
             }
@@ -288,7 +288,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Log In.
         /// </summary>
-        internal static string logInText {
+        public static string logInText {
             get {
                 return ResourceManager.GetString("logInText", resourceCulture);
             }
@@ -297,7 +297,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Log Out.
         /// </summary>
-        internal static string logOutText {
+        public static string logOutText {
             get {
                 return ResourceManager.GetString("logOutText", resourceCulture);
             }
@@ -306,7 +306,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Good luck next time!.
         /// </summary>
-        internal static string loosersMessageText {
+        public static string loosersMessageText {
             get {
                 return ResourceManager.GetString("loosersMessageText", resourceCulture);
             }
@@ -315,7 +315,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Loosers.
         /// </summary>
-        internal static string loosersText {
+        public static string loosersText {
             get {
                 return ResourceManager.GetString("loosersText", resourceCulture);
             }
@@ -324,7 +324,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Verify that both passwords match.
         /// </summary>
-        internal static string matchingPasswordErrorText {
+        public static string matchingPasswordErrorText {
             get {
                 return ResourceManager.GetString("matchingPasswordErrorText", resourceCulture);
             }
@@ -333,7 +333,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Music.
         /// </summary>
-        internal static string musicText {
+        public static string musicText {
             get {
                 return ResourceManager.GetString("musicText", resourceCulture);
             }
@@ -342,7 +342,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a First Name.
         /// </summary>
-        internal static string nameText {
+        public static string nameText {
             get {
                 return ResourceManager.GetString("nameText", resourceCulture);
             }
@@ -351,7 +351,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a nextRound.
         /// </summary>
-        internal static string nextRoundText {
+        public static string nextRoundText {
             get {
                 return ResourceManager.GetString("nextRoundText", resourceCulture);
             }
@@ -360,7 +360,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Nickname.
         /// </summary>
-        internal static string nicknameText {
+        public static string nicknameText {
             get {
                 return ResourceManager.GetString("nicknameText", resourceCulture);
             }
@@ -369,16 +369,25 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Don&apos;t have an Account?.
         /// </summary>
-        internal static string noAccountText {
+        public static string noAccountText {
             get {
                 return ResourceManager.GetString("noAccountText", resourceCulture);
             }
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a of.
+        /// </summary>
+        public static string ofText {
+            get {
+                return ResourceManager.GetString("ofText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a Was more than one word given as a clue?.
         /// </summary>
-        internal static string oneMoreWordQuestionText {
+        public static string oneMoreWordQuestionText {
             get {
                 return ResourceManager.GetString("oneMoreWordQuestionText", resourceCulture);
             }
@@ -387,7 +396,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Pass.
         /// </summary>
-        internal static string passText {
+        public static string passText {
             get {
                 return ResourceManager.GetString("passText", resourceCulture);
             }
@@ -396,7 +405,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a The PASSWORD to guess is:.
         /// </summary>
-        internal static string passwordToGuessText {
+        public static string passwordToGuessText {
             get {
                 return ResourceManager.GetString("passwordToGuessText", resourceCulture);
             }
@@ -405,7 +414,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Play Again.
         /// </summary>
-        internal static string playAgainText {
+        public static string playAgainText {
             get {
                 return ResourceManager.GetString("playAgainText", resourceCulture);
             }
@@ -414,7 +423,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Players.
         /// </summary>
-        internal static string playersText {
+        public static string playersText {
             get {
                 return ResourceManager.GetString("playersText", resourceCulture);
             }
@@ -423,7 +432,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Play.
         /// </summary>
-        internal static string playText {
+        public static string playText {
             get {
                 return ResourceManager.GetString("playText", resourceCulture);
             }
@@ -432,7 +441,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Profile.
         /// </summary>
-        internal static string profileText {
+        public static string profileText {
             get {
                 return ResourceManager.GetString("profileText", resourceCulture);
             }
@@ -441,7 +450,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Red Team.
         /// </summary>
-        internal static string redTeamText {
+        public static string redTeamText {
             get {
                 return ResourceManager.GetString("redTeamText", resourceCulture);
             }
@@ -450,7 +459,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Please complete the required fields.
         /// </summary>
-        internal static string requiredFieldsText {
+        public static string requiredFieldsText {
             get {
                 return ResourceManager.GetString("requiredFieldsText", resourceCulture);
             }
@@ -459,7 +468,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Retrieve Password.
         /// </summary>
-        internal static string retrieveUserPasswordText {
+        public static string retrieveUserPasswordText {
             get {
                 return ResourceManager.GetString("retrieveUserPasswordText", resourceCulture);
             }
@@ -468,7 +477,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Round Validation.
         /// </summary>
-        internal static string roundValidationText {
+        public static string roundValidationText {
             get {
                 return ResourceManager.GetString("roundValidationText", resourceCulture);
             }
@@ -480,7 +489,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         ///Each game will consist of five rounds of one minute each, with five passwords that the &quot;Guesser&quot; will have to guess.
         ///Each password correctly guessed will be worth one point for  [resto de la cadena truncado]&quot;;.
         /// </summary>
-        internal static string rulesGameText {
+        public static string rulesGameText {
             get {
                 return ResourceManager.GetString("rulesGameText", resourceCulture);
             }
@@ -489,7 +498,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Save Changes.
         /// </summary>
-        internal static string saveChangesText {
+        public static string saveChangesText {
             get {
                 return ResourceManager.GetString("saveChangesText", resourceCulture);
             }
@@ -498,7 +507,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Score.
         /// </summary>
-        internal static string scoreTopText {
+        public static string scoreTopText {
             get {
                 return ResourceManager.GetString("scoreTopText", resourceCulture);
             }
@@ -507,7 +516,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Choose an Avatar.
         /// </summary>
-        internal static string selectAvatarText {
+        public static string selectAvatarText {
             get {
                 return ResourceManager.GetString("selectAvatarText", resourceCulture);
             }
@@ -516,7 +525,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Send Code.
         /// </summary>
-        internal static string sendCodeText {
+        public static string sendCodeText {
             get {
                 return ResourceManager.GetString("sendCodeText", resourceCulture);
             }
@@ -525,7 +534,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Send Invitation.
         /// </summary>
-        internal static string sendInvitationText {
+        public static string sendInvitationText {
             get {
                 return ResourceManager.GetString("sendInvitationText", resourceCulture);
             }
@@ -534,7 +543,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Send.
         /// </summary>
-        internal static string sendText {
+        public static string sendText {
             get {
                 return ResourceManager.GetString("sendText", resourceCulture);
             }
@@ -543,7 +552,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Settings.
         /// </summary>
-        internal static string settingsText {
+        public static string settingsText {
             get {
                 return ResourceManager.GetString("settingsText", resourceCulture);
             }
@@ -552,7 +561,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Error registering user. Please try again later.
         /// </summary>
-        internal static string signUpErrorText {
+        public static string signUpErrorText {
             get {
                 return ResourceManager.GetString("signUpErrorText", resourceCulture);
             }
@@ -561,7 +570,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Sign Up.
         /// </summary>
-        internal static string signUpText {
+        public static string signUpText {
             get {
                 return ResourceManager.GetString("signUpText", resourceCulture);
             }
@@ -570,7 +579,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Were synonyms used?.
         /// </summary>
-        internal static string sinonymsQuestionText {
+        public static string sinonymsQuestionText {
             get {
                 return ResourceManager.GetString("sinonymsQuestionText", resourceCulture);
             }
@@ -579,7 +588,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Social Media.
         /// </summary>
-        internal static string socialMediaText {
+        public static string socialMediaText {
             get {
                 return ResourceManager.GetString("socialMediaText", resourceCulture);
             }
@@ -588,7 +597,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Sound Effects.
         /// </summary>
-        internal static string soundEffectsText {
+        public static string soundEffectsText {
             get {
                 return ResourceManager.GetString("soundEffectsText", resourceCulture);
             }
@@ -597,7 +606,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Start Game.
         /// </summary>
-        internal static string startGameText {
+        public static string startGameText {
             get {
                 return ResourceManager.GetString("startGameText", resourceCulture);
             }
@@ -606,7 +615,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Successful Login.
         /// </summary>
-        internal static string successfulLoginText {
+        public static string successfulLoginText {
             get {
                 return ResourceManager.GetString("successfulLoginText", resourceCulture);
             }
@@ -615,7 +624,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Successful PASSWORDS:.
         /// </summary>
-        internal static string successfulPasswordsText {
+        public static string successfulPasswordsText {
             get {
                 return ResourceManager.GetString("successfulPasswordsText", resourceCulture);
             }
@@ -624,7 +633,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Registration Successful.
         /// </summary>
-        internal static string successfulSignUpText {
+        public static string successfulSignUpText {
             get {
                 return ResourceManager.GetString("successfulSignUpText", resourceCulture);
             }
@@ -633,7 +642,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a By Signing Up you Agree to our Terms &amp; Conditions.
         /// </summary>
-        internal static string termsAndConditionsText {
+        public static string termsAndConditionsText {
             get {
                 return ResourceManager.GetString("termsAndConditionsText", resourceCulture);
             }
@@ -642,7 +651,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Top Players.
         /// </summary>
-        internal static string topPlayersText {
+        public static string topPlayersText {
             get {
                 return ResourceManager.GetString("topPlayersText", resourceCulture);
             }
@@ -651,7 +660,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Type your New Password.
         /// </summary>
-        internal static string typePasswordText {
+        public static string typePasswordText {
             get {
                 return ResourceManager.GetString("typePasswordText", resourceCulture);
             }
@@ -660,7 +669,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a User already exist with that e-mail.
         /// </summary>
-        internal static string userAlreadyExistText {
+        public static string userAlreadyExistText {
             get {
                 return ResourceManager.GetString("userAlreadyExistText", resourceCulture);
             }
@@ -669,7 +678,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Password.
         /// </summary>
-        internal static string userPasswordText {
+        public static string userPasswordText {
             get {
                 return ResourceManager.GetString("userPasswordText", resourceCulture);
             }
@@ -678,7 +687,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Use 8-15 characters including at least one uppercase, one lowercase, one numeric character and one symbol.
         /// </summary>
-        internal static string usserPasswordRequirementsText {
+        public static string usserPasswordRequirementsText {
             get {
                 return ResourceManager.GetString("usserPasswordRequirementsText", resourceCulture);
             }
@@ -687,7 +696,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Validate Round.
         /// </summary>
-        internal static string validateRoundText {
+        public static string validateRoundText {
             get {
                 return ResourceManager.GetString("validateRoundText", resourceCulture);
             }
@@ -696,7 +705,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Type the 4 digit code sent to the e-mail:.
         /// </summary>
-        internal static string verifyCodeMessageText {
+        public static string verifyCodeMessageText {
             get {
                 return ResourceManager.GetString("verifyCodeMessageText", resourceCulture);
             }
@@ -705,7 +714,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Didn&apos;t receive the code?.
         /// </summary>
-        internal static string verifyCodeNotSendText {
+        public static string verifyCodeNotSendText {
             get {
                 return ResourceManager.GetString("verifyCodeNotSendText", resourceCulture);
             }
@@ -714,7 +723,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Resend Code.
         /// </summary>
-        internal static string verifyCodeResendCodeText {
+        public static string verifyCodeResendCodeText {
             get {
                 return ResourceManager.GetString("verifyCodeResendCodeText", resourceCulture);
             }
@@ -723,7 +732,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Verify Code.
         /// </summary>
-        internal static string verifyCodeText {
+        public static string verifyCodeText {
             get {
                 return ResourceManager.GetString("verifyCodeText", resourceCulture);
             }
@@ -732,7 +741,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Congratulations you won PASSWORD.
         /// </summary>
-        internal static string winnersMessageText {
+        public static string winnersMessageText {
             get {
                 return ResourceManager.GetString("winnersMessageText", resourceCulture);
             }
@@ -741,7 +750,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Winners.
         /// </summary>
-        internal static string winnersText {
+        public static string winnersText {
             get {
                 return ResourceManager.GetString("winnersText", resourceCulture);
             }
@@ -750,7 +759,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Write a clue for your teammate:.
         /// </summary>
-        internal static string writeClueText {
+        public static string writeClueText {
             get {
                 return ResourceManager.GetString("writeClueText", resourceCulture);
             }
@@ -759,7 +768,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Enter your friend&apos;s email address to invite:.
         /// </summary>
-        internal static string writeEmailToInviteText {
+        public static string writeEmailToInviteText {
             get {
                 return ResourceManager.GetString("writeEmailToInviteText", resourceCulture);
             }
@@ -768,7 +777,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Write the PASSWORD that you think is.
         /// </summary>
-        internal static string writePasswordText {
+        public static string writePasswordText {
             get {
                 return ResourceManager.GetString("writePasswordText", resourceCulture);
             }
@@ -777,7 +786,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a Incorrect e-mail or password.
         /// </summary>
-        internal static string wrongCredentialsText {
+        public static string wrongCredentialsText {
             get {
                 return ResourceManager.GetString("wrongCredentialsText", resourceCulture);
             }
