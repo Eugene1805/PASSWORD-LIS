@@ -6,6 +6,8 @@
         xmlns:local="clr-namespace:PASSWORD_LIS_Client"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        WindowState="Maximized"
         MinHeight="800" MinWidth="1200"
         Title="MainWindow" Height="1000" Width="1400">
     <!-- 
