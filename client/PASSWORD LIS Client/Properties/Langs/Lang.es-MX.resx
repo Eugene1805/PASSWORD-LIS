@@ -148,10 +148,10 @@
     <value>Crea una Cuenta Gratis</value>
   </data>
   <data name="currentRoundText" xml:space="preserve">
-    <value>Ronda 1 de 3</value>
+    <value>Ronda:</value>
   </data>
   <data name="currentWordText" xml:space="preserve">
-    <value>Palabra 2 de 5</value>
+    <value>Palabra:</value>
   </data>
   <data name="emailRetrievePasswordText" xml:space="preserve">
     <value>Introduce tu correo para restablecer tu contraseña</value>
@@ -221,6 +221,9 @@
   </data>
   <data name="noAccountText" xml:space="preserve">
     <value>¿No tienes una cuenta?</value>
+  </data>
+  <data name="ofText" xml:space="preserve">
+    <value>de</value>
   </data>
   <data name="oneMoreWordQuestionText" xml:space="preserve">
     <value>¿Se dió más de una palabra como pista?</value>
