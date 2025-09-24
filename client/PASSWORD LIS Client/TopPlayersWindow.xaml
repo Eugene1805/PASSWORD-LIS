@@ -21,38 +21,30 @@
                    Margin="0,0,0,20"
                    Foreground="#343A40"/>
 
-        <!-- Tabla de solo lectura -->
-        <DataGrid x:Name="PlayersDataGrid"
+        <DataGrid x:Name="topPlayersDataGrid"
                   Grid.Row="1"
                   AutoGenerateColumns="False"
-                  IsReadOnly="True"                   
-            CanUserAddRows="False">
-            <!-- No agregar filas -->
+                  IsReadOnly="True"
+                  CanUserAddRows="False">
             CanUserDeleteRows="False"
-            <!-- No eliminar filas -->
             CanUserReorderColumns="False"
-            <!-- No reordenar columnas -->
             CanUserResizeColumns="True"
-            <!-- Permitir ajustar ancho columnas -->
             CanUserSortColumns="False"
-            <!-- No ordenar por columnas -->
             SelectionMode="Single"
-            <!-- Solo selección simple -->
             HeadersVisibility="Column"
-            <!-- Solo mostrar headers de columnas -->
             BorderThickness="1"
-                  BorderBrush="#CCCCCC"
-                  Background="White">
+                  BorderBrush="#66B2FF"
+                  Background="#66B2FF">
 
             <DataGrid.Columns>
                 <!-- Columna de Jugadores -->
-                <DataGridTextColumn Header="Jugadores" 
+                <DataGridTextColumn Header="a{x:Static language:Lang.playersText}" 
                                     Binding="{Binding Equipo}"
                                     Width="*"
                                     IsReadOnly="True"/>
 
                 <!-- Columna de Puntos -->
-                <DataGridTextColumn Header="Puntos" 
+                <DataGridTextColumn Header="a{x:Static language:Lang.scoreTopText}" 
                                     Binding="{Binding Puntos}"
                                     Width="120"
                                     IsReadOnly="True"/>
