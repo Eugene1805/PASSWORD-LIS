@@ -426,3 +426,14 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+
+# Copilot (algunos entornos crean estas carpetas)
+**/.copilot/
+**/copilot/
+**/GitHub.copilot*/
+# VS Code: por si alguien tiene storage de Copilot dentro del workspace (raro, pero evita ruidos)
+**/.vscode/**/workspaceStorage/
+**/.vscode/**/globalStorage/
+# Historiales locales comunes
+.history/

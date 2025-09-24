@@ -8,6 +8,7 @@
         WindowStartupLocation="CenterScreen"
         MinHeight="800" MinWidth="1200"
         Title="MainWindow" Height="1000" Width="1400">
+    <!-- 
     <Window.Resources>
         <SolidColorBrush x:Key="PrimaryAccentBrush" Color="#66B2FF"/>
         <SolidColorBrush x:Key="SecondaryAccentBrush" Color="#76EEB7"/>
@@ -185,4 +186,5 @@
             <Button Content="Iniciar Partida" Style="{StaticResource PrimaryButtonStyle}" IsEnabled="False"/>
         </StackPanel>
     </Grid>
+    -->
 </Window>
