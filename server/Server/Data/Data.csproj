@@ -42,6 +42,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
@@ -53,15 +54,74 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Ban.cs">
+      <DependentUpon>PasswordLISModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Class1.cs" />
+    <Compile Include="Friendship.cs">
+      <DependentUpon>PasswordLISModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Match.cs">
+      <DependentUpon>PasswordLISModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="PasswordLISContext.Extensions.cs" />
+    <Compile Include="PasswordLISModel.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PasswordLISModel.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="PasswordLISModel.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PasswordLISModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="PasswordLISModel.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PasswordLISModel.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Player.cs">
+      <DependentUpon>PasswordLISModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Report.cs">
+      <DependentUpon>PasswordLISModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="SocialAccount.cs">
+      <DependentUpon>PasswordLISModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Team.cs">
+      <DependentUpon>PasswordLISModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="UserAccount.cs">
+      <DependentUpon>PasswordLISModel.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.Config" />
     <None Include="packages.config" />
+    <EntityDeploy Include="PasswordLISModel.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>PasswordLISModel.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <None Include="PasswordLISModel.edmx.diagram">
+      <DependentUpon>PasswordLISModel.edmx</DependentUpon>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="PasswordLISModel.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>PasswordLISModel.edmx</DependentUpon>
+      <LastGenOutput>PasswordLISModel.Context.cs</LastGenOutput>
+    </Content>
+    <Content Include="PasswordLISModel.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>PasswordLISModel.edmx</DependentUpon>
+      <LastGenOutput>PasswordLISModel.cs</LastGenOutput>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
