@@ -15,20 +15,13 @@ using System.Windows.Shapes;
 namespace PASSWORD_LIS_Client
 {
     /// <summary>
-    /// Interaction logic for ChangePasswordWindow.xaml
+    /// Interaction logic for ChooseAvatarWindow.xaml
     /// </summary>
-    public partial class ChangePasswordWindow : Window
+    public partial class ChooseAvatarWindow : Window
     {
-        public ChangePasswordWindow()
+        public ChooseAvatarWindow()
         {
             InitializeComponent();
-        }
-
-        private void ButtonClickChangePassword(object sender, RoutedEventArgs e)
-        {
-            // Assume password change is successful
-            MessageBox.Show("Password changed successfully.");
-            this.Close();
         }
     }
 }

@@ -1,0 +1,97 @@
+﻿<Page x:Class="PASSWORD_LIS_Client.RoundValidationPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:PASSWORD_LIS_Client"
+      xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="{x:Static language:Lang.roundValidationText}">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="{x:Static language:Lang.roundValidationText}"
+                   FontSize="24"
+                   FontWeight="Bold"
+                   HorizontalAlignment="Center"
+                   Margin="0,10,0,20"/>
+
+        <Grid Grid.Row="1" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="{x:Static language:Lang.currentWordText}" FontWeight="Bold" Grid.Column="0"/>
+            <TextBlock Text="Pistas" FontWeight="Bold" Grid.Column="1"/>
+            <TextBlock Text="{x:Static language:Lang.sinonymsQuestionText}" FontWeight="Bold" Grid.Column="2" TextWrapping="Wrap"/>
+            <TextBlock Text="{x:Static language:Lang.oneMoreWordQuestionText}" FontWeight="Bold" Grid.Column="3" TextWrapping="Wrap"/>
+        </Grid>
+
+        <StackPanel Grid.Row="2">
+
+            <Grid Margin="0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border BorderBrush="Black" BorderThickness="1" Grid.Column="0" Height="30" Width="100" HorizontalAlignment="Left">
+                    <TextBlock Text="Calidad" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Border>
+
+                <ListBox Grid.Column="1" Height="60" Width="100" HorizontalAlignment="Left">
+                    <ListBoxItem Content="Atributo"/>
+                    <ListBoxItem Content="Buena"/>
+                    <ListBoxItem Content="Excelencia"/>
+                </ListBox>
+
+                <CheckBox Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="False"/>
+
+                <CheckBox Grid.Column="3" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="False"/>
+            </Grid>
+
+            <Grid Margin="0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border BorderBrush="Black" BorderThickness="1" Grid.Column="0" Height="30" Width="100" HorizontalAlignment="Left">
+                    <TextBlock Text="Requisito" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Border>
+
+                <ListBox Grid.Column="1" Height="60" Width="100" HorizontalAlignment="Left">
+                    <ListBoxItem Content="Fase"/>
+                    <ListBoxItem Content="Necesario"/>
+                    <ListBoxItem Content="Condición"/>
+                </ListBox>
+
+                <CheckBox Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="True"/>
+
+                <CheckBox Grid.Column="3" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="False"/>
+            </Grid>
+        </StackPanel>
+
+        <Button Content="{x:Static language:Lang.nextRoundText}"
+                Grid.Row="3"
+                Grid.ColumnSpan="2"
+                HorizontalAlignment="Right"
+                Margin="0,20,0,0"
+                Padding="15,5"/>
+
+    </Grid>
+</Page>

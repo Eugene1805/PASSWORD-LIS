@@ -10,25 +10,29 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace PASSWORD_LIS_Client
 {
     /// <summary>
-    /// Interaction logic for ChangePasswordWindow.xaml
+    /// Interaction logic for LosersPage.xaml
     /// </summary>
-    public partial class ChangePasswordWindow : Window
+    public partial class LosersPage : Page
     {
-        public ChangePasswordWindow()
+        public LosersPage()
         {
             InitializeComponent();
         }
 
-        private void ButtonClickChangePassword(object sender, RoutedEventArgs e)
+        private void ButtonClickPlayAgain(object sender, RoutedEventArgs e)
         {
-            // Assume password change is successful
-            MessageBox.Show("Password changed successfully.");
-            this.Close();
+            // TODO: Implement play again logic
+        }
+
+        private void ButtonClickBackToLobby(object sender, RoutedEventArgs e)
+        {
+            var mainWindow = Application.Current.MainWindow as MainWindow;
         }
     }
 }
