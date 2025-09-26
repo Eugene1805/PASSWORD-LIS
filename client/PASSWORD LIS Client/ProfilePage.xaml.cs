@@ -24,5 +24,26 @@ namespace PASSWORD_LIS_Client
         {
             InitializeComponent();
         }
+
+        private void ButtonClickChooseAnAvatar(object sender, RoutedEventArgs e)
+        {
+            var chooseAvatarWindow = new ChooseAvatarWindow();
+            chooseAvatarWindow.ShowDialog();
+        }
+        private void ButtonClickEditProfile(object sender, RoutedEventArgs e)
+        {
+            // Code to edit profile goes here
+            MessageBox.Show("Edit Profile clicked!");
+        }
+        private void ButtonClickChangePassword(object sender, RoutedEventArgs e)
+        {
+            // Code to change password goes here
+            MessageBox.Show("Change Password clicked!");
+        }
+        private void ButtonClickSaveChanges(object sender, RoutedEventArgs e)
+        {
+            // Code to save changes goes here
+            MessageBox.Show("Changes saved successfully!");
+        }
     }
 }

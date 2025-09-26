@@ -7,13 +7,18 @@
       xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="{x:Static language:Lang.winnersText}">
+      Title="a{x:Static language:Lang.winnersText}">
 
     <Grid>
-        <Label Content="{x:Static language:Lang.winnersMessageText}" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="24" Margin="0,43,0,0"/>
-        <Label Content="{x:Static language:Lang.redTeamText}" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,157,0,0"/>
-        <Label Content="{x:Static language:Lang.successfulPasswordsText}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,80,0,0"/>
-        <Button Content="{x:Static language:Lang.playAgainText}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="363,373,0,0" Click="GoBackButton_Click"/>
-        <Button Content="{x:Static language:Lang.backToLobbyText}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,383,48,0" Click="NextButton_Click"/>
+        <Label Content="{x:Static language:Lang.winnersMessageText}" HorizontalAlignment="Center" 
+               VerticalAlignment="Top" FontSize="24" Margin="0,43,0,0"/>
+        <Label Content="{x:Static language:Lang.redTeamText}" HorizontalAlignment="Center" 
+               VerticalAlignment="Top" Margin="0,157,0,0"/>
+        <Label Content="{x:Static language:Lang.successfulPasswordsText}" 
+               HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,80,0,0"/>
+        <Button Content="{x:Static language:Lang.playAgainText}" HorizontalAlignment="Left" 
+                VerticalAlignment="Top" Margin="363,373,0,0" Click="ButtonClickPlayAgain"/>
+        <Button Content="{x:Static language:Lang.backToLobbyText}" HorizontalAlignment="Right" 
+                VerticalAlignment="Top" Margin="0,383,48,0" Click="ButtonClickBackToLobby"/>
     </Grid>
 </Page>

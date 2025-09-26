@@ -24,5 +24,16 @@ namespace PASSWORD_LIS_Client
         {
             InitializeComponent();
         }
+
+        private void ButtonClickBackToLobby(object sender, RoutedEventArgs e)
+        {
+            // Navigate back to the lobby page
+            NavigationService?.Navigate(new LobbyPage());
+        }
+
+        private void ButtonClickPlayAgain(object sender, RoutedEventArgs e)
+        {
+            // TODO:
+        }
     }
 }

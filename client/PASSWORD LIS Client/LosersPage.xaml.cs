@@ -24,5 +24,15 @@ namespace PASSWORD_LIS_Client
         {
             InitializeComponent();
         }
+
+        private void ButtonClickPlayAgain(object sender, RoutedEventArgs e)
+        {
+            // TODO: Implement play again logic
+        }
+
+        private void ButtonClickBackToLobby(object sender, RoutedEventArgs e)
+        {
+            var mainWindow = Application.Current.MainWindow as MainWindow;
+        }
     }
 }

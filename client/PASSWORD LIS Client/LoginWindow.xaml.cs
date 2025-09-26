@@ -23,5 +23,25 @@ namespace PASSWORD_LIS_Client
         {
             InitializeComponent();
         }
+
+        private void ButtonClickLogin(object sender, RoutedEventArgs e)
+        {
+            var mainWindow = new MainWindow();
+            mainWindow.Show();
+            this.Close();
+        }
+        private void HyperlinkClickForgotPassword(object sender, RoutedEventArgs e)
+        {
+            var retrievePasswordWindow = new RetrievePasswordWindow();
+            retrievePasswordWindow.Show();
+            this.Close();
+        }
+
+        private void HyperlinkClickSignUp(object sender, RoutedEventArgs e)
+        {
+            var signUpWindow = new SignUpWindow();
+            signUpWindow.Show();
+            this.Close();
+        }
     }
 }
