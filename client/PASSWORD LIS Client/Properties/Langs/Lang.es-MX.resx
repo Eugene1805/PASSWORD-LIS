@@ -132,6 +132,9 @@
   <data name="changePasswordText" xml:space="preserve">
     <value>Cambiar Contraseña</value>
   </data>
+  <data name="clueGuyText" xml:space="preserve">
+    <value>Pistero</value>
+  </data>
   <data name="clueText" xml:space="preserve">
     <value>Pista</value>
   </data>
@@ -148,10 +151,10 @@
     <value>Crea una Cuenta Gratis</value>
   </data>
   <data name="currentRoundText" xml:space="preserve">
-    <value>Ronda:</value>
+    <value>Ronda: {0} de 5</value>
   </data>
   <data name="currentWordText" xml:space="preserve">
-    <value>Palabra:</value>
+    <value>Palabra: {0} de 5</value>
   </data>
   <data name="emailRetrievePasswordText" xml:space="preserve">
     <value>Introduce tu correo para restablecer tu contraseña</value>
@@ -170,6 +173,9 @@
   </data>
   <data name="groupChatText" xml:space="preserve">
     <value>Chat Grupal</value>
+  </data>
+  <data name="guesserText" xml:space="preserve">
+    <value>Adivinador</value>
   </data>
   <data name="guessPasswordWithText" xml:space="preserve">
     <value>¡Trata de adivinar el PASSWORD con!</value>
@@ -320,6 +326,9 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
   </data>
   <data name="successfulSignUpText" xml:space="preserve">
     <value>Usuario Registrado Exitosamente</value>
+  </data>
+  <data name="teamPointsText" xml:space="preserve">
+    <value>Puntos: {0}</value>
   </data>
   <data name="termsAndConditionsText" xml:space="preserve">
     <value>Al Registrarte aceptas nuestros Términos &amp; Condiciones</value>

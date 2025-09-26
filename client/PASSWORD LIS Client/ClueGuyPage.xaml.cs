@@ -10,26 +10,19 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace PASSWORD_LIS_Client
 {
     /// <summary>
-    /// Lógica de interacción para TopPlayersWindow.xaml
+    /// Lógica de interacción para ClueGuyPage.xaml
     /// </summary>
-    public partial class TopPlayersWindow : Window
+    public partial class ClueGuyPage : Page
     {
-        public TopPlayersWindow()
+        public ClueGuyPage()
         {
             InitializeComponent();
         }
-
-
-    }
-
-    public class PlayerScore
-    {
-        public string Equipo { get; set; }
-        public int Puntos { get; set; }
     }
 }

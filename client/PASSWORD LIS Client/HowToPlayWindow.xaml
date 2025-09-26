@@ -8,15 +8,22 @@
         Title="HowToPlayWindow" Height="450" Width="500"
         Background="#EEEFF0">
     <Grid>
-        <ScrollViewer Margin="20,20,20,20">
-            <TextBlock Text="a{x:Static language:Lang.rulesGameText}"
-                       TextWrapping="Wrap"
-                       TextAlignment="Justify"
-                       LineHeight="22"
-                       FontSize="14"
-                       FontFamily="Sans Serif Collection" 
-                       Margin="20,20,20,20" Width="418"/>
-        </ScrollViewer>
-
+        <Border Style="{StaticResource floatingBorderStyle}" Padding="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+            <TextBlock Grid.Row="0" Style="{StaticResource subtitleTextBlockStyle}"
+                       Text="a{x:Static language:Lang.howToPlayText}"/>
+            <ScrollViewer Grid.Row="1" Margin="20">
+                <TextBlock Style="{StaticResource bodyTextBlockStyle}"
+                           Text="a{x:Static language:Lang.rulesGameText}"
+                           TextWrapping="Wrap"
+                           TextAlignment="Justify"/>
+            </ScrollViewer>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

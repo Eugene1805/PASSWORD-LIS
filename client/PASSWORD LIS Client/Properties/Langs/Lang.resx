@@ -132,6 +132,9 @@
   <data name="changePasswordText" xml:space="preserve">
     <value>Change Password</value>
   </data>
+  <data name="clueGuyText" xml:space="preserve">
+    <value>Clue Guy</value>
+  </data>
   <data name="clueText" xml:space="preserve">
     <value>Clue</value>
   </data>
@@ -148,10 +151,10 @@
     <value>Sign Up for Free</value>
   </data>
   <data name="currentRoundText" xml:space="preserve">
-    <value>Round:</value>
+    <value>Round: {0} of 5</value>
   </data>
   <data name="currentWordText" xml:space="preserve">
-    <value>Word:</value>
+    <value>Word: {0} of 5</value>
   </data>
   <data name="emailRetrievePasswordText" xml:space="preserve">
     <value>Type your e-mail to reset your password</value>
@@ -170,6 +173,9 @@
   </data>
   <data name="groupChatText" xml:space="preserve">
     <value>Group Chat</value>
+  </data>
+  <data name="guesserText" xml:space="preserve">
+    <value>Guesser:</value>
   </data>
   <data name="guessPasswordWithText" xml:space="preserve">
     <value>Try to guess the PASSWORD with!</value>
@@ -320,6 +326,9 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   </data>
   <data name="successfulSignUpText" xml:space="preserve">
     <value>Registration Successful</value>
+  </data>
+  <data name="teamPointsText" xml:space="preserve">
+    <value>Score: {0}</value>
   </data>
   <data name="termsAndConditionsText" xml:space="preserve">
     <value>By Signing Up you Agree to our Terms &amp; Conditions</value>

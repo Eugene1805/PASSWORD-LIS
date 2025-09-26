@@ -16,7 +16,7 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel Grid.Column="0" >
-            <Ellipse x:Name="avatarEllipse" Height="100" Width="100" Stroke="#66B2FF" StrokeThickness="5" Margin="0,20,100,0">
+            <Ellipse x:Name="avatarEllipse" Style="{StaticResource circleEllipseStyle}" Margin="20,20,120,10" Height="100">
                 <Ellipse.Fill>
                     <ImageBrush/>
                 </Ellipse.Fill>

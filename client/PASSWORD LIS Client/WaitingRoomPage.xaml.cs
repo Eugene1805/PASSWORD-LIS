@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace PASSWORD_LIS_Client
 {
     /// <summary>
-    /// Lógica de interacción para ClueGuy.xaml
+    /// Lógica de interacción para WaitingRoomPage.xaml
     /// </summary>
-    public partial class ClueGuy : Page
+    public partial class WaitingRoomPage : Page
     {
-        public ClueGuy()
+        public WaitingRoomPage()
         {
             InitializeComponent();
         }

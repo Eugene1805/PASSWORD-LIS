@@ -106,6 +106,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a Clue Guy.
+        /// </summary>
+        public static string clueGuyText {
+            get {
+                return ResourceManager.GetString("clueGuyText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a Clue.
         /// </summary>
         public static string clueText {
@@ -151,7 +160,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
-        ///   Busca una cadena traducida similar a Round:.
+        ///   Busca una cadena traducida similar a Round: {0} of 5.
         /// </summary>
         public static string currentRoundText {
             get {
@@ -160,7 +169,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
-        ///   Busca una cadena traducida similar a Word:.
+        ///   Busca una cadena traducida similar a Word: {0} of 5.
         /// </summary>
         public static string currentWordText {
             get {
@@ -219,6 +228,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         public static string groupChatText {
             get {
                 return ResourceManager.GetString("groupChatText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a Guesser:.
+        /// </summary>
+        public static string guesserText {
+            get {
+                return ResourceManager.GetString("guesserText", resourceCulture);
             }
         }
         
@@ -636,6 +654,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         public static string successfulSignUpText {
             get {
                 return ResourceManager.GetString("successfulSignUpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a Score: {0}.
+        /// </summary>
+        public static string teamPointsText {
+            get {
+                return ResourceManager.GetString("teamPointsText", resourceCulture);
             }
         }
         

@@ -5,50 +5,45 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PASSWORD_LIS_Client"
         mc:Ignorable="d"
-        Title="TopPlayersWindow" Height="400" Width="300"
+        Title="TopPlayersWindow" Height="300" Width="300"
         Background="#EEEFF0">
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+    <Grid>
+        <Border Style="{StaticResource floatingBorderStyle}" Padding="15" Margin="20">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0"
-                   Text="a{x:Static language:Lang.topPlayersText}" 
-                   FontSize="24" 
-                   FontWeight="Bold"
-                   HorizontalAlignment="Center"
-                   Margin="0,0,0,20"
-                   Foreground="#343A40"/>
+                <TextBlock Grid.Row="0" Text="a{x:Static language:Lang.topPlayersText}"
+                           Style="{StaticResource titleTextBlockStyle}"
+                           Margin="20,0,20,10"/>
 
-        <DataGrid x:Name="topPlayersDataGrid"
-                  Grid.Row="1"
-                  AutoGenerateColumns="False"
-                  IsReadOnly="True"
-                  CanUserAddRows="False">
-            CanUserDeleteRows="False"
-            CanUserReorderColumns="False"
-            CanUserResizeColumns="True"
-            CanUserSortColumns="False"
-            SelectionMode="Single"
-            HeadersVisibility="Column"
-            BorderThickness="1"
-                  BorderBrush="#66B2FF"
-                  Background="#66B2FF">
 
-            <DataGrid.Columns>
-                <!-- Columna de Jugadores -->
-                <DataGridTextColumn Header="a{x:Static language:Lang.playersText}" 
-                                    Binding="{Binding Equipo}"
-                                    Width="*"
-                                    IsReadOnly="True"/>
+                <DataGrid x:Name="topPlayersDataGrid"
+                          Grid.Row="1" Style="{StaticResource cleanDataGridStyle}">
 
-                <!-- Columna de Puntos -->
-                <DataGridTextColumn Header="a{x:Static language:Lang.scoreTopText}" 
-                                    Binding="{Binding Puntos}"
-                                    Width="120"
-                                    IsReadOnly="True"/>
-            </DataGrid.Columns>
-        </DataGrid>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="a{x:Static language:Lang.playersText}" 
+                                            Binding="{Binding Equipo}"
+                                            Width="*"
+                                            MinWidth="150"/>
+
+                        <DataGridTextColumn Header="a{x:Static language:Lang.scoreTopText}" 
+                                            Binding="{Binding Puntos}"
+                                            Width="Auto"/>
+                    </DataGrid.Columns>
+                    <DataGrid.ItemsSource>
+                        <x:Array Type="{x:Type local:PlayerScore}">
+                            <local:PlayerScore Equipo="Arturo + Eugenio" Puntos="15" />
+                            <local:PlayerScore Equipo="Uriel + Miguel" Puntos="10" />
+                            <local:PlayerScore Equipo="Raziel + Abel" Puntos="9" />
+                            <local:PlayerScore Equipo="Mauricio + Erickmel" Puntos="8" />
+                            <local:PlayerScore Equipo="Carlos + Gabriel" Puntos="7" />
+                        </x:Array>
+                    </DataGrid.ItemsSource>
+                </DataGrid>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

@@ -15,21 +15,13 @@ using System.Windows.Shapes;
 namespace PASSWORD_LIS_Client
 {
     /// <summary>
-    /// Lógica de interacción para TopPlayersWindow.xaml
+    /// Lógica de interacción para InvitationByMailWindow.xaml
     /// </summary>
-    public partial class TopPlayersWindow : Window
+    public partial class InvitationByMailWindow : Window
     {
-        public TopPlayersWindow()
+        public InvitationByMailWindow()
         {
             InitializeComponent();
         }
-
-
-    }
-
-    public class PlayerScore
-    {
-        public string Equipo { get; set; }
-        public int Puntos { get; set; }
     }
 }
