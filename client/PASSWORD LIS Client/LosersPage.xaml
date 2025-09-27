@@ -11,9 +11,9 @@
 
     <Grid Background="#F5F5F5">
         <TextBlock Text="{x:Static language:Lang.loosersMessageText}" Style="{StaticResource titleTextBlockStyle}" HorizontalAlignment="Center"
-               VerticalAlignment="Top" FontSize="24" Margin="0,43,0,0"/>
+               VerticalAlignment="Top" FontSize="24" Margin="0,40,0,0"/>
         <TextBlock Text="{x:Static language:Lang.redTeamText}" Style="{StaticResource subtitleTextBlockStyle}" HorizontalAlignment="Center" 
-               VerticalAlignment="Top" Margin="0,157,0,0"/>
+               VerticalAlignment="Top" Margin="0,150,0,0"/>
         <TextBlock Text="{x:Static language:Lang.successfulPasswordsText}" Style="{StaticResource subtitleTextBlockStyle}" HorizontalAlignment="Center"
                VerticalAlignment="Center" Margin="0,80,0,0"/>
         <Button Content="{x:Static language:Lang.playAgainText}" Style="{StaticResource gameButtonStyle}" HorizontalAlignment="Center"

@@ -13,7 +13,6 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -31,25 +30,26 @@
                 HorizontalAlignment="Right" VerticalAlignment="Top"
                 Margin="0,10,10,0" Width="50" Height="50"
                 Click="ButtonClickEditProfile">
-            <Image Source="Resources/pencil_icon.png" Stretch="UniformToFill"/> 
+            <Image Source="Resources/pencil_icon.png" Width="30" Stretch="Uniform"/> 
         </Button>
 
-        <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,20,0">
-            
-            <Ellipse x:Name="Avatar" Style="{StaticResource circleEllipseStyle}"  HorizontalAlignment="Left" Margin="0,0,0,20"/>
-            <Button Content="{x:Static language:Lang.selectAvatarText}"
-                    Style="{StaticResource primaryButtonStyle}"
-                    Margin="0,0,0,10"
-                    Click="ButtonClickChooseAnAvatar"/>    
+        <StackPanel Grid.Row="2" Grid.Column="0" Margin="20,0,20,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Ellipse x:Name="Avatar" Style="{StaticResource circleEllipseStyle}"  HorizontalAlignment="Left" Margin="0,0,20,0"/>
+                <Button Content="{x:Static language:Lang.selectAvatarText}"
+                        Style="{StaticResource primaryButtonStyle}"
+                        Width="150" Height="30"
+                        Click="ButtonClickChooseAnAvatar"/>
+            </StackPanel>
 
             <TextBlock Text="{x:Static language:Lang.nicknameText}" Style="{StaticResource bodyTextBlockStyle}" Margin="0,10,0,5"/>
-            <TextBox x:Name="Nickname" Text="Eugene0518" Style="{StaticResource primaryTextBoxStyle}" Margin="0,0,0,10"/>
+            <TextBox x:Name="Nickname" Text="Eugene0518" Style="{StaticResource primaryTextBoxStyle}" Margin="0,0,0,5"/>
 
             <TextBlock Text="{x:Static language:Lang.nameText}" Style="{StaticResource bodyTextBlockStyle}" Margin="0,10,0,5"/>
-            <TextBox x:Name="Name" Text="Eugenio" Style="{StaticResource primaryTextBoxStyle}" Margin="0,0,0,10"/>
+            <TextBox x:Name="Name" Text="Eugenio" Style="{StaticResource primaryTextBoxStyle}" Margin="0,0,0,5"/>
 
             <TextBlock Text="{x:Static language:Lang.lastNameText}" Style="{StaticResource bodyTextBlockStyle}" Margin="0,10,0,5"/>
-            <TextBox x:Name="LastName" Text="González" Style="{StaticResource primaryTextBoxStyle}" Margin="0,0,0,10"/>
+            <TextBox x:Name="LastName" Text="González" Style="{StaticResource primaryTextBoxStyle}" Margin="0,0,0,5"/>
 
         </StackPanel>
 
@@ -77,16 +77,18 @@
                 <Image Source="Resources/tiktok_logo.png" Width="40" Height="40" Margin="0,0,10,0"/> 
                 <TextBox x:Name="TikTok" Text="" Width="200" Style="{StaticResource primaryTextBoxStyle}" VerticalAlignment="Center"/>
             </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="40,40,40,0">
+                <Button Content="{x:Static language:Lang.changePasswordText}" Style="{StaticResource gameButtonStyle}"
+                    Margin="10,10,20,10" Height="35" Width="130"
+                    Click="ButtonClickChangePassword"/>
+                <Button Content="{x:Static language:Lang.saveChangesText}" Style="{StaticResource primaryButtonStyle}"
+                    Height="35" Width="100"
+                    Margin="10,10,10,10"
+                    Click="ButtonClickSaveChanges"/>    
+            </StackPanel>
         </StackPanel>
 
-        <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
-            <Button Content="{x:Static language:Lang.changePasswordText}" Style="{StaticResource primaryButtonStyle}"
-                    Margin="0,0,50,0" Padding="10"
-                    Click="ButtonClickChangePassword"/>
-            <Button Content="{x:Static language:Lang.saveChangesText}" Style="{StaticResource primaryButtonStyle}"
-                    Padding="10"
-                    Click="ButtonClickSaveChanges"/>
-        </StackPanel>
+            
 
     </Grid>
 </Page>
