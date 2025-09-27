@@ -20,7 +20,7 @@
         <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="20" VerticalAlignment="Center">
 
-                <TextBlock Text="{x:Static language:Lang.createAccountText}" 
+                <TextBlock Text="{x:Static language:Lang.logInText}" 
                    FontSize="20" 
                    FontWeight="Bold" 
                    HorizontalAlignment="Center" 

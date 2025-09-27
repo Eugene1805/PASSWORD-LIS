@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PASSWORD_LIS_Client"
+        xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
         mc:Ignorable="d"
         Title="TopPlayersWindow" Height="300" Width="300"
         Background="#EEEFF0">
@@ -15,21 +16,21 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Text="a{x:Static language:Lang.topPlayersText}"
+                <TextBlock Grid.Row="0" Text="{x:Static language:Lang.topPlayersText}"
                            Style="{StaticResource titleTextBlockStyle}"
                            Margin="20,0,20,10"/>
 
 
                 <DataGrid x:Name="topPlayersDataGrid"
-                          Grid.Row="1" Style="{StaticResource cleanDataGridStyle}">
+                          Grid.Row="1" >
 
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="a{x:Static language:Lang.playersText}" 
+                        <DataGridTextColumn Header="{x:Static language:Lang.playersText}" 
                                             Binding="{Binding Equipo}"
                                             Width="*"
                                             MinWidth="150"/>
 
-                        <DataGridTextColumn Header="a{x:Static language:Lang.scoreTopText}" 
+                        <DataGridTextColumn Header="{x:Static language:Lang.scoreTopText}" 
                                             Binding="{Binding Puntos}"
                                             Width="Auto"/>
                     </DataGrid.Columns>

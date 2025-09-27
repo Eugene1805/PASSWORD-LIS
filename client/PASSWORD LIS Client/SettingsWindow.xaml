@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PASSWORD_LIS_Client"
+        xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
         mc:Ignorable="d"
-        Title="SettingsWindow" Height="250" Width="450"
+        Title="{x:Static language:Lang.settingsText}" Height="250" Width="450"
         Background="#EEEFF0">
     <Grid>
         <Border Style="{StaticResource floatingBorderStyle}" Padding="10" Margin="20">
@@ -17,7 +18,7 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Text="a{x:Static language:Lang.settingsText}"
+                <TextBlock Grid.Row="0" Text="{x:Static language:Lang.settingsText}"
                            Style="{StaticResource titleTextBlockStyle}"
                            Margin="20,0,20,10"/>
 
@@ -26,7 +27,7 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="a{x:Static language:Lang.musicText}"
+                    <TextBlock Grid.Column="0" Text="{x:Static language:Lang.musicText}"
                                Style="{StaticResource subtitleTextBlockStyle}"
                                TextAlignment="Left"/>
                     <Slider Grid.Column="1" x:Name="musicLevelSlider" VerticalAlignment="Center"/>
@@ -37,13 +38,13 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="a{x:Static language:Lang.soundEffectsText}"
+                    <TextBlock Grid.Column="0" Text="{x:Static language:Lang.soundEffectsText}"
                              Style="{StaticResource subtitleTextBlockStyle}"
                              TextAlignment="Left"/>
                     <Slider Grid.Column="1" x:Name="soundEffectsLevelSlider" VerticalAlignment="Center"/>
                 </Grid>
 
-                <Button Grid.Row="4" Content="a{x:Static language:Lang.logOutText}"
+                <Button Grid.Row="4" Content="{x:Static language:Lang.logOutText}"
                         Style="{StaticResource logOutButtonStyle}"
                         Width="180" Height="35"/>
             </Grid>

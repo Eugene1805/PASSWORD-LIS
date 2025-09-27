@@ -11,7 +11,7 @@
         Title="{x:Static language:Lang.signUpText}" Height="550" Width="600">
     <Grid>
         <Grid.Background>
-            <ImageBrush ImageSource="/BackgroudImage.png"/>
+            <ImageBrush ImageSource="Resources/BackgroudImage.png"/>
         </Grid.Background>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
