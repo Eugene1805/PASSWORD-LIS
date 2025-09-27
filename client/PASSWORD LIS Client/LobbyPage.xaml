@@ -8,107 +8,98 @@
       mc:Ignorable="d" 
       
       d:DesignHeight="450" d:DesignWidth="500"
+      Background="#EEEFF0"
       Title="LobbyPage">
 
-    <Grid Background="#EEEFF0">
+    <Grid >
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Column="0" >
-            <Ellipse x:Name="avatarEllipse" Style="{StaticResource circleEllipseStyle}" Margin="20,20,120,10" Height="100">
-                <Ellipse.Fill>
-                    <ImageBrush/>
-                </Ellipse.Fill>
-            </Ellipse>
+        <Border Grid.Column="0" Style="{StaticResource floatingBorderStyle}" Padding="20">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-            <Border BorderBrush="Black" BorderThickness="3" Height="100" Margin="20,20,20,0">
+                <Ellipse Grid.Row="0" x:Name="avatarEllipse" Style="{StaticResource circleEllipseStyle}" Margin="0,0,65,15">
+                    <Ellipse.Fill>
+                        <ImageBrush/>
+                    </Ellipse.Fill>
+                </Ellipse>
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-            </Border>
-
-            <Button Content="{x:Static language:Lang.topPlayersText}" 
-                    Margin ="0, 20,0,0" 
-                    Width="210" 
-                    Height="35"
-                    VerticalAlignment="Center" 
-                    FontFamily="Sans Serif Collection" 
-                    BorderBrush="#66B2FF" Background="#FF66B2FF" Foreground="#343A40">
-                <Button.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="15"/>
-                    </Style>
-                </Button.Resources>
-            </Button>
-
-
-            <Button Content="{x:Static language:Lang.rulesGameText}" 
-                    Margin ="0, 20,0,0" 
-                    Width="210" 
-                    Height="35"
-                    VerticalAlignment="Center" 
-                    FontFamily="Sans Serif Collection"
-                    Background="#66B2FF" BorderBrush="#66B2FF" Foreground="#343A40">
-                <Button.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="15"/>
-                    </Style>
-                </Button.Resources>
-            </Button>
-
-            <Button Content="{x:Static language:Lang.settingsText}" 
-                    Margin ="0, 20,0,0" 
-                    Width="210" 
-                    Height="35"
-                    VerticalAlignment="Center" 
-                    FontFamily="Sans Serif Collection"
-                    Background="#66B2FF" BorderBrush="#66B2FF" Foreground="#343A40">
-                <Button.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="15"/>
-                    </Style>
-                </Button.Resources>
-            </Button>
-        </StackPanel>
-
-        <StackPanel Grid.Column="1">
-            <TextBlock Text="PASSWORD" 
-                       FontSize="40" 
-                       FontWeight="Bold" 
-                       HorizontalAlignment="Center" 
-                       Margin="0,45,0,0" 
-                       Foreground="#343A40"/>
-
-            <Button Content="{x:Static language:Lang.playText}" 
-                    Width="180" Height="35"
-                    FontSize="14"
-                    Margin="0,40,0,0"
-                    FontFamily="Sans Serif Collection"
-                    FontWeight="Bold"
-                    HorizontalAlignment="Center" 
-                    Background="#71DDAF" BorderBrush="#71DDAF" Foreground="White">
-                <Button.Resources>
-                    <Style TargetType="Border">
-                        <Setter Property="CornerRadius" Value="15"/>
-                    </Style>
-                </Button.Resources>
-            </Button>
-
-            <Border BorderBrush="Black" BorderThickness="1" Padding="10" Margin="20,90,20,20">
-                <StackPanel>
-                    <TextBlock Text="{x:Static language:Lang.enterCodeToJoinText}" FontSize="12" HorizontalAlignment="Center" Margin="0,0,0,10" FontFamily="Sans Serif Collection"/>
-                    <TextBox x:Name="codeJoinTextBox" Height="30" FontSize="16" TextAlignment="Center" Margin="0,0,0,10" BorderBrush="#66B2FF" />
-                    <Button Content="{x:Static language:Lang.joingGameText}" FontSize="12" Background="#66B2FF" FontFamily="Sans Serif Collection" Foreground="White" BorderBrush="#FF66B2FF" >
-                        <Button.Resources>
-                            <Style TargetType="Border">
-                                <Setter Property="CornerRadius" Value="15"/>
-                            </Style>
-                        </Button.Resources>
+                    <TextBlock Grid.Column="0" Style="{StaticResource bodyTextBlockStyle}"
+                               Text="a{x:Static language:Lang.friendsListText}"
+                               VerticalAlignment="Center"
+                               TextAlignment="Left"/>
+                    <Button Grid.Column="1" Style="{StaticResource circleButtonStyle}"
+                            Width="30" Height="30" VerticalAlignment="Center">
+                        <Image Source="/Resources/AddFriendIcon.png" Width="15" Height="15"/>
                     </Button>
+                    <Button Grid.Column="2" Style="{StaticResource circleButtonStyle}"
+                            Width="30" Height="30" VerticalAlignment="Center">
+                        <Image Source="/Resources/DeleteFriendIcon.png" Width="15" Height="15"/>
+                    </Button>
+                </Grid>
+
+                <Border Grid.Row="2" Style ="{StaticResource floatingBorderStyle}" Margin="0,5,0,5">
+                    <TextBlock Text="[Lista de Amigos]" Style="{StaticResource bodyTextBlockStyle}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Border>
+
+                <StackPanel Grid.Row="3">
+                    <Button Content="a{x:Static language:Lang.topPlayersText}" 
+                            Style="{StaticResource primaryButtonStyle}"
+                            Height="35" Margin="0,5"/>
+
+                    <Button Content="a{x:Static language:Lang.rulesGameText}" 
+                            Style="{StaticResource primaryButtonStyle}"
+                            Height="35" Margin="0,5"/>
+
+                    <Button Content="a{x:Static language:Lang.settingsText}" 
+                            Style="{StaticResource primaryButtonStyle}"
+                            Height="35" Margin="0,5"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0" Style="{StaticResource floatingBorderStyle}" Padding="15">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <TextBlock Text="PASSWORD" Style="{StaticResource titleTextBlockStyle}"  Margin="0,0,0,20"/>
+                    <Button Content="a{x:Static language:Lang.playText}"
+                            Style="{StaticResource gameButtonStyle}"
+                            Height="30"/>
                 </StackPanel>
             </Border>
 
-        </StackPanel>
-
+            <Border Grid.Row="1" Style="{StaticResource floatingBorderStyle}" Padding="15">
+                <StackPanel>
+                    <TextBlock Text="a{x:Static language:Lang.enterCodeToJoin}" 
+                               Style="{StaticResource subtitleTextBlockStyle}" 
+                               Margin="0,0,0,10"/>
+                    <TextBox x:Name="codeJoinTextBox" 
+                             Style="{StaticResource primaryTextBoxStyle}" 
+                             Height="40" Margin="0,0,0,10"/>
+                    <Button Content="a{x:Static language:Lang.joinGameText}" 
+                            Style="{StaticResource primaryButtonStyle}" 
+                            Height="35"/>
+                </StackPanel>
+            </Border>
+        </Grid>
     </Grid>
 </Page>
