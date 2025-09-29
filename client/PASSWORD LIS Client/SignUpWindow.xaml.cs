@@ -23,7 +23,7 @@ namespace PASSWORD_LIS_Client
         private static readonly string tcUrl = "https://www.uv.mx/legislacion/files/2017/07/Codigo-de-etica-de-la-Universidad-Veracruzana.pdf";
         public SignUpWindow()
         {
-            InitializeComponent();
+                InitializeComponent();           
         }
 
         private void ButtonClickSignUp(object sender, RoutedEventArgs e)

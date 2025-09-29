@@ -7,45 +7,44 @@
         xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        MinHeight="350" MinWidth="450"
-        Title="{x:Static language:Lang.verifyCodeText}" Height="350" Width="450">
+        MinHeight="400" MinWidth="400"
+        Title="{x:Static language:Lang.verifyCodeText}" Height="400" Width="400">
     <Grid>
         <Grid.Background>
-            <ImageBrush ImageSource="/BackgroudImage.png"/>
+            <ImageBrush ImageSource="Resources/BackgroudImage.png"/>
         </Grid.Background>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="20">
-                <TextBlock Text="{x:Static language:Lang.verifyCodeMessageText}" 
-                   FontSize="18"  
+
+        <StackPanel Grid.Column="2" Margin="10">
+            <TextBlock Text="{x:Static language:Lang.verifyCodeMessageText}" 
+                   Style="{StaticResource titleTextBlockStyle}" 
                    TextWrapping="Wrap"
                    HorizontalAlignment="Center" 
                    Margin="0,0,0,20"/>
-                <Label x:Name="emailLabel" Content="email@example.com" FontSize="16"
+            <Label x:Name="emailLabel" Content="email@example.com" FontSize="16"
                        FontWeight="Bold" FontFamily="Consolas"
                     Margin="0,0,0,20"/>
-                
-                <TextBox x:Name="verificationCodeTextBox" Width="250"/>
-                <Button Content="{x:Static language:Lang.verifyCodeText}" 
-                FontWeight="Bold" 
+
+            <TextBox x:Name="verificationCodeTextBox" Style="{StaticResource primaryTextBoxStyle}" Width="180"/>
+            <Button Content="{x:Static language:Lang.verifyCodeText}" 
+               Style="{StaticResource primaryButtonStyle}" 
                 Width="180" 
                 Height="35" 
                 Margin="0,15,0,10"
                 HorizontalAlignment="Center" FontSize="14"
                 />
-                <Label Content="{x:Static language:Lang.verifyCodeNotSendText}"
+            <TextBlock Text="{x:Static language:Lang.verifyCodeNotSendText}" Style="{StaticResource bodyTextBlockStyle}"
                    HorizontalAlignment="Center"/>
-                <TextBlock 
+            <TextBlock Style="{StaticResource bodyTextBlockStyle}"
                     TextWrapping="Wrap"
                     HorizontalAlignment="Center">
                     <Hyperlink> 
                         <Run Text="{x:Static language:Lang.verifyCodeResendCodeText}"/>
                     </Hyperlink>
-                </TextBlock>
-            </StackPanel>
-        </ScrollViewer>
+            </TextBlock>
+        </StackPanel>
     </Grid>
 </Window>

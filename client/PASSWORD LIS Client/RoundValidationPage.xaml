@@ -9,7 +9,7 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="{x:Static language:Lang.roundValidationText}">
 
-    <Grid Margin="20">
+    <Grid Margin="20" Background="#F5F5F5">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -18,8 +18,7 @@
         </Grid.RowDefinitions>
 
         <TextBlock Text="{x:Static language:Lang.roundValidationText}"
-                   FontSize="24"
-                   FontWeight="Bold"
+                   Style="{StaticResource titleTextBlockStyle}"
                    HorizontalAlignment="Center"
                    Margin="0,10,0,20"/>
 
@@ -31,10 +30,10 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Text="{x:Static language:Lang.currentWordText}" FontWeight="Bold" Grid.Column="0"/>
-            <TextBlock Text="Pistas" FontWeight="Bold" Grid.Column="1"/>
-            <TextBlock Text="{x:Static language:Lang.sinonymsQuestionText}" FontWeight="Bold" Grid.Column="2" TextWrapping="Wrap"/>
-            <TextBlock Text="{x:Static language:Lang.oneMoreWordQuestionText}" FontWeight="Bold" Grid.Column="3" TextWrapping="Wrap"/>
+            <TextBlock Text="{x:Static language:Lang.currentWordText}" Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="0"/>
+            <TextBlock Text="Pistas" Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="1"/>
+            <TextBlock Text="{x:Static language:Lang.sinonymsQuestionText}" Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="2" TextWrapping="Wrap"/>
+            <TextBlock Text="{x:Static language:Lang.oneMoreWordQuestionText}" Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="3" TextWrapping="Wrap"/>
         </Grid>
 
         <StackPanel Grid.Row="2">
@@ -47,19 +46,19 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Border BorderBrush="Black" BorderThickness="1" Grid.Column="0" Height="30" Width="100" HorizontalAlignment="Left">
-                    <TextBlock Text="Calidad" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <Border Style="{StaticResource floatingBorderStyle}" Grid.Column="0" Height="30" Width="100" HorizontalAlignment="Center">
+                    <TextBlock Text="Calidad" Style="{StaticResource subtitleTextBlockStyle}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 </Border>
 
-                <ListBox Grid.Column="1" Height="60" Width="100" HorizontalAlignment="Left">
+                <ListBox Grid.Column="1" Height="60" Width="100" HorizontalAlignment="Center">
                     <ListBoxItem Content="Atributo"/>
                     <ListBoxItem Content="Buena"/>
                     <ListBoxItem Content="Excelencia"/>
                 </ListBox>
 
-                <CheckBox Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="False"/>
+                <CheckBox Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="False"/>
 
-                <CheckBox Grid.Column="3" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="False"/>
+                <CheckBox Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="False"/>
             </Grid>
 
             <Grid Margin="0,10">
@@ -70,28 +69,31 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Border BorderBrush="Black" BorderThickness="1" Grid.Column="0" Height="30" Width="100" HorizontalAlignment="Left">
-                    <TextBlock Text="Requisito" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                <Border Style="{StaticResource floatingBorderStyle}" Grid.Column="0" Height="30" Width="100" HorizontalAlignment="Center">
+                    <TextBlock Text="Requisito" Style="{StaticResource subtitleTextBlockStyle}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                 </Border>
 
-                <ListBox Grid.Column="1" Height="60" Width="100" HorizontalAlignment="Left">
+                <ListBox Grid.Column="1" Height="60" Width="100" HorizontalAlignment="Center">
                     <ListBoxItem Content="Fase"/>
                     <ListBoxItem Content="Necesario"/>
                     <ListBoxItem Content="Condición"/>
                 </ListBox>
 
-                <CheckBox Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="True"/>
+                <CheckBox Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="True"/>
 
-                <CheckBox Grid.Column="3" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="False"/>
+                <CheckBox Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="False"/>
             </Grid>
         </StackPanel>
 
         <Button Content="{x:Static language:Lang.nextRoundText}"
                 Grid.Row="3"
                 Grid.ColumnSpan="2"
+                Style="{StaticResource primaryButtonStyle}"
+                Width="100"
+                Height="30"
                 HorizontalAlignment="Right"
-                Margin="0,20,0,0"
-                Padding="15,5"/>
+                Margin="0,20,20,20"
+                />
 
     </Grid>
 </Page>

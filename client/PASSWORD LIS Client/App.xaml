@@ -128,6 +128,29 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        
+        <Style x:Key="passwordboxStyle" TargetType="PasswordBox">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="BorderBrush" Value="#66B2FF"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="Background" Value="#FFFFFF"/>
+            <Setter Property="Foreground" Value="#343A40"/>
+            <Setter Property="CaretBrush" Value="#66B2FF"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="PasswordBox">
+                        <Border CornerRadius="15"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ScrollViewer x:Name="PART_ContentHost" 
+                          Margin="10,5"
+                          VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
         <Style x:Key="titleTextBlockStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="24"/>

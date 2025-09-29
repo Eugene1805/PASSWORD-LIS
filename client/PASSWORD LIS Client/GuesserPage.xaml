@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:PASSWORD_LIS_Client"
+      xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="GuesserPage">
@@ -19,7 +20,7 @@
         <Border Grid.Column="0" Style="{StaticResource floatingBorderStyle}">
             <StackPanel>
                 <TextBlock Style="{StaticResource subtitleTextBlockStyle}" Margin="20,40,20,20"
-                           Text="a{x:Static language:Lang.readTeamText}"/>
+                           Text="{x:Static language:Lang.redTeamText}"/>
 
                 <TextBlock Style="{StaticResource bodyTextBlockStyle}" Margin="20"
                            Text="a{Binding currentRound, StringFormat={x:Static language:Lang.currentRoundText}}"/>
@@ -35,10 +36,10 @@
         <Border Grid.Column="1" Style="{StaticResource floatingBorderStyle}" Margin="20,20,20,220">
             <StackPanel>
                 <TextBlock Style="{StaticResource titleTextBlockStyle}" 
-                           Text="a{x:Static language:Lang.guesserText}"
+                           Text="{x:Static language:Lang.guesserText}"
                            Margin="20"/>
                 <TextBlock Style="{StaticResource bodyTextBlockStyle}" Margin="20,0,20,20"
-                           Text="a{x:Static language:Lang.guessPasswordWithText}"
+                           Text="{x:Static language:Lang.guessPasswordWithText}"
                            TextWrapping="Wrap"
                            />
                 <TextBlock x:Name="givenClueTextBlock" Style="{StaticResource titleTextBlockStyle}" 
@@ -50,13 +51,13 @@
         <Border Grid.Column="1" Style="{StaticResource floatingBorderStyle}" Margin="20,260,20,20">
             <StackPanel>
                 <TextBlock Style="{StaticResource bodyTextBlockStyle}" Margin="20,10,20,20"
-                           Text="a{x:Static language:Lang.writePasswordText}"
+                           Text="{x:Static language:Lang.writePasswordText}"
                            TextWrapping="Wrap"/>
                 <TextBox x:Name="passwordToGuessTextBox"
                          Style="{StaticResource primaryTextBoxStyle}" Margin="20,-10,20,0"/>
 
                 <Button Style="{StaticResource primaryButtonStyle}" Margin="20,15,20,20" Height="30"
-                        Content="a{x:Static language:Lang.sendText}"/>
+                        Content="{x:Static language:Lang.sendText}"/>
             </StackPanel>
         </Border>
 
@@ -74,7 +75,7 @@
                 <Button Style="{StaticResource gameButtonStyle}"
                         Margin="20" 
                         Height="35"
-                        Content="a{x:Static language:Lang.clueText}"/>
+                        Content="{x:Static language:Lang.clueText}"/>
             </StackPanel>
         </Border>
     </Grid>

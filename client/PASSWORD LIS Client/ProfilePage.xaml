@@ -6,13 +6,13 @@
       xmlns:local="clr-namespace:PASSWORD_LIS_Client"
       xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
       mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
       Title="{x:Static language:Lang.userPasswordText}">
 
-    <Grid Margin="20">
+    <Grid Margin="20" Background="#F5F5F5">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -21,74 +21,74 @@
         </Grid.ColumnDefinitions>
 
         <TextBlock Text="{x:Static language:Lang.profileText}"
-                   FontSize="24"
-                   FontWeight="Bold"
+                   Style="{StaticResource titleTextBlockStyle}"
                    HorizontalAlignment="Center"
                    Grid.ColumnSpan="2"
                    Margin="0,10,0,20"/>
 
-        <Button Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top"
-                Margin="0,10,10,0" Width="30" Height="30"
+        <Button Grid.Column="1" Style="{StaticResource circleButtonStyle}"
+                HorizontalAlignment="Right" VerticalAlignment="Top"
+                Margin="0,10,10,0" Width="50" Height="50"
                 Click="ButtonClickEditProfile">
-            <Image Source="Resources/pencil_icon.png" Stretch="Uniform"/> 
+            <Image Source="Resources/pencil_icon.png" Width="30" Stretch="Uniform"/> 
         </Button>
 
-        <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,20,0">
+        <StackPanel Grid.Row="2" Grid.Column="0" Margin="20,0,20,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <Ellipse x:Name="Avatar" Style="{StaticResource circleEllipseStyle}"  HorizontalAlignment="Left" Margin="0,0,20,0"/>
+                <Button Content="{x:Static language:Lang.selectAvatarText}"
+                        Style="{StaticResource primaryButtonStyle}"
+                        Width="150" Height="30"
+                        Click="ButtonClickChooseAnAvatar"/>
+            </StackPanel>
 
-            
-            <Button Content="{x:Static language:Lang.selectAvatarText}"
-                    Margin="0,0,0,10"
-                    FontSize="16"
-                    Click="ButtonClickChooseAnAvatar"/>
-            <Ellipse x:Name="Avatar" Width="100" Height="100" Stroke="Black"
-                     StrokeThickness="1" Fill="LightGray" HorizontalAlignment="Left" Margin="0,0,0,20"/>
+            <TextBlock Text="{x:Static language:Lang.nicknameText}" Style="{StaticResource bodyTextBlockStyle}" Margin="0,10,0,5"/>
+            <TextBox x:Name="Nickname" Text="Eugene0518" Style="{StaticResource primaryTextBoxStyle}" Margin="0,0,0,5"/>
 
+            <TextBlock Text="{x:Static language:Lang.nameText}" Style="{StaticResource bodyTextBlockStyle}" Margin="0,10,0,5"/>
+            <TextBox x:Name="Name" Text="Eugenio" Style="{StaticResource primaryTextBoxStyle}" Margin="0,0,0,5"/>
 
-            <Label Content="{x:Static language:Lang.nicknameText}" Margin="0,10,0,5"/>
-            <TextBox x:Name="Nickname" Text="Eugene0518" Margin="0,0,0,10"/>
-
-            <Label Content="{x:Static language:Lang.nameText}" Margin="0,10,0,5"/>
-            <TextBox x:Name="Name" Text="Eugenio" Margin="0,0,0,10"/>
-
-            <Label Content="{x:Static language:Lang.lastNameText}" Margin="0,10,0,5"/>
-            <TextBox x:Name="LastName" Text="González" Margin="0,0,0,10"/>
+            <TextBlock Text="{x:Static language:Lang.lastNameText}" Style="{StaticResource bodyTextBlockStyle}" Margin="0,10,0,5"/>
+            <TextBox x:Name="LastName" Text="González" Style="{StaticResource primaryTextBoxStyle}" Margin="0,0,0,5"/>
 
         </StackPanel>
 
         <StackPanel Grid.Row="2" Grid.Column="1" Margin="20,0,0,0">
             <TextBlock Text="{x:Static language:Lang.socialMediaText}"
-                       FontSize="16"
+                       Style="{StaticResource subtitleTextBlockStyle}"
                        Margin="0,0,0,10"/>
 
             <StackPanel Orientation="Horizontal" Margin="0,5">
-                <Image Source="Resources/facebook_logo.png" Width="20" Height="20" Margin="0,0,10,0"/>
-                <TextBox x:Name="Facebook" Text="Eugenio González" VerticalAlignment="Center"/>
+                <Image Source="Resources/facebook_logo.png" Width="40" Height="40" Margin="0,0,10,0"/>
+                <TextBox x:Name="Facebook" Text="Eugenio González" Style="{StaticResource primaryTextBoxStyle}" VerticalAlignment="Center"/>
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" Margin="0,5">
-                <Image Source="Resources/instagram_logo.png" Width="20" Height="20" Margin="0,0,10,0"/>
-                <TextBox x:Name="Instagram" Text="@eugene.cpp" VerticalAlignment="Center"/>
+                <Image Source="Resources/instagram_logo.png" Width="40" Height="40" Margin="0,0,10,0"/>
+                <TextBox x:Name="Instagram" Text="@eugene.cpp" Style="{StaticResource primaryTextBoxStyle}" VerticalAlignment="Center"/>
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" Margin="0,5">
-                <Image Source="Resources/x_logo.png" Width="20" Height="20" Margin="0,0,10,0"/>
-                <TextBox x:Name="X" Text="" Width="200" VerticalAlignment="Center" Margin="0,0,0,0"/>
+                <Image Source="Resources/x_logo.png" Width="40" Height="40" Margin="0,0,10,0"/>
+                <TextBox x:Name="X" Text="" Width="200" Style="{StaticResource primaryTextBoxStyle}" VerticalAlignment="Center" />
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" Margin="0,5">
-                <Image Source="Resources/tiktok_logo.png" Width="20" Height="20" Margin="0,0,10,0"/> 
-                <TextBox x:Name="TikTok" Text="" Width="200" VerticalAlignment="Center" Margin="0,0,0,0"/>
+                <Image Source="Resources/tiktok_logo.png" Width="40" Height="40" Margin="0,0,10,0"/> 
+                <TextBox x:Name="TikTok" Text="" Width="200" Style="{StaticResource primaryTextBoxStyle}" VerticalAlignment="Center"/>
             </StackPanel>
-        </StackPanel>
-
-        <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
-            <Button Content="{x:Static language:Lang.changePasswordText}" 
-                    Margin="0,0,50,0" Padding="10"
+            <StackPanel Orientation="Horizontal" Margin="40,40,40,0">
+                <Button Content="{x:Static language:Lang.changePasswordText}" Style="{StaticResource gameButtonStyle}"
+                    Margin="10,10,20,10" Height="35" Width="130"
                     Click="ButtonClickChangePassword"/>
-            <Button Content="{x:Static language:Lang.saveChangesText}"
-                    Padding="10"
-                    Click="ButtonClickSaveChanges"/>
+                <Button Content="{x:Static language:Lang.saveChangesText}" Style="{StaticResource primaryButtonStyle}"
+                    Height="35" Width="100"
+                    Margin="10,10,10,10"
+                    Click="ButtonClickSaveChanges"/>    
+            </StackPanel>
         </StackPanel>
+
+            
 
     </Grid>
 </Page>

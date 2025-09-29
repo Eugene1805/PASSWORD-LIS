@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PASSWORD_LIS_Client"
+        xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
         mc:Ignorable="d"
-        Title="HowToPlayWindow" Height="450" Width="500"
+        Title="{x:Static language:Lang.howToPlayText}" Height="500" Width="600"
         Background="#EEEFF0">
     <Grid>
         <Border Style="{StaticResource floatingBorderStyle}" Padding="10">
@@ -16,10 +17,10 @@
                 </Grid.RowDefinitions>
                 
             <TextBlock Grid.Row="0" Style="{StaticResource subtitleTextBlockStyle}"
-                       Text="a{x:Static language:Lang.howToPlayText}"/>
+                       Text="{x:Static language:Lang.howToPlayText}"/>
             <ScrollViewer Grid.Row="1" Margin="20">
                 <TextBlock Style="{StaticResource bodyTextBlockStyle}"
-                           Text="a{x:Static language:Lang.rulesGameText}"
+                           Text="{x:Static language:Lang.rulesGameText}"
                            TextWrapping="Wrap"
                            TextAlignment="Justify"/>
             </ScrollViewer>
