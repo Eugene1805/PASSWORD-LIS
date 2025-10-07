@@ -29,6 +29,7 @@ namespace Data.Model
         public Nullable<System.DateTime> LastLoginAt { get; set; }
         public bool IsActive { get; set; }
         public bool EmailVerified { get; set; }
+        public Nullable<byte> PhotoId { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Player> Player { get; set; }

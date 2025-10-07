@@ -31,6 +31,7 @@ namespace Data.Model
         public virtual DbSet<Player> Player { get; set; }
         public virtual DbSet<Report> Report { get; set; }
         public virtual DbSet<SocialAccount> SocialAccount { get; set; }
+        public virtual DbSet<sysdiagrams> sysdiagrams { get; set; }
         public virtual DbSet<Team> Team { get; set; }
         public virtual DbSet<UserAccount> UserAccount { get; set; }
     }

@@ -71,10 +71,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DAL\AcountRepository.cs" />
     <Compile Include="Model\Ban.cs">
       <DependentUpon>PasswordLISModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="DAL\AcountRepository.cs" />
     <Compile Include="Model\Friendship.cs">
       <DependentUpon>PasswordLISModel.tt</DependentUpon>
     </Compile>
@@ -100,11 +100,13 @@
     <Compile Include="Model\Player.cs">
       <DependentUpon>PasswordLISModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\Report.cs">
       <DependentUpon>PasswordLISModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Model\SocialAccount.cs">
+      <DependentUpon>PasswordLISModel.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Model\sysdiagrams.cs">
       <DependentUpon>PasswordLISModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Model\Team.cs">
@@ -113,10 +115,10 @@
     <Compile Include="Model\UserAccount.cs">
       <DependentUpon>PasswordLISModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.Config" />
-    <None Include="packages.config" />
     <EntityDeploy Include="Model\PasswordLISModel.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>PasswordLISModel.Designer.cs</LastGenOutput>
@@ -124,9 +126,14 @@
     <None Include="Model\PasswordLISModel.edmx.diagram">
       <DependentUpon>PasswordLISModel.edmx</DependentUpon>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\xunit.analyzers.1.24.0\analyzers\dotnet\cs\xunit.analyzers.dll" />
+    <Analyzer Include="..\packages\xunit.analyzers.1.24.0\analyzers\dotnet\cs\xunit.analyzers.fixes.dll" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Model\PasswordLISModel.Context.tt">
@@ -140,11 +147,6 @@
       <LastGenOutput>PasswordLISModel.cs</LastGenOutput>
     </Content>
   </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="..\packages\xunit.analyzers.1.24.0\analyzers\dotnet\cs\xunit.analyzers.dll" />
-    <Analyzer Include="..\packages\xunit.analyzers.1.24.0\analyzers\dotnet\cs\xunit.analyzers.fixes.dll" />
-  </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
