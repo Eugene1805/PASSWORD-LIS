@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Services.Contracts.DTOs;
+using System.ServiceModel;
 
-namespace Services.Interfaces
+namespace Services.Contracts
 {
-    internal interface IAccountManager
+    [ServiceContract]
+    public interface IAccountManager
     {
+        [OperationContract]
+        bool CreateAccount(NewAccountDTO newAccount);
     }
 }

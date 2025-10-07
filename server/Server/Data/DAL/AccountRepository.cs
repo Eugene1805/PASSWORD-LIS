@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Data.DAL
 {
-    public class AcountRepository
+    public class AccountRepository
     {
         public bool CreateAccount(UserAccount acount)
         {
