@@ -7,18 +7,18 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Data
+namespace Data.Model
 {
     using System;
     using System.Collections.Generic;
     
-    public partial class Ban
+    public partial class SocialAccount
     {
         public int Id { get; set; }
-        public int PlayerId { get; set; }
-        public System.DateTime StartTime { get; set; }
-        public System.DateTime EndTime { get; set; }
+        public int UserAccountId { get; set; }
+        public string Provider { get; set; }
+        public string Username { get; set; }
     
-        public virtual Player Player { get; set; }
+        public virtual UserAccount UserAccount { get; set; }
     }
 }

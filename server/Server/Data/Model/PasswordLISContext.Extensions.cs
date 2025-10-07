@@ -1,5 +1,5 @@
 ﻿
-namespace Data
+namespace Data.Model
 {
     using System;
     using System.Data.Entity;

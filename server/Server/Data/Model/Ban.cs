@@ -7,20 +7,18 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Data
+namespace Data.Model
 {
     using System;
     using System.Collections.Generic;
     
-    public partial class Friendship
+    public partial class Ban
     {
-        public int RequesterId { get; set; }
-        public int AddresseeId { get; set; }
-        public int Status { get; set; }
-        public System.DateTime RequestedAt { get; set; }
-        public Nullable<System.DateTime> RespondedAt { get; set; }
+        public int Id { get; set; }
+        public int PlayerId { get; set; }
+        public System.DateTime StartTime { get; set; }
+        public System.DateTime EndTime { get; set; }
     
         public virtual Player Player { get; set; }
-        public virtual Player Player1 { get; set; }
     }
 }

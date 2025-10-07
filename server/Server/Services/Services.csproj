@@ -64,6 +64,22 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
+=======
+    <Compile Include="Contracts\DTOs\AccountData.cs" />
+    <Compile Include="Contracts\IAccountManager.cs" />
+    <Compile Include="Contracts\IClueGuyManager.cs" />
+    <Compile Include="Contracts\IEndGameManager.cs" />
+    <Compile Include="Contracts\IFriendsManager.cs" />
+    <Compile Include="Contracts\IGuesserManager.cs" />
+    <Compile Include="Contracts\IJoinGame.cs" />
+    <Compile Include="Contracts\ILoginManager.cs" />
+    <Compile Include="Contracts\IPasswordResetManager.cs" />
+    <Compile Include="Contracts\IProfileManager.cs" />
+    <Compile Include="Contracts\IRoundValidationManager.cs" />
+    <Compile Include="Contracts\ITopPlayersManager.cs" />
+    <Compile Include="Contracts\IWaitingRoomManager.cs" />
+>>>>>>> 937f13e89058c495be399c424d148fda11cc9dca
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -75,8 +91,14 @@
     <Analyzer Include="..\packages\xunit.analyzers.1.24.0\analyzers\dotnet\cs\xunit.analyzers.fixes.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Implementations\" />
-    <Folder Include="Interfaces\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Data\Data.csproj">
+      <Project>{eb2104a9-3e72-4dd5-b9a8-2d66a089ad6b}</Project>
+      <Name>Data</Name>
+    </ProjectReference>
+>>>>>>> 937f13e89058c495be399c424d148fda11cc9dca
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

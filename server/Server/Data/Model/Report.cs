@@ -7,18 +7,20 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Data
+namespace Data.Model
 {
     using System;
     using System.Collections.Generic;
     
-    public partial class SocialAccount
+    public partial class Report
     {
         public int Id { get; set; }
-        public int UserAccountId { get; set; }
-        public string Provider { get; set; }
-        public string Username { get; set; }
+        public int ReportedPlayerId { get; set; }
+        public Nullable<int> ReporterPlayerId { get; set; }
+        public string Reason { get; set; }
+        public System.DateTime CreatedAt { get; set; }
     
-        public virtual UserAccount UserAccount { get; set; }
+        public virtual Player Player { get; set; }
+        public virtual Player Player1 { get; set; }
     }
 }

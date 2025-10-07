@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
-using System.Data.Entity;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Data
+namespace Services.Interfaces
 {
-    public class Class1
+    internal interface IRoundValidationManager
     {
-        
     }
 }
