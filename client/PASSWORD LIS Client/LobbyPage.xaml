@@ -39,7 +39,7 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" Style="{StaticResource bodyTextBlockStyle}"
-                               Text="a{x:Static language:Lang.friendsListText}"
+                               Text="{x:Static language:Lang.friendsListText}"
                                VerticalAlignment="Center"
                                TextAlignment="Left"/>
                     <Button Grid.Column="1" Style="{StaticResource circleButtonStyle}"
@@ -57,15 +57,15 @@
                 </Border>
 
                 <StackPanel Grid.Row="3">
-                    <Button Content="a{x:Static language:Lang.topPlayersText}" 
+                    <Button Content="{x:Static language:Lang.topPlayersText}" 
                             Style="{StaticResource primaryButtonStyle}"
                             Height="35" Margin="0,5"/>
 
-                    <Button Content="a{x:Static language:Lang.rulesGameText}" 
+                    <Button Content="{x:Static language:Lang.howToPlayText}" 
                             Style="{StaticResource primaryButtonStyle}"
                             Height="35" Margin="0,5"/>
 
-                    <Button Content="a{x:Static language:Lang.settingsText}" 
+                    <Button Content="{x:Static language:Lang.settingsText}" 
                             Style="{StaticResource primaryButtonStyle}"
                             Height="35" Margin="0,5"/>
                 </StackPanel>
@@ -81,7 +81,7 @@
             <Border Grid.Row="0" Style="{StaticResource floatingBorderStyle}" Padding="15">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                     <TextBlock Text="PASSWORD" Style="{StaticResource titleTextBlockStyle}"  Margin="0,0,0,20"/>
-                    <Button Content="a{x:Static language:Lang.playText}"
+                    <Button Content="{x:Static language:Lang.playText}"
                             Style="{StaticResource gameButtonStyle}"
                             Height="30"/>
                 </StackPanel>
@@ -89,13 +89,13 @@
 
             <Border Grid.Row="1" Style="{StaticResource floatingBorderStyle}" Padding="15">
                 <StackPanel>
-                    <TextBlock Text="a{x:Static language:Lang.enterCodeToJoin}" 
+                    <TextBlock Text="{x:Static language:Lang.enterCodeToJoinText}" 
                                Style="{StaticResource subtitleTextBlockStyle}" 
                                Margin="0,0,0,10"/>
                     <TextBox x:Name="codeJoinTextBox" 
                              Style="{StaticResource primaryTextBoxStyle}" 
                              Height="40" Margin="0,0,0,10"/>
-                    <Button Content="a{x:Static language:Lang.joinGameText}" 
+                    <Button Content="{x:Static language:Lang.joingGameText}" 
                             Style="{StaticResource primaryButtonStyle}" 
                             Height="35"/>
                 </StackPanel>
