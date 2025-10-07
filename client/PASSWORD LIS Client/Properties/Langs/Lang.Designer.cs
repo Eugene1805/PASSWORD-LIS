@@ -205,6 +205,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a Enter your friend&apos;s email to add them.
+        /// </summary>
+        public static string enterFriendEmailToAddText {
+            get {
+                return ResourceManager.GetString("enterFriendEmailToAddText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a Forgot Password.
         /// </summary>
         public static string forgotUserPasswordText {
@@ -541,11 +550,29 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a Select a profile picture.
+        /// </summary>
+        public static string selectProfilePictureText {
+            get {
+                return ResourceManager.GetString("selectProfilePictureText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a Send Code.
         /// </summary>
         public static string sendCodeText {
             get {
                 return ResourceManager.GetString("sendCodeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a Send Friend Request.
+        /// </summary>
+        public static string sendFriendRequestText {
+            get {
+                return ResourceManager.GetString("sendFriendRequestText", resourceCulture);
             }
         }
         

@@ -165,6 +165,9 @@
   <data name="enterCodeToJoinText" xml:space="preserve">
     <value>Ingresa el código de una partida para unirte</value>
   </data>
+  <data name="enterFriendEmailToAddText" xml:space="preserve">
+    <value>Ingresa el correo de tu amigo para añadirlo</value>
+  </data>
   <data name="forgotUserPasswordText" xml:space="preserve">
     <value>Olvidé mi contraseña</value>
   </data>
@@ -288,8 +291,14 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
   <data name="selectAvatarText" xml:space="preserve">
     <value>Seleccionar Avatar</value>
   </data>
+  <data name="selectProfilePictureText" xml:space="preserve">
+    <value>Seleccione una imagen de perfil</value>
+  </data>
   <data name="sendCodeText" xml:space="preserve">
     <value>Enviar Código</value>
+  </data>
+  <data name="sendFriendRequestText" xml:space="preserve">
+    <value>Enviar solicitud de amistad</value>
   </data>
   <data name="sendInvitationText" xml:space="preserve">
     <value>Enviar Invitación</value>

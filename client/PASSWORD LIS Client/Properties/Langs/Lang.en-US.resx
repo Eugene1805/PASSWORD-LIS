@@ -165,6 +165,9 @@
   <data name="enterCodeToJoinText" xml:space="preserve">
     <value>Enter a Match Code to Join</value>
   </data>
+  <data name="enterFriendEmailToAddText" xml:space="preserve">
+    <value>Enter your friend's email to add them</value>
+  </data>
   <data name="forgotUserPasswordText" xml:space="preserve">
     <value>Forgot Password</value>
   </data>
@@ -288,8 +291,14 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="selectAvatarText" xml:space="preserve">
     <value>Choose an Avatar</value>
   </data>
+  <data name="selectProfilePictureText" xml:space="preserve">
+    <value>Select a profile picture</value>
+  </data>
   <data name="sendCodeText" xml:space="preserve">
     <value>Send Code</value>
+  </data>
+  <data name="sendFriendRequestText" xml:space="preserve">
+    <value>Send Friend Request</value>
   </data>
   <data name="sendInvitationText" xml:space="preserve">
     <value>Send Invitation</value>
