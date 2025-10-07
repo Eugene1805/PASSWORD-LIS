@@ -116,6 +116,7 @@
       <DependentUpon>PasswordLISModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Util\Connection.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.Config" />
