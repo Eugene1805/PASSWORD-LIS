@@ -13,24 +13,26 @@ namespace Services.Services
     {
         public UserDTO Login(string email, string password)
         {
-            var repository = new AccountRepository();
-            var userAccount = repository.GetUserByEmail(email);
+            var userAccount = AccountRepository.GetUserByEmail(email);
 
             if (userAccount != null)
             {
                 bool isPasswordValid = BCrypt.Net.BCrypt.Verify(password, userAccount.PasswordHash);
 
-                if (isPasswordValid && userAccount.Player != null)
+                if (isPasswordValid && userAccount.Player.Any())
                 {
-                    var userDTO = new UserDTO
+                    var player = userAccount.Player.FirstOrDefault();
+                    if (player != null)
                     {
-                        PlayerId = userAccount.Player.Id,
-                        Nickname = userAccount.Nickname,
-                        Email = userAccount.Email
+                        var userDTO = new UserDTO
+                        {
+                            PlayerId = player.Id,
+                            Nickname = userAccount.Nickname,
+                            Email = userAccount.Email
 
-                    };
-
-                    return userDTO;
+                        };
+                        return userDTO;
+                    }
                 }    
             }
             return null;
