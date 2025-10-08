@@ -313,11 +313,38 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a Could not connect to the server. Please ensure the service is running..
+        /// </summary>
+        public static string loginConnectionErrorText {
+            get {
+                return ResourceManager.GetString("loginConnectionErrorText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a Log In.
         /// </summary>
         public static string logInText {
             get {
                 return ResourceManager.GetString("logInText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a An unexpected error ocurred: {0}.
+        /// </summary>
+        public static string loginUnexpectedErrorText {
+            get {
+                return ResourceManager.GetString("loginUnexpectedErrorText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a Welcome {0} !.
+        /// </summary>
+        public static string loginWelcomeText {
+            get {
+                return ResourceManager.GetString("loginWelcomeText", resourceCulture);
             }
         }
         
@@ -480,6 +507,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         public static string redTeamText {
             get {
                 return ResourceManager.GetString("redTeamText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a Please enter your email and password.
+        /// </summary>
+        public static string requiredEmailAndPassWordText {
+            get {
+                return ResourceManager.GetString("requiredEmailAndPassWordText", resourceCulture);
             }
         }
         
@@ -789,6 +825,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         public static string verifyCodeText {
             get {
                 return ResourceManager.GetString("verifyCodeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a Warning.
+        /// </summary>
+        public static string warningTitleText {
+            get {
+                return ResourceManager.GetString("warningTitleText", resourceCulture);
             }
         }
         

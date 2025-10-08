@@ -11,60 +11,60 @@ namespace PASSWORD_LIS_Client
             InitializeComponent();
         }
 
-        // --- MÉTODO DE LOGIN CORREGIDO Y MEJORADO ---
         private async void ButtonClickLogin(object sender, RoutedEventArgs e)
         {
-            string email = emailTextBox.Text;
-            string password = passwordBox.Password;
-
-            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+            if (!AreFieldsValid())
             {
-                MessageBox.Show("Por favor, ingresa tu email y contraseña.", "Campos vacíos");
-                return;
+                return; 
             }
 
-            // Deshabilitamos el botón para evitar clics múltiples
-
-            // Creamos el cliente. Dejamos que WCF elija el endpoint por defecto desde App.config
             var client = new LoginManagerClient();
             try
             {
-                // Usamos la llamada asíncrona para no congelar la aplicación
-                UserDTO loggedInUser = await client.LoginAsync(email, password);
+                UserDTO loggedInUser = await client.LoginAsync(emailTextBox.Text, passwordBox.Password);
 
                 if (loggedInUser != null)
                 {
-                    MessageBox.Show($"¡Bienvenido, {loggedInUser.Nickname}!", "Login Exitoso");
+                    MessageBox.Show(string.Format(Properties.Langs.Lang.loginWelcomeText, loggedInUser.Nickname),
+                                    Properties.Langs.Lang.successfulLoginText, MessageBoxButton.OK);
 
-                    // Lógica de navegación CORRECTA:
-                    var mainWindow = new MainWindow(); // O la ventana principal que deba abrirse
-                    // Aquí le pasarías los datos del usuario a la nueva ventana si es necesario
-                    // Ejemplo: ((App)Application.Current).CurrentUser = loggedInUser;
+                    var mainWindow = new MainWindow();
+                    mainWindow.SetInitialPage(loggedInUser); 
                     mainWindow.Show();
-                    this.Close(); // Cerramos la ventana de login SOLO si el login es exitoso
+                    this.Close(); 
                 }
                 else
                 {
-                    MessageBox.Show("Email o contraseña incorrectos.", "Error de Autenticación", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(Properties.Langs.Lang.wrongCredentialsText,
+                                    "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (System.ServiceModel.EndpointNotFoundException)
             {
-                MessageBox.Show("No se pudo conectar al servidor. Asegúrate de que el servicio esté corriendo.", "Error de Conexión", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(Properties.Langs.Lang.loginConnectionErrorText,
+                                "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             catch (System.Exception ex)
             {
-                MessageBox.Show($"Ocurrió un error inesperado: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(string.Format(Properties.Langs.Lang.loginUnexpectedErrorText, ex.Message),
+                                "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
-                // Este bloque se ejecuta siempre, haya error o no
                 client.Close();
             }
-            // Eliminamos la navegación incorrecta que estaba aquí
         }
 
-        // --- MÉTODOS DE NAVEGACIÓN ADICIONALES (estos ya estaban bien) ---
+        private bool AreFieldsValid()
+        {
+            if (string.IsNullOrWhiteSpace(emailTextBox.Text) || string.IsNullOrWhiteSpace(passwordBox.Password))
+            {
+                MessageBox.Show(Properties.Langs.Lang.requiredEmailAndPassWordText,
+                                Properties.Langs.Lang.warningTitleText, MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+            return true;
+        }
         private void HyperlinkClickForgotPassword(object sender, RoutedEventArgs e)
         {
             var retrievePasswordWindow = new RetrievePasswordWindow();

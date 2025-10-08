@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PASSWORD_LIS_Client.LoginManagerServiceReference;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,8 +23,15 @@ namespace PASSWORD_LIS_Client
     {
         public MainWindow()
         {
-            InitializeComponent();
             new LoginWindow().Show();
+            InitializeComponent();
+        }
+
+        public void SetInitialPage(UserDTO user)
+        {
+            LobbyPage lobbyPage = new LobbyPage(user);
+
+            mainFrame.NavigationService.Navigate(lobbyPage);
         }
     }
 }

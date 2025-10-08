@@ -25,17 +25,17 @@ namespace Host
                 // --- PASO 2: Crear las INSTANCIAS de cada servicio ---
                 // Se inyectan las dependencias compartidas en cada constructor.
                 var accountManagerInstance = new AccountManager(accountRepository, emailSender);
-                //var loginManagerInstance = new LoginManager(accountRepository); // Asumiendo que LoginManager necesita el repositorio
+                var loginManagerInstance = new LoginManager(accountRepository); // Asumiendo que LoginManager necesita el repositorio
                 var verificationManagerInstance = new VerificationCodeManager(accountRepository); // Asumiendo que VerificationCodeManager necesita el repositorio
 
                 // --- PASO 3: Crear un ServiceHost para CADA instancia de servicio ---
                 var accountManagerHost = new ServiceHost(accountManagerInstance);
-                //var loginManagerHost = new ServiceHost(loginManagerInstance);
+                var loginManagerHost = new ServiceHost(loginManagerInstance);
                 var verificationManagerHost = new ServiceHost(verificationManagerInstance);
 
                 // Agregarlos a la lista para manejarlos fácilmente
                 hosts.Add(accountManagerHost);
-               // hosts.Add(loginManagerHost);
+                hosts.Add(loginManagerHost);
                 hosts.Add(verificationManagerHost);
 
                 // --- PASO 4: Abrir todos los hosts ---

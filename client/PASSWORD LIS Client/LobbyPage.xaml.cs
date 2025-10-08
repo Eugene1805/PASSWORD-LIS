@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PASSWORD_LIS_Client.LoginManagerServiceReference;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +21,23 @@ namespace PASSWORD_LIS_Client
     /// </summary>
     public partial class LobbyPage : Page
     {
-        public LobbyPage()
+        private readonly UserDTO currentUser;
+        public LobbyPage(UserDTO user)
         {
             InitializeComponent();
+            currentUser = user;
+
+            LoadUserProfile();
+        }
+
+        private void LoadUserProfile()
+        {
+            if (currentUser == null)
+            {
+                return;
+            }
+
+            //string avatarPath = GetAvatharP
         }
     }
 }
