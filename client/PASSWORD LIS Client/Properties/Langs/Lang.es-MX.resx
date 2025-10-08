@@ -354,7 +354,7 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
   <data name="userPasswordText" xml:space="preserve">
     <value>Contraseña</value>
   </data>
-  <data name="usserPasswordRequirementsText" xml:space="preserve">
+  <data name="userPasswordRequirementsText" xml:space="preserve">
     <value>Usa 8-15 caracteres incluyendo al menos una mayúscula, una minúscula, un carácter numérico y un símbolo  </value>
   </data>
   <data name="validateRoundText" xml:space="preserve">

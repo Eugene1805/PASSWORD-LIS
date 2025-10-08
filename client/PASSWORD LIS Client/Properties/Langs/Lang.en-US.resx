@@ -354,7 +354,7 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="userPasswordText" xml:space="preserve">
     <value>Password</value>
   </data>
-  <data name="usserPasswordRequirementsText" xml:space="preserve">
+  <data name="userPasswordRequirementsText" xml:space="preserve">
     <value>Use 8-15 characters including at least one uppercase, one lowercase, one numeric character and one symbol</value>
   </data>
   <data name="validateRoundText" xml:space="preserve">

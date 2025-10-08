@@ -730,20 +730,20 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a Use 8-15 characters including at least one uppercase, one lowercase, one numeric character and one symbol.
+        /// </summary>
+        public static string userPasswordRequirementsText {
+            get {
+                return ResourceManager.GetString("userPasswordRequirementsText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a Password.
         /// </summary>
         public static string userPasswordText {
             get {
                 return ResourceManager.GetString("userPasswordText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Busca una cadena traducida similar a Use 8-15 characters including at least one uppercase, one lowercase, one numeric character and one symbol.
-        /// </summary>
-        public static string usserPasswordRequirementsText {
-            get {
-                return ResourceManager.GetString("usserPasswordRequirementsText", resourceCulture);
             }
         }
         
