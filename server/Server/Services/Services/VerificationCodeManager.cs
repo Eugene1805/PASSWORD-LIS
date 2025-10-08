@@ -2,6 +2,7 @@
 using Data.DAL.Interfaces;
 using Services.Contracts;
 using Services.Contracts.DTOs;
+using Services.Util;
 using System;
 using System.Collections.Generic;
 using System.ServiceModel;
@@ -11,6 +12,7 @@ namespace Services.Services
     internal class VerificationCodeInfo
     {
         public string Code { get; set; }
+        public DateTime CreationTime { get; set; }
         public DateTime ExpirationTime { get; set; }
     }
 
@@ -20,21 +22,24 @@ namespace Services.Services
         private static readonly Dictionary<string, VerificationCodeInfo> codes = new Dictionary<string, VerificationCodeInfo>();
         private static readonly Random random = new Random();
         private readonly IAccountRepository repository;
-            
-        public VerificationCodeManager(IAccountRepository accountRepository)
+        private readonly IEmailSender sender;    
+
+        public VerificationCodeManager(IAccountRepository accountRepository, IEmailSender emailSender)
         {
             repository = accountRepository;
+            sender = emailSender;
         }
         
         public static string GenerateCode(string email)
         {
-            var code = random.Next(100000, 999999).ToString(); 
-            var expirationTime = DateTime.UtcNow.AddMinutes(5);
+            var code = random.Next(100000, 999999).ToString();
+            var now = DateTime.UtcNow;
 
             var codeInfo = new VerificationCodeInfo
             {
                 Code = code,
-                ExpirationTime = expirationTime
+                CreationTime = now,
+                ExpirationTime = now.AddMinutes(5)
             };
 
             codes[email] = codeInfo;
@@ -70,6 +75,21 @@ namespace Services.Services
             }
 
             return false;
+        }
+
+        public bool ResendVerificationCode(string email)
+        {
+            // 1. Verificar si existe un código previo para controlar el tiempo
+            if (codes.TryGetValue(email, out VerificationCodeInfo existingCodeInfo) || DateTime.UtcNow.Subtract(existingCodeInfo.CreationTime).TotalSeconds < 60)
+            {
+                return false; // Indicar al cliente que debe esperar
+            }
+
+            // 3. Si la comprobación pasa, generar y enviar un nuevo código
+            var newCode = GenerateCode(email);
+            _ = sender.SendVerificationEmailAsync(email, newCode);
+
+            return true;
         }
     }
 }

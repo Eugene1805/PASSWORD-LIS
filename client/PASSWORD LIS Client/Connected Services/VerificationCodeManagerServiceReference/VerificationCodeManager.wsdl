@@ -42,10 +42,20 @@
   <wsdl:message name="IAccountVerificationManager_VerifyEmail_OutputMessage">
     <wsdl:part name="parameters" element="tns:VerifyEmailResponse" />
   </wsdl:message>
+  <wsdl:message name="IAccountVerificationManager_ResendVerificationCode_InputMessage">
+    <wsdl:part name="parameters" element="tns:ResendVerificationCode" />
+  </wsdl:message>
+  <wsdl:message name="IAccountVerificationManager_ResendVerificationCode_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ResendVerificationCodeResponse" />
+  </wsdl:message>
   <wsdl:portType name="IAccountVerificationManager">
     <wsdl:operation name="VerifyEmail">
       <wsdl:input wsaw:Action="http://tempuri.org/IAccountVerificationManager/VerifyEmail" message="tns:IAccountVerificationManager_VerifyEmail_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IAccountVerificationManager/VerifyEmailResponse" message="tns:IAccountVerificationManager_VerifyEmail_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ResendVerificationCode">
+      <wsdl:input wsaw:Action="http://tempuri.org/IAccountVerificationManager/ResendVerificationCode" message="tns:IAccountVerificationManager_ResendVerificationCode_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IAccountVerificationManager/ResendVerificationCodeResponse" message="tns:IAccountVerificationManager_ResendVerificationCode_OutputMessage" />
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="NetTcpBinding_IAccountVerificationManager" type="tns:IAccountVerificationManager">
@@ -53,6 +63,15 @@
     <soap12:binding transport="http://schemas.microsoft.com/soap/tcp" />
     <wsdl:operation name="VerifyEmail">
       <soap12:operation soapAction="http://tempuri.org/IAccountVerificationManager/VerifyEmail" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ResendVerificationCode">
+      <soap12:operation soapAction="http://tempuri.org/IAccountVerificationManager/ResendVerificationCode" style="document" />
       <wsdl:input>
         <soap12:body use="literal" />
       </wsdl:input>

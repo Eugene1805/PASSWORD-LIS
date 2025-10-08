@@ -83,6 +83,12 @@ namespace PASSWORD_LIS_Client.VerificationCodeManagerServiceReference {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IAccountVerificationManager/VerifyEmail", ReplyAction="http://tempuri.org/IAccountVerificationManager/VerifyEmailResponse")]
         System.Threading.Tasks.Task<bool> VerifyEmailAsync(PASSWORD_LIS_Client.VerificationCodeManagerServiceReference.EmailVerificationDTO emailVerificationDTO);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IAccountVerificationManager/ResendVerificationCode", ReplyAction="http://tempuri.org/IAccountVerificationManager/ResendVerificationCodeResponse")]
+        bool ResendVerificationCode(string email);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IAccountVerificationManager/ResendVerificationCode", ReplyAction="http://tempuri.org/IAccountVerificationManager/ResendVerificationCodeResponse")]
+        System.Threading.Tasks.Task<bool> ResendVerificationCodeAsync(string email);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -118,6 +124,14 @@ namespace PASSWORD_LIS_Client.VerificationCodeManagerServiceReference {
         
         public System.Threading.Tasks.Task<bool> VerifyEmailAsync(PASSWORD_LIS_Client.VerificationCodeManagerServiceReference.EmailVerificationDTO emailVerificationDTO) {
             return base.Channel.VerifyEmailAsync(emailVerificationDTO);
+        }
+        
+        public bool ResendVerificationCode(string email) {
+            return base.Channel.ResendVerificationCode(email);
+        }
+        
+        public System.Threading.Tasks.Task<bool> ResendVerificationCodeAsync(string email) {
+            return base.Channel.ResendVerificationCodeAsync(email);
         }
     }
 }

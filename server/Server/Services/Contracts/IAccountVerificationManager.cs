@@ -13,5 +13,7 @@ namespace Services.Contracts
     {
         [OperationContract]
         bool VerifyEmail(EmailVerificationDTO emailVerificationDTO);
+        [OperationContract]
+        bool ResendVerificationCode(string email);
     }
 }

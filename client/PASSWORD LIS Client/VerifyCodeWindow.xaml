@@ -25,8 +25,8 @@
                    HorizontalAlignment="Center" 
                    Margin="0,0,0,20"/>
             <Label x:Name="emailLabel"  FontSize="16"
-                       FontWeight="Bold" FontFamily="Consolas"
-                    Margin="0,0,0,20"/>
+                    HorizontalAlignment="Center" FontWeight="Bold" FontFamily="Consolas"
+                    Margin="0,0,0,20" Height="27" Width="203"/>
 
             <TextBox x:Name="verificationCodeTextBox" Style="{StaticResource primaryTextBoxStyle}" Width="180"/>
             <Button Content="{x:Static language:Lang.verifyCodeText}" 
@@ -41,7 +41,7 @@
             <TextBlock Style="{StaticResource bodyTextBlockStyle}"
                     TextWrapping="Wrap"
                     HorizontalAlignment="Center">
-                    <Hyperlink> 
+                    <Hyperlink x:Name="resendCodeHyperlink" Click="HyperlinkClickResendCode"> 
                         <Run Text="{x:Static language:Lang.verifyCodeResendCodeText}"/>
                     </Hyperlink>
             </TextBlock>

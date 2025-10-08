@@ -26,7 +26,7 @@ namespace Host
                 // Se inyectan las dependencias compartidas en cada constructor.
                 var accountManagerInstance = new AccountManager(accountRepository, emailSender);
                 //var loginManagerInstance = new LoginManager(accountRepository); // Asumiendo que LoginManager necesita el repositorio
-                var verificationManagerInstance = new VerificationCodeManager(accountRepository); // Asumiendo que VerificationCodeManager necesita el repositorio
+                var verificationManagerInstance = new VerificationCodeManager(accountRepository,emailSender); // Asumiendo que VerificationCodeManager necesita el repositorio
 
                 // --- PASO 3: Crear un ServiceHost para CADA instancia de servicio ---
                 var accountManagerHost = new ServiceHost(accountManagerInstance);
@@ -49,13 +49,13 @@ namespace Host
                     }
                 }
 
-                Console.WriteLine("\n✅ Todos los servicios están en ejecución.");
+                Console.WriteLine("\n Todos los servicios están en ejecución.");
                 Console.WriteLine("Presiona <Enter> para detenerlos.");
                 Console.ReadLine();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Ocurrió un error al iniciar los servicios: {ex.ToString()}");
+                Console.WriteLine($" Ocurrió un error al iniciar los servicios: {ex.ToString()}");
                 Console.ReadLine();
             }
             finally
