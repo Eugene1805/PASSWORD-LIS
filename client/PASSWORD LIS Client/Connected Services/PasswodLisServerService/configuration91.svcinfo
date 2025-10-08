@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<SavedWcfConfigurationInformation xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="9.1" CheckSum="mwwjWxCRIOjyehXz2klinrawbNKHrD61k33R1Nv2OdQ=">
+<SavedWcfConfigurationInformation xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="9.1" CheckSum="gaFl9EiDnemSbHD5UudVGRswaEvO4jxNrIafwxmJz7U=">
   <bindingConfigurations>
     <bindingConfiguration bindingType="basicHttpBinding" name="BasicHttpBinding_IAccountManager">
       <properties>
@@ -230,10 +230,10 @@
     </bindingConfiguration>
   </bindingConfigurations>
   <endpoints>
-    <endpoint name="NetTcpBinding_IAccountManager" contract="PasswodLisServerService.IAccountManager" bindingType="netTcpBinding" address="net.tcp://localhost:8090/PasswordLis/AccountManager" bindingConfiguration="NetTcpBinding_IAccountManager">
+    <endpoint name="NetTcpBinding_IAccountManager" contract="PasswodLisServerService.IAccountManager" bindingType="netTcpBinding" address="net.tcp://localhost:8091/AccountManager" bindingConfiguration="NetTcpBinding_IAccountManager">
       <properties>
         <property path="/address" isComplexType="false" isExplicitlyDefined="true" clrType="System.Uri, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-          <serializedValue>net.tcp://localhost:8090/PasswordLis/AccountManager</serializedValue>
+          <serializedValue>net.tcp://localhost:8091/AccountManager</serializedValue>
         </property>
         <property path="/behaviorConfiguration" isComplexType="false" isExplicitlyDefined="false" clrType="System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
           <serializedValue />
@@ -315,10 +315,10 @@
         </property>
       </properties>
     </endpoint>
-    <endpoint name="BasicHttpBinding_IAccountManager" contract="PasswodLisServerService.IAccountManager" bindingType="basicHttpBinding" address="http://localhost:8091/PasswordLis/AccountManager" bindingConfiguration="BasicHttpBinding_IAccountManager">
+    <endpoint name="BasicHttpBinding_IAccountManager" contract="PasswodLisServerService.IAccountManager" bindingType="basicHttpBinding" address="http://localhost:8090/AccountManager" bindingConfiguration="BasicHttpBinding_IAccountManager">
       <properties>
         <property path="/address" isComplexType="false" isExplicitlyDefined="true" clrType="System.Uri, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-          <serializedValue>http://localhost:8091/PasswordLis/AccountManager</serializedValue>
+          <serializedValue>http://localhost:8090/AccountManager</serializedValue>
         </property>
         <property path="/behaviorConfiguration" isComplexType="false" isExplicitlyDefined="false" clrType="System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
           <serializedValue />

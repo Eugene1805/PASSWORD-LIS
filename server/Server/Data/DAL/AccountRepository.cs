@@ -10,15 +10,20 @@ using System.Threading.Tasks;
 
 namespace Data.DAL
 {
-    public class AccountRepository
+    public static class AccountRepository
     {
-        public bool CreateAccount(UserAccount acount)
+        public static bool CreateAccount(UserAccount account)
         {
             using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
+                if (AccountAlreadyExist(account.Email))
+                {
+                    return false;
+                }
                 try
                 {
-                    context.UserAccount.Add(acount);
+                    context.UserAccount.Add(account);
+                    context.Player.Add(new Player { UserAccount = account });
                     context.SaveChanges();
                     return true;
                 }
@@ -28,6 +33,22 @@ namespace Data.DAL
                 }
             }
            
+        }
+
+        private static bool AccountAlreadyExist(string email)
+        {
+            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            {
+                try
+                {
+                    return context.UserAccount.Any(a => a.Email == email);
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+            }
+
         }
     }
 }

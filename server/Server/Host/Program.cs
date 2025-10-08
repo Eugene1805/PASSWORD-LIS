@@ -9,7 +9,7 @@ namespace Host
     internal static class Program
     {
         static void Main(string[] args)
-        {
+        {/*
             ServiceHost host = null;
             try
             {
@@ -58,6 +58,14 @@ namespace Host
                 Console.WriteLine($"❌ Ocurrió un error: {ex.Message}");
                 Console.ReadLine();
                 host?.Abort();
+            }*/
+
+            using (ServiceHost host = new ServiceHost(typeof(Services.Services.AccountManager)))
+            {
+
+                host.Open();
+                Console.WriteLine("Server is running");
+                Console.ReadLine();
             }
         }
     }

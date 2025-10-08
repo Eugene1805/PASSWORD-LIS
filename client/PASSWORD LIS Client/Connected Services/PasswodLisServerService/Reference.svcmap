@@ -19,14 +19,14 @@
     <ServiceContractMappings />
   </ClientOptions>
   <MetadataSources>
-    <MetadataSource Address="http://localhost:8091/PasswordLis" Protocol="http" SourceId="1" />
+    <MetadataSource Address="http://localhost:8090" Protocol="http" SourceId="1" />
   </MetadataSources>
   <Metadata>
-    <MetadataFile FileName="PasswordLis.disco" MetadataType="Disco" ID="2051cb59-a084-4cd7-b80d-0d4193262212" SourceId="1" SourceUrl="http://localhost:8091/PasswordLis?disco" />
-    <MetadataFile FileName="PasswordLis.xsd" MetadataType="Schema" ID="ec644ab0-5c52-4552-a349-0822c730305c" SourceId="1" SourceUrl="http://localhost:8091/PasswordLis?xsd=xsd0" />
-    <MetadataFile FileName="PasswordLis1.xsd" MetadataType="Schema" ID="462caf51-6280-4fcd-8652-e4a8b6129988" SourceId="1" SourceUrl="http://localhost:8091/PasswordLis?xsd=xsd2" />
-    <MetadataFile FileName="PasswordLis2.xsd" MetadataType="Schema" ID="46a89bb1-702e-48c2-aa23-fe740a33bdb0" SourceId="1" SourceUrl="http://localhost:8091/PasswordLis?xsd=xsd1" />
-    <MetadataFile FileName="AccountManager.wsdl" MetadataType="Wsdl" ID="b0bf9076-67c9-49eb-bb49-27fc6450ce14" SourceId="1" SourceUrl="http://localhost:8091/PasswordLis?wsdl" />
+    <MetadataFile FileName="item.disco" MetadataType="Disco" ID="ee32183c-562f-442e-af27-3d7f7931bd42" SourceId="1" SourceUrl="http://localhost:8090/?disco" />
+    <MetadataFile FileName="AccountManager1.wsdl" MetadataType="Wsdl" ID="1265ee9c-8c95-4f46-b182-df302d5f76a5" SourceId="1" SourceUrl="http://localhost:8090/?wsdl" />
+    <MetadataFile FileName="item.xsd" MetadataType="Schema" ID="32c6c33f-adb0-49d5-a2ed-6f4a87a3230d" SourceId="1" SourceUrl="http://localhost:8090/?xsd=xsd2" />
+    <MetadataFile FileName="item1.xsd" MetadataType="Schema" ID="8b022b41-dbc9-4354-8c42-69b08f74c716" SourceId="1" SourceUrl="http://localhost:8090/?xsd=xsd0" />
+    <MetadataFile FileName="item2.xsd" MetadataType="Schema" ID="78b543ab-0ad1-4a5b-bc04-edf71ddf6319" SourceId="1" SourceUrl="http://localhost:8090/?xsd=xsd1" />
   </Metadata>
   <Extensions>
     <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
