@@ -1,12 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Services.Contracts.DTOs;
+using System.ServiceModel;
 
 namespace Services.Contracts
 {
-    internal interface IPasswordResetManager
+    [ServiceContract]
+    public interface IPasswordResetManager
     {
+        [OperationContract]
+        bool ResetPassword(PasswordResetDTO passwordResetDTO);
+        [OperationContract]
+        bool RequestPasswordResetCode(EmailVerificationDTO emailVerificationDTO);
+
     }
 }

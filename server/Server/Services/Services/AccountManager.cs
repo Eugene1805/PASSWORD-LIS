@@ -2,6 +2,7 @@
 using Services.Contracts;
 using Data.DAL;
 using Data.Model;
+using Services.Util;
 
 namespace Services.Services
 {
@@ -16,10 +17,17 @@ namespace Services.Services
                 LastName = newAccount.LastName,
                 Email = newAccount.Email,
                 PasswordHash = newAccount.Password,
-                Nickname = newAccount.Nickname
+                Nickname = newAccount.Nickname,
             };
+            if (AccountRepository.CreateAccount(userAccount))
+            {
+                var verificationCode = VerificationCodeManager.GenerateCode(newAccount.Email);
 
-            return AccountRepository.CreateAccount(userAccount);
+                _ = EmailSender.SendVerificationEmailAsync(newAccount.Email, verificationCode);
+                return true;
+            }
+            
+            return false;
         }
     }
 }
