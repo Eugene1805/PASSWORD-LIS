@@ -8,28 +8,89 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         Title="ChooseAvatarWindow" Height="500" Width="600">
+
+    <Window.Resources>
+        <Style x:Key="AvatarSelectorStyle" TargetType="RadioButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="mainBorder" 
+                                Style="{StaticResource floatingBorderStyle}"
+                                BorderThickness="3"
+                                BorderBrush="Transparent"
+                                Margin="10">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="mainBorder" Property="BorderBrush" Value="DodgerBlue"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="mainBorder" Property="BorderBrush" Value="LightGray"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
         <Border Grid.Column="0" Style="{StaticResource floatingBorderStyle}" Padding="20">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Style="{StaticResource subtitleTextBlockStyle}" Margin="20,20,20,10"
-                           
-Text="{x:Static language:Lang.enterFriendEmailToAddText}"/>
+                <TextBlock Grid.Row="0" Style="{StaticResource subtitleTextBlockStyle}" Margin="20,0,20,10"
+                           HorizontalAlignment="Center"
+                           Text="Elige tu avatar"/>
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <RadioButton Grid.Row="0" Grid.Column="0" Style="{StaticResource AvatarSelectorStyle}" GroupName="AvatarGroup">
+                        <Image Source="/Resources/facebook_logo.png" Width="100" Height="100"/>
+                    </RadioButton>
+                    <RadioButton Grid.Row="0" Grid.Column="1" Style="{StaticResource AvatarSelectorStyle}" GroupName="AvatarGroup">
+                        <Image Source="/Resources/facebook_logo.png" Width="100" Height="100"/>
+                    </RadioButton>
+
+                    <RadioButton Grid.Row="1" Grid.Column="0" Style="{StaticResource AvatarSelectorStyle}" GroupName="AvatarGroup">
+                        <Image Source="/Resources/facebook_logo.png" Width="100" Height="100"/>
+                    </RadioButton>
+                    <RadioButton Grid.Row="1" Grid.Column="1" Style="{StaticResource AvatarSelectorStyle}" GroupName="AvatarGroup">
+                        <Image Source="/Resources/facebook_logo.png" Width="100" Height="100"/>
+                    </RadioButton>
+
+                    <RadioButton Grid.Row="2" Grid.Column="0" Style="{StaticResource AvatarSelectorStyle}" GroupName="AvatarGroup">
+                        <Image Source="/Resources/facebook_logo.png" Width="100" Height="100"/>
+                    </RadioButton>
+                    <RadioButton Grid.Row="2" Grid.Column="1" Style="{StaticResource AvatarSelectorStyle}" GroupName="AvatarGroup">
+                        <Image Source="/Resources/facebook_logo.png" Width="100" Height="100"/>
+                    </RadioButton>
+                </Grid>
+
+                <Button Grid.Row="2" Content="Seleccionar" Margin="0,15,0,0"
+                        HorizontalAlignment="Center" Width="150" Height="40"
+                        x:Name="SelectAvatarButton" Click="SelectAvatarButton_Click"/>
             </Grid>
-
-            
-            
-           
         </Border>
-
     </Grid>
 </Window>
