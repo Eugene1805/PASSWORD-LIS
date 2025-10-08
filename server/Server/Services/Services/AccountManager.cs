@@ -29,7 +29,7 @@ namespace Services.Services
                 FirstName = newAccount.FirstName,
                 LastName = newAccount.LastName,
                 Email = newAccount.Email,
-                PasswordHash = newAccount.Password,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(newAccount.Password),
                 Nickname = newAccount.Nickname,
             };
             if (repository.CreateAccount(userAccount))

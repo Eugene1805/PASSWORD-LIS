@@ -49,7 +49,8 @@
         </Hyperlink>
             </TextBlock>
 
-            <Button Content="{x:Static language:Lang.signUpText}" 
+            <Button x:Name="signUpButton"
+                Content="{x:Static language:Lang.signUpText}" 
                 Style="{StaticResource primaryButtonStyle}"
                 Width="250" 
                 Height="35" 
