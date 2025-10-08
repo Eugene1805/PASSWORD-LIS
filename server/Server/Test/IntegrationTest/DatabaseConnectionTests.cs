@@ -29,7 +29,7 @@ namespace Test.UnitTest
             {
                 Provider = "System.Data.SqlClient",
                 ProviderConnectionString = sqlBuilder.ToString(),
-                Metadata = "res://*/PasswordLIS.csdl|res://*/PasswordLIS.ssdl|res://*/PasswordLIS.msl"
+                Metadata = "res://*/Model.PasswordLISModel.csdl|res://*/Model.PasswordLISModel.ssdl|res://*/Model.PasswordLISModel.msl"
             };
 
             // Act & Assert
