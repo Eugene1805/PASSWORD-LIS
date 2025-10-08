@@ -26,7 +26,11 @@ namespace PASSWORD_LIS_Client
             };
 
             var verificationCodeManager = new AccountVerificationManagerClient();
-            bool succeeded = verificationCodeManager.VerifyEmail(emailVerificationDTO);
+            
+            if (verificationCodeManager.VerifyEmail(emailVerificationDTO))
+            {
+                MessageBox.Show("Codigo verificado con exito");
+            }
         }
     }
 }
