@@ -29,5 +29,22 @@ namespace Data.DAL
             }
            
         }
+
+        public UserAccount GetUserByEmail(string email)
+        {
+            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            {
+                try
+                {
+                    UserAccount userAccount = context.UserAccount.Include(u => u.Player)
+                        .FirstOrDefault(u => u.Email == email);
+                    return userAccount;
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+            }
+        }
     }
 }
