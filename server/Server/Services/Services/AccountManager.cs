@@ -9,7 +9,7 @@ namespace Services.Services
     {
         public bool CreateAccount(NewAccountDTO newAccount)
         {
-            var repository = new AccountRepository();
+            
             var userAccount = new UserAccount
             {
                 FirstName = newAccount.FirstName,
@@ -19,7 +19,7 @@ namespace Services.Services
                 Nickname = newAccount.Nickname
             };
 
-            return repository.CreateAccount(userAccount);
+            return AccountRepository.CreateAccount(userAccount);
         }
     }
 }
