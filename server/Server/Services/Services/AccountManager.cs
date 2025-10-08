@@ -15,7 +15,7 @@ namespace Services.Services
                 FirstName = newAccount.FirstName,
                 LastName = newAccount.LastName,
                 Email = newAccount.Email,
-                PasswordHash = null,
+                PasswordHash = newAccount.Password,
                 Nickname = newAccount.Nickname
             };
 
