@@ -10,7 +10,7 @@
       d:DesignHeight="450" d:DesignWidth="500"
       Background="#EEEFF0"
       Title="LobbyPage">
-
+    <!--
     <Grid >
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -102,4 +102,5 @@
             </Border>
         </Grid>
     </Grid>
+    -->
 </Page>

@@ -390,4 +390,19 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="wrongCredentialsText" xml:space="preserve">
     <value>Incorrect e-mail or password</value>
   </data>
+  <data name="requiredEmailAndPassWordText" xml:space="preserve">
+    <value>Please enter your email and password</value>
+  </data>
+  <data name="loginWelcomeText" xml:space="preserve">
+    <value>Welcome {0} !</value>
+  </data>
+  <data name="loginUnexpectedErrorText" xml:space="preserve">
+    <value>An unexpected error ocurred: {0}</value>
+  </data>
+  <data name="loginConnectionErrorText" xml:space="preserve">
+    <value>Could not connect to the server. Please ensure the service is running.</value>
+  </data>
+  <data name="warningTitleText" xml:space="preserve">
+    <value>Warning</value>
+  </data>
 </root>

@@ -1,4 +1,5 @@
 ﻿using Data.DAL.Implementations;
+using Data.DAL.Interfaces;
 using Services.Contracts;
 using Services.Contracts.DTOs;
 using System;
@@ -13,9 +14,17 @@ namespace Services.Services
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
     public class LoginManager : ILoginManager
     {
+        public readonly IAccountRepository repository;
+
+        public LoginManager(IAccountRepository accountRepository)
+        {
+            repository = accountRepository;
+        }
+
+
         public UserDTO Login(string email, string password)
-        {/*
-            var userAccount = AccountRepository.GetUserByEmail(email);
+        {
+            var userAccount = repository.GetUserByEmail(email);
 
             if (userAccount != null)
             {
@@ -36,7 +45,7 @@ namespace Services.Services
                         return userDTO;
                     }
                 }    
-            }*/
+            }
             return null;
         }
     }
