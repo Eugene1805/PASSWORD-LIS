@@ -1,6 +1,7 @@
 ﻿using Data.Model;
 using Data.Util;
 using System;
+using System.Data.Entity;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Remoting.Messaging;
@@ -49,6 +50,23 @@ namespace Data.DAL
                 }
             }
 
+        }
+
+        public static UserAccount GetUserByEmail(string email)
+        {
+            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            {
+                try
+                {
+                    UserAccount userAccount = context.UserAccount.Include(u => u.Player)
+                        .FirstOrDefault(u => u.Email == email);
+                    return userAccount;
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
+            }
         }
     }
 }
