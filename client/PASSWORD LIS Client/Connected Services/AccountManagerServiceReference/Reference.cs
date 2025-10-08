@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace PASSWORD_LIS_Client.PasswodLisServerService {
+namespace PASSWORD_LIS_Client.AccountManagerServiceReference {
     using System.Runtime.Serialization;
     using System;
     
@@ -123,23 +123,23 @@ namespace PASSWORD_LIS_Client.PasswodLisServerService {
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ServiceModel.ServiceContractAttribute(ConfigurationName="PasswodLisServerService.IAccountManager")]
+    [System.ServiceModel.ServiceContractAttribute(ConfigurationName="AccountManagerServiceReference.IAccountManager")]
     public interface IAccountManager {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IAccountManager/CreateAccount", ReplyAction="http://tempuri.org/IAccountManager/CreateAccountResponse")]
-        bool CreateAccount(PASSWORD_LIS_Client.PasswodLisServerService.NewAccountDTO newAccount);
+        bool CreateAccount(PASSWORD_LIS_Client.AccountManagerServiceReference.NewAccountDTO newAccount);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IAccountManager/CreateAccount", ReplyAction="http://tempuri.org/IAccountManager/CreateAccountResponse")]
-        System.Threading.Tasks.Task<bool> CreateAccountAsync(PASSWORD_LIS_Client.PasswodLisServerService.NewAccountDTO newAccount);
+        System.Threading.Tasks.Task<bool> CreateAccountAsync(PASSWORD_LIS_Client.AccountManagerServiceReference.NewAccountDTO newAccount);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public interface IAccountManagerChannel : PASSWORD_LIS_Client.PasswodLisServerService.IAccountManager, System.ServiceModel.IClientChannel {
+    public interface IAccountManagerChannel : PASSWORD_LIS_Client.AccountManagerServiceReference.IAccountManager, System.ServiceModel.IClientChannel {
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class AccountManagerClient : System.ServiceModel.ClientBase<PASSWORD_LIS_Client.PasswodLisServerService.IAccountManager>, PASSWORD_LIS_Client.PasswodLisServerService.IAccountManager {
+    public partial class AccountManagerClient : System.ServiceModel.ClientBase<PASSWORD_LIS_Client.AccountManagerServiceReference.IAccountManager>, PASSWORD_LIS_Client.AccountManagerServiceReference.IAccountManager {
         
         public AccountManagerClient() {
         }
@@ -160,11 +160,11 @@ namespace PASSWORD_LIS_Client.PasswodLisServerService {
                 base(binding, remoteAddress) {
         }
         
-        public bool CreateAccount(PASSWORD_LIS_Client.PasswodLisServerService.NewAccountDTO newAccount) {
+        public bool CreateAccount(PASSWORD_LIS_Client.AccountManagerServiceReference.NewAccountDTO newAccount) {
             return base.Channel.CreateAccount(newAccount);
         }
         
-        public System.Threading.Tasks.Task<bool> CreateAccountAsync(PASSWORD_LIS_Client.PasswodLisServerService.NewAccountDTO newAccount) {
+        public System.Threading.Tasks.Task<bool> CreateAccountAsync(PASSWORD_LIS_Client.AccountManagerServiceReference.NewAccountDTO newAccount) {
             return base.Channel.CreateAccountAsync(newAccount);
         }
     }

@@ -1,4 +1,4 @@
-﻿using PASSWORD_LIS_Client.PasswodLisServerService;
+﻿using PASSWORD_LIS_Client.AccountManagerServiceReference;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

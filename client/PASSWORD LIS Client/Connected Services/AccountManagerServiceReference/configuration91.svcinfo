@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<SavedWcfConfigurationInformation xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="9.1" CheckSum="p06rRorCdBC+IxQTz8mUMNld7qXjK9zXOIvQVYrAFck=">
+<SavedWcfConfigurationInformation xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Version="9.1" CheckSum="AiqeVESCsIPnoLbZ0L/Nn77HgHmUNJOYOK79GCpGtKY=">
   <bindingConfigurations>
     <bindingConfiguration bindingType="netTcpBinding" name="NetTcpBinding_IAccountManager">
       <properties>
@@ -121,7 +121,7 @@
     </bindingConfiguration>
   </bindingConfigurations>
   <endpoints>
-    <endpoint name="NetTcpBinding_IAccountManager" contract="PasswodLisServerService.IAccountManager" bindingType="netTcpBinding" address="net.tcp://localhost:8091/AccountManager" bindingConfiguration="NetTcpBinding_IAccountManager">
+    <endpoint name="NetTcpBinding_IAccountManager" contract="AccountManagerServiceReference.IAccountManager" bindingType="netTcpBinding" address="net.tcp://localhost:8091/AccountManager" bindingConfiguration="NetTcpBinding_IAccountManager">
       <properties>
         <property path="/address" isComplexType="false" isExplicitlyDefined="true" clrType="System.Uri, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
           <serializedValue>net.tcp://localhost:8091/AccountManager</serializedValue>
@@ -136,7 +136,7 @@
           <serializedValue>NetTcpBinding_IAccountManager</serializedValue>
         </property>
         <property path="/contract" isComplexType="false" isExplicitlyDefined="true" clrType="System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-          <serializedValue>PasswodLisServerService.IAccountManager</serializedValue>
+          <serializedValue>AccountManagerServiceReference.IAccountManager</serializedValue>
         </property>
         <property path="/headers" isComplexType="true" isExplicitlyDefined="false" clrType="System.ServiceModel.Configuration.AddressHeaderCollectionElement, System.ServiceModel, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
           <serializedValue>System.ServiceModel.Configuration.AddressHeaderCollectionElement</serializedValue>
