@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PASSWORD_LIS_Client.ServiceReferenceAccountManager;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -38,11 +39,12 @@ namespace PASSWORD_LIS_Client
                 MessageBox.Show("Passwords do not match.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            // Here you would typically add code to create the user account.
-            // For this example, we'll just show a success message.
-            MessageBox.Show("Account created successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-            var loginWindow = new LoginWindow();
-            loginWindow.Show();
+
+            var acount = new AccountManagerClient();
+            var userAccount = new NewAccountDTO();
+            bool succeeded = false;
+            bool succed = acount.CreateAccount(userAccount);
+            
             this.Close();
         }
 

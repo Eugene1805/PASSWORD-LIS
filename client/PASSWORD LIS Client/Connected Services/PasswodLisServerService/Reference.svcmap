@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ID="60dbcbe4-850f-4da5-b4d9-e1d8bf1ac337" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <GenerateTaskBasedAsynchronousMethod>true</GenerateTaskBasedAsynchronousMethod>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://localhost:8091/PasswordLis" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="PasswordLis.disco" MetadataType="Disco" ID="2051cb59-a084-4cd7-b80d-0d4193262212" SourceId="1" SourceUrl="http://localhost:8091/PasswordLis?disco" />
+    <MetadataFile FileName="PasswordLis.xsd" MetadataType="Schema" ID="ec644ab0-5c52-4552-a349-0822c730305c" SourceId="1" SourceUrl="http://localhost:8091/PasswordLis?xsd=xsd0" />
+    <MetadataFile FileName="PasswordLis1.xsd" MetadataType="Schema" ID="462caf51-6280-4fcd-8652-e4a8b6129988" SourceId="1" SourceUrl="http://localhost:8091/PasswordLis?xsd=xsd2" />
+    <MetadataFile FileName="PasswordLis2.xsd" MetadataType="Schema" ID="46a89bb1-702e-48c2-aa23-fe740a33bdb0" SourceId="1" SourceUrl="http://localhost:8091/PasswordLis?xsd=xsd1" />
+    <MetadataFile FileName="AccountManager.wsdl" MetadataType="Wsdl" ID="b0bf9076-67c9-49eb-bb49-27fc6450ce14" SourceId="1" SourceUrl="http://localhost:8091/PasswordLis?wsdl" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>
