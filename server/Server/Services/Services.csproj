@@ -80,9 +80,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Contracts\DTOs\EmailVerificationDTO.cs" />
     <Compile Include="Contracts\DTOs\NewAccountDTO.cs" />
+    <Compile Include="Contracts\DTOs\PasswordResetDTO.cs" />
     <Compile Include="Contracts\DTOs\UserDTO.cs" />
     <Compile Include="Contracts\IAccountManager.cs" />
+    <Compile Include="Contracts\IAccountVerificationManager.cs" />
     <Compile Include="Contracts\IClueGuyManager.cs" />
     <Compile Include="Contracts\IEndGameManager.cs" />
     <Compile Include="Contracts\IFriendsManager.cs" />
@@ -97,6 +100,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\AccountManager.cs" />
     <Compile Include="Services\LoginManager.cs" />
+    <Compile Include="Services\VerificationCodeManager.cs" />
+    <Compile Include="Util\EmailSender.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

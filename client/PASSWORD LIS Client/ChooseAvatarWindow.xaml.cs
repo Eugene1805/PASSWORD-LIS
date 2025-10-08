@@ -23,5 +23,10 @@ namespace PASSWORD_LIS_Client
         {
             InitializeComponent();
         }
+
+        private void SelectAvatarButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
