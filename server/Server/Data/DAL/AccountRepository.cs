@@ -34,5 +34,21 @@ namespace Data.DAL
             }
            
         }
+
+        private static bool AccountAlreadyExist(string email)
+        {
+            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            {
+                try
+                {
+                    return context.UserAccount.Any(a => a.Email == email);
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+            }
+
+        }
     }
 }
