@@ -1,15 +1,15 @@
-﻿using Data.Model;
+﻿using Data.DAL.Interfaces;
+using Data.Model;
 using Data.Util;
 using System;
 using System.Data.Entity;
-using System.Data.Entity.Migrations;
 using System.Linq;
 
-namespace Data.DAL
+namespace Data.DAL.Implementations
 {
-    public static class AccountRepository
+    public class AccountRepository : IAccountRepository
     {
-        public static bool CreateAccount(UserAccount account)
+        public bool CreateAccount(UserAccount account)
         {
             using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
@@ -32,7 +32,7 @@ namespace Data.DAL
            
         }
 
-        private static bool AccountAlreadyExist(string email)
+        public bool AccountAlreadyExist(string email)
         {
             if (String.IsNullOrEmpty(email)){
                 return false;
@@ -51,7 +51,7 @@ namespace Data.DAL
 
         }
 
-        public static UserAccount GetUserByEmail(string email)
+        public UserAccount GetUserByEmail(string email)
         {
             using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
@@ -68,7 +68,7 @@ namespace Data.DAL
             }
         }
 
-        public static bool VerifyEmail(string email)
+        public bool VerifyEmail(string email)
         {
             using(var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
@@ -86,5 +86,6 @@ namespace Data.DAL
                 }
             }
         }
+
     }
 }

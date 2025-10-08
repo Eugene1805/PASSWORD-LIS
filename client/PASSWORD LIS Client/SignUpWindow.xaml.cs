@@ -50,7 +50,7 @@ namespace PASSWORD_LIS_Client
 
             if (!ArePasswordRequirementsMet(passwordBox.Password))
             {
-                //MessageBox.Show(Properties.Langs.Lang.userPasswordRequirementsText);
+                MessageBox.Show(Properties.Langs.Lang.userPasswordRequirementsText);
                 return;
             }
 
@@ -66,7 +66,7 @@ namespace PASSWORD_LIS_Client
             
             if (acount.CreateAccount(userAccount))
             {
-                var codeVerificationWindow = new VerifyCodeWindow();
+                var codeVerificationWindow = new VerifyCodeWindow(userAccount.Email);
                 codeVerificationWindow.ShowDialog();
             }
             else

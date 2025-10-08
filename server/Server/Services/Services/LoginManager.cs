@@ -1,18 +1,20 @@
-﻿using Data.DAL;
+﻿using Data.DAL.Implementations;
 using Services.Contracts;
 using Services.Contracts.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Services.Services
 {
+    [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
     public class LoginManager : ILoginManager
     {
         public UserDTO Login(string email, string password)
-        {
+        {/*
             var userAccount = AccountRepository.GetUserByEmail(email);
 
             if (userAccount != null)
@@ -34,7 +36,7 @@ namespace Services.Services
                         return userDTO;
                     }
                 }    
-            }
+            }*/
             return null;
         }
     }

@@ -71,7 +71,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DAL\AccountRepository.cs" />
+    <Compile Include="DAL\Implementations\AccountRepository.cs" />
+    <Compile Include="DAL\Interfaces\IAccountRepository.cs" />
     <Compile Include="Model\Ban.cs">
       <DependentUpon>PasswordLISModel.tt</DependentUpon>
     </Compile>

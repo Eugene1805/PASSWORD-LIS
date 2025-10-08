@@ -1,13 +1,26 @@
-﻿using Services.Contracts.DTOs;
-using Services.Contracts;
-using Data.DAL;
+﻿using Data.DAL.Implementations;
+using Data.DAL.Interfaces;
 using Data.Model;
+using Services.Contracts;
+using Services.Contracts.DTOs;
 using Services.Util;
+using System.ServiceModel;
 
 namespace Services.Services
 {
+    [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
     public class AccountManager : IAccountManager
     {
+        private readonly IAccountRepository repository;
+        private readonly IEmailSender sender;
+       
+
+        public AccountManager(IAccountRepository accountRepository, IEmailSender emailSender)
+        {
+            repository = accountRepository;
+            sender = emailSender;
+        }
+
         public bool CreateAccount(NewAccountDTO newAccount)
         {
             
@@ -19,11 +32,11 @@ namespace Services.Services
                 PasswordHash = newAccount.Password,
                 Nickname = newAccount.Nickname,
             };
-            if (AccountRepository.CreateAccount(userAccount))
+            if (repository.CreateAccount(userAccount))
             {
                 var verificationCode = VerificationCodeManager.GenerateCode(newAccount.Email);
 
-                _ = EmailSender.SendVerificationEmailAsync(newAccount.Email, verificationCode);
+                _ = sender.SendVerificationEmailAsync(newAccount.Email, verificationCode);
                 return true;
             }
             

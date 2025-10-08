@@ -1,8 +1,10 @@
-﻿using Data.DAL;
+﻿using Data.DAL.Implementations;
+using Data.DAL.Interfaces;
 using Services.Contracts;
 using Services.Contracts.DTOs;
 using System;
 using System.Collections.Generic;
+using System.ServiceModel;
 
 namespace Services.Services
 {
@@ -11,11 +13,19 @@ namespace Services.Services
         public string Code { get; set; }
         public DateTime ExpirationTime { get; set; }
     }
+
+    [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
     public class VerificationCodeManager : IAccountVerificationManager
     {
         private static readonly Dictionary<string, VerificationCodeInfo> codes = new Dictionary<string, VerificationCodeInfo>();
         private static readonly Random random = new Random();
-
+        private readonly IAccountRepository repository;
+            
+        public VerificationCodeManager(IAccountRepository accountRepository)
+        {
+            repository = accountRepository;
+        }
+        
         public static string GenerateCode(string email)
         {
             var code = random.Next(100000, 999999).ToString(); 
@@ -54,9 +64,9 @@ namespace Services.Services
 
         public bool VerifyEmail(EmailVerificationDTO emailVerificationDTO)
         {
-            if (VerificationCodeManager.VerifyCode(emailVerificationDTO.Email, emailVerificationDTO.VerificationCode))
+            if (VerifyCode(emailVerificationDTO.Email, emailVerificationDTO.VerificationCode))
             {
-                return AccountRepository.VerifyEmail(emailVerificationDTO.Email);
+                return repository.VerifyEmail(emailVerificationDTO.Email);
             }
 
             return false;

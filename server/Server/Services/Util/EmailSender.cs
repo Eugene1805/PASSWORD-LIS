@@ -8,15 +8,22 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Services.Util
+
 {
-    public class EmailSender
+
+    public interface IEmailSender
     {
-        public static async Task SendVerificationEmailAsync(string recipientEmail, string code)
+        Task SendVerificationEmailAsync(string recipientEmail, string code);
+    }
+    public class EmailSender : IEmailSender
+    {
+        public async Task SendVerificationEmailAsync(string recipientEmail, string code)
         {
+            var smtpUser = Environment.GetEnvironmentVariable("SMTP_USER") ?? ConfigurationManager.AppSettings["SmtpUser"];
+            var smtpPass = Environment.GetEnvironmentVariable("SMTP_PASS") ?? ConfigurationManager.AppSettings["SmtpPass"];
             var smtpHost = ConfigurationManager.AppSettings["SmtpHost"];
             var smtpPort = int.Parse(ConfigurationManager.AppSettings["SmtpPort"]);
-            var smtpUser = ConfigurationManager.AppSettings["SmtpUser"];
-            var smtpPass = ConfigurationManager.AppSettings["SmtpPass"];
+            
 
             var message = new MailMessage
             {
