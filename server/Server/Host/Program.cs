@@ -21,22 +21,26 @@ namespace Host
                 // Estas instancias se compartirán entre todos los servicios que las necesiten.
                 var accountRepository = new AccountRepository();
                 var emailSender = new EmailSender();
+                var codeService = new VerificationCodeService();
+                var notificationService = new NotificationService(emailSender);
 
                 // --- PASO 2: Crear las INSTANCIAS de cada servicio ---
                 // Se inyectan las dependencias compartidas en cada constructor.
-                var accountManagerInstance = new AccountManager(accountRepository, emailSender);
+                var accountManagerInstance = new AccountManager(accountRepository, notificationService, codeService);
                 var loginManagerInstance = new LoginManager(accountRepository); // Asumiendo que LoginManager necesita el repositorio
-                var verificationManagerInstance = new VerificationCodeManager(accountRepository); // Asumiendo que VerificationCodeManager necesita el repositorio
-
+                var verificationManagerInstance = new VerificationCodeManager(accountRepository, notificationService, codeService); // Asumiendo que VerificationCodeManager necesita el repositorio
+                var passwordResetManagerInstance = new PasswordResetManager(accountRepository, notificationService, codeService);
                 // --- PASO 3: Crear un ServiceHost para CADA instancia de servicio ---
                 var accountManagerHost = new ServiceHost(accountManagerInstance);
                 var loginManagerHost = new ServiceHost(loginManagerInstance);
                 var verificationManagerHost = new ServiceHost(verificationManagerInstance);
+                var passwordResetManagerHost = new ServiceHost(passwordResetManagerInstance);
 
                 // Agregarlos a la lista para manejarlos fácilmente
                 hosts.Add(accountManagerHost);
                 hosts.Add(loginManagerHost);
                 hosts.Add(verificationManagerHost);
+                hosts.Add(passwordResetManagerHost);
 
                 // --- PASO 4: Abrir todos los hosts ---
                 foreach (var host in hosts)
@@ -49,13 +53,13 @@ namespace Host
                     }
                 }
 
-                Console.WriteLine("\n✅ Todos los servicios están en ejecución.");
+                Console.WriteLine("\n Todos los servicios están en ejecución.");
                 Console.WriteLine("Presiona <Enter> para detenerlos.");
                 Console.ReadLine();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Ocurrió un error al iniciar los servicios: {ex.ToString()}");
+                Console.WriteLine($" Ocurrió un error al iniciar los servicios: {ex.ToString()}");
                 Console.ReadLine();
             }
             finally

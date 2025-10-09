@@ -2,74 +2,60 @@
 using Data.DAL.Interfaces;
 using Services.Contracts;
 using Services.Contracts.DTOs;
+using Services.Util;
 using System;
 using System.Collections.Generic;
 using System.ServiceModel;
 
 namespace Services.Services
 {
-    internal class VerificationCodeInfo
-    {
-        public string Code { get; set; }
-        public DateTime ExpirationTime { get; set; }
-    }
 
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
     public class VerificationCodeManager : IAccountVerificationManager
     {
-        private static readonly Dictionary<string, VerificationCodeInfo> codes = new Dictionary<string, VerificationCodeInfo>();
-        private static readonly Random random = new Random();
         private readonly IAccountRepository repository;
-            
-        public VerificationCodeManager(IAccountRepository accountRepository)
+        private readonly INotificationService notification;
+        private readonly IVerificationCodeService codeService;
+        public VerificationCodeManager(IAccountRepository accountRepository, INotificationService notificationService,
+            IVerificationCodeService verificationCodeService)
         {
             repository = accountRepository;
+            notification = notificationService;
+            codeService = verificationCodeService;
         }
-        
-        public static string GenerateCode(string email)
-        {
-            var code = random.Next(100000, 999999).ToString(); 
-            var expirationTime = DateTime.UtcNow.AddMinutes(5);
-
-            var codeInfo = new VerificationCodeInfo
-            {
-                Code = code,
-                ExpirationTime = expirationTime
-            };
-
-            codes[email] = codeInfo;
-
-            return code;
-        }
-
-        public static bool VerifyCode(string email, string code)
-        {
-            // Si no existe un código para ese email, falla
-            if (!codes.TryGetValue(email, out VerificationCodeInfo codeInfo))
-            {
-                return false;
-            }
-
-            // Importante: Una vez que se intenta verificar, se elimina el código para evitar reintentos.
-            codes.Remove(email);
-
-            // Comprueba si el código es correcto Y no ha expirado
-            if (codeInfo.Code == code && DateTime.UtcNow < codeInfo.ExpirationTime)
-            {
-                return true; // Éxito
-            }
-
-            return false; // El código es incorrecto o ha expirado
-        }
-
         public bool VerifyEmail(EmailVerificationDTO emailVerificationDTO)
         {
-            if (VerifyCode(emailVerificationDTO.Email, emailVerificationDTO.VerificationCode))
+            // Paso 1: Pedirle al especialista en códigos que valide el código.
+            bool isCodeValid = codeService.ValidateCode(
+                emailVerificationDTO.Email,
+                emailVerificationDTO.VerificationCode,
+                CodeType.EmailVerification
+            );
+
+            if (isCodeValid)
             {
+                // Paso 2: Si el código es válido, pedirle al especialista en datos que actualice la BD.
                 return repository.VerifyEmail(emailVerificationDTO.Email);
             }
 
             return false;
+        }
+
+        public bool ResendVerificationCode(string email)
+        {
+            // Paso 1: Preguntarle al especialista si el usuario puede solicitar un nuevo código (throttling).
+            if (!codeService.CanRequestCode(email, CodeType.EmailVerification))
+            {
+                return false; // Indicar al cliente que debe esperar.
+            }
+
+            // Paso 2: Pedirle al especialista que genere y guarde un nuevo código.
+            var newCode = codeService.GenerateAndStoreCode(email, CodeType.EmailVerification);
+
+            // Paso 3: Pedirle al especialista en notificaciones que envíe el correo.
+            _ = notification.SendAccountVerificationEmailAsync(email, newCode);
+
+            return true;
         }
     }
 }

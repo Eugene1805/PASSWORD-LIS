@@ -1,4 +1,6 @@
 ﻿using PASSWORD_LIS_Client.VerificationCodeManagerServiceReference;
+using System;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace PASSWORD_LIS_Client
@@ -29,8 +31,41 @@ namespace PASSWORD_LIS_Client
             
             if (verificationCodeManager.VerifyEmail(emailVerificationDTO))
             {
-                MessageBox.Show("Codigo verificado con exito");
+                MessageBox.Show(Properties.Langs.Lang.codeActivationMessageText);
+                var loginWindow = new LoginWindow();
+                loginWindow.Show();
+                this.Close();
             }
+        }
+
+        private async void HyperlinkClickResendCode(object sender, RoutedEventArgs e)
+        {
+            
+            var client = new AccountVerificationManagerClient();
+            bool success = false;
+            try
+            {
+                success = await client.ResendVerificationCodeAsync(emailLabel.Content.ToString());
+                client.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error de conexión al intentar reenviar el código: " + ex.Message);
+                client?.Abort();
+            }
+
+            if (success)
+            {
+                MessageBox.Show("Se ha enviado un nuevo código a tu correo.");
+                var changePasswordWindow = new ChangePasswordWindow();
+                changePasswordWindow.Show();
+                this.Close();
+            }
+            else
+            {
+                MessageBox.Show("Por favor, espera al menos un minuto antes de solicitar otro código.");
+            }
+
         }
     }
 }

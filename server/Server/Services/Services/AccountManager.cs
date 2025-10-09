@@ -12,13 +12,15 @@ namespace Services.Services
     public class AccountManager : IAccountManager
     {
         private readonly IAccountRepository repository;
-        private readonly IEmailSender sender;
+        private readonly INotificationService notification;
+        private readonly IVerificationCodeService codeService;
        
 
-        public AccountManager(IAccountRepository accountRepository, IEmailSender emailSender)
+        public AccountManager(IAccountRepository accountRepository, INotificationService notificationService, IVerificationCodeService verificationCodeService)
         {
             repository = accountRepository;
-            sender = emailSender;
+            notification = notificationService;
+            codeService = verificationCodeService;
         }
 
         public bool CreateAccount(NewAccountDTO newAccount)
@@ -29,14 +31,13 @@ namespace Services.Services
                 FirstName = newAccount.FirstName,
                 LastName = newAccount.LastName,
                 Email = newAccount.Email,
-                PasswordHash = newAccount.Password,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(newAccount.Password),
                 Nickname = newAccount.Nickname,
             };
             if (repository.CreateAccount(userAccount))
             {
-                var verificationCode = VerificationCodeManager.GenerateCode(newAccount.Email);
-
-                _ = sender.SendVerificationEmailAsync(newAccount.Email, verificationCode);
+                var code = codeService.GenerateAndStoreCode(newAccount.Email, CodeType.EmailVerification);
+                _ = notification.SendAccountVerificationEmailAsync(newAccount.Email, code);
                 return true;
             }
             

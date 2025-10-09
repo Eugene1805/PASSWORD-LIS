@@ -28,7 +28,7 @@ namespace PASSWORD_LIS_Client
                 InitializeComponent();           
         }
 
-        private void ButtonClickSignUp(object sender, RoutedEventArgs e)
+        private async void ButtonClickSignUp(object sender, RoutedEventArgs e)
         {
             if (!CanExecuteSignUp())
             {
@@ -54,26 +54,52 @@ namespace PASSWORD_LIS_Client
                 return;
             }
 
-            var acount = new AccountManagerClient("NetTcpBinding_IAccountManager");
-            var userAccount = new NewAccountDTO
+            AccountManagerClient client = null;
+            bool accountCreated = false;
+            signUpButton.IsEnabled = false;
+            try
             {
-                Email = emailTextBox.Text,
-                Password = BCrypt.Net.BCrypt.HashPassword(passwordBox.Password),
-                FirstName = firstNameTextBox.Text,
-                LastName = lastNameTextBox.Text,
-                Nickname = nicknameTextBox.Text
-            };
-            
-            if (acount.CreateAccount(userAccount))
+                // 2. Crear el cliente (idealmente dentro de un using, pero para async es mejor try/finally)
+                client = new AccountManagerClient();
+
+                var userAccount = new NewAccountDTO
+                {
+                    Email = emailTextBox.Text,
+                    Password = passwordBox.Password, // 3. ¡ENVIAR SIN HASHEAR!
+                    FirstName = firstNameTextBox.Text,
+                    LastName = lastNameTextBox.Text,
+                    Nickname = nicknameTextBox.Text
+                };
+
+                // 4. Llamar al método ASÍNCRONO
+                accountCreated = await client.CreateAccountAsync(userAccount);
+
+                // Si la llamada fue exitosa, cierra el cliente
+                client.Close();
+            }
+            catch (Exception ex)
             {
-                var codeVerificationWindow = new VerifyCodeWindow(userAccount.Email);
+                // Manejar errores de comunicación con el servidor
+                MessageBox.Show("Error de conexión con el servidor: " + ex.Message);
+                client?.Abort(); // Abortar el cliente si hubo un error
+            }
+            finally
+            {
+                // 5. Volver a habilitar el botón
+                signUpButton.IsEnabled = true;
+            }
+
+            if (accountCreated)
+            {
+                var codeVerificationWindow = new VerifyCodeWindow(emailTextBox.Text);
                 codeVerificationWindow.ShowDialog();
+                this.Close(); // Cierra la ventana de registro si todo fue exitoso
             }
             else
             {
-                MessageBox.Show("Error,no se pudo crear la cuenta");
+                MessageBox.Show("No se pudo crear la cuenta. El correo o nickname ya podría estar en uso.");
             }
-                
+
         }
 
         private void HyperlinkClickLogIn(object sender, RoutedEventArgs e)

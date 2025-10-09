@@ -1,16 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using PASSWORD_LIS_Client.PasswordResetManagerServiceReference;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace PASSWORD_LIS_Client
 {
@@ -19,16 +9,28 @@ namespace PASSWORD_LIS_Client
     /// </summary>
     public partial class ChangePasswordWindow : Window
     {
+        private readonly string resetCode;
+        private readonly string accountEmail;
         public ChangePasswordWindow()
         {
             InitializeComponent();
         }
 
+        public ChangePasswordWindow(string code, string email) : this()
+        {
+            resetCode = code;
+            accountEmail = email;
+        }
+
         private void ButtonClickChangePassword(object sender, RoutedEventArgs e)
         {
-            // Assume password change is successful
-            MessageBox.Show("Password changed successfully.");
-            this.Close();
+            var client = new PasswordResetManagerClient();
+            client.ResetPassword(new PasswordResetDTO
+            {
+                ResetCode = resetCode,
+                NewPassword = newPasswordBox.Password,
+                Email = accountEmail
+            });
         }
     }
 }

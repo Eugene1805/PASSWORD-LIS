@@ -26,6 +26,7 @@ namespace Data.DAL.Implementations
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine(ex.ToString());
                     return false;
                 }
             }
@@ -82,10 +83,29 @@ namespace Data.DAL.Implementations
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine(ex.Message);
                     return false;
                 }
             }
         }
 
+        public bool ResetPassword(string email, string password)
+        {
+            using(var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            {
+                try
+                {
+                    UserAccount user = GetUserByEmail(email);
+                    user.PasswordHash = password;
+                    context.UserAccount.Attach(user);
+                    context.SaveChanges ();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    return false;
+                }
+            }
+        }
     }
 }

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ID="ffa5ebee-bedd-4e91-b272-ac9bd87d9024" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <GenerateTaskBasedAsynchronousMethod>true</GenerateTaskBasedAsynchronousMethod>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://localhost:8098" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="PasswordResetManager.wsdl" MetadataType="Wsdl" ID="97ca2aa3-cb96-441f-ba58-2269acaa16bc" SourceId="1" SourceUrl="http://localhost:8098/?wsdl" />
+    <MetadataFile FileName="item.xsd" MetadataType="Schema" ID="ec47e6a4-fcf7-42a0-914a-b65a33f04a8e" SourceId="1" SourceUrl="http://localhost:8098/?xsd=xsd0" />
+    <MetadataFile FileName="item1.xsd" MetadataType="Schema" ID="350abebd-bef0-432d-8e50-31a471a67042" SourceId="1" SourceUrl="http://localhost:8098/?xsd=xsd2" />
+    <MetadataFile FileName="item2.xsd" MetadataType="Schema" ID="9a7f0a41-7ed7-4f94-b067-c87e3a4191d4" SourceId="1" SourceUrl="http://localhost:8098/?xsd=xsd1" />
+    <MetadataFile FileName="item.disco" MetadataType="Disco" ID="34baaf90-3a46-48d6-9d77-1d2046080497" SourceId="1" SourceUrl="http://localhost:8098/?disco" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

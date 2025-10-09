@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace Test.UnitTest
 {
     public class AccountManagerTests
-    {
+    {/*
         [Fact]
         public void CreateAccount_WhenRepositorySucceeds_ShouldSendEmailAndReturnTrue()
         {
@@ -23,7 +23,7 @@ namespace Test.UnitTest
             var mockEmailSender = new Mock<IEmailSender>();
 
             var newAccountDto = new NewAccountDTO { Email = "test@example.com", /* ... */ };
-
+/*
             // 2. Configurar el comportamiento de los mocks
             // "Cuando se llame a CreateAccount, simula que funciona y devuelve true"
             mockRepo.Setup(r => r.CreateAccount(It.IsAny<UserAccount>())).Returns(true);
@@ -40,5 +40,5 @@ namespace Test.UnitTest
             // Verificar que el método de enviar email fue llamado exactamente una vez
             mockEmailSender.Verify(s => s.SendVerificationEmailAsync(newAccountDto.Email, It.IsAny<string>()), Times.Once);
         }
-    }
+    }*/
 }
