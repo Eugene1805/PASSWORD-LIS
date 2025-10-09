@@ -28,7 +28,7 @@ namespace PASSWORD_LIS_Client
                 InitializeComponent();           
         }
 
-        private async Task ButtonClickSignUp(object sender, RoutedEventArgs e)
+        private async void ButtonClickSignUp(object sender, RoutedEventArgs e)
         {
             if (!CanExecuteSignUp())
             {
