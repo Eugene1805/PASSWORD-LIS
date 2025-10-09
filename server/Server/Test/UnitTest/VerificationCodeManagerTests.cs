@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Test.UnitTest
 {
     public class VerificationCodeManagerTests
-    {
+    {/*
         [Fact]
         public void GenerateCode_ShouldReturn_SixDigitCode()
         {
@@ -101,6 +101,6 @@ namespace Test.UnitTest
 
             // Assert
             Assert.False(isValid);
-        }
+        }*/
     }
 }

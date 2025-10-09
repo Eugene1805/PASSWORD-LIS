@@ -13,24 +13,24 @@ namespace Services.Util
 
     public interface IEmailSender
     {
-        Task SendVerificationEmailAsync(string recipientEmail, string code);
+        Task SendEmailAsync(string recipientEmail, string subject, string body);
     }
+
     public class EmailSender : IEmailSender
     {
-        public async Task SendVerificationEmailAsync(string recipientEmail, string code)
+        public async Task SendEmailAsync(string recipientEmail, string subject, string body)
         {
             var smtpUser = Environment.GetEnvironmentVariable("SMTP_USER") ?? ConfigurationManager.AppSettings["SmtpUser"];
             var smtpPass = Environment.GetEnvironmentVariable("SMTP_PASS") ?? ConfigurationManager.AppSettings["SmtpPass"];
             var smtpHost = ConfigurationManager.AppSettings["SmtpHost"];
             var smtpPort = int.Parse(ConfigurationManager.AppSettings["SmtpPort"]);
-            
 
             var message = new MailMessage
             {
                 From = new MailAddress(smtpUser, "PASSWORD LIS"),
-                Subject = "Código de Verificación de Cuenta",
+                Subject = subject, // <-- Usa el parámetro subject
                 IsBodyHtml = true,
-                Body = $"<html><body><h2>¡Gracias por registrarte!</h2><p>Tu código de verificación es:</p><h1>{code}</h1><p>Este código expira en 5 minutos.</p></body></html>"
+                Body = body        // <-- Usa el parámetro body
             };
             message.To.Add(recipientEmail);
 
