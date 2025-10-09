@@ -37,7 +37,52 @@ namespace PASSWORD_LIS_Client
                 return;
             }
 
-            //string avatarPath = GetAvatharP
+            string avatarPath = GetAvatarPathById(currentUser.PhotoId);
+            if (!string.IsNullOrEmpty(avatarPath)){
+                var imageBrush = new System.Windows.Media.ImageBrush
+                {
+                    ImageSource = new BitmapImage(new Uri(avatarPath, UriKind.Relative))
+                };
+
+                avatarEllipse.Fill = imageBrush;
+            }
+        }
+
+        private void AvatarButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (NavigationService != null)
+            {
+                NavigationService.Navigate(new ProfilePage(currentUser));
+            }
+        }
+
+        private void AddFriendButtonClick(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ProfileButtonClick(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void DeleteFriendButtonClick(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private string GetAvatarPathById(int photoId)
+        {
+            switch (photoId)
+            {
+                case 1: return "/Resources/Avatar1.png";
+                case 2: return "/Resources/Avatar2.png";
+                case 3: return "/Resources/Avatar3.png";
+                case 4: return "/Resources/Avatar4.png";
+                case 5: return "/Resources/Avatar5.png";
+                case 6: return "/Resources/Avatar6.png";
+                default: return null; // O una imagen por defecto
+            }
         }
     }
 }

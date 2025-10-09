@@ -10,7 +10,7 @@
       d:DesignHeight="450" d:DesignWidth="500"
       Background="#EEEFF0"
       Title="LobbyPage">
-    <!--
+    
     <Grid >
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -26,11 +26,14 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <Ellipse Grid.Row="0" x:Name="avatarEllipse" Style="{StaticResource circleEllipseStyle}" Margin="0,0,65,15">
-                    <Ellipse.Fill>
-                        <ImageBrush/>
-                    </Ellipse.Fill>
-                </Ellipse>
+                <Button Grid.Row="0" Style="{StaticResource circleButtonStyle}"
+                        HorizontalAlignment="Left" VerticalAlignment="Top" Click="ProfileButtonClick">
+                    <Ellipse x:Name="avatarEllipse" Style="{StaticResource circleTransparentEllipseStyle}" Width="90" Height="90">
+                        <Ellipse.Fill>
+                            <ImageBrush/>
+                        </Ellipse.Fill>
+                    </Ellipse>
+                </Button>
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -43,11 +46,11 @@
                                VerticalAlignment="Center"
                                TextAlignment="Left"/>
                     <Button Grid.Column="1" Style="{StaticResource circleButtonStyle}"
-                            Width="30" Height="30" VerticalAlignment="Center">
+                            Width="30" Height="30" VerticalAlignment="Top" Click="AddFriendButtonClick">
                         <Image Source="/Resources/AddFriendIcon.png" Width="15" Height="15"/>
                     </Button>
                     <Button Grid.Column="2" Style="{StaticResource circleButtonStyle}"
-                            Width="30" Height="30" VerticalAlignment="Center">
+                            Width="30" Height="30" VerticalAlignment="Center" Click="DeleteFriendButtonClick">
                         <Image Source="/Resources/DeleteFriendIcon.png" Width="15" Height="15"/>
                     </Button>
                 </Grid>
@@ -102,5 +105,5 @@
             </Border>
         </Grid>
     </Grid>
-    -->
+    
 </Page>

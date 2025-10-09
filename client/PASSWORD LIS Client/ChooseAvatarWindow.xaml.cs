@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using PASSWORD_LIS_Client.Utils;
 
 namespace PASSWORD_LIS_Client
 {
@@ -19,14 +20,31 @@ namespace PASSWORD_LIS_Client
     /// </summary>
     public partial class ChooseAvatarWindow : Window
     {
+        public int selectedAvatarId { get; private set; } = 0;
+
+
         public ChooseAvatarWindow()
         {
             InitializeComponent();
         }
 
-        private void SelectAvatarButton_Click(object sender, RoutedEventArgs e)
+        private void SelectAvatarButtonClick(object sender, RoutedEventArgs e)
         {
+            var checkedRadioButton = this.FindVisualChildren<RadioButton>()
+                                                 .FirstOrDefault(rb => rb.IsChecked == true);
 
+            if (checkedRadioButton != null)
+            {
+                selectedAvatarId = int.Parse(checkedRadioButton.Tag.ToString());
+                this.DialogResult = true;
+
+            }
+            else
+            {
+                this.DialogResult = false;
+            }
+
+            this.Close();
         }
     }
 }

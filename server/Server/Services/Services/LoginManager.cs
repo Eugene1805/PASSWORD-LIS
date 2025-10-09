@@ -39,7 +39,10 @@ namespace Services.Services
                         {
                             PlayerId = player.Id,
                             Nickname = userAccount.Nickname,
-                            Email = userAccount.Email
+                            Email = userAccount.Email,
+                            FirstName = userAccount.FirstName,
+                            LastName = userAccount.LastName,
+                            PhotoId = userAccount.PhotoId ?? 1
 
                         };
                         return userDTO;

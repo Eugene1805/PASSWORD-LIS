@@ -11,6 +11,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
+using PASSWORD_LIS_Client.LoginManagerServiceReference;
 using System.Windows.Shapes;
 
 namespace PASSWORD_LIS_Client
@@ -20,15 +21,58 @@ namespace PASSWORD_LIS_Client
     /// </summary>
     public partial class ProfilePage : Page
     {
-        public ProfilePage()
+        private readonly UserDTO currentUser;
+        public ProfilePage(UserDTO user)
         {
             InitializeComponent();
+            currentUser = user;
+            LoadProfileData();
         }
 
+        private void LoadProfileData()
+        {
+            if (currentUser == null)
+            {
+                return;
+            }
+            Nickname.Text = currentUser.Nickname;
+            Name.Text = currentUser.FirstName;
+            LastName.Text = currentUser.LastName;
+
+            string avatarPath = GetAvatarPathById(currentUser.PhotoId);
+            if (!string.IsNullOrEmpty(avatarPath))
+            {
+                Avatar.Fill = new ImageBrush { ImageSource = new BitmapImage(new Uri(avatarPath, UriKind.Relative)) };
+            }
+        }
+
+        private string GetAvatarPathById(int photoId)
+        {
+            switch (photoId)
+            {
+                case 1: return "/Resources/Avatar1.png";
+                case 2: return "/Resources/Avatar2.png";
+                case 3: return "/Resources/Avatar3.png";
+                case 4: return "/Resources/Avatar4.png";
+                case 5: return "/Resources/Avatar5.png";
+                case 6: return "/Resources/Avatar6.png";
+                default: return null;
+            }
+        }
         private void ButtonClickChooseAnAvatar(object sender, RoutedEventArgs e)
         {
             var chooseAvatarWindow = new ChooseAvatarWindow();
-            chooseAvatarWindow.ShowDialog();
+            if (chooseAvatarWindow.ShowDialog() == true)
+            {
+                int newAvatarId = chooseAvatarWindow.selectedAvatarId;
+
+                currentUser.PhotoId = newAvatarId;
+                string avatarPath = GetAvatarPathById(newAvatarId);
+                if (!string.IsNullOrEmpty(avatarPath))
+                {
+                    Avatar.Fill = new ImageBrush { ImageSource = new BitmapImage(new Uri(avatarPath, UriKind.Relative)) };
+                }
+            }
         }
         private void ButtonClickEditProfile(object sender, RoutedEventArgs e)
         {

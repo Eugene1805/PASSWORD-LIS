@@ -26,7 +26,16 @@ namespace PASSWORD_LIS_Client.LoginManagerServiceReference {
         private string EmailField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string FirstNameField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string LastNameField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private string NicknameField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private int PhotoIdField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private int PlayerIdField;
@@ -55,6 +64,32 @@ namespace PASSWORD_LIS_Client.LoginManagerServiceReference {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
+        public string FirstName {
+            get {
+                return this.FirstNameField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.FirstNameField, value) != true)) {
+                    this.FirstNameField = value;
+                    this.RaisePropertyChanged("FirstName");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string LastName {
+            get {
+                return this.LastNameField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.LastNameField, value) != true)) {
+                    this.LastNameField = value;
+                    this.RaisePropertyChanged("LastName");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
         public string Nickname {
             get {
                 return this.NicknameField;
@@ -63,6 +98,19 @@ namespace PASSWORD_LIS_Client.LoginManagerServiceReference {
                 if ((object.ReferenceEquals(this.NicknameField, value) != true)) {
                     this.NicknameField = value;
                     this.RaisePropertyChanged("Nickname");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public int PhotoId {
+            get {
+                return this.PhotoIdField;
+            }
+            set {
+                if ((this.PhotoIdField.Equals(value) != true)) {
+                    this.PhotoIdField = value;
+                    this.RaisePropertyChanged("PhotoId");
                 }
             }
         }
