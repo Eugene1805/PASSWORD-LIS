@@ -107,5 +107,31 @@ namespace Data.DAL.Implementations
                 }
             }
         }
+
+        public bool UpdateUserAvatar(int userId, int newPhotoId)
+        {
+            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            {
+                try
+                {
+                    var player = context.Player.Include(p => p.UserAccount)
+                        .FirstOrDefault(p => p.Id == userId);
+                    if (player == null || player.UserAccount == null)
+                    {
+                        return false;
+                    }
+
+                    player.UserAccount.PhotoId = (byte?)newPhotoId;
+                    context.SaveChanges();
+                    return true;
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    return false;
+                }
+            }
+        }
     }
 }

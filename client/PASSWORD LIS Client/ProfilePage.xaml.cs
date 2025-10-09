@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using PASSWORD_LIS_Client.LoginManagerServiceReference;
 using System.Windows.Shapes;
+using PASSWORD_LIS_Client.ProfileManagerServiceReference;
 
 namespace PASSWORD_LIS_Client
 {
@@ -84,8 +85,33 @@ namespace PASSWORD_LIS_Client
             // Code to change password goes here
             MessageBox.Show("Change Password clicked!");
         }
-        private void ButtonClickSaveChanges(object sender, RoutedEventArgs e)
+        private async void ButtonClickSaveChanges(object sender, RoutedEventArgs e)
         {
+            var client = new ProfileManagerClient();
+            try
+            {
+                bool success = await client.UpdateAvatarAsync(currentUser.PlayerId, currentUser.PhotoId);
+
+                if (success)
+                {
+                    MessageBox.Show("Avatar updated successfully!");
+                    if (NavigationService.CanGoBack)
+                    {
+                        NavigationService.GoBack();
+                    }
+                } else
+                {
+                    MessageBox.Show("Failed to update avatar.");
+                }
+            } catch (Exception ex)
+            {
+                MessageBox.Show("Error de conexión: " + ex.Message);
+
+            }
+            finally
+            {
+                client.Close();
+            }
             // Code to save changes goes here
             MessageBox.Show("Changes saved successfully!");
         }

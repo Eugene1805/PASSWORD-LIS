@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Services.Services
 {
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
-    internal class ProfileManager : IProfileManager
+    public class ProfileManager : IProfileManager
     {
         private readonly IAccountRepository repository;
 
@@ -23,7 +23,5 @@ namespace Services.Services
         {
             return repository.UpdateUserAvatar(playerId, newPhotoId);
         }
-    }
-    {
     }
 }

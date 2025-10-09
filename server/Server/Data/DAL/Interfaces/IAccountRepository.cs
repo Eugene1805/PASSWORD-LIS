@@ -14,5 +14,7 @@ namespace Data.DAL.Interfaces
         UserAccount GetUserByEmail(string email);
         bool VerifyEmail(string email);
         bool ResetPassword(string email,string password);
+
+        bool UpdateUserAvatar(int playerId, int newPhotoId);
     }
 }

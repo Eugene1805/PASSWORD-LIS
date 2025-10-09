@@ -37,11 +37,11 @@ namespace PASSWORD_LIS_Client
                 return;
             }
 
-            string avatarPath = GetAvatarPathById(currentUser.PhotoId);
-            if (!string.IsNullOrEmpty(avatarPath)){
+            Uri avatarUri = GetAvatarUriById(currentUser.PhotoId);
+            if (avatarUri != null){
                 var imageBrush = new System.Windows.Media.ImageBrush
                 {
-                    ImageSource = new BitmapImage(new Uri(avatarPath, UriKind.Relative))
+                    ImageSource = new BitmapImage(avatarUri)
                 };
 
                 avatarEllipse.Fill = imageBrush;
@@ -71,18 +71,37 @@ namespace PASSWORD_LIS_Client
 
         }
 
-        private string GetAvatarPathById(int photoId)
+        private Uri GetAvatarUriById(int photoId)
         {
+            string resourcePath;
             switch (photoId)
             {
-                case 1: return "/Resources/Avatar1.png";
-                case 2: return "/Resources/Avatar2.png";
-                case 3: return "/Resources/Avatar3.png";
-                case 4: return "/Resources/Avatar4.png";
-                case 5: return "/Resources/Avatar5.png";
-                case 6: return "/Resources/Avatar6.png";
-                default: return null; // O una imagen por defecto
+                case 1:
+                    resourcePath = "/Resources/Avatar1.png";
+                    break;
+                case 2:
+                    resourcePath = "/Resources/Avatar2.png";
+                    break;
+                case 3:
+                    resourcePath = "/Resources/Avatar3.png";
+                    break;
+                case 4:
+                    resourcePath = "/Resources/Avatar4.png";
+                    break;
+                case 5:
+                    resourcePath = "/Resources/Avatar5.png";
+                    break;
+                case 6:
+                    resourcePath = "/Resources/Avatar6.png";
+                    break;
+                default:
+                    return null; // O una imagen por defecto
             }
+
+            // Construimos la URI de tipo "Pack"
+            // Esto le dice a WPF que busque el recurso DENTRO del ensamblado.
+            string packUri = $"pack://application:,,,{resourcePath}";
+            return new Uri(packUri, UriKind.Absolute);
         }
     }
 }

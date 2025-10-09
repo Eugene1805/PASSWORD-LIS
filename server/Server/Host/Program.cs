@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Data.DAL;
+using Data.DAL.Implementations;
+using Services.Services;
+using Services.Util;
+using System;
 using System.Collections.Generic;
 using System.ServiceModel;
-using Services.Services;
-using Data.DAL;
-using Services.Util;
-using Data.DAL.Implementations;
 
 namespace Host
 {
@@ -30,17 +30,22 @@ namespace Host
                 var loginManagerInstance = new LoginManager(accountRepository); // Asumiendo que LoginManager necesita el repositorio
                 var verificationManagerInstance = new VerificationCodeManager(accountRepository, notificationService, codeService); // Asumiendo que VerificationCodeManager necesita el repositorio
                 var passwordResetManagerInstance = new PasswordResetManager(accountRepository, notificationService, codeService);
+                var profileManagerInstance = new ProfileManager(accountRepository);
+
                 // --- PASO 3: Crear un ServiceHost para CADA instancia de servicio ---
                 var accountManagerHost = new ServiceHost(accountManagerInstance);
                 var loginManagerHost = new ServiceHost(loginManagerInstance);
                 var verificationManagerHost = new ServiceHost(verificationManagerInstance);
                 var passwordResetManagerHost = new ServiceHost(passwordResetManagerInstance);
+                var profileManagerHost = new ServiceHost(profileManagerInstance);
+
 
                 // Agregarlos a la lista para manejarlos fácilmente
                 hosts.Add(accountManagerHost);
                 hosts.Add(loginManagerHost);
                 hosts.Add(verificationManagerHost);
                 hosts.Add(passwordResetManagerHost);
+                hosts.Add(profileManagerHost);
 
                 // --- PASO 4: Abrir todos los hosts ---
                 foreach (var host in hosts)
