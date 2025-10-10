@@ -9,7 +9,8 @@
       
       d:DesignHeight="450" d:DesignWidth="500"
       Background="#EEEFF0"
-      Title="LobbyPage">
+      Title="LobbyPage"
+      Loaded="LobbyPageLoaded">
     
     <Grid >
         <Grid.ColumnDefinitions>
@@ -56,7 +57,10 @@
                 </Grid>
 
                 <Border Grid.Row="2" Style ="{StaticResource floatingBorderStyle}" Margin="0,5,0,5">
-                    <TextBlock Text="[Lista de Amigos]" Style="{StaticResource bodyTextBlockStyle}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                    <ListView>
+                        <ListViewItem Content="Prueba"></ListViewItem>
+                    </ListView>
+                   <!-- <TextBlock Text="[Lista de Amigos]" Style="{StaticResource bodyTextBlockStyle}" VerticalAlignment="Center" HorizontalAlignment="Center"/> -->
                 </Border>
 
                 <StackPanel Grid.Row="3">

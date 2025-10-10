@@ -1,6 +1,7 @@
 ﻿using PASSWORD_LIS_Client.LoginManagerServiceReference;
 using System;
 using System.Windows;
+using PASSWORD_LIS_Client.Utils;
 
 namespace PASSWORD_LIS_Client
 {
@@ -25,12 +26,12 @@ namespace PASSWORD_LIS_Client
 
                 if (loggedInUser != null)
                 {
+                    SessionManager.Login(loggedInUser);
+                    
                     MessageBox.Show(string.Format(Properties.Langs.Lang.loginWelcomeText, loggedInUser.Nickname),
                                     Properties.Langs.Lang.successfulLoginText, MessageBoxButton.OK);
 
                     var mainWindow = new MainWindow();
-                    mainWindow.SetInitialPage(loggedInUser);
-                    Application.Current.MainWindow = mainWindow;
                     mainWindow.Show();
                     this.Close();
                 }

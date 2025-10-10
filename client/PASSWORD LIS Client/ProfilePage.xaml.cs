@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using PASSWORD_LIS_Client.LoginManagerServiceReference;
 using System.Windows.Shapes;
 using PASSWORD_LIS_Client.ProfileManagerServiceReference;
+using PASSWORD_LIS_Client.Utils;
 
 namespace PASSWORD_LIS_Client
 {
@@ -22,56 +23,49 @@ namespace PASSWORD_LIS_Client
     /// </summary>
     public partial class ProfilePage : Page
     {
-        private readonly UserDTO currentUser;
-        public ProfilePage(UserDTO user)
+        public ProfilePage()
         {
             InitializeComponent();
-            currentUser = user;
             LoadProfileData();
         }
 
         private void LoadProfileData()
         {
-            if (currentUser == null)
+            if (!SessionManager.IsUserLoggedIn())
             {
                 return;
             }
+
+            var currentUser = SessionManager.CurrentUser;
             Nickname.Text = currentUser.Nickname;
             Name.Text = currentUser.FirstName;
             LastName.Text = currentUser.LastName;
 
-            string avatarPath = GetAvatarPathById(currentUser.PhotoId);
-            if (!string.IsNullOrEmpty(avatarPath))
+            Uri avatarUri = GetAvatarUriById(currentUser.PhotoId);
+            if (avatarUri != null)
             {
-                Avatar.Fill = new ImageBrush { ImageSource = new BitmapImage(new Uri(avatarPath, UriKind.Relative)) };
+                var imageBrush = new ImageBrush
+                {
+                    ImageSource = new BitmapImage(avatarUri)
+                };
+
+                AvatarEllipse.Fill = imageBrush;
             }
         }
 
-        private string GetAvatarPathById(int photoId)
-        {
-            switch (photoId)
-            {
-                case 1: return "/Resources/Avatar1.png";
-                case 2: return "/Resources/Avatar2.png";
-                case 3: return "/Resources/Avatar3.png";
-                case 4: return "/Resources/Avatar4.png";
-                case 5: return "/Resources/Avatar5.png";
-                case 6: return "/Resources/Avatar6.png";
-                default: return null;
-            }
-        }
+
         private void ButtonClickChooseAnAvatar(object sender, RoutedEventArgs e)
         {
             var chooseAvatarWindow = new ChooseAvatarWindow();
             if (chooseAvatarWindow.ShowDialog() == true)
             {
                 int newAvatarId = chooseAvatarWindow.selectedAvatarId;
+                SessionManager.CurrentUser.PhotoId = newAvatarId;
 
-                currentUser.PhotoId = newAvatarId;
-                string avatarPath = GetAvatarPathById(newAvatarId);
-                if (!string.IsNullOrEmpty(avatarPath))
+                Uri avatarUri = GetAvatarUriById(newAvatarId);
+                if (avatarUri != null)
                 {
-                    Avatar.Fill = new ImageBrush { ImageSource = new BitmapImage(new Uri(avatarPath, UriKind.Relative)) };
+                    AvatarEllipse.Fill = new ImageBrush { ImageSource = new BitmapImage(avatarUri) };
                 }
             }
         }
@@ -87,9 +81,16 @@ namespace PASSWORD_LIS_Client
         }
         private async void ButtonClickSaveChanges(object sender, RoutedEventArgs e)
         {
+            if (!SessionManager.IsUserLoggedIn())
+            {
+                MessageBox.Show("No user is logged in."); //Checar
+                return;
+            }
+
             var client = new ProfileManagerClient();
             try
             {
+                var currentUser = SessionManager.CurrentUser;
                 bool success = await client.UpdateAvatarAsync(currentUser.PlayerId, currentUser.PhotoId);
 
                 if (success)
@@ -99,11 +100,13 @@ namespace PASSWORD_LIS_Client
                     {
                         NavigationService.GoBack();
                     }
-                } else
+                }
+                else
                 {
                     MessageBox.Show("Failed to update avatar.");
                 }
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 MessageBox.Show("Error de conexión: " + ex.Message);
 
@@ -112,8 +115,37 @@ namespace PASSWORD_LIS_Client
             {
                 client.Close();
             }
-            // Code to save changes goes here
-            MessageBox.Show("Changes saved successfully!");
         }
+
+
+        private Uri GetAvatarUriById(int photoId)
+        {
+            string resourcePath;
+            switch (photoId)
+            {
+                case 1:
+                    resourcePath = "/Resources/Avatar1.png";
+                    break;
+                case 2:
+                    resourcePath = "/Resources/Avatar2.png";
+                    break;
+                case 3:
+                    resourcePath = "/Resources/Avatar3.png";
+                    break;
+                case 4:
+                    resourcePath = "/Resources/Avatar4.png";
+                    break;
+                case 5:
+                    resourcePath = "/Resources/Avatar5.png";
+                    break;
+                case 6:
+                    resourcePath = "/Resources/Avatar6.png";
+                    break;
+                default:
+                    return null; // O una imagen por defecto
+            }
+            string packUri = $"pack://application:,,,{resourcePath}";
+            return new Uri(packUri, UriKind.Absolute);
+        }
+    } 
     }
-}

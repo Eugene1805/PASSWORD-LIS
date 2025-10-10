@@ -35,7 +35,7 @@
 
         <StackPanel Grid.Row="2" Grid.Column="0" Margin="20,0,20,0">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Ellipse x:Name="Avatar" Style="{StaticResource circleEllipseStyle}"  HorizontalAlignment="Left" Margin="0,0,20,0"/>
+                <Ellipse x:Name="AvatarEllipse" Style="{StaticResource circleEllipseStyle}"  HorizontalAlignment="Left" Margin="0,0,20,0"/>
                 <Button Content="{x:Static language:Lang.selectAvatarText}"
                         Style="{StaticResource primaryButtonStyle}"
                         Width="150" Height="30"
