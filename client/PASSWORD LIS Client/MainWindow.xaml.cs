@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using PASSWORD_LIS_Client.Utils;
 
 namespace PASSWORD_LIS_Client
 {
@@ -23,15 +24,26 @@ namespace PASSWORD_LIS_Client
     {
         public MainWindow()
         {
-            new LoginWindow().Show();
             InitializeComponent();
+            SetInitialPage();
         }
 
-        public void SetInitialPage(UserDTO user)
+        public void SetInitialPage()
         {
-            LobbyPage lobbyPage = new LobbyPage(user);
+            if (SessionManager.IsUserLoggedIn())
+            {
+                mainFrame.NavigationService.Navigate(new LobbyPage());
+            }
+            else
+            {
+                //TODO Logica si llegamos aquí sin usuario logueado
+                
+                 var loginWindow = new LoginWindow();
+                 loginWindow.Show();
+                 this.Close();
+                 
+            }
 
-            mainFrame.NavigationService.Navigate(lobbyPage);
         }
     }
 }

@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using PASSWORD_LIS_Client.Utils;
 
 namespace PASSWORD_LIS_Client
 {
@@ -21,25 +22,22 @@ namespace PASSWORD_LIS_Client
     /// </summary>
     public partial class LobbyPage : Page
     {
-        private readonly UserDTO currentUser;
-        public LobbyPage(UserDTO user)
+        public LobbyPage()
         {
             InitializeComponent();
-            currentUser = user;
-
-            LoadUserProfile();
         }
 
         private void LoadUserProfile()
         {
-            if (currentUser == null)
+            if (!SessionManager.IsUserLoggedIn ())
             {
                 return;
             }
 
-            Uri avatarUri = GetAvatarUriById(currentUser.PhotoId);
-            if (avatarUri != null){
-                var imageBrush = new System.Windows.Media.ImageBrush
+            Uri avatarUri = GetAvatarUriById(SessionManager.CurrentUser.PhotoId);
+            if (avatarUri != null)
+            {
+                var imageBrush = new ImageBrush
                 {
                     ImageSource = new BitmapImage(avatarUri)
                 };
@@ -50,10 +48,7 @@ namespace PASSWORD_LIS_Client
 
         private void AvatarButton_Click(object sender, RoutedEventArgs e)
         {
-            if (NavigationService != null)
-            {
-                NavigationService.Navigate(new ProfilePage(currentUser));
-            }
+           
         }
 
         private void AddFriendButtonClick(object sender, RoutedEventArgs e)
@@ -63,7 +58,10 @@ namespace PASSWORD_LIS_Client
 
         private void ProfileButtonClick(object sender, RoutedEventArgs e)
         {
-
+            if (NavigationService != null)
+            {
+                NavigationService.Navigate(new ProfilePage());
+            }
         }
 
         private void DeleteFriendButtonClick(object sender, RoutedEventArgs e)
@@ -97,11 +95,14 @@ namespace PASSWORD_LIS_Client
                 default:
                     return null; // O una imagen por defecto
             }
-
-            // Construimos la URI de tipo "Pack"
-            // Esto le dice a WPF que busque el recurso DENTRO del ensamblado.
             string packUri = $"pack://application:,,,{resourcePath}";
             return new Uri(packUri, UriKind.Absolute);
         }
+
+        private void LobbyPageLoaded(object sender, RoutedEventArgs e)
+        {
+            LoadUserProfile();
+        }
+
     }
 }
