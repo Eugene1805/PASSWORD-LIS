@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Services.Util
 {
@@ -11,11 +10,16 @@ namespace Services.Util
     public interface IVerificationCodeService
     {
         string GenerateAndStoreCode(string identifier, CodeType type);
-        bool ValidateCode(string identifier, string code, CodeType type);
+        bool ValidateCode(string identifier, string code, CodeType type, bool consume = true);
         bool CanRequestCode(string identifier, CodeType type);
     }
     public class VerificationCodeService : IVerificationCodeService
     {
+        private readonly Guid guid = Guid.NewGuid();
+        public VerificationCodeService()
+        {
+            Console.WriteLine($"<<<<< NUEVA INSTANCIA de VerificationCodeService CREADA, ID: {guid} >>>>>");
+        }
         private class CodeInfo
         {
             public string Code { get; set; }
@@ -27,9 +31,14 @@ namespace Services.Util
         private readonly object lockObject = new object();
         private readonly Dictionary<string, CodeInfo> codes = new Dictionary<string, CodeInfo>();
         private readonly Random random = new Random();
-
+        private static string GetKey(string identifier, CodeType type)
+        {
+            return $"{type}:{identifier}";
+        }
         public string GenerateAndStoreCode(string identifier, CodeType type)
         {
+            Console.WriteLine($"[GenerateAndStoreCode] Operando en la instancia ID: {guid}");
+            var key = GetKey(identifier, type);
             lock (lockObject)
             {
                 var code = random.Next(100000, 999999).ToString();
@@ -41,38 +50,68 @@ namespace Services.Util
                     ExpirationTime = now.AddMinutes(5),
                     Type = type
                 };
-                codes[identifier] = codeInfo;
+                codes[key] = codeInfo;
+                Console.WriteLine($"[GenerateAndStoreCode] Diccionario contiene {codes.Count} elementos:");
+
+                foreach (var kvp in codes)
+                    Console.WriteLine($"  {kvp.Key} => Code: {kvp.Value.Code}, Type: {kvp.Value.Type}, Exp: {kvp.Value.ExpirationTime:O}");
+
                 return code;
             }
         }
-
-        public bool ValidateCode(string identifier, string code, CodeType type)
+           
+        public bool ValidateCode(string identifier, string code, CodeType type, bool consume = true)
         {
+            Console.WriteLine($"[ValidateCode] Operando en la instancia ID: {guid}");
+            var key = GetKey(identifier, type);
             lock (lockObject)
             {
-                if (!codes.TryGetValue(identifier, out CodeInfo codeInfo))
+                if (!codes.TryGetValue(key, out CodeInfo codeInfo))
+                {
+                    
+                    Console.WriteLine("No se pudo obtener el valor de ese correo con ese tipo");
+                    Console.WriteLine("El mapa contiene los valores:");
+                    Console.WriteLine($"[ValidateCode] ❌ Clave no encontrada: {key}");
+                    Console.WriteLine($"[ValidateCode] Diccionario contiene {codes.Count} elementos:");
+
+                    foreach (var kvp in codes)
+                        Console.WriteLine($"  {kvp.Key} => Code: {kvp.Value.Code}, Type: {kvp.Value.Type}, Exp: {kvp.Value.ExpirationTime:O}");
+
                     return false;
+                }
+                if (DateTime.UtcNow >= codeInfo.ExpirationTime)
+                {
+                    Console.WriteLine("El codigo expiro");
+                    codes.Remove(key);
+                    return false;
+                }
+                if (codeInfo.Type != type)
+                {
+                    Console.WriteLine("El tipo no coincide");
+                    return false;
+                }
+                if (codeInfo.Code != code) {
+                    Console.WriteLine("El codigo no coincide");
+                    return false;
+                }
+                if (consume)
+                {
+                    codes.Remove(key);
+                }
 
-                // El código se elimina después del primer intento de validación
-                codes.Remove(identifier);
-
-                // El código y el propósito deben coincidir, y no debe haber expirado
-                return codeInfo.Code == code &&
-                       codeInfo.Type == type &&
-                       DateTime.UtcNow < codeInfo.ExpirationTime;
+                return true;
             }
         }
-
+        
         public bool CanRequestCode(string identifier, CodeType type)
         {
             lock (lockObject)
             {
-                if (codes.TryGetValue(identifier, out CodeInfo existingCode) && existingCode.Type == type)
+                if (codes.TryGetValue(GetKey(identifier, type), out CodeInfo existingCode) && existingCode.Type == type)
                 {
-                    // Si se pidió un código hace menos de 60 segundos, no se puede pedir otro.
                     return DateTime.UtcNow.Subtract(existingCode.CreationTime).TotalSeconds >= 60;
                 }
-                return true; // No hay código previo, así que se puede pedir uno.
+                return true; 
             }
         }
     }

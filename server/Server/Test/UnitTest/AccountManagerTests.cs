@@ -4,41 +4,73 @@ using Moq;
 using Services.Contracts.DTOs;
 using Services.Services;
 using Services.Util;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Test.UnitTest
 {
     public class AccountManagerTests
-    {/*
-        [Fact]
-        public void CreateAccount_WhenRepositorySucceeds_ShouldSendEmailAndReturnTrue()
+    {
+        private readonly Mock<IAccountRepository> _mockRepo;
+        private readonly Mock<INotificationService> _mockNotification;
+        private readonly Mock<IVerificationCodeService> _mockCodeService;
+        private readonly AccountManager _accountManager;
+
+        public AccountManagerTests()
         {
-            // Arrange (Preparar)
-            // 1. Crear "Mocks" (simuladores) de las dependencias
-            var mockRepo = new Mock<IAccountRepository>();
-            var mockEmailSender = new Mock<IEmailSender>();
+            // Arrange común para todas las pruebas
+            _mockRepo = new Mock<IAccountRepository>();
+            _mockNotification = new Mock<INotificationService>();
+            _mockCodeService = new Mock<IVerificationCodeService>();
 
-            var newAccountDto = new NewAccountDTO { Email = "test@example.com", /* ... */ };
-/*
-            // 2. Configurar el comportamiento de los mocks
-            // "Cuando se llame a CreateAccount, simula que funciona y devuelve true"
-            mockRepo.Setup(r => r.CreateAccount(It.IsAny<UserAccount>())).Returns(true);
+            // Inyectamos los mocks al servicio que vamos a probar
+            _accountManager = new AccountManager(
+                _mockRepo.Object,
+                _mockNotification.Object,
+                _mockCodeService.Object
+            );
+        }
 
-            // 3. Crear la instancia de la clase que queremos probar, pasándole los mocks
-            var accountManager = new AccountManager(mockRepo.Object, mockEmailSender.Object);
+        [Fact]
+        public async Task CreateAccount_ShouldReturnTrueAndSendEmail_WhenAccountIsCreatedSuccessfully()
+        {
+            // Arrange
+            var newAccountDto = new NewAccountDTO { Email = "test@example.com", Password = "Password123!" };
+            var generatedCode = "123456";
 
-            // Act (Actuar)
-            var result = accountManager.CreateAccount(newAccountDto);
+            // Configuramos los mocks para el "camino feliz"
+            _mockRepo.Setup(repo => repo.CreateAccount(It.IsAny<UserAccount>())).Returns(true);
+            _mockCodeService.Setup(service => service.GenerateAndStoreCode(newAccountDto.Email, CodeType.EmailVerification)).Returns(generatedCode);
 
-            // Assert (Verificar)
+            // Act
+            var result =  _accountManager.CreateAccount(newAccountDto);
+
+            // Assert
             Assert.True(result);
 
-            // Verificar que el método de enviar email fue llamado exactamente una vez
-            mockEmailSender.Verify(s => s.SendVerificationEmailAsync(newAccountDto.Email, It.IsAny<string>()), Times.Once);
+            // Verificamos que los métodos importantes de nuestras dependencias fueron llamados.
+            _mockRepo.Verify(repo => repo.CreateAccount(It.IsAny<UserAccount>()), Times.Once);
+            _mockCodeService.Verify(service => service.GenerateAndStoreCode(newAccountDto.Email, CodeType.EmailVerification), Times.Once);
+            _mockNotification.Verify(service => service.SendAccountVerificationEmailAsync(newAccountDto.Email, generatedCode), Times.Once);
         }
-    }*/
+
+        [Fact]
+        public async Task CreateAccount_ShouldReturnFalse_WhenRepositoryFailsToCreateAccount()
+        {
+            // Arrange
+            var newAccountDto = new NewAccountDTO { Email = "test@example.com", Password = "Password123!" };
+
+            // Configuramos el mock del repositorio para que falle la creación.
+            _mockRepo.Setup(repo => repo.CreateAccount(It.IsAny<UserAccount>())).Returns(false);
+
+            // Act
+            var result =  _accountManager.CreateAccount(newAccountDto);
+
+            // Assert
+            Assert.False(result);
+
+            // Verificamos que, como la creación falló, NUNCA se intentó generar un código ni enviar un email.
+            // Esto prueba que la lógica de nuestro servicio es correcta.
+            _mockCodeService.Verify(service => service.GenerateAndStoreCode(It.IsAny<string>(), It.IsAny<CodeType>()), Times.Never);
+            _mockNotification.Verify(service => service.SendAccountVerificationEmailAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+    }
 }

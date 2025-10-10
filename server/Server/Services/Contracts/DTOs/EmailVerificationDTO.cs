@@ -12,7 +12,7 @@ namespace Services.Contracts.DTOs
     {
         [DataMember]
         public string Email { get; set; }
-
+        
         [DataMember]
         public string VerificationCode { get; set; }
     }

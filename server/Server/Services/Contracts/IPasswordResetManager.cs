@@ -1,5 +1,6 @@
 ﻿using Services.Contracts.DTOs;
 using System.ServiceModel;
+using System.Threading.Tasks;
 
 namespace Services.Contracts
 {
@@ -10,6 +11,7 @@ namespace Services.Contracts
         bool ResetPassword(PasswordResetDTO passwordResetDTO);
         [OperationContract]
         bool RequestPasswordResetCode(EmailVerificationDTO emailVerificationDTO);
-
+        [OperationContract]
+        bool ValidatePasswordResetCode(EmailVerificationDTO emailVerificationDTO);
     }
 }

@@ -4,6 +4,7 @@ using Data.Util;
 using System;
 using System.Data.Entity;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Data.DAL.Implementations
 {
@@ -71,13 +72,17 @@ namespace Data.DAL.Implementations
 
         public bool VerifyEmail(string email)
         {
-            using(var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
                 try
                 {
-                    UserAccount user = GetUserByEmail (email);
+                    UserAccount user = context.UserAccount.FirstOrDefault(u => u.Email == email);
+
+                    if (user == null)
+                    {
+                        return false;
+                    }
                     user.EmailVerified = true;
-                    context.UserAccount.Attach(user);
                     context.SaveChanges();
                     return true;
                 }
@@ -89,20 +94,27 @@ namespace Data.DAL.Implementations
             }
         }
 
-        public bool ResetPassword(string email, string password)
+        public bool ResetPassword(string email, string passwordHash)
         {
-            using(var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
                 try
                 {
-                    UserAccount user = GetUserByEmail(email);
-                    user.PasswordHash = password;
-                    context.UserAccount.Attach(user);
-                    context.SaveChanges ();
+                    UserAccount user = context.UserAccount.FirstOrDefault(u => u.Email == email);
+
+                    if (user == null)
+                    {
+                        return false;
+                    }
+
+                    user.PasswordHash = passwordHash;
+                    context.SaveChanges();
+
                     return true;
                 }
                 catch (Exception ex)
                 {
+                    Console.WriteLine(ex.ToString());
                     return false;
                 }
             }
