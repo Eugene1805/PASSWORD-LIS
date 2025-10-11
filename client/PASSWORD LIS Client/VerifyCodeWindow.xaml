@@ -9,6 +9,16 @@
         WindowStartupLocation="CenterScreen"
         MinHeight="400" MinWidth="400"
         Title="{x:Static language:Lang.verifyCodeText}" Height="600" Width="600">
+    <Window.Resources>
+        <Style TargetType="Hyperlink">
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Foreground" Value="Gray"/>
+                    <Setter Property="TextDecorations" Value="None"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
     <Grid>
         <Grid.Background>
             <ImageBrush ImageSource="Resources/BackgroudImage.png"/>

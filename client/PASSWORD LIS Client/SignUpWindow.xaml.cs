@@ -40,7 +40,7 @@ namespace PASSWORD_LIS_Client
                 }
                 else
                 {
-                    MessageBox.Show("No se pudo crear la cuenta. El correo o nickname ya podría estar en uso.");
+                    MessageBox.Show(Properties.Langs.Lang.userAlreadyExistText);
                 }
             }
             catch (Exception ex)

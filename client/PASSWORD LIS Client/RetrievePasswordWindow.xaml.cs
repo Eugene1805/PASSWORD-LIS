@@ -1,7 +1,8 @@
 ﻿using PASSWORD_LIS_Client.PasswordResetManagerServiceReference;
-using PASSWORD_LIS_Client.VerificationCodeManagerServiceReference;
 using System;
-using System.ComponentModel;
+using System.ServiceModel;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace PASSWORD_LIS_Client
@@ -18,37 +19,100 @@ namespace PASSWORD_LIS_Client
 
         private async void ButtonClickSendCode(object sender, RoutedEventArgs e)
         {
-            var client = new PasswordResetManagerClient();
-            bool success = false;
+            if (!IsInputValid())
+            {
+                return;
+            }
+
+            sendCodeButton.IsEnabled = false;
             try
             {
-                success = await client.RequestPasswordResetCodeAsync(new PasswordResetManagerServiceReference.EmailVerificationDTO { Email = emailTextBox.Text, 
-                VerificationCode = ""});
-                client.Close();
+                bool success = await TryRequestResetCodeAsync(emailTextBox.Text);
+
+                if (success)
+                {
+                    ProcessCodeRequestSuccess(emailTextBox.Text);
+                }
+                else
+                {
+                    MessageBox.Show("No se pudo enviar el código. Verifica que el correo sea correcto o espera un minuto antes de reintentar.", "Envío Fallido", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show($"Ocurrió un error inesperado: {ex.Message}", "Error Crítico", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                sendCodeButton.IsEnabled = true;
+            }
+        }
+
+        private async Task<bool> TryRequestResetCodeAsync(string email)
+        {
+            var client = new PasswordResetManagerClient();
+            try
+            {
+                var requestDto = new EmailVerificationDTO { Email = email, VerificationCode = "" };
+                bool success = await client.RequestPasswordResetCodeAsync(requestDto);
+                client.Close();
+                return success;
+            }
+            catch (TimeoutException)
+            {
                 client.Abort();
+                MessageBox.Show("El servidor no respondió a tiempo. Inténtalo de nuevo.", "Error de Red", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
             }
-
-            if (success)
+            catch (EndpointNotFoundException)
             {
-                var verifyCodeWindow = new VerifyCodeWindow(emailTextBox.Text, VerificationReason.PasswordReset);
+                client.Abort();
+                MessageBox.Show("No se pudo conectar con el servidor. Verifica tu conexión a internet.", "Error de Conexión", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            catch (CommunicationException ex)
+            {
+                client.Abort();
+                MessageBox.Show($"Ocurrió un error de comunicación: {ex.Message}", "Error de Red", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                client.Abort();
+                MessageBox.Show($"Ocurrió un error inesperado: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+        }
 
-                bool? result = verifyCodeWindow.ShowDialog();
+        private void ProcessCodeRequestSuccess(string email)
+        {
+            var verifyCodeWindow = new VerifyCodeWindow(email, VerificationReason.PasswordReset);
+            bool? result = verifyCodeWindow.ShowDialog();
+
+            if (result == true)
+            {
+                var changePasswordWindow = new ChangePasswordWindow(email, verifyCodeWindow.EnteredCode);
+                changePasswordWindow.Show();
                 this.Close();
-                if (result == true)
-                {
-                    var changePasswordWindow = new ChangePasswordWindow(emailTextBox.Text, verifyCodeWindow.EnteredCode); // Pasa los datos necesarios
-                    changePasswordWindow.Show();
-                    this.Close();
-                }
             }
-            else
+        }
+
+        private bool IsInputValid()
+        {
+            string email = emailTextBox.Text;
+            if (string.IsNullOrWhiteSpace(email))
             {
-                MessageBox.Show("No se pudo enviar el código. Verifica el correo o espera un minuto.");
+                MessageBox.Show(Properties.Langs.Lang.requiredFieldsText);
+                return false;
             }
+            string emailRegex = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+
+            if(!Regex.IsMatch(email, emailRegex))
+            {
+                MessageBox.Show(Properties.Langs.Lang.invalidEmailErrorText);
+                return false;
+            }
+            return true;
         }
     }
 }
