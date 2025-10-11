@@ -37,9 +37,9 @@ namespace PASSWORD_LIS_Client
             }
 
             var currentUser = SessionManager.CurrentUser;
-            Nickname.Text = currentUser.Nickname;
-            Name.Text = currentUser.FirstName;
-            LastName.Text = currentUser.LastName;
+            nicknameTextBox.Text = currentUser.Nickname;
+            nameTextBox.Text = currentUser.FirstName;
+            lastNameTextBox.Text = currentUser.LastName;
 
             Uri avatarUri = GetAvatarUriById(currentUser.PhotoId);
             if (avatarUri != null)
@@ -49,12 +49,12 @@ namespace PASSWORD_LIS_Client
                     ImageSource = new BitmapImage(avatarUri)
                 };
 
-                AvatarEllipse.Fill = imageBrush;
+                avatarEllipse.Fill = imageBrush;
             }
         }
 
 
-        private void ButtonClickChooseAnAvatar(object sender, RoutedEventArgs e)
+        private void ChooseAnAvatarButtonClick(object sender, RoutedEventArgs e)
         {
             var chooseAvatarWindow = new ChooseAvatarWindow();
             if (chooseAvatarWindow.ShowDialog() == true)
@@ -65,11 +65,11 @@ namespace PASSWORD_LIS_Client
                 Uri avatarUri = GetAvatarUriById(newAvatarId);
                 if (avatarUri != null)
                 {
-                    AvatarEllipse.Fill = new ImageBrush { ImageSource = new BitmapImage(avatarUri) };
+                    avatarEllipse.Fill = new ImageBrush { ImageSource = new BitmapImage(avatarUri) };
                 }
             }
         }
-        private void ButtonClickEditProfile(object sender, RoutedEventArgs e)
+        private void EditProfileButtonClick(object sender, RoutedEventArgs e)
         {
             // Code to edit profile goes here
             MessageBox.Show("Edit Profile clicked!");
@@ -79,7 +79,7 @@ namespace PASSWORD_LIS_Client
             // Code to change password goes here
             MessageBox.Show("Change Password clicked!");
         }
-        private async void ButtonClickSaveChanges(object sender, RoutedEventArgs e)
+        private async void SaveChangesButtonClick(object sender, RoutedEventArgs e)
         {
             if (!SessionManager.IsUserLoggedIn())
             {
