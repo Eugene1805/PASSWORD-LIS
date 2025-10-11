@@ -48,7 +48,7 @@ namespace PASSWORD_LIS_Client
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            // Usando IEnumerable<string> funciona para List<T> y para arrays T[]
+            // We use IEnumerable<string> because it works with List<T> and arrays T[]
             if (value is IEnumerable<string> nombres)
             {
                 // Si la colección está vacía, devuelve un texto indicativo
@@ -58,7 +58,7 @@ namespace PASSWORD_LIS_Client
                 }
                 return string.Join(" & ", nombres);
             }
-            return string.Empty; // Devuelve vacío si el valor no es una colección de strings
+            return string.Empty; 
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

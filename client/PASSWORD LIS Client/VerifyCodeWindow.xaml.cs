@@ -26,7 +26,7 @@ namespace PASSWORD_LIS_Client
 
         public VerifyCodeWindow(string email, VerificationReason reason) : this()
         {
-            emailLabel.Content = email;
+            emailTextblock.Text = email;
             this.reason = reason;
             this.email = email;
         }

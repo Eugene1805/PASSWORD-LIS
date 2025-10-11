@@ -87,7 +87,7 @@
                     </RadioButton>
                 </Grid>
 
-                <Button Grid.Row="2" Content="Seleccionar" Margin="0,15,0,0"
+                <Button Grid.Row="2" Content="Seleccionar" Margin="0,15,0,0" Style="{StaticResource primaryButtonStyle}"
                         HorizontalAlignment="Center" Width="150" Height="40"
                         x:Name="SelectAvatarButton" Click="SelectAvatarButtonClick"/>
             </Grid>
