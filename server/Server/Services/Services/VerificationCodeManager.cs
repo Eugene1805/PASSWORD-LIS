@@ -1,10 +1,7 @@
-﻿using Data.DAL.Implementations;
-using Data.DAL.Interfaces;
+﻿using Data.DAL.Interfaces;
 using Services.Contracts;
 using Services.Contracts.DTOs;
 using Services.Util;
-using System;
-using System.Collections.Generic;
 using System.ServiceModel;
 
 namespace Services.Services

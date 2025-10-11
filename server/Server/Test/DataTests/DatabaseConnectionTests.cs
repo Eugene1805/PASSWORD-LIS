@@ -8,7 +8,7 @@ using System.Data.Entity.Core.EntityClient;
 using System.Data.SqlClient;
 
 
-namespace Test.UnitTest
+namespace Test.DataTests
 {
     public class DatabaseConnectionTests
     {

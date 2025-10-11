@@ -1,6 +1,6 @@
 ﻿using Services.Util;
 
-namespace Test.UnitTest
+namespace Test.ServicesTests.ServicesUtilTest
 {
     public class VerificationCodeServiceTests
     {

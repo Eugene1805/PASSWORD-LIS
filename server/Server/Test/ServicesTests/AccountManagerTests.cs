@@ -5,7 +5,7 @@ using Services.Contracts.DTOs;
 using Services.Services;
 using Services.Util;
 
-namespace Test.UnitTest
+namespace Test.ServicesTests
 {
     public class AccountManagerTests
     {

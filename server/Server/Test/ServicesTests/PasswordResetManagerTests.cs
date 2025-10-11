@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Test.UnitTest
+namespace Test.ServicesTests
 {
     public class PasswordResetManagerTests
     {
@@ -39,7 +39,7 @@ namespace Test.UnitTest
             var resetDto = new PasswordResetDTO { Email = "test@example.com", ResetCode = "123456", NewPassword = "NewPassword123!" };
 
             // Configuramos los mocks para el escenario de éxito
-            _mockCodeService.Setup(s => s.ValidateCode(resetDto.Email, resetDto.ResetCode, CodeType.PasswordReset)).Returns(true);
+            _mockCodeService.Setup(s => s.ValidateCode(resetDto.Email, resetDto.ResetCode, CodeType.PasswordReset,true)).Returns(true);
             _mockRepo.Setup(r => r.ResetPassword(resetDto.Email, It.IsAny<string>())).Returns(true);
 
             // Act
@@ -59,7 +59,7 @@ namespace Test.UnitTest
             var resetDto = new PasswordResetDTO { Email = "test@example.com", ResetCode = "invalid-code", NewPassword = "NewPassword123!" };
 
             // Configuramos el mock para que el código sea inválido
-            _mockCodeService.Setup(s => s.ValidateCode(resetDto.Email, resetDto.ResetCode, CodeType.PasswordReset)).Returns(false);
+            _mockCodeService.Setup(s => s.ValidateCode(resetDto.Email, resetDto.ResetCode, CodeType.PasswordReset,true)).Returns(false);
 
             // Act
             var result =  _passwordManager.ResetPassword(resetDto);
