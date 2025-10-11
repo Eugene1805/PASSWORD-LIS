@@ -81,6 +81,7 @@
     <Compile Include="Contracts\DTOs\EmailVerificationDTO.cs" />
     <Compile Include="Contracts\DTOs\NewAccountDTO.cs" />
     <Compile Include="Contracts\DTOs\PasswordResetDTO.cs" />
+    <Compile Include="Contracts\DTOs\TeamDTO.cs" />
     <Compile Include="Contracts\DTOs\UserDTO.cs" />
     <Compile Include="Contracts\IAccountManager.cs" />
     <Compile Include="Contracts\IAccountVerificationManager.cs" />
@@ -100,6 +101,7 @@
     <Compile Include="Services\LoginManager.cs" />
     <Compile Include="Services\ProfileManager.cs" />
     <Compile Include="Services\PasswordResetManager.cs" />
+    <Compile Include="Services\TopPlayersManager.cs" />
     <Compile Include="Services\VerificationCodeManager.cs" />
     <Compile Include="Util\EmailSender.cs" />
     <Compile Include="Util\INotificationService.cs" />

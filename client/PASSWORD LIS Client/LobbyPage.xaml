@@ -64,7 +64,8 @@
                 </Border>
 
                 <StackPanel Grid.Row="3">
-                    <Button Content="{x:Static language:Lang.topPlayersText}" 
+                    <Button Click="TopPlayersButonClick"
+                            Content="{x:Static language:Lang.topPlayersText}" 
                             Style="{StaticResource primaryButtonStyle}"
                             Height="35" Margin="0,5"/>
 

@@ -120,14 +120,14 @@ namespace Data.DAL.Implementations
             }
         }
 
-        public bool UpdateUserAvatar(int userId, int newPhotoId)
+        public bool UpdateUserAvatar(int playerId, int newPhotoId)
         {
             using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
                 try
                 {
                     var player = context.Player.Include(p => p.UserAccount)
-                        .FirstOrDefault(p => p.Id == userId);
+                        .FirstOrDefault(p => p.Id == playerId);
                     if (player == null || player.UserAccount == null)
                     {
                         return false;
