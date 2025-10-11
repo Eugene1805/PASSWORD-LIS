@@ -1,5 +1,6 @@
 ﻿using PASSWORD_LIS_Client.PasswordResetManagerServiceReference;
 using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -23,51 +24,103 @@ namespace PASSWORD_LIS_Client
             verificationCode = code;
         }
 
-        private void ButtonClickChangePassword(object sender, RoutedEventArgs e)
+        private async void ButtonClickChangePassword(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(newPasswordBox.Password) || string.IsNullOrWhiteSpace(confirmNewPasswordBox.Password))
+            if (!IsInputValid())
             {
-                MessageBox.Show("Ambos campos de contraseña son requeridos.", "Advertencia", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-            if (newPasswordBox.Password != confirmNewPasswordBox.Password)
-            {
-                MessageBox.Show("Las contraseñas no coinciden.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
+
             changePasswordButton.IsEnabled = false;
-            var client = new PasswordResetManagerClient();
-            bool success = false;
             try
             {
-                success = client.ResetPassword(new PasswordResetDTO
+                bool success = await TryResetPasswordOnServerAsync();
+
+                if (success)
                 {
-                    NewPassword = newPasswordBox.Password,
-                    Email = accountEmail,
-                    ResetCode = verificationCode
-                });
+                    ProcessSuccessfulPasswordChange();
+                }
+                else
+                {
+                    MessageBox.Show("No se pudo cambiar la contraseña. Revisa los mensajes de error anteriores.", "Operación Fallida", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
             }
-            catch (Exception ex) {
-                MessageBox.Show("Ocurrió un error al cambiar la contraseña: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                client.Abort();
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ocurrió un error inesperado: {ex.Message}", "Error Crítico", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
                 changePasswordButton.IsEnabled = true;
             }
-            
-            if (success) {
-                MessageBox.Show("Contraseña cambiada exitosamente. Ahora serás redirigido al inicio de sesión.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
-                var loginWindow = new LoginWindow();
-                loginWindow.Show();
-                this.Close();
-            }
-            else
+        }
+        private async Task<bool> TryResetPasswordOnServerAsync()
+        {
+            var client = new PasswordResetManagerClient();
+            try
             {
-                MessageBox.Show("No se pudo cambiar la contraseña");
-            }
-            
+                var passwordResetInfo = new PasswordResetDTO
+                {
+                    NewPassword = newPasswordBox.Password,
+                    Email = this.accountEmail,
+                    ResetCode = this.verificationCode
+                };
 
+                bool success = await client.ResetPasswordAsync(passwordResetInfo);
+
+                client.Close();
+                return success;
+            }
+            catch (TimeoutException)
+            {
+                client.Abort();
+                MessageBox.Show("El servidor no respondió a tiempo. Por favor, inténtalo más tarde.", "Error de Conexión", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            catch (System.ServiceModel.EndpointNotFoundException)
+            {
+                client.Abort();
+                MessageBox.Show("No se pudo conectar con el servidor. Verifica tu conexión a internet.", "Error de Conexión", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            catch (System.ServiceModel.CommunicationException ex)
+            {
+                client.Abort();
+                MessageBox.Show($"Ocurrió un error de comunicación: {ex.Message}", "Error de Red", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                client.Abort();
+                MessageBox.Show($"Ocurrió un error inesperado: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+        }
+        private void ProcessSuccessfulPasswordChange()
+        {
+            MessageBox.Show("Contraseña cambiada exitosamente. Ahora serás redirigido al inicio de sesión.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
+            var loginWindow = new LoginWindow();
+            loginWindow.Show();
+            this.Close();
+        }
+        private bool IsInputValid()
+        {
+            string newPassword = newPasswordBox.Password;
+            string confirmPassword = confirmNewPasswordBox.Password;
+
+            if (string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
+            {
+                MessageBox.Show(Properties.Langs.Lang.requiredFieldsText);
+                return false;
+            }
+
+            if (newPassword != confirmPassword)
+            {
+                MessageBox.Show(Properties.Langs.Lang.matchingPasswordErrorText);
+                return false;
+            }
+
+            return true;
         }
     }
 }
