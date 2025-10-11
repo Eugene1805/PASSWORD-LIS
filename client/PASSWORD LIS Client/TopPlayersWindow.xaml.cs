@@ -1,5 +1,7 @@
-﻿using System;
+﻿using PASSWORD_LIS_Client.TopPlayersManagerServiceReference;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,17 +21,49 @@ namespace PASSWORD_LIS_Client
     /// </summary>
     public partial class TopPlayersWindow : Window
     {
+        private readonly int numberOfTeams = 10;
         public TopPlayersWindow()
         {
             InitializeComponent();
+            LoadTop();
         }
+        private void LoadTop()
+        {
+            try
+            {
+                var client = new TopPlayersManagerClient();
+                List<TeamDTO> teamsTop = client.GetTop(numberOfTeams).ToList();
 
+                topTeamsDataGrid.ItemsSource = teamsTop;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar el top de equipos: {ex.Message}");
+            }
+        }
 
     }
 
-    public class PlayerScore
+    public class NicknamesConverter : IValueConverter
     {
-        public string Equipo { get; set; }
-        public int Puntos { get; set; }
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            // We use IEnumerable<string> because it works with List<T> and arrays T[]
+            if (value is IEnumerable<string> nombres)
+            {
+                // Si la colección está vacía, devuelve un texto indicativo
+                if (!nombres.Any())
+                {
+                    return "(Sin jugadores)";
+                }
+                return string.Join(" & ", nombres);
+            }
+            return string.Empty; 
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

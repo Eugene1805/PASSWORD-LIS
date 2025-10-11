@@ -13,7 +13,7 @@ namespace Data.DAL.Interfaces
         bool AccountAlreadyExist(string email);
         UserAccount GetUserByEmail(string email);
         bool VerifyEmail(string email);
-        bool ResetPassword(string email,string password);
+        bool ResetPassword(string email, string passwordHash);
 
         bool UpdateUserAvatar(int playerId, int newPhotoId);
     }

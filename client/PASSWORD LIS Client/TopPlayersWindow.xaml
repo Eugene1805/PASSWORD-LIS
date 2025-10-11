@@ -6,8 +6,13 @@
         xmlns:local="clr-namespace:PASSWORD_LIS_Client"
         xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
         mc:Ignorable="d"
-        Title="TopPlayersWindow" Height="300" Width="300"
+        WindowStartupLocation="CenterScreen"
+        MinHeight="350" MinWidth="350"
+        Title="TopPlayersWindow" Height="350" Width="350"
         Background="#EEEFF0">
+    <Window.Resources>
+        <local:NicknamesConverter x:Key="PlayerNicknamesConverter"/>
+    </Window.Resources>
     <Grid>
         <Border Style="{StaticResource floatingBorderStyle}" Padding="15" Margin="20">
             <Grid>
@@ -21,28 +26,14 @@
                            Margin="20,0,20,10"/>
 
 
-                <DataGrid x:Name="topPlayersDataGrid"
-                          Grid.Row="1" >
-
+                <DataGrid x:Name="topTeamsDataGrid" AutoGenerateColumns="False"
+                          CanUserAddRows="False" RowDetailsVisibilityMode="Collapsed"
+                          CanUserSortColumns="False" Grid.Row="1"
+                          IsReadOnly="True" Style="{StaticResource cleanDataGridStyle}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="{x:Static language:Lang.playersText}" 
-                                            Binding="{Binding Equipo}"
-                                            Width="*"
-                                            MinWidth="150"/>
-
-                        <DataGridTextColumn Header="{x:Static language:Lang.scoreTopText}" 
-                                            Binding="{Binding Puntos}"
-                                            Width="Auto"/>
+                        <DataGridTextColumn HeaderStyle="{StaticResource cleanDataGridColumnHeaderStyle}" Header="Puntuación" Binding="{Binding Score}" Width="*"/>
+                        <DataGridTextColumn HeaderStyle="{StaticResource cleanDataGridColumnHeaderStyle}" Header="Jugadores" Binding="{Binding PlayersNicknames, Converter={StaticResource PlayerNicknamesConverter}}" Width="2*"/>
                     </DataGrid.Columns>
-                    <DataGrid.ItemsSource>
-                        <x:Array Type="{x:Type local:PlayerScore}">
-                            <local:PlayerScore Equipo="Arturo + Eugenio" Puntos="15" />
-                            <local:PlayerScore Equipo="Uriel + Miguel" Puntos="10" />
-                            <local:PlayerScore Equipo="Raziel + Abel" Puntos="9" />
-                            <local:PlayerScore Equipo="Mauricio + Erickmel" Puntos="8" />
-                            <local:PlayerScore Equipo="Carlos + Gabriel" Puntos="7" />
-                        </x:Array>
-                    </DataGrid.ItemsSource>
                 </DataGrid>
             </Grid>
         </Border>

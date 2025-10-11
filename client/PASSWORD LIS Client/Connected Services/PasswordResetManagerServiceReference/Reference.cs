@@ -166,6 +166,12 @@ namespace PASSWORD_LIS_Client.PasswordResetManagerServiceReference {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IPasswordResetManager/RequestPasswordResetCode", ReplyAction="http://tempuri.org/IPasswordResetManager/RequestPasswordResetCodeResponse")]
         System.Threading.Tasks.Task<bool> RequestPasswordResetCodeAsync(PASSWORD_LIS_Client.PasswordResetManagerServiceReference.EmailVerificationDTO emailVerificationDTO);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IPasswordResetManager/ValidatePasswordResetCode", ReplyAction="http://tempuri.org/IPasswordResetManager/ValidatePasswordResetCodeResponse")]
+        bool ValidatePasswordResetCode(PASSWORD_LIS_Client.PasswordResetManagerServiceReference.EmailVerificationDTO emailVerificationDTO);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IPasswordResetManager/ValidatePasswordResetCode", ReplyAction="http://tempuri.org/IPasswordResetManager/ValidatePasswordResetCodeResponse")]
+        System.Threading.Tasks.Task<bool> ValidatePasswordResetCodeAsync(PASSWORD_LIS_Client.PasswordResetManagerServiceReference.EmailVerificationDTO emailVerificationDTO);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -209,6 +215,14 @@ namespace PASSWORD_LIS_Client.PasswordResetManagerServiceReference {
         
         public System.Threading.Tasks.Task<bool> RequestPasswordResetCodeAsync(PASSWORD_LIS_Client.PasswordResetManagerServiceReference.EmailVerificationDTO emailVerificationDTO) {
             return base.Channel.RequestPasswordResetCodeAsync(emailVerificationDTO);
+        }
+        
+        public bool ValidatePasswordResetCode(PASSWORD_LIS_Client.PasswordResetManagerServiceReference.EmailVerificationDTO emailVerificationDTO) {
+            return base.Channel.ValidatePasswordResetCode(emailVerificationDTO);
+        }
+        
+        public System.Threading.Tasks.Task<bool> ValidatePasswordResetCodeAsync(PASSWORD_LIS_Client.PasswordResetManagerServiceReference.EmailVerificationDTO emailVerificationDTO) {
+            return base.Channel.ValidatePasswordResetCodeAsync(emailVerificationDTO);
         }
     }
 }

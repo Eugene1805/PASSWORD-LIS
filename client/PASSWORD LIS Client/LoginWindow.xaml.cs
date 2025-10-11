@@ -18,7 +18,7 @@ namespace PASSWORD_LIS_Client
             {
                 return; 
             }
-
+            
             var client = new LoginManagerClient();
             try
             {
@@ -33,23 +33,26 @@ namespace PASSWORD_LIS_Client
 
                     var mainWindow = new MainWindow();
                     mainWindow.Show();
-                    this.Close(); 
+                    this.Close();
                 }
                 else
                 {
                     MessageBox.Show(Properties.Langs.Lang.wrongCredentialsText,
                                     "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
+                client.Close();
             }
             catch (System.ServiceModel.EndpointNotFoundException)
             {
                 MessageBox.Show(Properties.Langs.Lang.loginConnectionErrorText,
                                 "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                client.Abort();
             }
             catch (System.Exception ex)
             {
                 MessageBox.Show(string.Format(Properties.Langs.Lang.loginUnexpectedErrorText, ex.Message),
                                 "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                client.Abort();
             }
             finally
             {
@@ -70,8 +73,7 @@ namespace PASSWORD_LIS_Client
         private void HyperlinkClickForgotPassword(object sender, RoutedEventArgs e)
         {
             var retrievePasswordWindow = new RetrievePasswordWindow();
-            retrievePasswordWindow.Show();
-            this.Close();
+            retrievePasswordWindow.ShowDialog();
         }
 
         private void HyperlinkClickSignUp(object sender, RoutedEventArgs e)

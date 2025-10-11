@@ -23,6 +23,7 @@ namespace Host
                 var emailSender = new EmailSender();
                 var codeService = new VerificationCodeService();
                 var notificationService = new NotificationService(emailSender);
+                var statisticsRepository = new StatisticsRepository();
 
                 // --- PASO 2: Crear las INSTANCIAS de cada servicio ---
                 // Se inyectan las dependencias compartidas en cada constructor.
@@ -31,6 +32,7 @@ namespace Host
                 var verificationManagerInstance = new VerificationCodeManager(accountRepository, notificationService, codeService); // Asumiendo que VerificationCodeManager necesita el repositorio
                 var passwordResetManagerInstance = new PasswordResetManager(accountRepository, notificationService, codeService);
                 var profileManagerInstance = new ProfileManager(accountRepository);
+                var topPlayersManagerInstance = new TopPlayersManager(statisticsRepository);
 
                 // --- PASO 3: Crear un ServiceHost para CADA instancia de servicio ---
                 var accountManagerHost = new ServiceHost(accountManagerInstance);
@@ -38,7 +40,7 @@ namespace Host
                 var verificationManagerHost = new ServiceHost(verificationManagerInstance);
                 var passwordResetManagerHost = new ServiceHost(passwordResetManagerInstance);
                 var profileManagerHost = new ServiceHost(profileManagerInstance);
-
+                var topPlayersManagerHost = new ServiceHost(topPlayersManagerInstance);
 
                 // Agregarlos a la lista para manejarlos fácilmente
                 hosts.Add(accountManagerHost);
@@ -46,6 +48,7 @@ namespace Host
                 hosts.Add(verificationManagerHost);
                 hosts.Add(passwordResetManagerHost);
                 hosts.Add(profileManagerHost);
+                hosts.Add(topPlayersManagerHost);
 
                 // --- PASO 4: Abrir todos los hosts ---
                 foreach (var host in hosts)

@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
-using System.Linq;
 using System.Net;
 using System.Net.Mail;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Services.Util
@@ -28,9 +25,9 @@ namespace Services.Util
             var message = new MailMessage
             {
                 From = new MailAddress(smtpUser, "PASSWORD LIS"),
-                Subject = subject, // <-- Usa el parámetro subject
+                Subject = subject,
                 IsBodyHtml = true,
-                Body = body        // <-- Usa el parámetro body
+                Body = body
             };
             message.To.Add(recipientEmail);
 

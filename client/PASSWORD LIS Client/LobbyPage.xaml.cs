@@ -104,5 +104,10 @@ namespace PASSWORD_LIS_Client
             LoadUserProfile();
         }
 
+        private void TopPlayersButonClick(object sender, RoutedEventArgs e)
+        {
+            var topPlayersWindow = new TopPlayersWindow();
+            topPlayersWindow.ShowDialog();
+        }
     }
 }

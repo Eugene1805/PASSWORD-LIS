@@ -1,19 +1,8 @@
 ﻿using PASSWORD_LIS_Client.AccountManagerServiceReference;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace PASSWORD_LIS_Client
 {
@@ -59,41 +48,42 @@ namespace PASSWORD_LIS_Client
             signUpButton.IsEnabled = false;
             try
             {
-                // 2. Crear el cliente (idealmente dentro de un using, pero para async es mejor try/finally)
                 client = new AccountManagerClient();
 
                 var userAccount = new NewAccountDTO
                 {
                     Email = emailTextBox.Text,
-                    Password = passwordBox.Password, // 3. ¡ENVIAR SIN HASHEAR!
+                    Password = passwordBox.Password, 
                     FirstName = firstNameTextBox.Text,
                     LastName = lastNameTextBox.Text,
                     Nickname = nicknameTextBox.Text
                 };
 
-                // 4. Llamar al método ASÍNCRONO
                 accountCreated = await client.CreateAccountAsync(userAccount);
 
-                // Si la llamada fue exitosa, cierra el cliente
                 client.Close();
             }
             catch (Exception ex)
             {
-                // Manejar errores de comunicación con el servidor
                 MessageBox.Show("Error de conexión con el servidor: " + ex.Message);
-                client?.Abort(); // Abortar el cliente si hubo un error
+                client.Abort(); 
             }
             finally
             {
-                // 5. Volver a habilitar el botón
                 signUpButton.IsEnabled = true;
             }
 
             if (accountCreated)
             {
-                var codeVerificationWindow = new VerifyCodeWindow(emailTextBox.Text);
-                codeVerificationWindow.ShowDialog();
-                this.Close(); // Cierra la ventana de registro si todo fue exitoso
+                var codeVerificationWindow = new VerifyCodeWindow(emailTextBox.Text, VerificationReason.AccountActivation);
+                bool? result = codeVerificationWindow.ShowDialog();
+
+                if (result == true)
+                {
+                    var loginWindow = new LoginWindow();
+                    loginWindow.Show();
+                    this.Close();
+                }
             }
             else
             {
@@ -111,7 +101,14 @@ namespace PASSWORD_LIS_Client
 
         private void HyperlinkClickTC(object sender, RoutedEventArgs e)
         {
-            Process.Start(tcUrl);
+            try
+            {
+                Process.Start(new ProcessStartInfo(tcUrl) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("No se pudo abrir el enlace: " + ex.Message);
+            }
         }
 
         private static bool ArePasswordRequirementsMet(string password)

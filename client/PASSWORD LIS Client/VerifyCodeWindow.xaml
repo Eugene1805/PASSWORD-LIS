@@ -24,12 +24,13 @@
                    TextWrapping="Wrap"
                    HorizontalAlignment="Center" 
                    Margin="0,0,0,20"/>
-            <Label x:Name="emailLabel"  FontSize="16"
+            <TextBlock x:Name="emailTextblock"  FontSize="16" TextWrapping="Wrap"
                     HorizontalAlignment="Center" FontWeight="Bold" FontFamily="Consolas"
-                    Margin="0,0,0,20" Height="27" Width="203"/>
+                    Margin="0,0,0,20" Height="50" Width="200"/>
 
             <TextBox x:Name="verificationCodeTextBox" Style="{StaticResource primaryTextBoxStyle}" Width="180"/>
-            <Button Content="{x:Static language:Lang.verifyCodeText}" 
+            <Button x:Name="verifyCodeButton"
+                Content="{x:Static language:Lang.verifyCodeText}" 
                Style="{StaticResource primaryButtonStyle}" 
                 Width="180" 
                 Height="35" 
