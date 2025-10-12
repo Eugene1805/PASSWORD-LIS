@@ -33,25 +33,27 @@
     <xsd:schema targetNamespace="http://tempuri.org/Imports">
       <xsd:import schemaLocation="http://localhost:8096/?xsd=xsd0" namespace="http://tempuri.org/" />
       <xsd:import schemaLocation="http://localhost:8096/?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+      <xsd:import schemaLocation="http://localhost:8096/?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" />
+      <xsd:import schemaLocation="http://localhost:8096/?xsd=xsd3" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
     </xsd:schema>
   </wsdl:types>
-  <wsdl:message name="IProfileManager_UpdateAvatar_InputMessage">
-    <wsdl:part name="parameters" element="tns:UpdateAvatar" />
+  <wsdl:message name="IProfileManager_UpdateProfile_InputMessage">
+    <wsdl:part name="parameters" element="tns:UpdateProfile" />
   </wsdl:message>
-  <wsdl:message name="IProfileManager_UpdateAvatar_OutputMessage">
-    <wsdl:part name="parameters" element="tns:UpdateAvatarResponse" />
+  <wsdl:message name="IProfileManager_UpdateProfile_OutputMessage">
+    <wsdl:part name="parameters" element="tns:UpdateProfileResponse" />
   </wsdl:message>
   <wsdl:portType name="IProfileManager">
-    <wsdl:operation name="UpdateAvatar">
-      <wsdl:input wsaw:Action="http://tempuri.org/IProfileManager/UpdateAvatar" message="tns:IProfileManager_UpdateAvatar_InputMessage" />
-      <wsdl:output wsaw:Action="http://tempuri.org/IProfileManager/UpdateAvatarResponse" message="tns:IProfileManager_UpdateAvatar_OutputMessage" />
+    <wsdl:operation name="UpdateProfile">
+      <wsdl:input wsaw:Action="http://tempuri.org/IProfileManager/UpdateProfile" message="tns:IProfileManager_UpdateProfile_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IProfileManager/UpdateProfileResponse" message="tns:IProfileManager_UpdateProfile_OutputMessage" />
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="NetTcpBinding_IProfileManager" type="tns:IProfileManager">
     <wsp:PolicyReference URI="#NetTcpBinding_IProfileManager_policy" />
     <soap12:binding transport="http://schemas.microsoft.com/soap/tcp" />
-    <wsdl:operation name="UpdateAvatar">
-      <soap12:operation soapAction="http://tempuri.org/IProfileManager/UpdateAvatar" style="document" />
+    <wsdl:operation name="UpdateProfile">
+      <soap12:operation soapAction="http://tempuri.org/IProfileManager/UpdateProfile" style="document" />
       <wsdl:input>
         <soap12:body use="literal" />
       </wsdl:input>
@@ -66,7 +68,7 @@
       <wsa10:EndpointReference>
         <wsa10:Address>net.tcp://localhost:8097/ProfileManager</wsa10:Address>
         <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
-          <Upn>SURFACE\eugen</Upn>
+          <Upn>LAPTOP-LF36UFJ4\artcu</Upn>
         </Identity>
       </wsa10:EndpointReference>
     </wsdl:port>

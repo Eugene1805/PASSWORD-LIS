@@ -42,7 +42,9 @@ namespace Services.Services
                             Email = userAccount.Email,
                             FirstName = userAccount.FirstName,
                             LastName = userAccount.LastName,
-                            PhotoId = userAccount.PhotoId ?? 1
+                            PhotoId = userAccount.PhotoId ?? 1,
+
+                            SocialAccounts = userAccount.SocialAccount.ToDictionary(sa => sa.Provider, sa => sa.Username)
 
                         };
                         return userDTO;

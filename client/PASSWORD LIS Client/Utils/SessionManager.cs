@@ -1,4 +1,4 @@
-﻿using PASSWORD_LIS_Client.LoginManagerServiceReference;
+﻿using UserDTO = PASSWORD_LIS_Client.LoginManagerServiceReference.UserDTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +9,7 @@ namespace PASSWORD_LIS_Client.Utils
 {
     public static class SessionManager
     {
-        public static UserDTO CurrentUser { get; set; }
+        public static UserDTO CurrentUser { get; private set; }
 
         public static void Login(UserDTO user)
         {

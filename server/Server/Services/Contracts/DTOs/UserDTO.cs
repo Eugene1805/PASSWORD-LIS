@@ -28,5 +28,8 @@ namespace Services.Contracts.DTOs
         [DataMember]
         public int PhotoId { get; set; }
 
+        [DataMember]
+        public Dictionary<string, string> SocialAccounts { get; set; }
+
     }
 }

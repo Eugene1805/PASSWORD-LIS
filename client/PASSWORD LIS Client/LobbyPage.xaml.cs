@@ -1,5 +1,4 @@
-﻿using PASSWORD_LIS_Client.LoginManagerServiceReference;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -34,15 +33,10 @@ namespace PASSWORD_LIS_Client
                 return;
             }
 
-            Uri avatarUri = GetAvatarUriById(SessionManager.CurrentUser.PhotoId);
+            Uri avatarUri = AvatarHelper.GetAvatarUriById(SessionManager.CurrentUser.PhotoId);
             if (avatarUri != null)
             {
-                var imageBrush = new ImageBrush
-                {
-                    ImageSource = new BitmapImage(avatarUri)
-                };
-
-                avatarEllipse.Fill = imageBrush;
+                avatarEllipse.Fill = new ImageBrush { ImageSource = new BitmapImage(avatarUri) };
             }
         }
 
@@ -68,37 +62,6 @@ namespace PASSWORD_LIS_Client
         {
 
         }
-
-        private Uri GetAvatarUriById(int photoId)
-        {
-            string resourcePath;
-            switch (photoId)
-            {
-                case 1:
-                    resourcePath = "/Resources/Avatar1.png";
-                    break;
-                case 2:
-                    resourcePath = "/Resources/Avatar2.png";
-                    break;
-                case 3:
-                    resourcePath = "/Resources/Avatar3.png";
-                    break;
-                case 4:
-                    resourcePath = "/Resources/Avatar4.png";
-                    break;
-                case 5:
-                    resourcePath = "/Resources/Avatar5.png";
-                    break;
-                case 6:
-                    resourcePath = "/Resources/Avatar6.png";
-                    break;
-                default:
-                    return null; // O una imagen por defecto
-            }
-            string packUri = $"pack://application:,,,{resourcePath}";
-            return new Uri(packUri, UriKind.Absolute);
-        }
-
         private void LobbyPageLoaded(object sender, RoutedEventArgs e)
         {
             LoadUserProfile();

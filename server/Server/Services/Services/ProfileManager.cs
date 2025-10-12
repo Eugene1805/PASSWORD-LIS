@@ -1,5 +1,6 @@
 ﻿using Data.DAL.Interfaces;
 using Services.Contracts;
+using Services.Contracts.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,9 +20,18 @@ namespace Services.Services
             repository = accountRepository;
         }
 
-        public bool UpdateAvatar(int playerId, int newPhotoId)
+        public UserDTO UpdateProfile(UserDTO updatedProfileData)
         {
-            return repository.UpdateUserAvatar(playerId, newPhotoId);
+            bool updateSuccess = repository.UpdateUserProfile(
+                updatedProfileData.PlayerId, 
+                updatedProfileData.Nickname, 
+                updatedProfileData.FirstName, 
+                updatedProfileData.LastName, 
+                updatedProfileData.PhotoId,
+                updatedProfileData.SocialAccounts
+             );
+
+            return updateSuccess ? updatedProfileData : null;
         }
     }
 }

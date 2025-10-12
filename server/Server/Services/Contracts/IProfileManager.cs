@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Services.Contracts.DTOs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
@@ -11,7 +12,6 @@ namespace Services.Contracts
     public interface IProfileManager
     {
         [OperationContract]
-
-        bool UpdateAvatar(int playerId, int newPhotoId);
+        UserDTO UpdateProfile(UserDTO updatedProfileData);
     }
 }

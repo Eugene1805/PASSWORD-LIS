@@ -2,6 +2,7 @@
 using Data.Model;
 using Data.Util;
 using System;
+using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,12 +32,13 @@ namespace Data.DAL.Implementations
                     return false;
                 }
             }
-           
+
         }
 
         public bool AccountAlreadyExist(string email)
         {
-            if (String.IsNullOrEmpty(email)){
+            if (String.IsNullOrEmpty(email))
+            {
                 return false;
             }
             using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
@@ -59,7 +61,9 @@ namespace Data.DAL.Implementations
             {
                 try
                 {
-                    UserAccount userAccount = context.UserAccount.Include(u => u.Player)
+                    UserAccount userAccount = context.UserAccount
+                        .Include(u => u.Player)
+                        .Include(u => u.SocialAccount)
                         .FirstOrDefault(u => u.Email == email);
                     return userAccount;
                 }
@@ -120,30 +124,69 @@ namespace Data.DAL.Implementations
             }
         }
 
-        public bool UpdateUserAvatar(int playerId, int newPhotoId)
+        public bool UpdateUserProfile(int playerId, string nickname, string firstName, string lastName, int photoId, Dictionary<string, string> socialAccounts)
         {
             using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
-                try
+                using (var transaction = context.Database.BeginTransaction())
                 {
-                    var player = context.Player.Include(p => p.UserAccount)
-                        .FirstOrDefault(p => p.Id == playerId);
-                    if (player == null || player.UserAccount == null)
+                    try
                     {
+                        var player = context.Player
+                            .Include(p => p.UserAccount.SocialAccount)
+                            .FirstOrDefault(p => p.Id == playerId);
+
+                        if (player == null || player.UserAccount == null)
+                        {
+                            return false;
+                        }
+
+                        var userAccount = player.UserAccount;
+
+                        userAccount.Nickname = nickname;
+                        userAccount.FirstName = firstName;
+                        userAccount.LastName = lastName;
+                        userAccount.PhotoId = (byte?)photoId;
+
+                        foreach (var socialAcccount in socialAccounts)
+                        {
+                            var existingAccount = userAccount.SocialAccount
+                                .FirstOrDefault(sa => sa.Provider == socialAcccount.Key);
+
+                            if (existingAccount != null)
+                            {
+                                if (string.IsNullOrEmpty(socialAcccount.Value))
+                                {
+                                    context.SocialAccount.Remove(existingAccount);
+                                }
+                                else
+                                {
+                                    existingAccount.Username = socialAcccount.Value;
+                                }
+                            }
+                            else if (!string.IsNullOrEmpty(socialAcccount.Value))
+                            {
+                                userAccount.SocialAccount.Add(new SocialAccount
+                                {
+                                    Provider = socialAcccount.Key,
+                                    Username = socialAcccount.Value
+                                });
+                            }
+                        }
+
+                        context.SaveChanges();
+                        transaction.Commit();
+
+                        return true;
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
                         return false;
                     }
-
-                    player.UserAccount.PhotoId = (byte?)newPhotoId;
-                    context.SaveChanges();
-                    return true;
-
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                    return false;
                 }
             }
         }
+
     }
 }
