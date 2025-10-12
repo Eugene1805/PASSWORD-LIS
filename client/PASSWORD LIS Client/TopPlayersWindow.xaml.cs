@@ -3,16 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ServiceModel;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using ServiceErrorDetailDTO = PASSWORD_LIS_Client.TopPlayersManagerServiceReference.ServiceErrorDetailDTO;
 
 namespace PASSWORD_LIS_Client
 {
@@ -25,21 +19,47 @@ namespace PASSWORD_LIS_Client
         public TopPlayersWindow()
         {
             InitializeComponent();
-            LoadTop();
         }
-        private void LoadTop()
+        private async void TopPlayersWindowLoaded(object sender, RoutedEventArgs e)
         {
+            var client = new TopPlayersManagerClient();
+            bool success = false;
             try
             {
-                var client = new TopPlayersManagerClient();
-                List<TeamDTO> teamsTop = client.GetTop(numberOfTeams).ToList();
-
+                
+                var teamsTop = await client.GetTopAsync(numberOfTeams);
                 topTeamsDataGrid.ItemsSource = teamsTop;
+                success = true;
             }
-            catch (Exception ex)
+            catch (FaultException<ServiceErrorDetailDTO> ex)
             {
-                MessageBox.Show($"Error al cargar el top de equipos: {ex.Message}");
+                MessageBox.Show(ex.Detail.Message, "Error del Servidor");
             }
+            catch (EndpointNotFoundException)
+            {
+                MessageBox.Show("No se pudo conectar con el servidor. Verifica tu conexión o que el servidor esté en línea.");
+            }
+            catch (CommunicationException ex)
+            {
+                MessageBox.Show($"Ocurrió un error de comunicación: {ex.Message}");
+            }
+            catch (Exception ex) // Captura cualquier otro error inesperado
+            {
+                MessageBox.Show($"Se produjo un error inesperado: {ex.Message}");
+            }
+            finally
+            {
+                if (success)
+                {
+                    client.Close();
+                }
+                else
+                {
+                    client.Abort();
+                }
+                topTeamsDataGrid.Visibility = Visibility.Visible;
+            }
+
         }
 
     }

@@ -12,6 +12,7 @@ namespace Services.Contracts
     public interface ITopPlayersManager
     {
         [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
         Task<List<TeamDTO>> GetTopAsync(int numberOfTeams);
     }
 }

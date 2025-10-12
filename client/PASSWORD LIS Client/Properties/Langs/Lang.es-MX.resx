@@ -402,8 +402,89 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
   <data name="loginConnectionErrorText" xml:space="preserve">
     <value>No se pudo conectar al servidor. Asegúrate de que el servicio esté corriendo.</value>
   </data>
+  <data name="warningTitleText" xml:space="preserve">
+    <value>Advertencia</value>
+  </data>
+  <data name="serverTimeoutText" xml:space="preserve">
+    <value>El servidor tardó demasiado en responder. Por favor, inténtalo de nuevo.</value>
+  </data>
+  <data name="serverConnectionInternetErrorText" xml:space="preserve">
+    <value>No se pudo conectar con el servidor. Verifica tu conexión a internet o inténtalo más tarde.</value>
+  </data>
+  <data name="serverCommunicationErrorText" xml:space="preserve">
+    <value>Ocurrió un error de comunicación con el servidor</value>
+  </data>
+  <data name="unexpectedServerErrorText" xml:space="preserve">
+    <value>Se produjo un error inesperado en el servidor.</value>
+  </data>
+  <data name="unexpectedErrorText" xml:space="preserve">
+    <value>Ocurrió un error inesperado.</value>
+  </data>
+  <data name="linkUnavailableText" xml:space="preserve">
+    <value>El enlace no esta disponible actualmente</value>
+  </data>
+  <data name="invalidLinkTitle" xml:space="preserve">
+    <value>Enlace Inválido</value>
+  </data>
+  <data name="linkOpenFailText" xml:space="preserve">
+    <value>No se pudo abrir el enlace. Asegúrate de tener un navegador web instalado y configurado como predeterminado.</value>
+  </data>
+  <data name="systemErrorTitle" xml:space="preserve">
+    <value>Error del Sistema</value>
+  </data>
+  <data name="termsLinkUnavailableText" xml:space="preserve">
+    <value>El enlace de los términos y condiciones no está disponible.</value>
+  </data>
+  <data name="internalErrorTitle" xml:space="preserve">
+    <value>Error Interno</value>
+  </data>
+  <data name="unexpectedLinkOpenErrorText" xml:space="preserve">
+    <value>Ocurrió un error inesperado al intentar abrir el enlace.</value>
+  </data>
+  <data name="unknownErrorTitle" xml:space="preserve">
+    <value>Error Desconocido</value>
+  </data>
+  <data name="passwordChangeFailedText" xml:space="preserve">
+    <value>No se pudo cambiar la contraseña. Revisa los mensajes de error anteriores.</value>
+  </data>
+  <data name="operationFailedTitleText" xml:space="preserve">
+    <value>Operación Fallida</value>
+  </data>
+  <data name="criticalErrorTitle" xml:space="preserve">
+    <value>Error Crítico</value>
+  </data>
+  <data name="connectionErrorTitleText" xml:space="preserve">
+    <value>Error de Conexión</value>
+  </data>
+  <data name="networkErrorTitleText" xml:space="preserve">
+    <value>Error de Red</value>
+  </data>
+  <data name="errorTitleText" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="codeSendFailedText" xml:space="preserve">
+    <value>No se pudo enviar el código. Verifica que el correo sea correcto o espera un minuto antes de reintentar.</value>
+  </data>
+  <data name="sendFailedTitleText" xml:space="preserve">
+    <value>Envío Fallido</value>
+  </data>
+  <data name="codeIncorrectOrExpiredText" xml:space="preserve">
+    <value>El código es incorrecto o ha expirado.</value>
+  </data>
+  <data name="verificationFailedTitleText" xml:space="preserve">
+    <value>Verificación Fallida</value>
+  </data>
+  <data name="newCodeSentText" xml:space="preserve">
+    <value>Se ha enviado un nuevo código a tu correo.</value>
+  </data>
+  <data name="codeSentTitleText" xml:space="preserve">
+    <value>Código Enviado</value>
+  </data>
+  <data name="waitAMinuteForCodeText" xml:space="preserve">
+    <value>Por favor, espera al menos un minuto antes de solicitar otro código.</value>
+  </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="warningTitleText" type="System.Resources.ResXNullRef, System.Windows.Forms">
+  <data name="timeLimitTitleText" type="System.Resources.ResXNullRef, System.Windows.Forms">
     <value />
   </data>
 </root>
