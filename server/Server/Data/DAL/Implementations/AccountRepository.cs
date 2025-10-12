@@ -1,4 +1,5 @@
 ﻿using Data.DAL.Interfaces;
+using Data.Exceptions;
 using Data.Model;
 using Data.Util;
 using System;
@@ -10,26 +11,18 @@ namespace Data.DAL.Implementations
 {
     public class AccountRepository : IAccountRepository
     {
-        public bool CreateAccount(UserAccount account)
+        public async Task CreateAccountAsync(UserAccount account)
         {
             using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
-                if (AccountAlreadyExist(account.Email))
+                if ( await context.UserAccount.AnyAsync(a => a.Email == account.Email))
                 {
-                    return false;
+                    throw new DuplicateAccountException($"Una cuenta con el email '{account.Email}' ya existe.");
                 }
-                try
-                {
                     context.UserAccount.Add(account);
                     context.Player.Add(new Player { UserAccount = account });
-                    context.SaveChanges();
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                    return false;
-                }
+                    await context.SaveChangesAsync();
+                
             }
            
         }

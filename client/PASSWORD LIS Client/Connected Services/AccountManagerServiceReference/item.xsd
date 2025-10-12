@@ -10,4 +10,11 @@
     </xs:sequence>
   </xs:complexType>
   <xs:element name="NewAccountDTO" nillable="true" type="tns:NewAccountDTO" />
+  <xs:complexType name="ServiceErrorDetailDTO">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="ErrorCode" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Message" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ServiceErrorDetailDTO" nillable="true" type="tns:ServiceErrorDetailDTO" />
 </xs:schema>

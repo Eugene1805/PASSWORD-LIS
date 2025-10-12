@@ -122,15 +122,77 @@ namespace PASSWORD_LIS_Client.AccountManagerServiceReference {
         }
     }
     
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
+    [System.SerializableAttribute()]
+    public partial class ServiceErrorDetailDTO : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ErrorCodeField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string MessageField;
+        
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string ErrorCode {
+            get {
+                return this.ErrorCodeField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ErrorCodeField, value) != true)) {
+                    this.ErrorCodeField = value;
+                    this.RaisePropertyChanged("ErrorCode");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Message {
+            get {
+                return this.MessageField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.MessageField, value) != true)) {
+                    this.MessageField = value;
+                    this.RaisePropertyChanged("Message");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     [System.ServiceModel.ServiceContractAttribute(ConfigurationName="AccountManagerServiceReference.IAccountManager")]
     public interface IAccountManager {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IAccountManager/CreateAccount", ReplyAction="http://tempuri.org/IAccountManager/CreateAccountResponse")]
-        bool CreateAccount(PASSWORD_LIS_Client.AccountManagerServiceReference.NewAccountDTO newAccount);
+        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.AccountManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IAccountManager/CreateAccountServiceErrorDetailDTOFault", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
+        void CreateAccount(PASSWORD_LIS_Client.AccountManagerServiceReference.NewAccountDTO newAccount);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IAccountManager/CreateAccount", ReplyAction="http://tempuri.org/IAccountManager/CreateAccountResponse")]
-        System.Threading.Tasks.Task<bool> CreateAccountAsync(PASSWORD_LIS_Client.AccountManagerServiceReference.NewAccountDTO newAccount);
+        System.Threading.Tasks.Task CreateAccountAsync(PASSWORD_LIS_Client.AccountManagerServiceReference.NewAccountDTO newAccount);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -160,11 +222,11 @@ namespace PASSWORD_LIS_Client.AccountManagerServiceReference {
                 base(binding, remoteAddress) {
         }
         
-        public bool CreateAccount(PASSWORD_LIS_Client.AccountManagerServiceReference.NewAccountDTO newAccount) {
-            return base.Channel.CreateAccount(newAccount);
+        public void CreateAccount(PASSWORD_LIS_Client.AccountManagerServiceReference.NewAccountDTO newAccount) {
+            base.Channel.CreateAccount(newAccount);
         }
         
-        public System.Threading.Tasks.Task<bool> CreateAccountAsync(PASSWORD_LIS_Client.AccountManagerServiceReference.NewAccountDTO newAccount) {
+        public System.Threading.Tasks.Task CreateAccountAsync(PASSWORD_LIS_Client.AccountManagerServiceReference.NewAccountDTO newAccount) {
             return base.Channel.CreateAccountAsync(newAccount);
         }
     }

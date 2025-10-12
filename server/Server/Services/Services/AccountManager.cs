@@ -1,10 +1,15 @@
 ﻿using Data.DAL.Implementations;
 using Data.DAL.Interfaces;
+using Data.Exceptions;
 using Data.Model;
+using log4net;
 using Services.Contracts;
 using Services.Contracts.DTOs;
 using Services.Util;
+using System;
+using System.Data.Entity.Infrastructure;
 using System.ServiceModel;
+using System.Threading.Tasks;
 
 namespace Services.Services
 {
@@ -14,7 +19,9 @@ namespace Services.Services
         private readonly IAccountRepository repository;
         private readonly INotificationService notification;
         private readonly IVerificationCodeService codeService;
-       
+
+        private static readonly ILog log = LogManager.GetLogger(typeof(AccountManager));
+
 
         public AccountManager(IAccountRepository accountRepository, INotificationService notificationService, IVerificationCodeService verificationCodeService)
         {
@@ -23,25 +30,57 @@ namespace Services.Services
             codeService = verificationCodeService;
         }
 
-        public bool CreateAccount(NewAccountDTO newAccount)
+        public async Task CreateAccountAsync(NewAccountDTO newAccount)
         {
-            
-            var userAccount = new UserAccount
+            try
             {
-                FirstName = newAccount.FirstName,
-                LastName = newAccount.LastName,
-                Email = newAccount.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(newAccount.Password),
-                Nickname = newAccount.Nickname,
-            };
-            if (repository.CreateAccount(userAccount))
-            {
+                log.Info($"Intentando crear cuenta para el email: {newAccount.Email}");
+                var userAccount = new UserAccount
+                {
+                    FirstName = newAccount.FirstName,
+                    LastName = newAccount.LastName,
+                    Email = newAccount.Email,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(newAccount.Password),
+                    Nickname = newAccount.Nickname,
+                };
+                await repository.CreateAccountAsync(userAccount);
+                log.Info($"Cuenta creada exitosamente para: {newAccount.Email}");
                 var code = codeService.GenerateAndStoreCode(newAccount.Email, CodeType.EmailVerification);
                 _ = notification.SendAccountVerificationEmailAsync(newAccount.Email, code);
-                return true;
             }
-            
-            return false;
+            catch (DuplicateAccountException ex)
+            {
+                log.Warn($"Intento de registro duplicado para el email: {newAccount.Email}", ex);
+                var errorDetail = new ServiceErrorDetailDTO
+                {
+                    ErrorCode = "USER_ALREADY_EXISTS",
+                    Message = ex.Message // Usamos el mensaje de la excepción
+                };
+                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+            }
+            catch (DbUpdateException dbEx)
+            {
+                // ¡Importante! Aquí debes registrar el error real en tu log del servidor.
+                // Logger.LogError(dbEx, "Error al guardar en la base de datos.");
+                log.Error("Error en la base de datos al crear la cuenta.", dbEx);
+                var errorDetail = new ServiceErrorDetailDTO
+                {
+                    ErrorCode = "DATABASE_ERROR",
+                    Message = "Ocurrió un error al procesar tu solicitud. Por favor, inténtalo más tarde."
+                };
+                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason("Error en la capa de datos."));
+            }
+            catch (Exception ex)
+            {
+                log.Fatal("Error fatal inesperado en CreateAccount.", ex);
+                var errorDetail = new ServiceErrorDetailDTO
+                {
+                    ErrorCode = "UNEXPECTED_ERROR",
+                    Message = "Ocurrió un error inesperado en el servidor."
+                };
+                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason("Error genérico del servidor."));
+            }
+
         }
     }
 }

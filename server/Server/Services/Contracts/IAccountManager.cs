@@ -1,5 +1,6 @@
 ﻿using Services.Contracts.DTOs;
 using System.ServiceModel;
+using System.Threading.Tasks;
 
 namespace Services.Contracts
 {
@@ -7,6 +8,7 @@ namespace Services.Contracts
     public interface IAccountManager
     {
         [OperationContract]
-        bool CreateAccount(NewAccountDTO newAccount);
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
+        Task CreateAccountAsync(NewAccountDTO newAccount);
     }
 }

@@ -32,16 +32,29 @@ namespace PASSWORD_LIS_Client
             signUpButton.IsEnabled = false;
             try
             {
-                bool accountCreated = await TryCreateAccountOnServerAsync();
+                await TryCreateAccountOnServerAsync();
 
-                if (accountCreated)
-                {
-                    ProcessSuccessfulSignUp(emailTextBox.Text);
-                }
-                else
-                {
-                    MessageBox.Show(Properties.Langs.Lang.userAlreadyExistText);
-                }
+                ProcessSuccessfulSignUp(emailTextBox.Text);
+                
+            }
+            catch (FaultException<ServiceErrorDetailDTO>)
+            {
+                MessageBox.Show(Properties.Langs.Lang.userAlreadyExistText);
+            }
+            catch (TimeoutException)
+            {
+                MessageBox.Show("El servidor tardó demasiado en responder. Por favor, inténtalo de nuevo.");
+
+            }
+            catch (EndpointNotFoundException)
+            {
+                MessageBox.Show("No se pudo conectar con el servidor. Verifica tu conexión a internet o inténtalo más tarde.");
+
+            }
+            catch (CommunicationException ex)
+            {
+                MessageBox.Show($"Ocurrió un error de comunicación con el servidor: {ex.Message}");
+
             }
             catch (Exception ex)
             {
@@ -94,7 +107,7 @@ namespace PASSWORD_LIS_Client
                 );
             }
         }
-        private async Task<bool> TryCreateAccountOnServerAsync()
+        private async Task TryCreateAccountOnServerAsync()
         {
             var userAccount = new NewAccountDTO
             {
@@ -108,36 +121,16 @@ namespace PASSWORD_LIS_Client
             AccountManagerClient client = new AccountManagerClient();
             try
             {
-                bool result = await client.CreateAccountAsync(userAccount);
+                await client.CreateAccountAsync(userAccount);
                 client.Close();
-                return result;
             }
-            catch (TimeoutException)
-            {
-                client.Abort();
-                MessageBox.Show("El servidor tardó demasiado en responder. Por favor, inténtalo de nuevo.");
-                return false;
-            }
-            catch (EndpointNotFoundException)
-            {
-                client.Abort();
-                MessageBox.Show("No se pudo conectar con el servidor. Verifica tu conexión a internet o inténtalo más tarde.");
-                return false;
-            }
-            catch (CommunicationException ex)
-            {
-                client.Abort();
-                MessageBox.Show($"Ocurrió un error de comunicación con el servidor: {ex.Message}");
-                return false;
-            }
-            //s FaultExceptions, las capturarías aquí también.
-            // catch (FaultException<UserAlreadyExistsError> ex) { ... }
-            catch (Exception ex)
+            
+            catch (Exception)
             {
                 // Un error inesperado que no es de comunicación
                 client.Abort();
-                MessageBox.Show($"Se produjo un error inesperado en el servidor: {ex.Message}");
-                return false;
+                throw;
+
             }
         }
         private void ProcessSuccessfulSignUp(string userEmail)
