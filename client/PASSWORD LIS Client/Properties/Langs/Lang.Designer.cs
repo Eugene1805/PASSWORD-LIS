@@ -856,11 +856,29 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Successful change.
+        /// </summary>
+        public static string succesfulPasswordChangeTitleText {
+            get {
+                return ResourceManager.GetString("succesfulPasswordChangeTitleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Successful Login.
         /// </summary>
         public static string successfulLoginText {
             get {
                 return ResourceManager.GetString("successfulLoginText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password successfully changed. You will now be redirected to the login page..
+        /// </summary>
+        public static string successfulPasswordChangeText {
+            get {
+                return ResourceManager.GetString("successfulPasswordChangeText", resourceCulture);
             }
         }
         

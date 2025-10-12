@@ -486,4 +486,10 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="timeLimitTitleText" xml:space="preserve">
     <value>Time Limit</value>
   </data>
+  <data name="succesfulPasswordChangeTitleText" xml:space="preserve">
+    <value>Successful change</value>
+  </data>
+  <data name="successfulPasswordChangeText" xml:space="preserve">
+    <value>Password successfully changed. You will now be redirected to the login page.</value>
+  </data>
 </root>

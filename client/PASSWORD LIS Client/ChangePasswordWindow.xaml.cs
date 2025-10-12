@@ -1,4 +1,5 @@
 ﻿using PASSWORD_LIS_Client.PasswordResetManagerServiceReference;
+using PASSWORD_LIS_Client.View;
 using System;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,6 +14,8 @@ namespace PASSWORD_LIS_Client
     {
         private readonly string accountEmail;
         private readonly string verificationCode;
+
+        private Window popUpWindow = null;
         public ChangePasswordWindow()
         {
             InitializeComponent();
@@ -42,12 +45,14 @@ namespace PASSWORD_LIS_Client
                 }
                 else
                 {
-                    MessageBox.Show("No se pudo cambiar la contraseña. Revisa los mensajes de error anteriores.", "Operación Fallida");
+                    popUpWindow = new PopUpWindow(Properties.Langs.Lang.unexpectedErrorText,Properties.Langs.Lang.passwordChangeFailedText);
+                    popUpWindow.ShowDialog();
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ocurrió un error inesperado: {ex.Message}", "Error Crítico");
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.errorTitleText, Properties.Langs.Lang.unexpectedErrorText);
+                popUpWindow.ShowDialog();
             }
             finally
             {
@@ -74,31 +79,36 @@ namespace PASSWORD_LIS_Client
             catch (TimeoutException)
             {
                 client.Abort();
-                MessageBox.Show("El servidor no respondió a tiempo. Por favor, inténtalo más tarde.", "Error de Conexión");
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.timeLimitTitleText,Properties.Langs.Lang.serverTimeoutText);
+                popUpWindow.ShowDialog();
                 return false;
             }
             catch (System.ServiceModel.EndpointNotFoundException)
-            {
+            {   
                 client.Abort();
-                MessageBox.Show("No se pudo conectar con el servidor. Verifica tu conexión a internet.", "Error de Conexión");
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.connectionErrorTitleText, Properties.Langs.Lang.serverConnectionInternetErrorText);
+                popUpWindow.ShowDialog();
                 return false;
             }
             catch (System.ServiceModel.CommunicationException ex)
             {
                 client.Abort();
-                MessageBox.Show($"Ocurrió un error de comunicación: {ex.Message}", "Error de Red");
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.networkErrorTitleText, Properties.Langs.Lang.serverCommunicationErrorText);
+                popUpWindow.ShowDialog();
                 return false;
             }
             catch (Exception ex)
             {
                 client.Abort();
-                MessageBox.Show($"Ocurrió un error inesperado: {ex.Message}", "Error");
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.errorTitleText, Properties.Langs.Lang.unexpectedErrorText);
+                popUpWindow.ShowDialog();
                 return false;
             }
         }
         private void ProcessSuccessfulPasswordChange()
         {
-            MessageBox.Show("Contraseña cambiada exitosamente. Ahora serás redirigido al inicio de sesión.", "Éxito");
+            popUpWindow = new PopUpWindow(Properties.Langs.Lang.succesfulPasswordChangeTitleText, Properties.Langs.Lang.successfulPasswordChangeText);
+            popUpWindow.ShowDialog();
             var loginWindow = new LoginWindow();
             loginWindow.Show();
             this.Close();

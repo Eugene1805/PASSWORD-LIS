@@ -487,4 +487,10 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
   <data name="timeLimitTitleText" type="System.Resources.ResXNullRef, System.Windows.Forms">
     <value />
   </data>
+  <data name="succesfulPasswordChangeTitleText" xml:space="preserve">
+    <value>Cambio exitoso</value>
+  </data>
+  <data name="successfulPasswordChangeText" xml:space="preserve">
+    <value>Contraseña cambiada exitosamente. Ahora serás redirigido al inicio de sesión.</value>
+  </data>
 </root>
