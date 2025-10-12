@@ -9,6 +9,6 @@ namespace Data.DAL.Interfaces
 {
     public interface IStatisticsRepository
     {
-        List<Team> GetTopTeams(int numberOfTeams);
+        Task<List<Team>> GetTopTeamsAsync(int numberOfTeams);
     }
 }

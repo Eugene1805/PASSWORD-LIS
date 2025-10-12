@@ -32,8 +32,8 @@
   <wsdl:types>
     <xsd:schema targetNamespace="http://tempuri.org/Imports">
       <xsd:import schemaLocation="http://localhost:8090/?xsd=xsd0" namespace="http://tempuri.org/" />
-      <xsd:import schemaLocation="http://localhost:8090/?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
       <xsd:import schemaLocation="http://localhost:8090/?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" />
+      <xsd:import schemaLocation="http://localhost:8090/?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
     </xsd:schema>
   </wsdl:types>
   <wsdl:message name="IAccountManager_CreateAccount_InputMessage">
@@ -42,10 +42,14 @@
   <wsdl:message name="IAccountManager_CreateAccount_OutputMessage">
     <wsdl:part name="parameters" element="tns:CreateAccountResponse" />
   </wsdl:message>
+  <wsdl:message name="IAccountManager_CreateAccount_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q1="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q1:ServiceErrorDetailDTO" />
+  </wsdl:message>
   <wsdl:portType name="IAccountManager">
     <wsdl:operation name="CreateAccount">
       <wsdl:input wsaw:Action="http://tempuri.org/IAccountManager/CreateAccount" message="tns:IAccountManager_CreateAccount_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IAccountManager/CreateAccountResponse" message="tns:IAccountManager_CreateAccount_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IAccountManager/CreateAccountServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IAccountManager_CreateAccount_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="NetTcpBinding_IAccountManager" type="tns:IAccountManager">
@@ -59,6 +63,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
   </wsdl:binding>
   <wsdl:service name="AccountManager">

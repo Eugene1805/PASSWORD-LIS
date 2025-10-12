@@ -5,20 +5,21 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Data.DAL.Implementations
 {
     public class StatisticsRepository : IStatisticsRepository
     {
-        public List<Team> GetTopTeams(int numberOfTeams)
+        public async Task<List<Team>> GetTopTeamsAsync(int numberOfTeams)
         {
             using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
-                var topTeamsEntities = context.Team
+                var topTeamsEntities = await context.Team
                     .Include(t => t.Player.Select(p => p.UserAccount))
                     .OrderByDescending(t => t.TotalPoints)
                     .Take(numberOfTeams)
-                    .ToList();
+                    .ToListAsync();
 
                 return topTeamsEntities;
             }

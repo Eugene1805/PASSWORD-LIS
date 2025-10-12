@@ -1,5 +1,7 @@
 ﻿using PASSWORD_LIS_Client.PasswordResetManagerServiceReference;
+using PASSWORD_LIS_Client.View;
 using System;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -12,6 +14,8 @@ namespace PASSWORD_LIS_Client
     {
         private readonly string accountEmail;
         private readonly string verificationCode;
+
+        private Window popUpWindow = null;
         public ChangePasswordWindow()
         {
             InitializeComponent();
@@ -23,51 +27,110 @@ namespace PASSWORD_LIS_Client
             verificationCode = code;
         }
 
-        private void ButtonClickChangePassword(object sender, RoutedEventArgs e)
+        private async void ButtonClickChangePassword(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(newPasswordBox.Password) || string.IsNullOrWhiteSpace(confirmNewPasswordBox.Password))
+            if (!IsInputValid())
             {
-                MessageBox.Show("Ambos campos de contraseña son requeridos.", "Advertencia", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-            if (newPasswordBox.Password != confirmNewPasswordBox.Password)
-            {
-                MessageBox.Show("Las contraseñas no coinciden.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
+
             changePasswordButton.IsEnabled = false;
-            var client = new PasswordResetManagerClient();
-            bool success = false;
             try
             {
-                success = client.ResetPassword(new PasswordResetDTO
+                bool success = await TryResetPasswordOnServerAsync();
+
+                if (success)
                 {
-                    NewPassword = newPasswordBox.Password,
-                    Email = accountEmail,
-                    ResetCode = verificationCode
-                });
+                    ProcessSuccessfulPasswordChange();
+                }
+                else
+                {
+                    popUpWindow = new PopUpWindow(Properties.Langs.Lang.unexpectedErrorText,Properties.Langs.Lang.passwordChangeFailedText);
+                    popUpWindow.ShowDialog();
+                }
             }
-            catch (Exception ex) {
-                MessageBox.Show("Ocurrió un error al cambiar la contraseña: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                client.Abort();
+            catch (Exception ex)
+            {
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.errorTitleText, Properties.Langs.Lang.unexpectedErrorText);
+                popUpWindow.ShowDialog();
             }
             finally
             {
                 changePasswordButton.IsEnabled = true;
             }
-            
-            if (success) {
-                MessageBox.Show("Contraseña cambiada exitosamente. Ahora serás redirigido al inicio de sesión.", "Éxito", MessageBoxButton.OK, MessageBoxImage.Information);
-                var loginWindow = new LoginWindow();
-                loginWindow.Show();
-                this.Close();
-            }
-            else
+        }
+        private async Task<bool> TryResetPasswordOnServerAsync()
+        {
+            var client = new PasswordResetManagerClient();
+            try
             {
-                MessageBox.Show("No se pudo cambiar la contraseña");
-            }
-            
+                var passwordResetInfo = new PasswordResetDTO
+                {
+                    NewPassword = newPasswordBox.Password,
+                    Email = this.accountEmail,
+                    ResetCode = this.verificationCode
+                };
 
+                bool success = await client.ResetPasswordAsync(passwordResetInfo);
+
+                client.Close();
+                return success;
+            }
+            catch (TimeoutException)
+            {
+                client.Abort();
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.timeLimitTitleText,Properties.Langs.Lang.serverTimeoutText);
+                popUpWindow.ShowDialog();
+                return false;
+            }
+            catch (System.ServiceModel.EndpointNotFoundException)
+            {   
+                client.Abort();
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.connectionErrorTitleText, Properties.Langs.Lang.serverConnectionInternetErrorText);
+                popUpWindow.ShowDialog();
+                return false;
+            }
+            catch (System.ServiceModel.CommunicationException ex)
+            {
+                client.Abort();
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.networkErrorTitleText, Properties.Langs.Lang.serverCommunicationErrorText);
+                popUpWindow.ShowDialog();
+                return false;
+            }
+            catch (Exception ex)
+            {
+                client.Abort();
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.errorTitleText, Properties.Langs.Lang.unexpectedErrorText);
+                popUpWindow.ShowDialog();
+                return false;
+            }
+        }
+        private void ProcessSuccessfulPasswordChange()
+        {
+            popUpWindow = new PopUpWindow(Properties.Langs.Lang.succesfulPasswordChangeTitleText, Properties.Langs.Lang.successfulPasswordChangeText);
+            popUpWindow.ShowDialog();
+            var loginWindow = new LoginWindow();
+            loginWindow.Show();
+            this.Close();
+        }
+        private bool IsInputValid()
+        {
+            string newPassword = newPasswordBox.Password;
+            string confirmPassword = confirmNewPasswordBox.Password;
+
+            if (string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
+            {
+                MessageBox.Show(Properties.Langs.Lang.requiredFieldsText);
+                return false;
+            }
+
+            if (newPassword != confirmPassword)
+            {
+                MessageBox.Show(Properties.Langs.Lang.matchingPasswordErrorText);
+                return false;
+            }
+
+            return true;
         }
     }
 }

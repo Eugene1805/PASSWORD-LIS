@@ -1,5 +1,6 @@
 ﻿using PASSWORD_LIS_Client.VerificationCodeManagerServiceReference;
 using System;
+using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -33,96 +34,138 @@ namespace PASSWORD_LIS_Client
 
         private async void ButtonClickVerifyCode(object sender, RoutedEventArgs e)
         {
-            bool isCodeValid = false;
-            verifyCodeButton.IsEnabled = false;
-            EnteredCode = verificationCodeTextBox.Text;
-            try
+            string code = verificationCodeTextBox.Text;
+            if (string.IsNullOrWhiteSpace(code))
             {
-                switch (reason)
-                {
-                    case VerificationReason.AccountActivation:
-                        var verificationClient = new AccountVerificationManagerClient();
-                        var dto = new EmailVerificationDTO
-                        {
-                            Email = email,
-                            VerificationCode = verificationCodeTextBox.Text
-                        };
-                        isCodeValid = await verificationClient.VerifyEmailAsync(dto);
-                        verificationClient.Close();
-                        break;
+                MessageBox.Show("Por favor, ingresa el código de verificación.", "Campo Requerido");
+                return;
+            }
 
-                    case VerificationReason.PasswordReset:
-                      
-                        var resetClient = new PasswordResetManagerServiceReference.PasswordResetManagerClient();
-                        isCodeValid = await resetClient.ValidatePasswordResetCodeAsync(new PasswordResetManagerServiceReference.EmailVerificationDTO
-                        {
-                            Email = email,
-                            VerificationCode = verificationCodeTextBox.Text
-                        });
-                        MessageBox.Show(isCodeValid.ToString());
-                        resetClient.Close();
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error de conexión: " + ex.Message);
-                isCodeValid = false;
-            }
-            finally
-            {
-                verifyCodeButton.IsEnabled = true;
-            }
+            verifyCodeButton.IsEnabled = false;
+            resendCodeHyperlink.IsEnabled = false; 
+
+            bool isCodeValid = await TryVerifyCodeAsync(code);
 
             if (isCodeValid)
             {
-                this.DialogResult = true;
+                this.EnteredCode = code;
+                this.DialogResult = true; 
             }
             else
             {
-                MessageBox.Show("El código es incorrecto o ha expirado.");
+                MessageBox.Show("El código es incorrecto o ha expirado.", "Verificación Fallida");
+                verifyCodeButton.IsEnabled = true;
+                resendCodeHyperlink.IsEnabled = true;
             }
         }
 
         private async void HyperlinkClickResendCode(object sender, RoutedEventArgs e)
         {
-            bool success = false;
+            verifyCodeButton.IsEnabled = false;
+            resendCodeHyperlink.IsEnabled = false;
+
+            bool success = await TryResendCodeAsync();
+
+            if (success)
+            {
+                MessageBox.Show("Se ha enviado un nuevo código a tu correo.", "Código Enviado");
+            }
+            else
+            {
+                MessageBox.Show("Por favor, espera al menos un minuto antes de solicitar otro código.", "Límite de Tiempo");
+            }
+
+            verifyCodeButton.IsEnabled = true;
+            resendCodeHyperlink.IsEnabled = true;
+        }
+        
+        private async Task<bool> TryVerifyCodeAsync(string code)
+        {
+            // Usamos esta interfaz común para poder abortar cualquier tipo de cliente en el catch
+            System.ServiceModel.ICommunicationObject client = null;
             try
             {
+                bool isValid = false;
                 switch (reason)
                 {
                     case VerificationReason.AccountActivation:
                         var activationClient = new AccountVerificationManagerClient();
-                        success = await activationClient.ResendVerificationCodeAsync(email);
-                        activationClient.Close();
+                        client = activationClient;
+                        var dto = new EmailVerificationDTO { Email = this.email, VerificationCode = code };
+                        isValid = await activationClient.VerifyEmailAsync(dto);
                         break;
+
                     case VerificationReason.PasswordReset:
                         var resetClient = new PasswordResetManagerServiceReference.PasswordResetManagerClient();
-                        success = await resetClient.RequestPasswordResetCodeAsync(new PasswordResetManagerServiceReference.EmailVerificationDTO
-                        {
-                            Email = email,
-                            VerificationCode = verificationCodeTextBox.Text
-                        });
-                        resetClient.Close();
+                        client = resetClient; 
+                        var resetDto = new PasswordResetManagerServiceReference.EmailVerificationDTO { Email = this.email, VerificationCode = code };
+                        isValid = await resetClient.ValidatePasswordResetCodeAsync(resetDto);
                         break;
                 }
+                client.Close();
+                return isValid;
+            }
+            catch (TimeoutException)
+            {
+                client?.Abort();
+                MessageBox.Show("El servidor no respondió a tiempo. Inténtalo de nuevo.", "Error de Red");
+                return false;
+            }
+            catch (EndpointNotFoundException)
+            {
+                client?.Abort();
+                MessageBox.Show("No se pudo conectar con el servidor. Verifica tu conexión.", "Error de Conexión");
+                return false;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error de conexión al reenviar el código: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-
+                client?.Abort();
+                MessageBox.Show($"Ocurrió un error inesperado: {ex.Message}", "Error");
+                return false;
             }
-            
+        }
 
-            if (success)
+        private async Task<bool> TryResendCodeAsync()
+        {
+            System.ServiceModel.ICommunicationObject client = null;
+            try
             {
-                MessageBox.Show("Se ha enviado un nuevo código a tu correo.");
+                bool success = false;
+                switch (reason)
+                {
+                    case VerificationReason.AccountActivation:
+                        var activationClient = new AccountVerificationManagerClient();
+                        client = activationClient;
+                        success = await activationClient.ResendVerificationCodeAsync(this.email);
+                        break;
+                    case VerificationReason.PasswordReset:
+                        var resetClient = new PasswordResetManagerServiceReference.PasswordResetManagerClient();
+                        client = resetClient;
+                        var resetDto = new PasswordResetManagerServiceReference.EmailVerificationDTO { Email = this.email, VerificationCode = "" };
+                        success = await resetClient.RequestPasswordResetCodeAsync(resetDto);
+                        break;
+                }
+                client.Close();
+                return success;
             }
-            else
+            catch (TimeoutException)
             {
-                MessageBox.Show("Por favor, espera al menos un minuto antes de solicitar otro código.");
+                client?.Abort();
+                MessageBox.Show("El servidor no respondió a tiempo. Inténtalo de nuevo.", "Error de Red");
+                return false;
             }
-
+            catch (EndpointNotFoundException)
+            {
+                client?.Abort();
+                MessageBox.Show("No se pudo conectar con el servidor. Verifica tu conexión.", "Error de Conexión");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                client?.Abort();
+                MessageBox.Show($"Ocurrió un error inesperado: {ex.Message}", "Error");
+                return false;
+            }
         }
     }
 }

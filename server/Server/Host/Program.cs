@@ -5,7 +5,8 @@ using Services.Util;
 using System;
 using System.Collections.Generic;
 using System.ServiceModel;
-
+// Lee la configuración del App.config
+[assembly: log4net.Config.XmlConfigurator(Watch = true)]
 namespace Host
 {
     class Program

@@ -9,6 +9,7 @@
         WindowStartupLocation="CenterScreen"
         MinHeight="350" MinWidth="350"
         Title="TopPlayersWindow" Height="350" Width="350"
+        Loaded="TopPlayersWindowLoaded"
         Background="#EEEFF0">
     <Window.Resources>
         <local:NicknamesConverter x:Key="PlayerNicknamesConverter"/>

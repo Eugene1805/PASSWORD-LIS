@@ -405,4 +405,91 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="warningTitleText" xml:space="preserve">
     <value>Warning</value>
   </data>
+  <data name="serverTimeoutText" xml:space="preserve">
+    <value>The server took too long to respond. Please try again.</value>
+  </data>
+  <data name="serverConnectionInternetErrorText" xml:space="preserve">
+    <value>Could not connect to the server. Check your internet connection or try again later.</value>
+  </data>
+  <data name="serverCommunicationErrorText" xml:space="preserve">
+    <value>A communication error with the server occurred.</value>
+  </data>
+  <data name="unexpectedServerErrorText" xml:space="preserve">
+    <value>An unexpected server error occurred.</value>
+  </data>
+  <data name="unexpectedErrorText" xml:space="preserve">
+    <value>An unexpected error occurred.</value>
+  </data>
+  <data name="linkUnavailableText" xml:space="preserve">
+    <value>The link is not currently available</value>
+  </data>
+  <data name="invalidLinkTitle" xml:space="preserve">
+    <value>Invalid Link</value>
+  </data>
+  <data name="linkOpenFailText" xml:space="preserve">
+    <value>Could not open the link. Make sure you have a web browser installed and set as default.</value>
+  </data>
+  <data name="systemErrorTitle" xml:space="preserve">
+    <value>System Error</value>
+  </data>
+  <data name="termsLinkUnavailableText" xml:space="preserve">
+    <value>The terms and conditions link is not available.</value>
+  </data>
+  <data name="internalErrorTitle" xml:space="preserve">
+    <value>Internal Error</value>
+  </data>
+  <data name="unexpectedLinkOpenErrorText" xml:space="preserve">
+    <value>An unexpected error occurred while trying to open the link.</value>
+  </data>
+  <data name="unknownErrorTitle" xml:space="preserve">
+    <value>Unknown Error</value>
+  </data>
+  <data name="passwordChangeFailedText" xml:space="preserve">
+    <value>Could not change the password. Please review the previous error messages.</value>
+  </data>
+  <data name="operationFailedTitleText" xml:space="preserve">
+    <value>Operation Failed</value>
+  </data>
+  <data name="criticalErrorTitle" xml:space="preserve">
+    <value>Critical Error</value>
+  </data>
+  <data name="connectionErrorTitleText" xml:space="preserve">
+    <value>Connection Error</value>
+  </data>
+  <data name="networkErrorTitleText" xml:space="preserve">
+    <value>Network Error</value>
+  </data>
+  <data name="errorTitleText" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="codeSendFailedText" xml:space="preserve">
+    <value>Could not send the code. Verify that the email is correct or wait a minute before retrying.</value>
+  </data>
+  <data name="sendFailedTitleText" xml:space="preserve">
+    <value>Send Failed</value>
+  </data>
+  <data name="codeIncorrectOrExpiredText" xml:space="preserve">
+    <value>The code is incorrect or has expired.</value>
+  </data>
+  <data name="verificationFailedTitleText" xml:space="preserve">
+    <value>Verification Failed</value>
+  </data>
+  <data name="newCodeSentText" xml:space="preserve">
+    <value>A new code has been sent to your email.</value>
+  </data>
+  <data name="codeSentTitleText" xml:space="preserve">
+    <value>Code Sent</value>
+  </data>
+  <data name="waitAMinuteForCodeText" xml:space="preserve">
+    <value>Please wait at least one minute before requesting another code.</value>
+  </data>
+  <data name="timeLimitTitleText" xml:space="preserve">
+    <value>Time Limit</value>
+  </data>
+  <data name="succesfulPasswordChangeTitleText" xml:space="preserve">
+    <value>Successful change</value>
+  </data>
+  <data name="successfulPasswordChangeText" xml:space="preserve">
+    <value>Password successfully changed. You will now be redirected to the login page.</value>
+  </data>
 </root>

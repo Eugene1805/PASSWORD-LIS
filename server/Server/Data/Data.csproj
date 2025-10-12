@@ -62,6 +62,7 @@
     <Compile Include="DAL\Implementations\StatisticsRepository.cs" />
     <Compile Include="DAL\Interfaces\IAccountRepository.cs" />
     <Compile Include="DAL\Interfaces\IStatisticsRepository.cs" />
+    <Compile Include="Exceptions\DuplicateAccountException.cs" />
     <Compile Include="Model\Ban.cs">
       <DependentUpon>PasswordLISModel.tt</DependentUpon>
     </Compile>
