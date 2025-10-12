@@ -483,10 +483,6 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
   <data name="waitAMinuteForCodeText" xml:space="preserve">
     <value>Por favor, espera al menos un minuto antes de solicitar otro código.</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="timeLimitTitleText" type="System.Resources.ResXNullRef, System.Windows.Forms">
-    <value />
-  </data>
   <data name="succesfulPasswordChangeTitleText" xml:space="preserve">
     <value>Cambio exitoso</value>
   </data>
@@ -516,5 +512,24 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
   </data>
   <data name="lastNameInvalidCharsText" xml:space="preserve">
     <value>El apellido solo puede contener letras.</value>
+  </data>
+  <data name="profileUpdatedTitleText" xml:space="preserve">
+    <value>Perfil Actualizado</value>
+  </data>
+  <data name="profileChangesSavedSuccessText" xml:space="preserve">
+    <value>¡Cambios guardados con éxito!</value>
+  </data>
+  <data name="changesSavedErrorText" xml:space="preserve">
+    <value>No se pudieron guardar los cambios en el servidor.</value>
+  </data>
+  <data name="unsavedChangesWarningTitleText" xml:space="preserve">
+    <value>Descartar Cambios</value>
+  </data>
+  <data name="timeLimitTitleText" xml:space="preserve">
+    <value>Tiempo Limite</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="unsavedChangesWarningText" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
   </data>
 </root>

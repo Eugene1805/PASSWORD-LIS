@@ -106,6 +106,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a Could not save changes to the server..
+        /// </summary>
+        public static string changesSavedErrorText {
+            get {
+                return ResourceManager.GetString("changesSavedErrorText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a Clue Guy.
         /// </summary>
         public static string clueGuyText {
@@ -691,11 +700,29 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a Changes saved successfully!.
+        /// </summary>
+        public static string profileChangesSavedSuccessText {
+            get {
+                return ResourceManager.GetString("profileChangesSavedSuccessText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a Profile.
         /// </summary>
         public static string profileText {
             get {
                 return ResourceManager.GetString("profileText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a Profile Updated.
+        /// </summary>
+        public static string profileUpdatedTitleText {
+            get {
+                return ResourceManager.GetString("profileUpdatedTitleText", resourceCulture);
             }
         }
         
@@ -1068,6 +1095,24 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         public static string unknownErrorTitle {
             get {
                 return ResourceManager.GetString("unknownErrorTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a You have unsaved changes. Are you sure you want to leave and discard them?.
+        /// </summary>
+        public static string unsavedChangesWarningText {
+            get {
+                return ResourceManager.GetString("unsavedChangesWarningText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a Discard Changes.
+        /// </summary>
+        public static string unsavedChangesWarningTitleText {
+            get {
+                return ResourceManager.GetString("unsavedChangesWarningTitleText", resourceCulture);
             }
         }
         

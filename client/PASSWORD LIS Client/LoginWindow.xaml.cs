@@ -2,6 +2,7 @@
 using System;
 using System.Windows;
 using PASSWORD_LIS_Client.Utils;
+using PASSWORD_LIS_Client.View;
 
 namespace PASSWORD_LIS_Client
 {
@@ -27,9 +28,10 @@ namespace PASSWORD_LIS_Client
                 if (loggedInUser != null)
                 {
                     SessionManager.Login(loggedInUser);
-                    
-                    MessageBox.Show(string.Format(Properties.Langs.Lang.loginWelcomeText, loggedInUser.Nickname),
-                                    Properties.Langs.Lang.successfulLoginText, MessageBoxButton.OK);
+
+                    new PopUpWindow(Properties.Langs.Lang.successfulLoginText,
+                        string.Format(Properties.Langs.Lang.loginWelcomeText, SessionManager.CurrentUser.Nickname),
+                        PopUpIcon.Success).ShowDialog();
 
                     var mainWindow = new MainWindow();
                     mainWindow.Show();
@@ -37,26 +39,19 @@ namespace PASSWORD_LIS_Client
                 }
                 else
                 {
-                    MessageBox.Show(Properties.Langs.Lang.wrongCredentialsText,
-                                    "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                    new PopUpWindow(Properties.Langs.Lang.warningTitleText,
+                        Properties.Langs.Lang.wrongCredentialsText,
+                        PopUpIcon.Warning).ShowDialog();    
                 }
                 client.Close();
             }
-            catch (System.ServiceModel.EndpointNotFoundException)
+            catch (Exception ex)
             {
-                MessageBox.Show(Properties.Langs.Lang.loginConnectionErrorText,
-                                "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
+                new PopUpWindow(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.serverCommunicationErrorText,
+                    PopUpIcon.Error).ShowDialog();
+
                 client.Abort();
-            }
-            catch (System.Exception ex)
-            {
-                MessageBox.Show(string.Format(Properties.Langs.Lang.loginUnexpectedErrorText, ex.Message),
-                                "ERROR", MessageBoxButton.OK, MessageBoxImage.Error);
-                client.Abort();
-            }
-            finally
-            {
-                client.Close();
             }
         }
 
@@ -64,8 +59,9 @@ namespace PASSWORD_LIS_Client
         {
             if (string.IsNullOrWhiteSpace(emailTextBox.Text) || string.IsNullOrWhiteSpace(passwordBox.Password))
             {
-                MessageBox.Show(Properties.Langs.Lang.requiredEmailAndPassWordText,
-                                Properties.Langs.Lang.warningTitleText, MessageBoxButton.OK, MessageBoxImage.Warning);
+                new PopUpWindow(Properties.Langs.Lang.warningTitleText,
+                    Properties.Langs.Lang.requiredEmailAndPassWordText,
+                    PopUpIcon.Warning).ShowDialog();
                 return false;
             }
             return true;

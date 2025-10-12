@@ -85,14 +85,7 @@ namespace PASSWORD_LIS_Client
         }
         private async void SaveChangesButtonClick(object sender, RoutedEventArgs e)
         {
-            if (!AreFieldsValid())
-            {
-                return;
-            }
-            {
-                
-            }
-            if (!SessionManager.IsUserLoggedIn())
+            if (!AreFieldsValid() || !SessionManager.IsUserLoggedIn())
             {
                 return;
             }
@@ -106,16 +99,15 @@ namespace PASSWORD_LIS_Client
             {
                 UserDTO resultDto = await client.UpdateProfileAsync(updatedDto);
                 ProcessUpdateResponse(resultDto);
+                client.Close();
             }
             catch (Exception ex)
             {
+                new PopUpWindow(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.serverCommunicationErrorText,
+                    PopUpIcon.Error).ShowDialog();
                 SetEditMode(true);
-                MessageBox.Show("Error de conexión: " + ex.Message);
-
-            }
-            finally
-            {
-                client.Close();
+                client.Abort();
             }
         }
 
@@ -124,8 +116,8 @@ namespace PASSWORD_LIS_Client
             if (isEditMode)
             {
                 MessageBoxResult result = MessageBox.Show(
-                    "Tienes cambios sin guardar. ¿Estás seguro de que quieres salir y descartarlos?",
-                    "Descartar Cambios",
+                    Properties.Langs.Lang.unsavedChangesWarningText,
+                    Properties.Langs.Lang.unsavedChangesWarningTitleText,
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Warning);
 
@@ -184,13 +176,22 @@ namespace PASSWORD_LIS_Client
                 var updatedSessionUser = ConvertProfileDtoToSessionDto(resultDto);
                 SessionManager.Login(updatedSessionUser);
 
-                MessageBox.Show("¡Cambios guardados con éxito!", "Perfil Actualizado");
-                if (NavigationService.CanGoBack) NavigationService.GoBack();
+                new PopUpWindow(Properties.Langs.Lang.profileUpdatedTitleText,
+                    Properties.Langs.Lang.profileChangesSavedSuccessText,
+                    PopUpIcon.Success).ShowDialog(); 
+
+                if (NavigationService.CanGoBack)
+                {
+                    NavigationService.GoBack();
+                    
+                }
             }
             else
             {
                 SetEditMode(true);
-                MessageBox.Show("No se pudieron guardar los cambios en el servidor.", "Error");
+                new PopUpWindow(Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.changesSavedErrorText,
+                        PopUpIcon.Error).ShowDialog();
             }
         }
 

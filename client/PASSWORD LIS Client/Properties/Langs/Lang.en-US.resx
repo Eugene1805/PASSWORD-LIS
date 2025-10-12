@@ -483,9 +483,6 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="waitAMinuteForCodeText" xml:space="preserve">
     <value>Please wait at least one minute before requesting another code.</value>
   </data>
-  <data name="timeLimitTitleText" xml:space="preserve">
-    <value>Time Limit</value>
-  </data>
   <data name="succesfulPasswordChangeTitleText" xml:space="preserve">
     <value>Successful change</value>
   </data>
@@ -515,5 +512,23 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   </data>
   <data name="lastNameInvalidCharsText" xml:space="preserve">
     <value>Last name can only contain letters.</value>
+  </data>
+  <data name="profileUpdatedTitleText" xml:space="preserve">
+    <value>Profile Updated</value>
+  </data>
+  <data name="profileChangesSavedSuccessText" xml:space="preserve">
+    <value>Changes saved successfully!</value>
+  </data>
+  <data name="changesSavedErrorText" xml:space="preserve">
+    <value>Could not save changes to the server.</value>
+  </data>
+  <data name="unsavedChangesWarningTitleText" xml:space="preserve">
+    <value>Discard Changes</value>
+  </data>
+  <data name="timeLimitTitleText" xml:space="preserve">
+    <value>Time Limit</value>
+  </data>
+  <data name="unsavedChangesWarningText" xml:space="preserve">
+    <value>You have unsaved changes. Are you sure you want to leave and discard them?</value>
   </data>
 </root>
