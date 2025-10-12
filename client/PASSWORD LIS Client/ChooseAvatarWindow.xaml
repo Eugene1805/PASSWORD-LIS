@@ -52,7 +52,7 @@
 
                 <TextBlock Grid.Row="0" Style="{StaticResource subtitleTextBlockStyle}" Margin="20,0,20,10"
                            HorizontalAlignment="Center"
-                           Text="Elige tu avatar"/>
+                           Text="{x:Static language:Lang.selectAvatarText}"/>
 
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
@@ -87,9 +87,9 @@
                     </RadioButton>
                 </Grid>
 
-                <Button Grid.Row="2" Content="Seleccionar" Margin="0,15,0,0" Style="{StaticResource primaryButtonStyle}"
+                <Button Grid.Row="2" Content="{x:Static language:Lang.selectText}" Margin="0,15,0,0" Style="{StaticResource primaryButtonStyle}"
                         HorizontalAlignment="Center" Width="150" Height="40"
-                        x:Name="SelectAvatarButton" Click="SelectAvatarButtonClick"/>
+                        Click="SelectAvatarButtonClick"/>
             </Grid>
         </Border>
     </Grid>

@@ -1,8 +1,9 @@
 ﻿using PASSWORD_LIS_Client.LoginManagerServiceReference;
-using System;
-using System.Windows;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.View;
+using System;
+using System.Collections.Generic;
+using System.Windows;
 
 namespace PASSWORD_LIS_Client
 {
@@ -76,6 +77,34 @@ namespace PASSWORD_LIS_Client
         {
             var signUpWindow = new SignUpWindow();
             signUpWindow.Show();
+            this.Close();
+        }
+
+        private void PlayAsGuestButtonClick(object sender, RoutedEventArgs e)
+        {
+            string guestNickname = "Invitado" + new Random().Next(1000, 9999);
+
+            var guestUser = new UserDTO
+            {
+                PlayerId = -1, 
+                Nickname = guestNickname,
+                Email = string.Empty,
+                FirstName = "Invitado",
+                LastName = string.Empty,
+                PhotoId = 0, 
+                SocialAccounts = new Dictionary<string, string>() 
+            };
+
+            SessionManager.Login(guestUser);
+
+            new PopUpWindow(
+                Properties.Langs.Lang.successfulLoginText,
+                string.Format(Properties.Langs.Lang.loginWelcomeText, guestUser.Nickname),
+                PopUpIcon.Success
+            ).ShowDialog();
+
+            var mainWindow = new MainWindow();
+            mainWindow.Show();
             this.Close();
         }
     }
