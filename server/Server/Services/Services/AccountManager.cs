@@ -1,5 +1,4 @@
-﻿using Data.DAL.Implementations;
-using Data.DAL.Interfaces;
+﻿using Data.DAL.Interfaces;
 using Data.Exceptions;
 using Data.Model;
 using log4net;
@@ -34,7 +33,7 @@ namespace Services.Services
         {
             try
             {
-                log.Info($"Intentando crear cuenta para el email: {newAccount.Email}");
+                log.InfoFormat("Intentando crear cuenta para el email: {0}", newAccount.Email);
                 var userAccount = new UserAccount
                 {
                     FirstName = newAccount.FirstName,
@@ -44,7 +43,7 @@ namespace Services.Services
                     Nickname = newAccount.Nickname,
                 };
                 await repository.CreateAccountAsync(userAccount);
-                log.Info($"Cuenta creada exitosamente para: {newAccount.Email}");
+                log.InfoFormat("Cuenta creada exitosamente para: '{0}'", userAccount.Email);
                 var code = codeService.GenerateAndStoreCode(newAccount.Email, CodeType.EmailVerification);
                 _ = notification.SendAccountVerificationEmailAsync(newAccount.Email, code);
             }
@@ -54,14 +53,12 @@ namespace Services.Services
                 var errorDetail = new ServiceErrorDetailDTO
                 {
                     ErrorCode = "USER_ALREADY_EXISTS",
-                    Message = ex.Message // Usamos el mensaje de la excepción
+                    Message = ex.Message 
                 };
                 throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
             }
             catch (DbUpdateException dbEx)
             {
-                // ¡Importante! Aquí debes registrar el error real en tu log del servidor.
-                // Logger.LogError(dbEx, "Error al guardar en la base de datos.");
                 log.Error("Error en la base de datos al crear la cuenta.", dbEx);
                 var errorDetail = new ServiceErrorDetailDTO
                 {

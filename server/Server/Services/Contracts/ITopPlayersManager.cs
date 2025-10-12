@@ -12,6 +12,6 @@ namespace Services.Contracts
     public interface ITopPlayersManager
     {
         [OperationContract]
-        List<TeamDTO> GetTop(int numberOfTeams);
+        Task<List<TeamDTO>> GetTopAsync(int numberOfTeams);
     }
 }
