@@ -2,8 +2,6 @@
 using Services.Contracts;
 using Services.Contracts.DTOs;
 using Services.Util;
-using System;
-using System.Diagnostics;
 using System.ServiceModel;
 using System.Threading.Tasks;
 
@@ -28,7 +26,6 @@ namespace Services.Services
             {
                 return false;
             }
-            Console.WriteLine("Se va a enviar el codigo");
             var code = codeService.GenerateAndStoreCode(emailVerificationDTO.Email, CodeType.PasswordReset);
             _ = notification.SendPasswordResetEmailAsync(emailVerificationDTO.Email, code);
 
@@ -40,11 +37,8 @@ namespace Services.Services
             
             if (!codeService.ValidateCode(passwordResetDTO.Email, passwordResetDTO.ResetCode, CodeType.PasswordReset))
             {
-                Console.WriteLine(" Retorna false porque no se pudo validar el codigo");
-                Console.WriteLine("Uso la informacion:" + passwordResetDTO.Email + " " + passwordResetDTO.NewPassword + " " + passwordResetDTO.ResetCode);
                 return false;
             }
-            Console.WriteLine("Intenta cambiar la contrasena ");
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(passwordResetDTO.NewPassword);
             return repository.ResetPassword(passwordResetDTO.Email, hashedPassword);
         }
