@@ -5,12 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PASSWORD_LIS_Client.View"
         xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
-        WindowStartupLocation="CenterOwner"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="ToolWindow"
         mc:Ignorable="d"
-        Title="PopUpWindow" Height="150" Width="200">
+        Title="PopUpWindow" Height="150" Width="300">
     <Grid>
-        <TextBlock x:Name="MessageTextBlock" Style="{StaticResource subtitleTextBlockStyle}" Text="This is a pop-up message!" 
-                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                    TextWrapping="Wrap"/>
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Image x:Name="iconImage" Width="48" Height="48" Margin="0,0,20,0"/>
+
+            <TextBlock x:Name="messageTextBlock" Style="{StaticResource subtitleTextBlockStyle}" Text="This is a pop-up message!"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       TextWrapping="Wrap"/>
+        </StackPanel>
+        
     </Grid>
 </Window>

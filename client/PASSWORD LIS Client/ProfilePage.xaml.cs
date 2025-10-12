@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using PASSWORD_LIS_Client.Utils;
+using PASSWORD_LIS_Client.View;
 using PASSWORD_LIS_Client.ProfileManagerServiceReference;
 using SessionUserDTO = PASSWORD_LIS_Client.LoginManagerServiceReference.UserDTO;
 
@@ -84,6 +85,13 @@ namespace PASSWORD_LIS_Client
         }
         private async void SaveChangesButtonClick(object sender, RoutedEventArgs e)
         {
+            if (!AreFieldsValid())
+            {
+                return;
+            }
+            {
+                
+            }
             if (!SessionManager.IsUserLoggedIn())
             {
                 return;
@@ -173,7 +181,6 @@ namespace PASSWORD_LIS_Client
         {
             if (resultDto != null)
             {
-                // ÉXITO: Convertimos y actualizamos la sesión
                 var updatedSessionUser = ConvertProfileDtoToSessionDto(resultDto);
                 SessionManager.Login(updatedSessionUser);
 
@@ -182,7 +189,6 @@ namespace PASSWORD_LIS_Client
             }
             else
             {
-                // FALLO LÓGICO: Volvemos al modo edición
                 SetEditMode(true);
                 MessageBox.Show("No se pudieron guardar los cambios en el servidor.", "Error");
             }
@@ -208,6 +214,56 @@ namespace PASSWORD_LIS_Client
                 }
             }
             return sessionDto;
+        }
+
+        private bool AreFieldsValid()
+        {
+            string title = Properties.Langs.Lang.verificationFailedTitleText;
+
+            if (string.IsNullOrWhiteSpace(nicknameTextBox.Text))
+            {
+                new PopUpWindow(title, Properties.Langs.Lang.emptyNicknameText, PopUpIcon.Warning).ShowDialog();
+                return false;
+            }
+            if (nicknameTextBox.Text.Length > 50)
+            {
+                new PopUpWindow(title, Properties.Langs.Lang.nicknameTooLongText, PopUpIcon.Warning).ShowDialog();
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(nameTextBox.Text))
+            {
+                new PopUpWindow(title, Properties.Langs.Lang.emptyFirstNameText, PopUpIcon.Warning).ShowDialog();
+                return false;
+            }
+            if (nameTextBox.Text.Length > 50)
+            {
+                new PopUpWindow(title, Properties.Langs.Lang.firstNameTooLongText, PopUpIcon.Warning).ShowDialog();
+                return false;
+            }
+            if (!ValidationUtils.ContainsOnlyLetters(nameTextBox.Text))
+            {
+                new PopUpWindow(title, Properties.Langs.Lang.nameInvalidCharsText, PopUpIcon.Warning).ShowDialog();
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(lastNameTextBox.Text))
+            {
+                new PopUpWindow(title, Properties.Langs.Lang.emptyLastNameText, PopUpIcon.Warning).ShowDialog();
+                return false;
+            }
+            if (lastNameTextBox.Text.Length > 80)
+            {
+                new PopUpWindow(title, Properties.Langs.Lang.lastNameTooLongText, PopUpIcon.Warning).ShowDialog();
+                return false;
+            }
+            if (!ValidationUtils.ContainsOnlyLetters(lastNameTextBox.Text))
+            {
+                new PopUpWindow(title, Properties.Langs.Lang.lastNameInvalidCharsText, PopUpIcon.Warning).ShowDialog();
+                return false;
+            }
+
+            return true;
         }
     } 
 }
