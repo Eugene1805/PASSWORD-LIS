@@ -531,4 +531,10 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="unsavedChangesWarningText" xml:space="preserve">
     <value>You have unsaved changes. Are you sure you want to leave and discard them?</value>
   </data>
+  <data name="playAsGuestText" xml:space="preserve">
+    <value>Play as guest</value>
+  </data>
+  <data name="selectText" xml:space="preserve">
+    <value>Select</value>
+  </data>
 </root>

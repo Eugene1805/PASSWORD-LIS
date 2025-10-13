@@ -682,6 +682,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a Play as guest.
+        /// </summary>
+        public static string playAsGuestText {
+            get {
+                return ResourceManager.GetString("playAsGuestText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a Players.
         /// </summary>
         public static string playersText {
@@ -816,6 +825,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         public static string selectProfilePictureText {
             get {
                 return ResourceManager.GetString("selectProfilePictureText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a Select.
+        /// </summary>
+        public static string selectText {
+            get {
+                return ResourceManager.GetString("selectText", resourceCulture);
             }
         }
         

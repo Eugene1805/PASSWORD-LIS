@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"        
         MinHeight="400" MinWidth="400"
-        Title="{x:Static language:Lang.logInText}" Height="500" Width="500">
+        Title="a{x:Static language:Lang.logInText}" Height="500" Width="500">
     <Grid>
         <Grid.Background>
             <ImageBrush ImageSource="Resources/BackgroudImage.png"/>
@@ -45,6 +45,15 @@
                 Margin="0,15,0,10" 
                 HorizontalAlignment="Center"
                 Click="ButtonClickLogin"
+                />
+
+            <Button Content="{x:Static language:Lang.playAsGuestText}" 
+                Style="{StaticResource primaryButtonStyle}" 
+                Width="210" 
+                Height="40" 
+                Margin="0,15,0,10" 
+                HorizontalAlignment="Center"
+                Click="PlayAsGuestButtonClick"
                 />
 
             <TextBlock Style="{StaticResource bodyTextBlockStyle}" TextWrapping="Wrap" HorizontalAlignment="Center">

@@ -52,6 +52,12 @@ namespace PASSWORD_LIS_Client
 
         private void ProfileButtonClick(object sender, RoutedEventArgs e)
         {
+            if (SessionManager.IsUserLoggedIn() && SessionManager.CurrentUser.PlayerId < 0)
+            {
+                profileButton.IsEnabled = false;
+                return; 
+            }
+
             if (NavigationService != null)
             {
                 NavigationService.Navigate(new ProfilePage());
@@ -65,12 +71,24 @@ namespace PASSWORD_LIS_Client
         private void LobbyPageLoaded(object sender, RoutedEventArgs e)
         {
             LoadUserProfile();
+            ConfigureGuestMode();
         }
 
         private void TopPlayersButonClick(object sender, RoutedEventArgs e)
         {
             var topPlayersWindow = new TopPlayersWindow();
             topPlayersWindow.ShowDialog();
+        }
+
+        private void ConfigureGuestMode()
+        {
+            if (SessionManager.IsUserLoggedIn() && SessionManager.CurrentUser.PlayerId < 0)
+            {
+               // profileButton.Visibility = Visibility.Visible;
+                friendGrid.Visibility = Visibility.Collapsed;
+                friendListBorder.Visibility = Visibility.Collapsed;   
+            }
+            
         }
     }
 }
