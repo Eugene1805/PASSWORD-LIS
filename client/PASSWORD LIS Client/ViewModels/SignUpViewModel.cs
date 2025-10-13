@@ -65,7 +65,6 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         public string TCLink { get; }
         
-        private Window popUpWindow = null;
 
         public ICommand SignUpCommand { get; }
         public ICommand NavigateToLoginCommand { get; }
@@ -87,7 +86,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 return;
             }
-
+            Window popUpWindow;
             IsSigningUp = true;
             try
             {
@@ -159,6 +158,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void OpenTermsAndConditions(object obj)
         {
+            Window popUpWindow;
             if (string.IsNullOrWhiteSpace(TCLink) || !Uri.IsWellFormedUriString(TCLink, UriKind.Absolute))
             {
                 popUpWindow = new PopUpWindow(Properties.Langs.Lang.invalidLinkTitle,
@@ -181,6 +181,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 popUpWindow = new PopUpWindow(Properties.Langs.Lang.internalErrorTitle,
                     Properties.Langs.Lang.termsLinkUnavailableText,PopUpIcon.Error);
+                popUpWindow.ShowDialog();
             }
             catch (Exception)
             {

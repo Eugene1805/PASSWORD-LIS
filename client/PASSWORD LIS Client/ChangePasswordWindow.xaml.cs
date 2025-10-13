@@ -1,9 +1,9 @@
 ﻿using PASSWORD_LIS_Client.PasswordResetManagerServiceReference;
+using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
 using System;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace PASSWORD_LIS_Client
 {
@@ -15,7 +15,6 @@ namespace PASSWORD_LIS_Client
         private readonly string accountEmail;
         private readonly string verificationCode;
 
-        private Window popUpWindow = null;
         public ChangePasswordWindow()
         {
             InitializeComponent();
@@ -35,6 +34,7 @@ namespace PASSWORD_LIS_Client
             }
 
             changePasswordButton.IsEnabled = false;
+            Window popUpWindow;
             try
             {
                 bool success = await TryResetPasswordOnServerAsync();
@@ -64,6 +64,7 @@ namespace PASSWORD_LIS_Client
         private async Task<bool> TryResetPasswordOnServerAsync()
         {
             var client = new PasswordResetManagerClient();
+            Window popUpWindow;
             try
             {
                 var passwordResetInfo = new PasswordResetDTO
@@ -113,7 +114,7 @@ namespace PASSWORD_LIS_Client
         }
         private void ProcessSuccessfulPasswordChange()
         {
-            popUpWindow = new PopUpWindow(Properties.Langs.Lang.succesfulPasswordChangeTitleText,
+            Window popUpWindow = new PopUpWindow(Properties.Langs.Lang.succesfulPasswordChangeTitleText,
                 Properties.Langs.Lang.successfulPasswordChangeText);
             popUpWindow.ShowDialog();
             var loginWindow = new LoginWindow();
@@ -125,15 +126,18 @@ namespace PASSWORD_LIS_Client
             string newPassword = newPasswordBox.Password;
             string confirmPassword = confirmNewPasswordBox.Password;
 
+            Window popUpWindow;
             if (string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
             {
-                MessageBox.Show(Properties.Langs.Lang.requiredFieldsText);
+                popUpWindow = new PopUpWindow(" ",Properties.Langs.Lang.requiredFieldsText);
+                popUpWindow.ShowDialog();
                 return false;
             }
 
-            if (newPassword != confirmPassword)
+            if (!ValidationUtils.PasswordsMatch(newPassword,confirmPassword))
             {
-                MessageBox.Show(Properties.Langs.Lang.matchingPasswordErrorText);
+                popUpWindow = new PopUpWindow(" ", Properties.Langs.Lang.matchingPasswordErrorText);
+                popUpWindow.ShowDialog();
                 return false;
             }
 

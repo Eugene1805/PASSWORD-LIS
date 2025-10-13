@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 
 namespace PASSWORD_LIS_Client.Utils
 {
     public static class ValidationUtils
     {
         private static readonly Regex OnlyLettersRegex = new Regex(@"[^a-zA-Z\sñÑáéíóúÁÉÍÓÚüÜ]");
-
+        private static readonly Regex PasswordRequirementsRegex = new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,15}$");
+        private static readonly Regex EmailRegex = new Regex(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
         public static bool ContainsOnlyLetters(string text)
         {
             if (string.IsNullOrEmpty(text))
@@ -22,15 +18,16 @@ namespace PASSWORD_LIS_Client.Utils
         }
         public static bool ArePasswordRequirementsMet(string password)
         {
-            string passwordRegex = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,15}$";
-            return Regex.IsMatch(password, passwordRegex);
+            return PasswordRequirementsRegex.IsMatch(password);
         }
 
         public static bool IsValidEmail(string email)
         {
-            if (string.IsNullOrWhiteSpace(email)) return false;
-            string emailRegex = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
-            return Regex.IsMatch(email, emailRegex);
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return false;
+            }
+            return EmailRegex.IsMatch(email);
         }
 
         public static bool PasswordsMatch(string password, string confirmPassword)
