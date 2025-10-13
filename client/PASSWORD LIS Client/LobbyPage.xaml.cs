@@ -5,6 +5,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using PASSWORD_LIS_Client.Utils;
+using PASSWORD_LIS_Client.Views;
 
 namespace PASSWORD_LIS_Client
 {

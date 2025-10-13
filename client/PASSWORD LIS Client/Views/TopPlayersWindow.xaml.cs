@@ -8,18 +8,18 @@ using System.Windows;
 using System.Windows.Data;
 using ServiceErrorDetailDTO = PASSWORD_LIS_Client.TopPlayersManagerServiceReference.ServiceErrorDetailDTO;
 
-namespace PASSWORD_LIS_Client
+namespace PASSWORD_LIS_Client.Views
 {
     /// <summary>
     /// Lógica de interacción para TopPlayersWindow.xaml
     /// </summary>
     public partial class TopPlayersWindow : Window
     {
-        private readonly int numberOfTeams = 10;
+       // private readonly int numberOfTeams = 10;
         public TopPlayersWindow()
         {
             InitializeComponent();
-        }
+        }/*
         private async void TopPlayersWindowLoaded(object sender, RoutedEventArgs e)
         {
             var client = new TopPlayersManagerClient();
@@ -84,6 +84,6 @@ namespace PASSWORD_LIS_Client
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
-        }
+        }*/
     }
 }
