@@ -26,9 +26,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         public TopPlayersViewModel()
         {
-            // Inicializamos la colección para que el binding no falle al inicio.
             TopTeams = new ObservableCollection<TeamDTO>();
-            // Llamamos al método de carga de forma asíncrona desde el constructor.
             LoadTopPlayersAsync();
         }
 
@@ -41,7 +39,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             try
             {
                 var teamsTopArray = await client.GetTopAsync(NumberOfTeams);
-                // Llenamos la ObservableCollection con los datos del servicio.
                 TopTeams = new ObservableCollection<TeamDTO>(teamsTopArray);
                 success = true;
             }
@@ -57,7 +54,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 MessageBox.Show($"Ocurrió un error de comunicación: {ex.Message}", "Error de Comunicación", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-            catch (System.Exception ex) // Captura cualquier otro error inesperado
+            catch (System.Exception ex) 
             {
                 MessageBox.Show($"Se produjo un error inesperado: {ex.Message}", "Error Inesperado", MessageBoxButton.OK, MessageBoxImage.Error);
             }

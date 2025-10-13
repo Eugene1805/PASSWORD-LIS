@@ -34,7 +34,6 @@
                    HorizontalAlignment="Center"
                    Margin="0,10,0,15"/>
 
-        <!-- 📊 Contenedor del DataGrid -->
         <Border Grid.Row="1"
                 Style="{StaticResource floatingBorderStyle}"
                 Padding="15" Margin="20">

@@ -10,10 +10,9 @@ namespace PASSWORD_LIS_Client.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            // Usamos IEnumerable<string> porque funciona con List<T> y arrays T[]
+            // We use IEnumerable<string> because it works with List<T> & arrays T[]
             if (value is IEnumerable<string> nombres)
             {
-                // Si la colección está vacía, devuelve un texto indicativo
                 if (!nombres.Any())
                 {
                     return "(Sin jugadores)";

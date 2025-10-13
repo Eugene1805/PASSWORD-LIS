@@ -4,7 +4,7 @@ using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace PASSWORD_LIS_Client
+namespace PASSWORD_LIS_Client.Views
 {
     /// <summary>
     /// Interaction logic for VerifyCodeWindow.xaml

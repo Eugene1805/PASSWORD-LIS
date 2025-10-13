@@ -1,11 +1,10 @@
 ﻿using PASSWORD_LIS_Client.PasswordResetManagerServiceReference;
 using PASSWORD_LIS_Client.Utils;
-using PASSWORD_LIS_Client.Views;
 using System;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace PASSWORD_LIS_Client
+namespace PASSWORD_LIS_Client.Views
 {
     /// <summary>
     /// Interaction logic for ChangePasswordWindow.xaml
