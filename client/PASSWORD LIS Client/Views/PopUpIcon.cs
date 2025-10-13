@@ -1,4 +1,4 @@
-﻿namespace PASSWORD_LIS_Client.View
+﻿namespace PASSWORD_LIS_Client.Views
 {
     public enum PopUpIcon
     {

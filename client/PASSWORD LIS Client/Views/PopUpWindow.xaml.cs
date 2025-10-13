@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Media.Imaging;
 
-namespace PASSWORD_LIS_Client.View
+namespace PASSWORD_LIS_Client.Views
 {
     /// <summary>
     /// Interaction logic for PopUpWindow.xaml

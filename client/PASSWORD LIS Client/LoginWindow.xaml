@@ -48,7 +48,7 @@
                 />
 
             <Button Content="{x:Static language:Lang.playAsGuestText}" 
-                Style="{StaticResource primaryButtonStyle}" 
+                Style="{StaticResource logOutButtonStyle}" 
                 Width="210" 
                 Height="40" 
                 Margin="0,15,0,10" 

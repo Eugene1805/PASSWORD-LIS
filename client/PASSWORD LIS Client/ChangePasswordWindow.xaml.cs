@@ -1,5 +1,5 @@
 ﻿using PASSWORD_LIS_Client.PasswordResetManagerServiceReference;
-using PASSWORD_LIS_Client.View;
+using PASSWORD_LIS_Client.Views;
 using System;
 using System.Threading.Tasks;
 using System.Windows;
@@ -45,13 +45,15 @@ namespace PASSWORD_LIS_Client
                 }
                 else
                 {
-                    popUpWindow = new PopUpWindow(Properties.Langs.Lang.unexpectedErrorText,Properties.Langs.Lang.passwordChangeFailedText);
+                    popUpWindow = new PopUpWindow(Properties.Langs.Lang.unexpectedErrorText,
+                        Properties.Langs.Lang.passwordChangeFailedText);
                     popUpWindow.ShowDialog();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                popUpWindow = new PopUpWindow(Properties.Langs.Lang.errorTitleText, Properties.Langs.Lang.unexpectedErrorText);
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.unexpectedErrorText);
                 popUpWindow.ShowDialog();
             }
             finally
@@ -79,35 +81,40 @@ namespace PASSWORD_LIS_Client
             catch (TimeoutException)
             {
                 client.Abort();
-                popUpWindow = new PopUpWindow(Properties.Langs.Lang.timeLimitTitleText,Properties.Langs.Lang.serverTimeoutText);
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.timeLimitTitleText,
+                    Properties.Langs.Lang.serverTimeoutText);
                 popUpWindow.ShowDialog();
                 return false;
             }
             catch (System.ServiceModel.EndpointNotFoundException)
             {   
                 client.Abort();
-                popUpWindow = new PopUpWindow(Properties.Langs.Lang.connectionErrorTitleText, Properties.Langs.Lang.serverConnectionInternetErrorText);
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.connectionErrorTitleText,
+                    Properties.Langs.Lang.serverConnectionInternetErrorText);
                 popUpWindow.ShowDialog();
                 return false;
             }
-            catch (System.ServiceModel.CommunicationException ex)
+            catch (System.ServiceModel.CommunicationException)
             {
                 client.Abort();
-                popUpWindow = new PopUpWindow(Properties.Langs.Lang.networkErrorTitleText, Properties.Langs.Lang.serverCommunicationErrorText);
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.networkErrorTitleText,
+                    Properties.Langs.Lang.serverCommunicationErrorText);
                 popUpWindow.ShowDialog();
                 return false;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 client.Abort();
-                popUpWindow = new PopUpWindow(Properties.Langs.Lang.errorTitleText, Properties.Langs.Lang.unexpectedErrorText);
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.unexpectedErrorText);
                 popUpWindow.ShowDialog();
                 return false;
             }
         }
         private void ProcessSuccessfulPasswordChange()
         {
-            popUpWindow = new PopUpWindow(Properties.Langs.Lang.succesfulPasswordChangeTitleText, Properties.Langs.Lang.successfulPasswordChangeText);
+            popUpWindow = new PopUpWindow(Properties.Langs.Lang.succesfulPasswordChangeTitleText,
+                Properties.Langs.Lang.successfulPasswordChangeText);
             popUpWindow.ShowDialog();
             var loginWindow = new LoginWindow();
             loginWindow.Show();
