@@ -49,11 +49,11 @@
                           Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConv}}">
                     <DataGrid.Columns>
                         <DataGridTextColumn HeaderStyle="{StaticResource cleanDataGridColumnHeaderStyle}"
-                                            Header="Puntuación"
+                                            Header="{x:Static language:Lang.scoreTopText}"
                                             Binding="{Binding Score}"
                                             Width="*"/>
                         <DataGridTextColumn HeaderStyle="{StaticResource cleanDataGridColumnHeaderStyle}"
-                                            Header="Jugadores"
+                                            Header="{x:Static language:Lang.playersText}"
                                             Binding="{Binding PlayersNicknames, Converter={StaticResource NicknamesConverter}}"
                                             Width="2*"/>
                     </DataGrid.Columns>
