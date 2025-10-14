@@ -45,14 +45,14 @@ namespace PASSWORD_LIS_Client.Views
                 else
                 {
                     popUpWindow = new PopUpWindow(Properties.Langs.Lang.unexpectedErrorText,
-                        Properties.Langs.Lang.passwordChangeFailedText);
+                        Properties.Langs.Lang.passwordChangeFailedText,PopUpIcon.Warning);
                     popUpWindow.ShowDialog();
                 }
             }
             catch (Exception)
             {
                 popUpWindow = new PopUpWindow(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText);
+                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
                 popUpWindow.ShowDialog();
             }
             finally
@@ -82,7 +82,7 @@ namespace PASSWORD_LIS_Client.Views
             {
                 client.Abort();
                 popUpWindow = new PopUpWindow(Properties.Langs.Lang.timeLimitTitleText,
-                    Properties.Langs.Lang.serverTimeoutText);
+                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
                 popUpWindow.ShowDialog();
                 return false;
             }
@@ -90,7 +90,7 @@ namespace PASSWORD_LIS_Client.Views
             {   
                 client.Abort();
                 popUpWindow = new PopUpWindow(Properties.Langs.Lang.connectionErrorTitleText,
-                    Properties.Langs.Lang.serverConnectionInternetErrorText);
+                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Warning);
                 popUpWindow.ShowDialog();
                 return false;
             }
@@ -98,7 +98,7 @@ namespace PASSWORD_LIS_Client.Views
             {
                 client.Abort();
                 popUpWindow = new PopUpWindow(Properties.Langs.Lang.networkErrorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText);
+                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Warning);
                 popUpWindow.ShowDialog();
                 return false;
             }
@@ -106,7 +106,7 @@ namespace PASSWORD_LIS_Client.Views
             {
                 client.Abort();
                 popUpWindow = new PopUpWindow(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText);
+                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
                 popUpWindow.ShowDialog();
                 return false;
             }
@@ -114,7 +114,7 @@ namespace PASSWORD_LIS_Client.Views
         private void ProcessSuccessfulPasswordChange()
         {
             Window popUpWindow = new PopUpWindow(Properties.Langs.Lang.succesfulPasswordChangeTitleText,
-                Properties.Langs.Lang.successfulPasswordChangeText);
+                Properties.Langs.Lang.successfulPasswordChangeText, PopUpIcon.Warning);
             popUpWindow.ShowDialog();
             var loginWindow = new LoginWindow();
             loginWindow.Show();
@@ -128,14 +128,16 @@ namespace PASSWORD_LIS_Client.Views
             Window popUpWindow;
             if (string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
             {
-                popUpWindow = new PopUpWindow(" ",Properties.Langs.Lang.requiredFieldsText);
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.warningTitleText,
+                    Properties.Langs.Lang.requiredFieldsText,PopUpIcon.Warning);
                 popUpWindow.ShowDialog();
                 return false;
             }
 
             if (!ValidationUtils.PasswordsMatch(newPassword,confirmPassword))
             {
-                popUpWindow = new PopUpWindow(" ", Properties.Langs.Lang.matchingPasswordErrorText);
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.warningTitleText,
+                     Properties.Langs.Lang.matchingPasswordErrorText, PopUpIcon.Warning);
                 popUpWindow.ShowDialog();
                 return false;
             }

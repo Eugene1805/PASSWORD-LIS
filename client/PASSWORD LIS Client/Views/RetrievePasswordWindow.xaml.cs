@@ -1,4 +1,5 @@
 ﻿using PASSWORD_LIS_Client.PasswordResetManagerServiceReference;
+using PASSWORD_LIS_Client.Utils;
 using System;
 using System.ServiceModel;
 using System.Text.RegularExpressions;
@@ -23,7 +24,7 @@ namespace PASSWORD_LIS_Client.Views
             {
                 return;
             }
-
+            Window popUpWindow;
             sendCodeButton.IsEnabled = false;
             try
             {
@@ -35,12 +36,16 @@ namespace PASSWORD_LIS_Client.Views
                 }
                 else
                 {
-                    MessageBox.Show("No se pudo enviar el código. Verifica que el correo sea correcto o espera un minuto antes de reintentar.", "Envío Fallido", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    popUpWindow = new PopUpWindow(Properties.Langs.Lang.sendFailedTitleText,
+                        Properties.Langs.Lang.codeSendFailedText,PopUpIcon.Error);
+                    popUpWindow.ShowDialog();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show($"Ocurrió un error inesperado: {ex.Message}", "Error Crítico", MessageBoxButton.OK, MessageBoxImage.Error);
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
+                popUpWindow.ShowDialog();
             }
             finally
             {
@@ -51,6 +56,7 @@ namespace PASSWORD_LIS_Client.Views
         private async Task<bool> TryRequestResetCodeAsync(string email)
         {
             var client = new PasswordResetManagerClient();
+            Window popUpWindow;
             try
             {
                 var requestDto = new EmailVerificationDTO { Email = email, VerificationCode = "" };
@@ -61,25 +67,33 @@ namespace PASSWORD_LIS_Client.Views
             catch (TimeoutException)
             {
                 client.Abort();
-                MessageBox.Show("El servidor no respondió a tiempo. Inténtalo de nuevo.", "Error de Red", MessageBoxButton.OK, MessageBoxImage.Error);
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.timeLimitTitleText,
+                                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+                popUpWindow.ShowDialog();
                 return false;
             }
             catch (EndpointNotFoundException)
             {
                 client.Abort();
-                MessageBox.Show("No se pudo conectar con el servidor. Verifica tu conexión a internet.", "Error de Conexión", MessageBoxButton.OK, MessageBoxImage.Error);
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.connectionErrorTitleText,
+                    Properties.Langs.Lang.serverConnectionInternetErrorText , PopUpIcon.Warning );
+                popUpWindow.ShowDialog();
                 return false;
             }
-            catch (CommunicationException ex)
+            catch (CommunicationException)
             {
                 client.Abort();
-                MessageBox.Show($"Ocurrió un error de comunicación: {ex.Message}", "Error de Red", MessageBoxButton.OK, MessageBoxImage.Error);
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.networkErrorTitleText,
+                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Warning);
+                popUpWindow.ShowDialog();
                 return false;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 client.Abort();
-                MessageBox.Show($"Ocurrió un error inesperado: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.errorTitleText,
+                            Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
+                popUpWindow.ShowDialog();
                 return false;
             }
         }
@@ -99,17 +113,21 @@ namespace PASSWORD_LIS_Client.Views
 
         private bool IsInputValid()
         {
+            Window popUpWindow;
             string email = emailTextBox.Text;
             if (string.IsNullOrWhiteSpace(email))
             {
-                MessageBox.Show(Properties.Langs.Lang.requiredFieldsText);
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.warningTitleText,
+                    Properties.Langs.Lang.requiredFieldsText, PopUpIcon.Warning);
+                popUpWindow.ShowDialog();
                 return false;
             }
-            string emailRegex = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
 
-            if(!Regex.IsMatch(email, emailRegex))
+            if(!ValidationUtils.IsValidEmail(email))
             {
-                MessageBox.Show(Properties.Langs.Lang.invalidEmailErrorText);
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.warningTitleText,
+                    Properties.Langs.Lang.invalidEmailErrorText, PopUpIcon.Warning);
+                popUpWindow.ShowDialog();
                 return false;
             }
             return true;

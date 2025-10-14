@@ -35,9 +35,12 @@ namespace PASSWORD_LIS_Client.Views
         private async void ButtonClickVerifyCode(object sender, RoutedEventArgs e)
         {
             string code = verificationCodeTextBox.Text;
+            Window popUpWindow;
             if (string.IsNullOrWhiteSpace(code))
             {
-                MessageBox.Show("Por favor, ingresa el código de verificación.", "Campo Requerido");
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.codeWordText,
+                            Properties.Langs.Lang.requiredFieldsText, PopUpIcon.Warning);
+                popUpWindow.ShowDialog();
                 return;
             }
 
@@ -53,7 +56,9 @@ namespace PASSWORD_LIS_Client.Views
             }
             else
             {
-                MessageBox.Show("El código es incorrecto o ha expirado.", "Verificación Fallida");
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.verificationFailedTitleText,
+                            Properties.Langs.Lang.codeIncorrectOrExpiredText, PopUpIcon.Error);
+                popUpWindow.ShowDialog();
                 verifyCodeButton.IsEnabled = true;
                 resendCodeHyperlink.IsEnabled = true;
             }
@@ -65,14 +70,18 @@ namespace PASSWORD_LIS_Client.Views
             resendCodeHyperlink.IsEnabled = false;
 
             bool success = await TryResendCodeAsync();
-
+            Window popUpWindow;
             if (success)
             {
-                MessageBox.Show("Se ha enviado un nuevo código a tu correo.", "Código Enviado");
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.codeSentTitleText,
+                            Properties.Langs.Lang.newCodeSentText, PopUpIcon.Information);
+                popUpWindow.ShowDialog();
             }
             else
             {
-                MessageBox.Show("Por favor, espera al menos un minuto antes de solicitar otro código.", "Límite de Tiempo");
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.timeLimitTitleText,
+                            Properties.Langs.Lang.waitAMinuteForCodeText, PopUpIcon.Warning);
+                popUpWindow.ShowDialog();
             }
 
             verifyCodeButton.IsEnabled = true;
@@ -81,8 +90,8 @@ namespace PASSWORD_LIS_Client.Views
         
         private async Task<bool> TryVerifyCodeAsync(string code)
         {
-            // Usamos esta interfaz común para poder abortar cualquier tipo de cliente en el catch
-            System.ServiceModel.ICommunicationObject client = null;
+            ICommunicationObject client = null;
+            Window popUpWindow;
             try
             {
                 bool isValid = false;
@@ -108,26 +117,32 @@ namespace PASSWORD_LIS_Client.Views
             catch (TimeoutException)
             {
                 client?.Abort();
-                MessageBox.Show("El servidor no respondió a tiempo. Inténtalo de nuevo.", "Error de Red");
-                return false;
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.timeLimitTitleText,
+                            Properties.Langs.Lang.serverTimeoutText,PopUpIcon.Warning);
+                popUpWindow.ShowDialog(); return false;
             }
             catch (EndpointNotFoundException)
             {
                 client?.Abort();
-                MessageBox.Show("No se pudo conectar con el servidor. Verifica tu conexión.", "Error de Conexión");
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.connectionErrorTitleText,
+                            Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Warning);
+                popUpWindow.ShowDialog();
                 return false;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 client?.Abort();
-                MessageBox.Show($"Ocurrió un error inesperado: {ex.Message}", "Error");
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.errorTitleText,
+                            Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
+                popUpWindow.ShowDialog();
                 return false;
             }
         }
 
         private async Task<bool> TryResendCodeAsync()
         {
-            System.ServiceModel.ICommunicationObject client = null;
+            ICommunicationObject client = null;
+            Window popUpWindow;
             try
             {
                 bool success = false;
@@ -151,19 +166,25 @@ namespace PASSWORD_LIS_Client.Views
             catch (TimeoutException)
             {
                 client?.Abort();
-                MessageBox.Show("El servidor no respondió a tiempo. Inténtalo de nuevo.", "Error de Red");
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.timeLimitTitleText,
+                                                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+                popUpWindow.ShowDialog(); 
                 return false;
             }
             catch (EndpointNotFoundException)
             {
                 client?.Abort();
-                MessageBox.Show("No se pudo conectar con el servidor. Verifica tu conexión.", "Error de Conexión");
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.connectionErrorTitleText,
+                                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Warning);
+                popUpWindow.ShowDialog();
                 return false;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 client?.Abort();
-                MessageBox.Show($"Ocurrió un error inesperado: {ex.Message}", "Error");
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.errorTitleText,
+                                                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
+                popUpWindow.ShowDialog();
                 return false;
             }
         }
