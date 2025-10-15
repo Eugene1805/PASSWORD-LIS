@@ -208,6 +208,6 @@
             <Setter Property="CellStyle" Value="{StaticResource cleanDataGridCellStyle}"/>
             <Setter Property="ColumnHeaderStyle" Value="{StaticResource cleanDataGridColumnHeaderStyle}"/>
         </Style>
-
+        
     </Application.Resources>
 </Application>

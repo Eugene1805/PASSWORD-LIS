@@ -1,11 +1,10 @@
 ﻿using PASSWORD_LIS_Client.PasswordResetManagerServiceReference;
-using PASSWORD_LIS_Client.View;
+using PASSWORD_LIS_Client.Utils;
 using System;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 
-namespace PASSWORD_LIS_Client
+namespace PASSWORD_LIS_Client.Views
 {
     /// <summary>
     /// Interaction logic for ChangePasswordWindow.xaml
@@ -15,7 +14,6 @@ namespace PASSWORD_LIS_Client
         private readonly string accountEmail;
         private readonly string verificationCode;
 
-        private Window popUpWindow = null;
         public ChangePasswordWindow()
         {
             InitializeComponent();
@@ -35,6 +33,7 @@ namespace PASSWORD_LIS_Client
             }
 
             changePasswordButton.IsEnabled = false;
+            Window popUpWindow;
             try
             {
                 bool success = await TryResetPasswordOnServerAsync();
@@ -45,13 +44,15 @@ namespace PASSWORD_LIS_Client
                 }
                 else
                 {
-                    popUpWindow = new PopUpWindow(Properties.Langs.Lang.unexpectedErrorText,Properties.Langs.Lang.passwordChangeFailedText);
+                    popUpWindow = new PopUpWindow(Properties.Langs.Lang.unexpectedErrorText,
+                        Properties.Langs.Lang.passwordChangeFailedText,PopUpIcon.Warning);
                     popUpWindow.ShowDialog();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                popUpWindow = new PopUpWindow(Properties.Langs.Lang.errorTitleText, Properties.Langs.Lang.unexpectedErrorText);
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
                 popUpWindow.ShowDialog();
             }
             finally
@@ -62,6 +63,7 @@ namespace PASSWORD_LIS_Client
         private async Task<bool> TryResetPasswordOnServerAsync()
         {
             var client = new PasswordResetManagerClient();
+            Window popUpWindow;
             try
             {
                 var passwordResetInfo = new PasswordResetDTO
@@ -79,35 +81,40 @@ namespace PASSWORD_LIS_Client
             catch (TimeoutException)
             {
                 client.Abort();
-                popUpWindow = new PopUpWindow(Properties.Langs.Lang.timeLimitTitleText,Properties.Langs.Lang.serverTimeoutText);
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.timeLimitTitleText,
+                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
                 popUpWindow.ShowDialog();
                 return false;
             }
             catch (System.ServiceModel.EndpointNotFoundException)
             {   
                 client.Abort();
-                popUpWindow = new PopUpWindow(Properties.Langs.Lang.connectionErrorTitleText, Properties.Langs.Lang.serverConnectionInternetErrorText);
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.connectionErrorTitleText,
+                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Warning);
                 popUpWindow.ShowDialog();
                 return false;
             }
-            catch (System.ServiceModel.CommunicationException ex)
+            catch (System.ServiceModel.CommunicationException)
             {
                 client.Abort();
-                popUpWindow = new PopUpWindow(Properties.Langs.Lang.networkErrorTitleText, Properties.Langs.Lang.serverCommunicationErrorText);
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.networkErrorTitleText,
+                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Warning);
                 popUpWindow.ShowDialog();
                 return false;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 client.Abort();
-                popUpWindow = new PopUpWindow(Properties.Langs.Lang.errorTitleText, Properties.Langs.Lang.unexpectedErrorText);
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
                 popUpWindow.ShowDialog();
                 return false;
             }
         }
         private void ProcessSuccessfulPasswordChange()
         {
-            popUpWindow = new PopUpWindow(Properties.Langs.Lang.succesfulPasswordChangeTitleText, Properties.Langs.Lang.successfulPasswordChangeText);
+            Window popUpWindow = new PopUpWindow(Properties.Langs.Lang.succesfulPasswordChangeTitleText,
+                Properties.Langs.Lang.successfulPasswordChangeText, PopUpIcon.Warning);
             popUpWindow.ShowDialog();
             var loginWindow = new LoginWindow();
             loginWindow.Show();
@@ -118,15 +125,20 @@ namespace PASSWORD_LIS_Client
             string newPassword = newPasswordBox.Password;
             string confirmPassword = confirmNewPasswordBox.Password;
 
+            Window popUpWindow;
             if (string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmPassword))
             {
-                MessageBox.Show(Properties.Langs.Lang.requiredFieldsText);
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.warningTitleText,
+                    Properties.Langs.Lang.requiredFieldsText,PopUpIcon.Warning);
+                popUpWindow.ShowDialog();
                 return false;
             }
 
-            if (newPassword != confirmPassword)
+            if (!ValidationUtils.PasswordsMatch(newPassword,confirmPassword))
             {
-                MessageBox.Show(Properties.Langs.Lang.matchingPasswordErrorText);
+                popUpWindow = new PopUpWindow(Properties.Langs.Lang.warningTitleText,
+                     Properties.Langs.Lang.matchingPasswordErrorText, PopUpIcon.Warning);
+                popUpWindow.ShowDialog();
                 return false;
             }
 

@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Media.Imaging;
 
-namespace PASSWORD_LIS_Client.View
+namespace PASSWORD_LIS_Client.Views
 {
     /// <summary>
     /// Interaction logic for PopUpWindow.xaml
@@ -21,13 +21,6 @@ namespace PASSWORD_LIS_Client.View
             SetIcon(icon);
         }
 
-        //ELIMINAR CONSTRUCTOR
-        public PopUpWindow(string title, string message) : this()
-        {
-            this.Title = title;
-            messageTextBlock.Text = message;
-        }
-
         private void SetIcon(PopUpIcon icon)
         {
             string iconPath;
@@ -42,9 +35,8 @@ namespace PASSWORD_LIS_Client.View
                 case PopUpIcon.Error:
                     iconPath = "/Resources/ErrorIcon.png";
                     break;
-                case PopUpIcon.Information:
                 default:
-                    iconPath = "/Resources/Icons/InformationIcon.png";
+                    iconPath = "/Resources/InformationIcon.png";
                     break;
             }
 

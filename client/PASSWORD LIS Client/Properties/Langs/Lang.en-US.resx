@@ -361,7 +361,7 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
     <value>Validate Round</value>
   </data>
   <data name="verifyCodeMessageText" xml:space="preserve">
-    <value>Type the 4 digit code sent to the e-mail:</value>
+    <value>Type the 6 digit code sent to the e-mail:</value>
   </data>
   <data name="verifyCodeNotSendText" xml:space="preserve">
     <value>Didn't receive the code?</value>

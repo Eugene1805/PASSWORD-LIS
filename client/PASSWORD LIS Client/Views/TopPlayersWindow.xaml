@@ -1,0 +1,64 @@
+﻿<Window x:Class="PASSWORD_LIS_Client.Views.TopPlayersWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PASSWORD_LIS_Client"
+        xmlns:viewModels="clr-namespace:PASSWORD_LIS_Client.ViewModels"
+        xmlns:converters="clr-namespace:PASSWORD_LIS_Client.Converters"
+        xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        MinHeight="350" MinWidth="350"
+        Title="TopPlayersWindow" Height="350" Width="350"
+        Background="#EEEFF0">
+
+    <Window.DataContext>
+        <viewModels:TopPlayersViewModel/>
+    </Window.DataContext>
+
+    <Window.Resources>
+        <converters:NicknamesConverter x:Key="NicknamesConverter"/>
+        <converters:InverseBooleanToVisibilityConverter x:Key="BoolToVisibilityConv"/>
+    </Window.Resources>
+
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <TextBlock Grid.Row="0"
+                   Text="{x:Static language:Lang.topPlayersText}"
+                   Style="{StaticResource titleTextBlockStyle}"
+                   HorizontalAlignment="Center"
+                   Margin="0,10,0,15"/>
+
+        <Border Grid.Row="1"
+                Style="{StaticResource floatingBorderStyle}"
+                Padding="15" Margin="20">
+            <Grid>
+                <DataGrid x:Name="topTeamsDataGrid"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserSortColumns="False"
+                          RowDetailsVisibilityMode="Collapsed"
+                          IsReadOnly="True"
+                          Style="{StaticResource cleanDataGridStyle}"
+                          ItemsSource="{Binding TopTeams}"
+                          Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConv}}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn HeaderStyle="{StaticResource cleanDataGridColumnHeaderStyle}"
+                                            Header="{x:Static language:Lang.scoreTopText}"
+                                            Binding="{Binding Score}"
+                                            Width="*"/>
+                        <DataGridTextColumn HeaderStyle="{StaticResource cleanDataGridColumnHeaderStyle}"
+                                            Header="{x:Static language:Lang.playersText}"
+                                            Binding="{Binding PlayersNicknames, Converter={StaticResource NicknamesConverter}}"
+                                            Width="2*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

@@ -361,7 +361,7 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
     <value>Validar Ronda</value>
   </data>
   <data name="verifyCodeMessageText" xml:space="preserve">
-    <value>Introduce el código de 4 dígitos enviado al correo:</value>
+    <value>Introduce el código de 6 dígitos enviado al correo:</value>
   </data>
   <data name="verifyCodeNotSendText" xml:space="preserve">
     <value>¿No recibiste el código?</value>

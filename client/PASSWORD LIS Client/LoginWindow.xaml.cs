@@ -1,6 +1,6 @@
 ﻿using PASSWORD_LIS_Client.LoginManagerServiceReference;
 using PASSWORD_LIS_Client.Utils;
-using PASSWORD_LIS_Client.View;
+using PASSWORD_LIS_Client.Views;
 using System;
 using System.Collections.Generic;
 using System.Windows;
