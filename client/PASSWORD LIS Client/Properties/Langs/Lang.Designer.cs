@@ -358,6 +358,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a Guest.
+        /// </summary>
+        public static string guestText {
+            get {
+                return ResourceManager.GetString("guestText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a How to Play?.
         /// </summary>
         public static string howToPlayText {
