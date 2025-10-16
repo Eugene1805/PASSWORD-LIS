@@ -215,14 +215,12 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Grid>
-                            <!-- Fondo del botón -->
                             <Border x:Name="BackgroundBorder"
                                         CornerRadius="10"
                                         Background="{TemplateBinding Background}"
                                         BorderBrush="{TemplateBinding BorderBrush}"
                                         BorderThickness="{TemplateBinding BorderThickness}" />
 
-                            <!-- Indicador de carga (círculo pulsante) -->
                             <Border x:Name="LoadingIndicator"
                                         Width="25" Height="25"
                                         CornerRadius="15"
@@ -232,13 +230,11 @@
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center" />
 
-                            <!-- Contenido del botón (el texto) -->
                             <ContentPresenter x:Name="Content"
                                                   HorizontalAlignment="Center"
                                                   VerticalAlignment="Center" />
                         </Grid>
                         <ControlTemplate.Triggers>
-                            <!-- Disparador: Se activa cuando IsBusy en el ViewModel es True -->
                             <Trigger Property="utils:ButtonProperties.IsBusy" Value="True">
                                 <Setter TargetName="Content" Property="Visibility" Value="Collapsed" />
                                 <Setter TargetName="LoadingIndicator" Property="Visibility" Value="Visible" />

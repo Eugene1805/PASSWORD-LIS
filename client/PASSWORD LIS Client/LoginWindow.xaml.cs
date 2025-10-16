@@ -4,6 +4,8 @@ using PASSWORD_LIS_Client.Views;
 using System;
 using System.Collections.Generic;
 using System.Windows;
+using PASSWORD_LIS_Client.Services;
+using PASSWORD_LIS_Client.ViewModels;
 
 namespace PASSWORD_LIS_Client
 {
@@ -75,7 +77,8 @@ namespace PASSWORD_LIS_Client
 
         private void HyperlinkClickSignUp(object sender, RoutedEventArgs e)
         {
-            var signUpWindow = new SignUpWindow();
+            var signUpViewModel = new SignUpViewModel(new WcfAccountManagerService(), new WindowService());
+            var signUpWindow = new SignUpWindow { DataContext = signUpViewModel};
             signUpWindow.Show();
             this.Close();
         }

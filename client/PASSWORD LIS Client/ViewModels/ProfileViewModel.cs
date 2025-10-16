@@ -1,4 +1,5 @@
 ﻿using PASSWORD_LIS_Client.Commands;
+using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
 using System;
@@ -91,10 +92,12 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand ChangePasswordCommand { get; }
 
         private readonly IWindowService windowService;
+        private readonly IProfileManagerService profileManagerClient;
 
-        public ProfileViewModel()
+        public ProfileViewModel(IProfileManagerService profileManagerService, IWindowService windowService)
         {
-            windowService = new WindowService();
+            this.profileManagerClient = profileManagerService;
+            this.windowService = windowService;
 
             BackToLobbyCommand = new RelayCommand(BackToLobby);
             EditProfileCommand = new RelayCommand(EditProfile);
@@ -157,13 +160,12 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
 
             IsSaving = true;
-            var client = new ProfileManagerServiceReference.ProfileManagerClient();
+
             try
             {
                 var updatedDto = CollectUserData();
-                var resultDto = await client.UpdateProfileAsync(updatedDto);
+                var resultDto = await profileManagerClient.UpdateProfileAsync(updatedDto);
                 ProcessUpdateResponse(resultDto);
-                client.Close();
             }
             catch (Exception)
             {
@@ -171,7 +173,6 @@ namespace PASSWORD_LIS_Client.ViewModels
                     Properties.Langs.Lang.serverCommunicationErrorText,
                     PopUpIcon.Error);
                 IsEditMode = true; 
-                client.Abort();
             }
             finally
             {

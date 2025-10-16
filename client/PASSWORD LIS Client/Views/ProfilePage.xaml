@@ -12,9 +12,7 @@
       MinHeight="400" MinWidth="600"
       d:DesignHeight="450" d:DesignWidth="800"
       Title="{x:Static language:Lang.profileText}">
-    <Page.DataContext>
-        <viewModels:ProfileViewModel/>
-    </Page.DataContext>
+
 
     <Page.Resources>
         <converters:AvatarIdToImageConverter x:Key="AvatarIdToImageConverter"/>

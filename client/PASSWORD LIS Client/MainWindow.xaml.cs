@@ -32,7 +32,8 @@ namespace PASSWORD_LIS_Client
         {
             if (SessionManager.IsUserLoggedIn())
             {
-                mainFrame.NavigationService.Navigate(new LobbyPage());
+                //var viewModel = new LobbyViewModel(new WindowService());
+                mainFrame.NavigationService.Navigate(new Views.LobbyPage()); //{ DataContext = viewModel });
             }
             else
             {

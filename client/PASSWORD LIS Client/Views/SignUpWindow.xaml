@@ -11,9 +11,7 @@
         WindowStartupLocation="CenterScreen"
         MinHeight="700" MinWidth="700"
         Title="{x:Static language:Lang.signUpText}" Height="700" Width="700">
-    <Window.DataContext>
-        <viewModels:SignUpViewModel/>
-    </Window.DataContext>
+   
     <Grid>
         <Grid.Background>
             <ImageBrush ImageSource="/Resources/BackgroudImage.png"/>
@@ -82,4 +80,5 @@
             </TextBlock>
         </StackPanel>
     </Grid>
+    
 </Window>

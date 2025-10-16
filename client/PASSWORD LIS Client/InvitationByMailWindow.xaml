@@ -8,6 +8,7 @@
         mc:Ignorable="d"
         Title="InvitationByMailWindow" Height="225" Width="500">
     <Grid>
+
         <Border Style="{StaticResource floatingBorderStyle}">
             <StackPanel>
                 <TextBlock Style="{StaticResource subtitleTextBlockStyle}" Margin="20,20,20,10"
@@ -18,5 +19,6 @@
                         Content="{x:Static language:Lang.sendInvitationText}"/>
             </StackPanel>
         </Border>
+       
     </Grid>
 </Window>

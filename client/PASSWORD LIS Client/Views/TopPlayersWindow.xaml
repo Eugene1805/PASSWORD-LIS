@@ -13,9 +13,7 @@
         Title="TopPlayersWindow" Height="350" Width="350"
         Background="#EEEFF0">
 
-    <Window.DataContext>
-        <viewModels:TopPlayersViewModel/>
-    </Window.DataContext>
+
 
     <Window.Resources>
         <converters:NicknamesConverter x:Key="NicknamesConverter"/>
