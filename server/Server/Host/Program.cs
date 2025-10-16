@@ -2,6 +2,7 @@
 using Data.DAL.Implementations;
 using Services.Services;
 using Services.Util;
+using Services.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.ServiceModel;
@@ -25,7 +26,8 @@ namespace Host
                 var codeService = new VerificationCodeService();
                 var notificationService = new NotificationService(emailSender);
                 var statisticsRepository = new StatisticsRepository();
-
+                var playerRepository = new PlayerRepository();
+                var operationContextWrapper = new OperationContextWrapper();
                 // --- PASO 2: Crear las INSTANCIAS de cada servicio ---
                 // Se inyectan las dependencias compartidas en cada constructor.
                 var accountManagerInstance = new AccountManager(accountRepository, notificationService, codeService);
@@ -34,6 +36,7 @@ namespace Host
                 var passwordResetManagerInstance = new PasswordResetManager(accountRepository, notificationService, codeService);
                 var profileManagerInstance = new ProfileManager(accountRepository);
                 var topPlayersManagerInstance = new TopPlayersManager(statisticsRepository);
+                var waitingRoomManagerInstance = new WaitingRoomManager(playerRepository,operationContextWrapper);
 
                 // --- PASO 3: Crear un ServiceHost para CADA instancia de servicio ---
                 var accountManagerHost = new ServiceHost(accountManagerInstance);
@@ -42,6 +45,7 @@ namespace Host
                 var passwordResetManagerHost = new ServiceHost(passwordResetManagerInstance);
                 var profileManagerHost = new ServiceHost(profileManagerInstance);
                 var topPlayersManagerHost = new ServiceHost(topPlayersManagerInstance);
+                var waitingRoomManagerHost = new ServiceHost(waitingRoomManagerInstance);
 
                 // Agregarlos a la lista para manejarlos fácilmente
                 hosts.Add(accountManagerHost);
@@ -50,6 +54,7 @@ namespace Host
                 hosts.Add(passwordResetManagerHost);
                 hosts.Add(profileManagerHost);
                 hosts.Add(topPlayersManagerHost);
+                hosts.Add(waitingRoomManagerHost);
 
                 // --- PASO 4: Abrir todos los hosts ---
                 foreach (var host in hosts)
