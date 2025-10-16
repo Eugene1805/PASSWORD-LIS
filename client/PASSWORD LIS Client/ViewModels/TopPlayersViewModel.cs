@@ -1,4 +1,8 @@
-﻿using PASSWORD_LIS_Client.TopPlayersManagerServiceReference;
+﻿using PASSWORD_LIS_Client.Services;
+using PASSWORD_LIS_Client.TopPlayersManagerServiceReference;
+using PASSWORD_LIS_Client.Utils;
+using PASSWORD_LIS_Client.Views;
+using System;
 using System.Collections.ObjectModel;
 using System.ServiceModel;
 using System.Threading.Tasks;
@@ -9,7 +13,8 @@ namespace PASSWORD_LIS_Client.ViewModels
     public class TopPlayersViewModel : BaseViewModel
     {
         private const int NumberOfTeams = 5;
-
+        private readonly ITopPlayersManagerService playersManagerClient;
+        private readonly IWindowService windowService;
         private ObservableCollection<TeamDTO> topTeams;
         public ObservableCollection<TeamDTO> TopTeams
         {
@@ -24,50 +29,45 @@ namespace PASSWORD_LIS_Client.ViewModels
             set { isLoading = value; OnPropertyChanged(); }
         }
 
-        public TopPlayersViewModel()
+        public TopPlayersViewModel(ITopPlayersManagerService playersManagerService, IWindowService windowService)
         {
+            this.playersManagerClient = playersManagerService;
+            this.windowService = windowService;
             TopTeams = new ObservableCollection<TeamDTO>();
-            LoadTopPlayersAsync();
+            _ = LoadTopPlayersAsync();
         }
 
         private async Task LoadTopPlayersAsync()
         {
             IsLoading = true;
-            var client = new TopPlayersManagerClient();
-            bool success = false;
 
             try
             {
-                var teamsTopArray = await client.GetTopAsync(NumberOfTeams);
+                var teamsTopArray = await playersManagerClient.GetTopAsync(NumberOfTeams);
                 TopTeams = new ObservableCollection<TeamDTO>(teamsTopArray);
-                success = true;
             }
-            catch (FaultException<ServiceErrorDetailDTO> ex)
+            catch (FaultException<ServiceErrorDetailDTO>)
             {
-                MessageBox.Show(ex.Detail.Message, "Error del Servidor", MessageBoxButton.OK, MessageBoxImage.Error);
+                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                            Properties.Langs.Lang.unexpectedServerErrorText, PopUpIcon.Error);
             }
             catch (EndpointNotFoundException)
             {
-                MessageBox.Show("No se pudo conectar con el servidor. Verifica tu conexión o que el servidor esté en línea.", "Error de Conexión", MessageBoxButton.OK, MessageBoxImage.Error);
+                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
+                            Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Warning);
             }
-            catch (CommunicationException ex)
+            catch (CommunicationException)
             {
-                MessageBox.Show($"Ocurrió un error de comunicación: {ex.Message}", "Error de Comunicación", MessageBoxButton.OK, MessageBoxImage.Error);
+                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
+                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
             }
-            catch (System.Exception ex) 
+            catch (Exception) 
             {
-                MessageBox.Show($"Se produjo un error inesperado: {ex.Message}", "Error Inesperado", MessageBoxButton.OK, MessageBoxImage.Error);
+                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                            Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
             }
             finally
             {
-                if (success)
-                {
-                    client.Close();
-                }
-                else
-                {
-                    client.Abort();
-                }
                 IsLoading = false;
             }
         }

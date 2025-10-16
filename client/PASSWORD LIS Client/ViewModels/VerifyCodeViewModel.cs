@@ -1,4 +1,5 @@
 ﻿using PASSWORD_LIS_Client.Commands;
+using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.VerificationCodeManagerServiceReference;
 using PASSWORD_LIS_Client.Views;
@@ -13,6 +14,8 @@ namespace PASSWORD_LIS_Client.ViewModels
         public string Email { get; }
         private readonly VerificationReason reason;
         private readonly IWindowService windowService;
+        private readonly IVerificationCodeManagerService newAccountClient;
+        private readonly IPasswordResetManagerService resetPasswordClient;
 
         private string enteredCode;
         public string EnteredCode
@@ -31,11 +34,14 @@ namespace PASSWORD_LIS_Client.ViewModels
         public RelayCommand VerifyCodeCommand { get; }
         public RelayCommand ResendCodeCommand { get; }
 
-        public VerifyCodeViewModel(string email, VerificationReason reason, IWindowService windowService)
+        public VerifyCodeViewModel(string email, VerificationReason reason, IWindowService windowService,
+            IVerificationCodeManagerService verificationCodeManager, IPasswordResetManagerService passwordResetManager)
         {
             this.Email = email;
             this.reason = reason;
             this.windowService = windowService;
+            this.newAccountClient = verificationCodeManager;
+            this.resetPasswordClient = passwordResetManager;
 
             this.VerifyCodeCommand = new RelayCommand(async (_) => await VerifyCodeAsync(), (_) => CanVerify());
             this.ResendCodeCommand = new RelayCommand(async (_) => await ResendCodeAsync(), (_) => !this.IsBusy);
@@ -101,20 +107,13 @@ namespace PASSWORD_LIS_Client.ViewModels
                 switch (this.reason)
                 {
                     case VerificationReason.AccountActivation:
-                        var activationClient = new AccountVerificationManagerClient();
                         var dto = new EmailVerificationDTO { Email = this.Email, VerificationCode = code };
-                        isValid = await activationClient.VerifyEmailAsync(dto);
-                        activationClient.Close();
+                        isValid = await newAccountClient.VerifyEmailAsync(dto);
                         return isValid;
 
                     case VerificationReason.PasswordReset:
-                        var resetClient = new PasswordResetManagerServiceReference.PasswordResetManagerClient();
                         var resetDto = new PasswordResetManagerServiceReference.EmailVerificationDTO { Email = this.Email, VerificationCode = code };
-                        isValid = await resetClient.ValidatePasswordResetCodeAsync(resetDto);
-                        resetClient.Close();
-                        Console.WriteLine(isValid);
-                        Console.WriteLine(resetDto.Email);
-
+                        isValid = await resetPasswordClient.ValidatePasswordResetCodeAsync(resetDto);
                         return isValid;
                 }
                 return isValid;
@@ -148,15 +147,11 @@ namespace PASSWORD_LIS_Client.ViewModels
                 switch (reason)
                 {
                     case VerificationReason.AccountActivation:
-                        var activationClient = new AccountVerificationManagerClient();
-                        success = await activationClient.ResendVerificationCodeAsync(this.Email);
-                        activationClient.Close();
+                        success = await newAccountClient.ResendVerificationCodeAsync(this.Email);
                         break;
                     case VerificationReason.PasswordReset:
-                        var resetClient = new PasswordResetManagerServiceReference.PasswordResetManagerClient();
                         var resetDto = new PasswordResetManagerServiceReference.EmailVerificationDTO { Email = this.Email, VerificationCode = "" };
-                        success = await resetClient.RequestPasswordResetCodeAsync(resetDto);
-                        resetClient.Close();
+                        success = await resetPasswordClient.RequestPasswordResetCodeAsync(resetDto);
                         break;
                 }
                 return success;

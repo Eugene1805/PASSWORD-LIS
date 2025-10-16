@@ -1,4 +1,5 @@
-﻿using PASSWORD_LIS_Client.ViewModels;
+﻿using PASSWORD_LIS_Client.Services;
+using PASSWORD_LIS_Client.ViewModels;
 using PASSWORD_LIS_Client.Views;
 using System.Linq;
 using System.Windows;
@@ -19,7 +20,8 @@ namespace PASSWORD_LIS_Client.Utils
     {
         public void ShowVerifyCodeWindow(string email, VerificationReason reason)
         {
-            var viewModel = new VerifyCodeViewModel(email, reason, this);
+            var viewModel = new VerifyCodeViewModel(email, reason, this,
+                new WcfVerificationCodeManagerService(), new WcfPasswordResetManagerService());
             var window = new VerifyCodeWindow { DataContext = viewModel };
             window.Show();
 ;
@@ -27,7 +29,7 @@ namespace PASSWORD_LIS_Client.Utils
 
         public void ShowChangePasswordWindow(string email, string verificationCode)
         {
-            var viewModel = new ChangePasswordViewModel(email, verificationCode, this);
+            var viewModel = new ChangePasswordViewModel(email, verificationCode, this, new WcfPasswordResetManagerService());
             var window = new ChangePasswordWindow { DataContext = viewModel };
             window.Show();
         }
