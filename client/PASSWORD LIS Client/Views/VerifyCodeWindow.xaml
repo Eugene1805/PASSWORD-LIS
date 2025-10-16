@@ -4,6 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PASSWORD_LIS_Client.Views"
+        xmlns:viewModels="clr-namespace:PASSWORD_LIS_Client.ViewModels"
+        xmlns:utils="clr-namespace:PASSWORD_LIS_Client.Utils"
         xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
@@ -38,21 +40,25 @@
                     HorizontalAlignment="Center" FontWeight="Bold" FontFamily="Consolas"
                     Margin="0,0,0,20" Height="50" Width="200"/>
 
-            <TextBox x:Name="verificationCodeTextBox" Style="{StaticResource primaryTextBoxStyle}" Width="220"/>
+            <TextBox x:Name="verificationCodeTextBox" 
+                     Text="{Binding EnteredCode, UpdateSourceTrigger=PropertyChanged}"
+                     Style="{StaticResource primaryTextBoxStyle}" Width="220"/>
             <Button x:Name="verifyCodeButton"
                 Content="{x:Static language:Lang.verifyCodeText}" 
-               Style="{StaticResource primaryButtonStyle}" 
+                Style="{StaticResource LoadingButtonStyle}"
+                utils:ButtonProperties.IsBusy="{Binding IsBusy}"
                 Width="180" 
                 Height="35" 
                 Margin="0,15,0,10"
-                HorizontalAlignment="Center" FontSize="14" Click="ButtonClickVerifyCode"
+                HorizontalAlignment="Center" FontSize="14"
+                Command="{Binding VerifyCodeCommand}"
                 />
             <TextBlock Text="{x:Static language:Lang.verifyCodeNotSendText}" Style="{StaticResource bodyTextBlockStyle}"
                    HorizontalAlignment="Center"/>
             <TextBlock Style="{StaticResource bodyTextBlockStyle}"
                     TextWrapping="Wrap"
                     HorizontalAlignment="Center">
-                    <Hyperlink x:Name="resendCodeHyperlink" Click="HyperlinkClickResendCode"> 
+                    <Hyperlink x:Name="resendCodeHyperlink" Command="{Binding ResendCodeCommand}"> 
                         <Run Text="{x:Static language:Lang.verifyCodeResendCodeText}"/>
                     </Hyperlink>
             </TextBlock>

@@ -70,11 +70,12 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand NavigateToLoginCommand { get; }
         public ICommand OpenTermsAndConditionsCommand { get; }
         
-
+        private readonly IWindowService windowService;
         public SignUpViewModel()
         {
+            windowService = new WindowService();
             TCLink = ConfigurationManager.AppSettings["TCPageURL"];
-            SignUpCommand = new RelayCommand((_) => SignUpAsync(), _ => CanExecuteSignUp());
+            SignUpCommand = new RelayCommand(async (_) => await SignUpAsync(), (_) => CanExecuteSignUp());
             NavigateToLoginCommand = new RelayCommand(NavigateToLogin);
             OpenTermsAndConditionsCommand = new RelayCommand(OpenTermsAndConditions);
         }
@@ -86,7 +87,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 return;
             }
-            Window popUpWindow;
             IsSigningUp = true;
             try
             {
@@ -95,33 +95,28 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             catch (FaultException<ServiceErrorDetailDTO>)
             {
-                popUpWindow = new PopUpWindow(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.userAlreadyExistText,PopUpIcon.Warning);
-                popUpWindow.ShowDialog();
+                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.userAlreadyExistText, PopUpIcon.Warning);
             }
             catch (TimeoutException)
             {
-                popUpWindow = new PopUpWindow(Properties.Langs.Lang.timeLimitTitleText,
-                    Properties.Langs.Lang.serverTimeoutText,PopUpIcon.Warning);
-                popUpWindow.ShowDialog();
+                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
+                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
             }
             catch (EndpointNotFoundException)
             {
-                popUpWindow = new PopUpWindow(Properties.Langs.Lang.connectionErrorTitleText,
-                    Properties.Langs.Lang.serverConnectionInternetErrorText,PopUpIcon.Error);
-                popUpWindow.ShowDialog();
+                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
+                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
             }
             catch (CommunicationException)
             {
-                popUpWindow = new PopUpWindow(Properties.Langs.Lang.networkErrorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText,PopUpIcon.Error);
-                popUpWindow.ShowDialog();
+                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
+                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
             }
             catch (Exception)
             {
-                popUpWindow = new PopUpWindow(Properties.Langs.Lang.errorTitleText,
-                                    Properties.Langs.Lang.unexpectedErrorText,PopUpIcon.Error);
-                popUpWindow.ShowDialog();
+                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
             }
             finally
             {
@@ -141,29 +136,18 @@ namespace PASSWORD_LIS_Client.ViewModels
                    !string.IsNullOrEmpty(ConfirmPassword);
         }
 
-        private static void NavigateToLogin(object obj)
+        private void NavigateToLogin(object obj)
         {
-            var loginWindow = new LoginWindow();
-            loginWindow.Show();
-
-            foreach (Window window in Application.Current.Windows)
-            {
-                if (window is SignUpWindow)
-                {
-                    window.Close();
-                    break;
-                }
-            }
+            this.windowService.ShowLoginWindow();
+            this.windowService.CloseWindow(this);
         }
 
         private void OpenTermsAndConditions(object obj)
         {
-            Window popUpWindow;
             if (string.IsNullOrWhiteSpace(TCLink) || !Uri.IsWellFormedUriString(TCLink, UriKind.Absolute))
             {
-                popUpWindow = new PopUpWindow(Properties.Langs.Lang.invalidLinkTitle,
-                    Properties.Langs.Lang.linkUnavailableText,PopUpIcon.Warning);
-                popUpWindow.ShowDialog();
+                this.windowService.ShowPopUp(Properties.Langs.Lang.invalidLinkTitle,
+                    Properties.Langs.Lang.linkUnavailableText, PopUpIcon.Warning);
                 return;
             }
 
@@ -173,21 +157,18 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             catch (Win32Exception)
             {
-                popUpWindow = new PopUpWindow(Properties.Langs.Lang.operationFailedTitleText,
+                this.windowService.ShowPopUp(Properties.Langs.Lang.operationFailedTitleText,
                     Properties.Langs.Lang.linkOpenFailText, PopUpIcon.Warning);
-                popUpWindow.ShowDialog();
             }
             catch (ArgumentNullException)
             {
-                popUpWindow = new PopUpWindow(Properties.Langs.Lang.internalErrorTitle,
-                    Properties.Langs.Lang.termsLinkUnavailableText,PopUpIcon.Error);
-                popUpWindow.ShowDialog();
+                this.windowService.ShowPopUp(Properties.Langs.Lang.internalErrorTitle,
+                    Properties.Langs.Lang.termsLinkUnavailableText, PopUpIcon.Error);
             }
             catch (Exception)
             {
-                popUpWindow = new PopUpWindow(Properties.Langs.Lang.unknownErrorTitle,
-                    Properties.Langs.Lang.unexpectedErrorText,PopUpIcon.Error);
-                popUpWindow.ShowDialog();
+                this.windowService.ShowPopUp(Properties.Langs.Lang.unknownErrorTitle, 
+                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
             }
         }
 
@@ -217,13 +198,8 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void ProcessSuccessfulSignUp()
         {
-            var codeVerificationWindow = new VerifyCodeWindow(Email, VerificationReason.AccountActivation);
-            bool? result = codeVerificationWindow.ShowDialog();
-
-            if (result == true)
-            {
-                NavigateToLogin(null);
-            }
+            _ = this.windowService.ShowVerifyCodeDialog(this.Email, VerificationReason.AccountActivation);
+            this.windowService.CloseWindow(this);
         }
 
         private bool IsInputValid()
@@ -244,8 +220,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 return false;
             }
             return true;
-        }
-             
+        }    
         
     }
 }

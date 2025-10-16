@@ -60,7 +60,8 @@
 
             <Button x:Name="signUpButton"
                 Content="{x:Static language:Lang.signUpText}" 
-                Style="{StaticResource primaryButtonStyle}"
+                Style="{StaticResource LoadingButtonStyle}"
+                utils:ButtonProperties.IsBusy="{Binding IsSigningUp}"
                 Width="250" 
                 Height="35" 
                 Margin="0,15,0,10" 
