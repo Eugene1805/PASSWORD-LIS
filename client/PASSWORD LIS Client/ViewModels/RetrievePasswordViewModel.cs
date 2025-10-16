@@ -27,9 +27,9 @@ namespace PASSWORD_LIS_Client.ViewModels
         public RelayCommand SendCodeCommand { get; }
 
         private readonly IWindowService windowService;
-        public RetrievePasswordViewModel()
+        public RetrievePasswordViewModel(IWindowService windowService)
         {
-            this.windowService = new WindowService();
+            this.windowService = windowService;
             this.SendCodeCommand = new RelayCommand(async (_) => await SendCodeAsync(), (_) => CanSendCode());
         }
 
