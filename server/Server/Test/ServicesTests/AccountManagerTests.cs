@@ -60,25 +60,58 @@ namespace Test.ServicesTests
         }
 
         [Fact]
+        public async Task CreateAccount_ShouldSucceed_WhenDataIsValid()
+        {
+            // Arrange
+            var newAccountDto = new NewAccountDTO
+            {
+                Email = "newuser@example.com",
+                Password = "AValidPassword123!",
+                Nickname = "Newbie",
+                FirstName = "Test",
+                LastName = "User"
+            };
+            var verificationCode = "123456";
+
+            _mockRepo.Setup(repo => repo.CreateAccountAsync(It.IsAny<UserAccount>()))
+                     .Returns(Task.CompletedTask);
+
+            _mockCodeService.Setup(s => s.GenerateAndStoreCode(newAccountDto.Email, CodeType.EmailVerification))
+                            .Returns(verificationCode);
+
+            // Act
+            await _accountManager.CreateAccountAsync(newAccountDto);
+
+            // Assert
+            // Verifica que se intentó crear la cuenta en la base de datos
+            _mockRepo.Verify(repo => repo.CreateAccountAsync(It.IsAny<UserAccount>()), Times.Once);
+
+            // Verifica que se generó un código de verificación
+            _mockCodeService.Verify(s => s.GenerateAndStoreCode(newAccountDto.Email, CodeType.EmailVerification), Times.Once);
+
+            // Verifica que se intentó enviar el email de notificación
+            _mockNotification.Verify(n => n.SendAccountVerificationEmailAsync(newAccountDto.Email, verificationCode), Times.Once);
+        }
+
+
+        [Fact]
         public async Task CreateAccount_ShouldThrowFaultException_WhenAccountAlreadyExists()
         {
             // Arrange
-            var newAccountDto = new NewAccountDTO { Email = "duplicate@example.com" };
+            var newAccountDto = new NewAccountDTO
+            {
+                Email = "duplicate@example.com",
+                Password = "AValidPassword123!" // Dato necesario para que BCrypt no falle
+            };
 
-            // CAMBIO 1: Configuramos el mock para que lance la excepción de negocio específica
-            // que creamos antes (`DuplicateAccountException`).
             _mockRepo.Setup(repo => repo.CreateAccountAsync(It.IsAny<UserAccount>()))
                      .ThrowsAsync(new DuplicateAccountException("El usuario ya existe"));
 
             // Act & Assert
-            // CAMBIO 2: Usamos Assert.ThrowsAsync para verificar que se lanza la excepción correcta.
-            // El método espera un FaultException<ServiceErrorDetail> porque nuestro servicio
-            // traduce la DuplicateAccountException interna a este tipo de FaultException.
             var exception = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => _accountManager.CreateAccountAsync(newAccountDto)
             );
 
-            // (Opcional) Podemos incluso verificar el contenido del error.
             Assert.Equal("USER_ALREADY_EXISTS", exception.Detail.ErrorCode);
 
             // Verificamos que la lógica posterior (generar código, enviar email) nunca se ejecutó.
@@ -90,9 +123,12 @@ namespace Test.ServicesTests
         public async Task CreateAccount_ShouldThrowFaultException_WhenDatabaseFails()
         {
             // Arrange
-            var newAccountDto = new NewAccountDTO { Email = "test@example.com" };
+            var newAccountDto = new NewAccountDTO
+            {
+                Email = "test@example.com",
+                Password = "AValidPassword123!" // Dato necesario para que BCrypt no falle
+            };
 
-            // CAMBIO 1 (Variación): Simulamos un error genérico de base de datos.
             _mockRepo.Setup(repo => repo.CreateAccountAsync(It.IsAny<UserAccount>()))
                      .ThrowsAsync(new System.Data.Entity.Infrastructure.DbUpdateException("Error de BD"));
 

@@ -86,9 +86,11 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Contracts\DTOs\ChatMessage.cs" />
     <Compile Include="Contracts\DTOs\EmailVerificationDTO.cs" />
     <Compile Include="Contracts\DTOs\NewAccountDTO.cs" />
     <Compile Include="Contracts\DTOs\PasswordResetDTO.cs" />
+    <Compile Include="Contracts\DTOs\PlayerDTO.cs" />
     <Compile Include="Contracts\DTOs\ServiceErrorDetailDTO.cs" />
     <Compile Include="Contracts\DTOs\TeamDTO.cs" />
     <Compile Include="Contracts\DTOs\UserDTO.cs" />
@@ -112,9 +114,11 @@
     <Compile Include="Services\PasswordResetManager.cs" />
     <Compile Include="Services\TopPlayersManager.cs" />
     <Compile Include="Services\VerificationCodeManager.cs" />
+    <Compile Include="Services\WaitingRoomManager.cs" />
     <Compile Include="Util\EmailSender.cs" />
     <Compile Include="Util\INotificationService.cs" />
     <Compile Include="Util\IVerificationCodeService.cs" />
+    <Compile Include="Wrappers\OperationContextWrapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
