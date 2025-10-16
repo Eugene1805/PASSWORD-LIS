@@ -82,14 +82,14 @@ namespace PASSWORD_LIS_Client
 
         private void PlayAsGuestButtonClick(object sender, RoutedEventArgs e)
         {
-            string guestNickname = "Invitado" + new Random().Next(1000, 9999);
+            string guestNickname = Properties.Langs.Lang.guestText + new Random().Next(1000, 9999);
 
             var guestUser = new UserDTO
             {
                 PlayerId = -1, 
                 Nickname = guestNickname,
                 Email = string.Empty,
-                FirstName = "Invitado",
+                FirstName = Properties.Langs.Lang.guestText,
                 LastName = string.Empty,
                 PhotoId = 0, 
                 SocialAccounts = new Dictionary<string, string>() 
