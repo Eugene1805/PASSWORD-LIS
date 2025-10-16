@@ -1,5 +1,6 @@
 ﻿using PASSWORD_LIS_Client.Commands;
 using PASSWORD_LIS_Client.PasswordResetManagerServiceReference;
+using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
 using System;
@@ -27,9 +28,11 @@ namespace PASSWORD_LIS_Client.ViewModels
         public RelayCommand SendCodeCommand { get; }
 
         private readonly IWindowService windowService;
-        public RetrievePasswordViewModel()
+        private readonly IPasswordResetManagerService passwordResetClient;
+        public RetrievePasswordViewModel(IPasswordResetManagerService resetManagerService,IWindowService windowService)
         {
-            this.windowService = new WindowService();
+            this.passwordResetClient = resetManagerService;
+            this.windowService = windowService;
             this.SendCodeCommand = new RelayCommand(async (_) => await SendCodeAsync(), (_) => CanSendCode());
         }
 
@@ -72,38 +75,32 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private async Task<bool> TryRequestResetCodeAsync(string email)
         {
-            var client = new PasswordResetManagerClient();
             try
             {
                 var requestDto = new EmailVerificationDTO { Email = email, VerificationCode = "" };
-                bool success = await client.RequestPasswordResetCodeAsync(requestDto);
-                client.Close();
+                bool success = await passwordResetClient.RequestPasswordResetCodeAsync(requestDto);
                 return success;
             }
             catch (TimeoutException)
             {
-                client.Abort();
                 this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
                     Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
                 return false;
             }
             catch (EndpointNotFoundException)
             {
-                client.Abort();
                 this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
                     Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Warning);
                 return false;
             }
             catch (CommunicationException)
             {
-                client.Abort();
                 this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
                     Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Warning);
                 return false;
             }
             catch (Exception)
             {
-                client.Abort();
                 this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
                     Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
                 return false;
@@ -112,13 +109,8 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void ProcessCodeRequestSuccess(string userEmail)
         {
-            string enteredCode = this.windowService.ShowVerifyCodeDialog(userEmail, VerificationReason.PasswordReset);
-
-            if (!string.IsNullOrEmpty(enteredCode))
-            {
-                this.windowService.ShowChangePasswordWindow(userEmail, enteredCode);
-                this.windowService.CloseWindow(this);
-            }
+            this.windowService.ShowVerifyCodeWindow(userEmail, VerificationReason.PasswordReset);
+            this.windowService.CloseWindow(this);
         }
 
         private bool IsInputValid()

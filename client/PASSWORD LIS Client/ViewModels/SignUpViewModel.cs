@@ -10,6 +10,7 @@ using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using PASSWORD_LIS_Client.Services;
 
 namespace PASSWORD_LIS_Client.ViewModels
 {
@@ -69,11 +70,13 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand SignUpCommand { get; }
         public ICommand NavigateToLoginCommand { get; }
         public ICommand OpenTermsAndConditionsCommand { get; }
+        private readonly IAccountManagerService client;
         
         private readonly IWindowService windowService;
-        public SignUpViewModel()
+        public SignUpViewModel(IAccountManagerService accountManager,IWindowService windowService)
         {
-            windowService = new WindowService();
+            this.client = accountManager;
+            this.windowService = windowService;
             TCLink = ConfigurationManager.AppSettings["TCPageURL"];
             SignUpCommand = new RelayCommand(async (_) => await SignUpAsync(), (_) => CanExecuteSignUp());
             NavigateToLoginCommand = new RelayCommand(NavigateToLogin);
@@ -182,23 +185,12 @@ namespace PASSWORD_LIS_Client.ViewModels
                 LastName = this.LastName,
                 Nickname = this.Nickname
             };
-
-            var client = new AccountManagerClient();
-            try
-            {
-                await client.CreateAccountAsync(userAccount);
-                client.Close();
-            }
-            catch(Exception)
-            {
-                client.Abort();
-                throw;
-            }
+            await client.CreateAccountAsync(userAccount);
         }
 
         private void ProcessSuccessfulSignUp()
         {
-            _ = this.windowService.ShowVerifyCodeDialog(this.Email, VerificationReason.AccountActivation);
+            this.windowService.ShowVerifyCodeWindow(this.Email, VerificationReason.AccountActivation);
             this.windowService.CloseWindow(this);
         }
 

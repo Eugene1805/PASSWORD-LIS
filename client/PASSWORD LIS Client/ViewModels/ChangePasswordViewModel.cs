@@ -1,5 +1,6 @@
 ﻿using PASSWORD_LIS_Client.Commands;
 using PASSWORD_LIS_Client.PasswordResetManagerServiceReference;
+using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
 using System;
@@ -13,7 +14,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         private readonly string email;
         private readonly string verificationCode;
         private readonly IWindowService windowService;
-
+        private readonly IPasswordResetManagerService passwordResetClient;
         private string newPassword;
         public string NewPassword
         {
@@ -37,11 +38,12 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         public RelayCommand ChangePasswordCommand { get; }
 
-        public ChangePasswordViewModel(string email, string code, IWindowService windowService)
+        public ChangePasswordViewModel(string email, string code, IWindowService windowService, IPasswordResetManagerService passwordResetService)
         {
             this.email = email;
             this.verificationCode = code;
             this.windowService = windowService;
+            this.passwordResetClient = passwordResetService;
             this.ChangePasswordCommand = new RelayCommand(async (_) => await ChangePasswordAsync(), (_) => CanChangePassword());
         }
         public ChangePasswordViewModel() { }
@@ -85,7 +87,6 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private async Task<bool> TryResetPasswordOnServerAsync()
         {
-            var client = new PasswordResetManagerClient();
             try
             {
                 var passwordResetInfo = new PasswordResetDTO
@@ -95,35 +96,29 @@ namespace PASSWORD_LIS_Client.ViewModels
                     ResetCode = this.verificationCode
                 };
 
-                bool success = await client.ResetPasswordAsync(passwordResetInfo);
-
-                client.Close();
+                bool success = await passwordResetClient.ResetPasswordAsync(passwordResetInfo);
                 return success;
             }
             catch (TimeoutException)
             {
-                client.Abort();
                 this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
                     Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
                 return false;
             }
             catch (EndpointNotFoundException)
             {
-                client.Abort();
                 this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
                     Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Warning);
                 return false;
             }
             catch (CommunicationException)
             {
-                client.Abort();
                 this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
                     Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Warning);
                 return false;
             }
             catch (Exception)
             {
-                client.Abort();
                 this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
                     Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
                 return false;
