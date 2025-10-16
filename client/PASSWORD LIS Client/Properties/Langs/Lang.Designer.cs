@@ -358,7 +358,6 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
-
         ///   Busca una cadena traducida similar a Guest.
         /// </summary>
         public static string guestText {
@@ -370,9 +369,6 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         /// <summary>
         ///   Busca una cadena traducida similar a How to Play?.
         ///   Looks up a localized string similar to How to Play?.
-
-        ///   Looks up a localized string similar to How to Play?.
-
         /// </summary>
         public static string howToPlayText {
             get {
