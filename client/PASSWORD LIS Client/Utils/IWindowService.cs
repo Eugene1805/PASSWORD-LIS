@@ -7,7 +7,7 @@ namespace PASSWORD_LIS_Client.Utils
 {
     public interface IWindowService
     {
-        string ShowVerifyCodeDialog(string email, VerificationReason reason);
+        void ShowVerifyCodeWindow(string email, VerificationReason reason);
         void ShowChangePasswordWindow(string email, string verificationCode);
         void ShowLoginWindow();
         void CloseWindow(object viewModel);
@@ -17,18 +17,12 @@ namespace PASSWORD_LIS_Client.Utils
 
     public class WindowService : IWindowService
     {
-        public string ShowVerifyCodeDialog(string email, VerificationReason reason)
+        public void ShowVerifyCodeWindow(string email, VerificationReason reason)
         {
             var viewModel = new VerifyCodeViewModel(email, reason, this);
             var window = new VerifyCodeWindow { DataContext = viewModel };
-
-            bool? result = window.ShowDialog();
-
-            if (result == true)
-            {
-                return viewModel.EnteredCode;
-            }
-            return null;
+            window.Show();
+;
         }
 
         public void ShowChangePasswordWindow(string email, string verificationCode)

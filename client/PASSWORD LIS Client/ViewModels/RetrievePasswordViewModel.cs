@@ -112,13 +112,8 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void ProcessCodeRequestSuccess(string userEmail)
         {
-            string enteredCode = this.windowService.ShowVerifyCodeDialog(userEmail, VerificationReason.PasswordReset);
-
-            if (!string.IsNullOrEmpty(enteredCode))
-            {
-                this.windowService.ShowChangePasswordWindow(userEmail, enteredCode);
-                this.windowService.CloseWindow(this);
-            }
+            this.windowService.ShowVerifyCodeWindow(userEmail, VerificationReason.PasswordReset);
+            this.windowService.CloseWindow(this);
         }
 
         private bool IsInputValid()

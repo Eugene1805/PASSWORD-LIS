@@ -198,7 +198,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void ProcessSuccessfulSignUp()
         {
-            _ = this.windowService.ShowVerifyCodeDialog(this.Email, VerificationReason.AccountActivation);
+            this.windowService.ShowVerifyCodeWindow(this.Email, VerificationReason.AccountActivation);
             this.windowService.CloseWindow(this);
         }
 
