@@ -75,8 +75,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                         string.Format(Properties.Langs.Lang.loginWelcomeText, SessionManager.CurrentUser.Nickname),
                         PopUpIcon.Success);
 
-                    var mainWindow = new MainWindow();
-                    mainWindow.Show();
+                    windowService.ShowMainWindow();
                     windowService.CloseWindow(this);
                 }
                 else
@@ -131,8 +130,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 string.Format(Properties.Langs.Lang.loginWelcomeText, guestUser.Nickname),
                 PopUpIcon.Success);
 
-            var mainWindow = new MainWindow();
-            mainWindow.Show();
+            windowService.ShowMainWindow();
             windowService.CloseWindow(this);
         }
 

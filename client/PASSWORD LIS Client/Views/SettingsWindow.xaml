@@ -6,7 +6,9 @@
         xmlns:local="clr-namespace:PASSWORD_LIS_Client.Views"
         xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
         mc:Ignorable="d"
-        Title="SettingsWindow" Height="250" Width="450">
+        WindowStartupLocation="CenterScreen"
+        Title="SettingsWindow" Height="250" Width="450"> <!--Cambiar nombre a Internacionalizacion-->
+   
     <Grid>
         <Border Style="{StaticResource floatingBorderStyle}" Padding="10" Margin="20">
             <Grid>
@@ -29,7 +31,7 @@
                     <TextBlock Grid.Column="0" Text="{x:Static language:Lang.musicText}"
                             Style="{StaticResource subtitleTextBlockStyle}"
                             TextAlignment="Left"/>
-                    <Slider Grid.Column="1" x:Name="musicLevelSlider" VerticalAlignment="Center"/>
+                    <Slider Grid.Column="1" Value="{Binding MusicVolume}" VerticalAlignment="Center"/>
                 </Grid>
 
                 <Grid Grid.Row="2" Margin="20,0,20,10">
@@ -40,13 +42,15 @@
                     <TextBlock Grid.Column="0" Text="{x:Static language:Lang.soundEffectsText}"
                           Style="{StaticResource subtitleTextBlockStyle}"
                           TextAlignment="Left"/>
-                    <Slider Grid.Column="1" x:Name="soundEffectsLevelSlider" VerticalAlignment="Center"/>
+                    <Slider Grid.Column="1" Value="{Binding SoundEffectsVolume}" VerticalAlignment="Center"/>
                 </Grid>
 
                 <Button Grid.Row="4" Content="{x:Static language:Lang.logOutText}"
                      Style="{StaticResource logOutButtonStyle}"
-                     Width="180" Height="35"/>
+                     Width="180" Height="35"
+                     Command="{Binding LogoutCommand}"/>
             </Grid>
         </Border>
     </Grid>
+    
 </Window>

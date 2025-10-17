@@ -49,6 +49,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             AddFriendCommand = new RelayCommand(AddFriend);
             DeleteFriendCommand = new RelayCommand(DeleteFriend);
             ShowTopPlayersCommand = new RelayCommand(ShowTopPlayers);
+            SettingsCommand = new RelayCommand(ShowSettings);
 
             LoadSessionData();
         }
@@ -95,6 +96,19 @@ namespace PASSWORD_LIS_Client.ViewModels
             var topPlayersViewModel = new TopPlayersViewModel(new WcfTopPlayersManagerService(), new WindowService());
             var topPlayersWindow = new Views.TopPlayersWindow { DataContext = topPlayersViewModel};
             topPlayersWindow.ShowDialog();
+        }
+
+        private void ShowSettings(object parameter)
+        {
+            var settingsViewModel = new SettingsViewModel(new WindowService());
+            var settingsWindow = new SettingsWindow { DataContext = settingsViewModel };
+            settingsWindow.ShowDialog();
+
+            if (settingsViewModel.WasLogoutSuccessful)
+            {
+                windowService.ShowLoginWindow();
+                windowService.CloseMainWindow();
+            }
         }
     }
 }

@@ -13,6 +13,8 @@ namespace PASSWORD_LIS_Client.Utils
         void ShowLoginWindow();
         void CloseWindow(object viewModel);
         void ShowPopUp(string title, string message, PopUpIcon icon);
+        void ShowMainWindow();
+        void CloseMainWindow();
 
     }
 
@@ -24,7 +26,7 @@ namespace PASSWORD_LIS_Client.Utils
                 new WcfVerificationCodeManagerService(), new WcfPasswordResetManagerService());
             var window = new VerifyCodeWindow { DataContext = viewModel };
             window.Show();
-;
+            ;
         }
 
         public void ShowChangePasswordWindow(string email, string verificationCode)
@@ -33,11 +35,12 @@ namespace PASSWORD_LIS_Client.Utils
             var window = new ChangePasswordWindow { DataContext = viewModel };
             window.Show();
         }
-        
+
         public void ShowLoginWindow()
         {
-            var window = new LoginWindow();
-            window.Show();
+            var loginViewModel = new LoginViewModel(new WcfLoginManagerService(), new WindowService());
+            var loginWindow = new LoginWindow { DataContext = loginViewModel};
+            loginWindow.Show();
         }
 
         public void CloseWindow(object viewModel)
@@ -53,6 +56,26 @@ namespace PASSWORD_LIS_Client.Utils
         {
             var popUp = new PopUpWindow(title, message, icon);
             popUp.ShowDialog();
+        }
+
+        public void ShowMainWindow()
+        {
+            var lobbyViewModel = new LobbyViewModel(new WindowService());
+            var lobbyPage = new LobbyPage { DataContext = lobbyViewModel };
+            
+            var mainWindowViewModel = new MainWindowViewModel(new WindowService());
+            var mainWindow = new MainWindow { DataContext = mainWindowViewModel };
+
+            mainWindow.mainFrame.NavigationService.Navigate(lobbyPage);
+            Application.Current.MainWindow = mainWindow;
+            mainWindow.Show();
+        }
+        public void CloseMainWindow()
+        {
+            if (Application.Current.MainWindow is MainWindow mainWindow)
+            {
+                mainWindow.Close();
+            }
         }
     }
 }

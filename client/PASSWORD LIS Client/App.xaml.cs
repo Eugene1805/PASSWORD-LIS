@@ -30,7 +30,7 @@ namespace PASSWORD_LIS_Client
 
             // 3. Creamos la vista y le asignamos el ViewModel
             var loginWindow = new LoginWindow {DataContext = loginViewModel};
-
+            this.MainWindow = loginWindow;  
             // 4. Mostramos la ventana
             loginWindow.Show();
 
