@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Controls;
 
 namespace PASSWORD_LIS_Client.ViewModels
 {
@@ -51,10 +52,12 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             LoadSessionData();
         }
-        private void LoadSessionData()
+        public void LoadSessionData()
         {
-            if (!SessionManager.IsUserLoggedIn()) return;
-
+            if (!SessionManager.IsUserLoggedIn())
+            {
+                return;
+            }
             var currentUser = SessionManager.CurrentUser;
             PhotoId = currentUser.PhotoId;
             //Nickname = currentUser.Nickname; Por qué la propiedad de nickname?
@@ -69,8 +72,11 @@ namespace PASSWORD_LIS_Client.ViewModels
             var profileViewModel = new ProfileViewModel(new WcfProfileManagerService(), new WindowService());
 
 
-            var page = parameter as System.Windows.Controls.Page;
-            page?.NavigationService.Navigate(new ProfilePage { DataContext = profileViewModel});
+            var page = parameter as Page;
+            if (page != null)
+            {
+                page.NavigationService.Navigate(new ProfilePage { DataContext = profileViewModel });
+            }
         }
 
         private void AddFriend(object parameter)

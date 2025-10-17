@@ -10,15 +10,13 @@
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       MinHeight="450" MinWidth="800"
+      Loaded="LobbyPageLoaded"
       Title="LobbyPage"> <!--Cambiar titulo a internalizacion-->
-   
-    <Page.DataContext>
-        <viewModels:LobbyViewModel/>
-    </Page.DataContext>
-    
+     
     <Page.Resources>
         <converters:AvatarIdToImageConverter x:Key="AvatarIdToImageConverter"/>
         <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibility"/>
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
     </Page.Resources>
 
     <Grid >
@@ -40,11 +38,11 @@
                     HorizontalAlignment="Left" VerticalAlignment="Top" 
                     Command="{Binding NavigateToProfileCommand}"
                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Page}}"
-                    IsEnabled="{Binding IsGuest, Converter={StaticResource InverseBooleanToVisibility}}">
+                    IsEnabled="{Binding IsGuest, Converter={StaticResource InverseBooleanConverter}}">
     
                     <Ellipse Style="{StaticResource circleTransparentEllipseStyle}" Width="90" Height="90">
                         <Ellipse.Fill>
-                            <ImageBrush ImageSource="{Binding PhotoId, Converter={StaticResource AvatarIdToImageConverter}}"/>
+                            <ImageBrush ImageSource="{Binding PhotoId, Converter={StaticResource AvatarIdToImageConverter}, FallbackValue=/Resources/AvatarDefault.png}"/>
                         </Ellipse.Fill>
                     </Ellipse>
                 </Button>

@@ -1,0 +1,155 @@
+﻿using PASSWORD_LIS_Client.Commands;
+using PASSWORD_LIS_Client.Services;
+using PASSWORD_LIS_Client.Utils;
+using PASSWORD_LIS_Client.Views;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Input;
+
+namespace PASSWORD_LIS_Client.ViewModels
+{
+    public class LoginViewModel : BaseViewModel
+    {
+        private string email;
+        public string Email
+        {
+            get => email;
+            set { email = value; OnPropertyChanged(); }
+        }
+
+        private string password;
+        public string Password
+        {
+            get => password;
+            set { password = value; OnPropertyChanged(); }
+        }
+
+        private bool isLoggingIn;
+        public bool IsLoggingIn
+        {
+            get => isLoggingIn;
+            set { isLoggingIn = value; OnPropertyChanged(); }
+        }
+
+        public ICommand LoginCommand { get; }
+        public ICommand PlayAsGuestCommand { get; }
+        public ICommand NavigateToSignUpCommand { get; }
+        public ICommand NavigateToForgotPasswordCommand { get; }
+
+        private readonly ILoginManagerService loginManagerService;
+        private readonly IWindowService windowService;
+
+        public LoginViewModel(ILoginManagerService loginManagerService, IWindowService windowService)
+        {
+            this.loginManagerService = loginManagerService;
+            this.windowService = windowService;
+
+            LoginCommand = new RelayCommand(async (_) => await LoginAsync(), (_) => CanLogin());
+            PlayAsGuestCommand = new RelayCommand(PlayAsGuest);
+            NavigateToSignUpCommand = new RelayCommand(NavigateToSignUp);
+            NavigateToForgotPasswordCommand = new RelayCommand(NavigateToForgotPassword);
+        }
+
+        private bool CanLogin()
+        {
+            return !string.IsNullOrWhiteSpace(Email) && !string.IsNullOrWhiteSpace(Password) && !IsLoggingIn;
+        }
+
+        private async Task LoginAsync()
+        {
+            if (!AreFieldsValid())
+            {
+                return;
+            }
+            IsLoggingIn = true;
+            try
+            {
+                var loggedInUser = await loginManagerService.LoginAsync(Email, Password);
+                if (loggedInUser != null)
+                {
+                    SessionManager.Login(loggedInUser);
+                    windowService.ShowPopUp(Properties.Langs.Lang.successfulLoginText,
+                        string.Format(Properties.Langs.Lang.loginWelcomeText, SessionManager.CurrentUser.Nickname),
+                        PopUpIcon.Success);
+
+                    var mainWindow = new MainWindow();
+                    mainWindow.Show();
+                    windowService.CloseWindow(this);
+                }
+                else
+                {
+                    windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
+                        Properties.Langs.Lang.wrongCredentialsText,
+                        PopUpIcon.Warning);
+                }
+            }
+            catch (Exception)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.serverCommunicationErrorText,
+                    PopUpIcon.Error);
+            }
+            finally
+            {
+                IsLoggingIn = false;
+            }
+        }
+
+        private bool AreFieldsValid()
+        {
+            if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
+            {
+                windowService.ShowPopUp(
+                    Properties.Langs.Lang.warningTitleText,
+                    Properties.Langs.Lang.requiredEmailAndPassWordText, // Usando tu clave de recurso existente
+                    PopUpIcon.Warning);
+                return false;
+            }
+            return true;
+        }
+
+        private void PlayAsGuest(object parameter)
+        {
+            string guestNickname = Properties.Langs.Lang.guestText + new Random().Next(1000, 9999);
+            var guestUser = new LoginManagerServiceReference.UserDTO
+            {
+                PlayerId = -1,
+                Nickname = guestNickname,
+                FirstName = Properties.Langs.Lang.guestText,
+                LastName = "",
+                PhotoId = 0,
+                SocialAccounts = new Dictionary<string, string>()
+            };
+
+            SessionManager.Login(guestUser);
+
+            windowService.ShowPopUp(
+                Properties.Langs.Lang.successfulLoginText,
+                string.Format(Properties.Langs.Lang.loginWelcomeText, guestUser.Nickname),
+                PopUpIcon.Success);
+
+            var mainWindow = new MainWindow();
+            mainWindow.Show();
+            windowService.CloseWindow(this);
+        }
+
+        private void NavigateToSignUp(object parameter)
+        {
+            var signUpViewModel = new SignUpViewModel(new WcfAccountManagerService(), new WindowService()); 
+            var signUpWindow = new SignUpWindow { DataContext = signUpViewModel };
+            signUpWindow.Show();
+            windowService.CloseWindow(this);
+        }
+
+        private void NavigateToForgotPassword(object parameter)
+        {
+            var retrievePasswordWindow = new RetrievePasswordWindow();
+            retrievePasswordWindow.ShowDialog();
+        }
+
+
+    }
+}

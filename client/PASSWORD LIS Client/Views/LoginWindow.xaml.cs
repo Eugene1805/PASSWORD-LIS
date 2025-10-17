@@ -1,5 +1,4 @@
-﻿using PASSWORD_LIS_Client.ViewModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,27 +10,18 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 namespace PASSWORD_LIS_Client.Views
 {
     /// <summary>
-    /// Lógica de interacción para LobbyPage.xaml
+    /// Lógica de interacción para LoginWindow.xaml
     /// </summary>
-    public partial class LobbyPage : Page
+    public partial class LoginWindow : Window
     {
-        public LobbyPage()
+        public LoginWindow()
         {
             InitializeComponent();
-        }
-
-        private void LobbyPageLoaded(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is LobbyViewModel viewModel)
-            {
-                viewModel.LoadSessionData();
-            }
         }
     }
 }

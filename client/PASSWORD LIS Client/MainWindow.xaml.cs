@@ -1,4 +1,7 @@
 ﻿using PASSWORD_LIS_Client.LoginManagerServiceReference;
+using PASSWORD_LIS_Client.Utils;
+using PASSWORD_LIS_Client.ViewModels;
+using PASSWORD_LIS_Client.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +16,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using PASSWORD_LIS_Client.Utils;
 
 namespace PASSWORD_LIS_Client
 {
@@ -32,17 +34,25 @@ namespace PASSWORD_LIS_Client
         {
             if (SessionManager.IsUserLoggedIn())
             {
-                //var viewModel = new LobbyViewModel(new WindowService());
-                mainFrame.NavigationService.Navigate(new Views.LobbyPage()); //{ DataContext = viewModel });
+                // --- LÓGICA CORREGIDA ---
+                // 1. Creamos las dependencias para el LobbyViewModel
+                var windowService = new WindowService();
+
+                // 2. Creamos el ViewModel, inyectando las dependencias
+                var lobbyViewModel = new LobbyViewModel(windowService);
+
+                // 3. Creamos la vista (la página) y le ASIGNAMOS el ViewModel
+                var lobbyPage = new LobbyPage { DataContext = lobbyViewModel };
+
+                // 4. Navegamos a la página ya configurada
+                mainFrame.NavigationService.Navigate(lobbyPage);
             }
             else
             {
-                //TODO Logica si llegamos aquí sin usuario logueado
-                
-                 var loginWindow = new LoginWindow();
-                 loginWindow.Show();
-                 this.Close();
-                 
+                // La lógica defensiva para volver al login
+                var loginWindow = new LoginWindow(); // Asumiendo que LoginWindow está en Views
+                loginWindow.Show();
+                this.Close();
             }
 
         }

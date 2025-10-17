@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:PASSWORD_LIS_Client"
              xmlns:utils="clr-namespace:PASSWORD_LIS_Client.Utils"
-             StartupUri="MainWindow.xaml">
+             >
     <Application.Resources>
         <Style x:Key="floatingBorderStyle" TargetType="Border">
             <Setter Property="Background" Value="White"/>
