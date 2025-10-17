@@ -1,11 +1,12 @@
-﻿<Window x:Class="PASSWORD_LIS_Client.HowToPlayWindow"
+﻿<Window x:Class="PASSWORD_LIS_Client.Views.HowToPlayWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:PASSWORD_LIS_Client"
+        xmlns:local="clr-namespace:PASSWORD_LIS_Client.Views"
         xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
         mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
         Title="{x:Static language:Lang.howToPlayText}" Height="500" Width="600"
         Background="#EEEFF0">
     <Grid>
@@ -15,15 +16,15 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                
-            <TextBlock Grid.Row="0" Style="{StaticResource subtitleTextBlockStyle}"
-                       Text="{x:Static language:Lang.howToPlayText}"/>
-            <ScrollViewer Grid.Row="1" Margin="20">
-                <TextBlock Style="{StaticResource bodyTextBlockStyle}"
-                           Text="{x:Static language:Lang.rulesGameText}"
-                           TextWrapping="Wrap"
-                           TextAlignment="Justify"/>
-            </ScrollViewer>
+
+                <TextBlock Grid.Row="0" Style="{StaticResource subtitleTextBlockStyle}"
+                   Text="{x:Static language:Lang.howToPlayText}"/>
+                <ScrollViewer Grid.Row="1" Margin="20">
+                    <TextBlock Style="{StaticResource bodyTextBlockStyle}"
+                       Text="{x:Static language:Lang.rulesGameText}"
+                       TextWrapping="Wrap"
+                       TextAlignment="Justify"/>
+                </ScrollViewer>
             </Grid>
         </Border>
     </Grid>

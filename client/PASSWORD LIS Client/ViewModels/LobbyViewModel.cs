@@ -21,8 +21,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             set { photoId = value; OnPropertyChanged(); }
         }
 
-        //? POR QUE LA PROPIEDAD DE NICKNAME
-
         private bool isGuest;
         public bool IsGuest
         {
@@ -49,6 +47,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             AddFriendCommand = new RelayCommand(AddFriend);
             DeleteFriendCommand = new RelayCommand(DeleteFriend);
             ShowTopPlayersCommand = new RelayCommand(ShowTopPlayers);
+            HowToPlayCommand = new RelayCommand(ShowHowToPlay); 
             SettingsCommand = new RelayCommand(ShowSettings);
 
             LoadSessionData();
@@ -61,7 +60,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             var currentUser = SessionManager.CurrentUser;
             PhotoId = currentUser.PhotoId;
-            //Nickname = currentUser.Nickname; Por qué la propiedad de nickname?
             IsGuest = currentUser.PlayerId < 0;
 
             //lógica para cargar la lista de amigos
@@ -96,6 +94,13 @@ namespace PASSWORD_LIS_Client.ViewModels
             var topPlayersViewModel = new TopPlayersViewModel(new WcfTopPlayersManagerService(), new WindowService());
             var topPlayersWindow = new Views.TopPlayersWindow { DataContext = topPlayersViewModel};
             topPlayersWindow.ShowDialog();
+        }
+        private void ShowHowToPlay(object parameter)
+        {
+            var howToPlayViewModel = new HowToPlayViewModel();
+            var howToPlayWindow = new HowToPlayWindow { DataContext = howToPlayViewModel };
+
+            howToPlayWindow.ShowDialog();
         }
 
         private void ShowSettings(object parameter)
