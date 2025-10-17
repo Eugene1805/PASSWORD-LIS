@@ -12,7 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace PASSWORD_LIS_Client
+namespace PASSWORD_LIS_Client.Views
 {
     /// <summary>
     /// Lógica de interacción para HowToPlayWindow.xaml
