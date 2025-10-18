@@ -9,13 +9,13 @@ namespace Test.ServicesTests
 {
     public class TopPlayersManagerTests
     {
-        private readonly Mock<IStatisticsRepository> _mockStatisticsRepository;
-        private readonly TopPlayersManager _topPlayersManager;
+        private readonly Mock<IStatisticsRepository> mockStatisticsRepository;
+        private readonly TopPlayersManager topPlayersManager;
 
         public TopPlayersManagerTests()
         {
-            _mockStatisticsRepository = new Mock<IStatisticsRepository>();
-            _topPlayersManager = new TopPlayersManager(_mockStatisticsRepository.Object);
+            mockStatisticsRepository = new Mock<IStatisticsRepository>();
+            topPlayersManager = new TopPlayersManager(mockStatisticsRepository.Object);
         }
 
         [Fact]
@@ -45,11 +45,11 @@ namespace Test.ServicesTests
             };
 
             // CAMBIO 1: Usar ReturnsAsync
-            _mockStatisticsRepository.Setup(repo => repo.GetTopTeamsAsync(numberOfTeams)).ReturnsAsync(teamsFromDb);
+            mockStatisticsRepository.Setup(repo => repo.GetTopTeamsAsync(numberOfTeams)).ReturnsAsync(teamsFromDb);
 
             // Act
             // CAMBIO 2: Usar await
-            var result = await _topPlayersManager.GetTopAsync(numberOfTeams);
+            var result = await topPlayersManager.GetTopAsync(numberOfTeams);
 
             // Assert
             Assert.NotNull(result);
@@ -70,10 +70,10 @@ namespace Test.ServicesTests
         {
             // Arrange
             var numberOfTeams = 5;
-            _mockStatisticsRepository.Setup(repo => repo.GetTopTeamsAsync(numberOfTeams)).ReturnsAsync(new List<Team>());
+            mockStatisticsRepository.Setup(repo => repo.GetTopTeamsAsync(numberOfTeams)).ReturnsAsync(new List<Team>());
 
             // Act
-            var result = await _topPlayersManager.GetTopAsync(numberOfTeams);
+            var result = await topPlayersManager.GetTopAsync(numberOfTeams);
 
             // Assert
             Assert.NotNull(result);
@@ -93,10 +93,10 @@ namespace Test.ServicesTests
                     Player = new List<Player>()
                 }
             };
-            _mockStatisticsRepository.Setup(repo => repo.GetTopTeamsAsync(numberOfTeams)).ReturnsAsync(teamsFromDb);
+            mockStatisticsRepository.Setup(repo => repo.GetTopTeamsAsync(numberOfTeams)).ReturnsAsync(teamsFromDb);
 
             // Act
-            var result = await _topPlayersManager.GetTopAsync(numberOfTeams);
+            var result = await topPlayersManager.GetTopAsync(numberOfTeams);
 
             // Assert
             Assert.Single(result);
@@ -109,12 +109,12 @@ namespace Test.ServicesTests
         {
             // Arrange
             var numberOfTeams = 3;
-            _mockStatisticsRepository.Setup(repo => repo.GetTopTeamsAsync(numberOfTeams))
+            mockStatisticsRepository.Setup(repo => repo.GetTopTeamsAsync(numberOfTeams))
                                      .ThrowsAsync(new System.Exception("Error de base de datos simulado"));
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
-                () => _topPlayersManager.GetTopAsync(numberOfTeams)
+                () => topPlayersManager.GetTopAsync(numberOfTeams)
             );
 
             // (Opcional) Verificar que el código de error sea el correcto

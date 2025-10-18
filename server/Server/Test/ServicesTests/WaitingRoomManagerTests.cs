@@ -9,23 +9,23 @@ namespace Test.ServicesTests
 {
     public class WaitingRoomManagerTests
     {
-        private readonly Mock<IPlayerRepository> _mockPlayerRepo;
-        private readonly Mock<IOperationContextWrapper> _mockOperationContext;
-        private readonly Mock<IWaitingRoomCallback> _mockCallbackChannel;
-        private readonly WaitingRoomManager _sut; // System Under Test
+        private readonly Mock<IPlayerRepository> mockPlayerRepo;
+        private readonly Mock<IOperationContextWrapper> mockOperationContext;
+        private readonly Mock<IWaitingRoomCallback> mockCallbackChannel;
+        private readonly WaitingRoomManager sut; // System Under Test
 
         public WaitingRoomManagerTests()
         {
-            _mockPlayerRepo = new Mock<IPlayerRepository>();
-            _mockOperationContext = new Mock<IOperationContextWrapper>();
-            _mockCallbackChannel = new Mock<IWaitingRoomCallback>();
+            mockPlayerRepo = new Mock<IPlayerRepository>();
+            mockOperationContext = new Mock<IOperationContextWrapper>();
+            mockCallbackChannel = new Mock<IWaitingRoomCallback>();
 
             // Configurar el mock del wrapper para que siempre devuelva nuestro mock del canal de callback
-            _mockOperationContext.Setup(o => o.GetCallbackChannel<IWaitingRoomCallback>())
-                                 .Returns(_mockCallbackChannel.Object);
+            mockOperationContext.Setup(o => o.GetCallbackChannel<IWaitingRoomCallback>())
+                                 .Returns(mockCallbackChannel.Object);
 
             // Crear la instancia del servicio con los mocks
-            _sut = new WaitingRoomManager(_mockPlayerRepo.Object, _mockOperationContext.Object);
+            sut = new WaitingRoomManager(mockPlayerRepo.Object, mockOperationContext.Object);
         }
 
         [Fact]
@@ -39,14 +39,14 @@ namespace Test.ServicesTests
                 UserAccountId = 1,
                 UserAccount = new UserAccount { Nickname = username }
             };
-            _mockPlayerRepo.Setup(repo => repo.GetPlayerByUsername(username)).Returns(playerEntity);
+            mockPlayerRepo.Setup(repo => repo.GetPlayerByUsername(username)).Returns(playerEntity);
 
             // Act: Ejecutar la acción
-            var result = await _sut.JoinAsRegisteredPlayerAsync(username);
+            var result = await sut.JoinAsRegisteredPlayerAsync(username);
 
             // Assert: Verificar el resultado
             Assert.True(result);
-            var connectedPlayers = await _sut.GetConnectedPlayersAsync();
+            var connectedPlayers = await sut.GetConnectedPlayersAsync();
             Assert.Single(connectedPlayers); // Debe haber un solo jugador conectado
             Assert.Equal(username, connectedPlayers[0].Username);
         }
@@ -56,14 +56,14 @@ namespace Test.ServicesTests
         {
             // Arrange
             var username = "GhostUser";
-            _mockPlayerRepo.Setup(repo => repo.GetPlayerByUsername(username)).Returns((Player)null);
+            mockPlayerRepo.Setup(repo => repo.GetPlayerByUsername(username)).Returns((Player)null);
 
             // Act
-            var result = await _sut.JoinAsRegisteredPlayerAsync(username);
+            var result = await sut.JoinAsRegisteredPlayerAsync(username);
 
             // Assert
             Assert.False(result);
-            Assert.Empty(await _sut.GetConnectedPlayersAsync());
+            Assert.Empty(await sut.GetConnectedPlayersAsync());
         }
 
         [Fact]
@@ -73,11 +73,11 @@ namespace Test.ServicesTests
             var guestUsername = "Guest123";
 
             // Act
-            var result = await _sut.JoinAsGuestAsync(guestUsername);
+            var result = await sut.JoinAsGuestAsync(guestUsername);
 
             // Assert
             Assert.True(result);
-            var connectedPlayers = await _sut.GetConnectedPlayersAsync();
+            var connectedPlayers = await sut.GetConnectedPlayersAsync();
             Assert.Single(connectedPlayers);
             Assert.Equal(guestUsername, connectedPlayers[0].Username);
             Assert.True(connectedPlayers[0].Id < 0, "Guest ID should be negative."); // Verificar que el ID de invitado sea negativo
@@ -88,14 +88,14 @@ namespace Test.ServicesTests
         {
             // Arrange
             var guestUsername = "Guest123";
-            await _sut.JoinAsGuestAsync(guestUsername); // Un primer invitado se une
+            await sut.JoinAsGuestAsync(guestUsername); // Un primer invitado se une
 
             // Act
-            var result = await _sut.JoinAsGuestAsync(guestUsername); // El segundo intenta unirse con el mismo nombre
+            var result = await sut.JoinAsGuestAsync(guestUsername); // El segundo intenta unirse con el mismo nombre
 
             // Assert
             Assert.False(result);
-            Assert.Single(await _sut.GetConnectedPlayersAsync()); // Solo debe haber un jugador
+            Assert.Single(await sut.GetConnectedPlayersAsync()); // Solo debe haber un jugador
         }
 
         [Fact]
@@ -103,32 +103,32 @@ namespace Test.ServicesTests
         {
             // Arrange
             var player1 = new Player { Id = 1, UserAccountId = 1, UserAccount = new UserAccount { Nickname = "Player1" } };
-            _mockPlayerRepo.Setup(r => r.GetPlayerByUsername("Player1")).Returns(player1);
+            mockPlayerRepo.Setup(r => r.GetPlayerByUsername("Player1")).Returns(player1);
 
             // Act & Assert
 
             // 1er jugador se une
-            await _sut.JoinAsRegisteredPlayerAsync("Player1");
-            var playersAfter1 = await _sut.GetConnectedPlayersAsync();
+            await sut.JoinAsRegisteredPlayerAsync("Player1");
+            var playersAfter1 = await sut.GetConnectedPlayersAsync();
             Assert.Single(playersAfter1); // Debe haber 1 jugador
-            Assert.Equal("ClueGuy", playersAfter1.First().Role); // El único jugador debe ser ClueGuy
+            Assert.Equal("ClueGuy", playersAfter1[0].Role); // El único jugador debe ser ClueGuy
 
             // 2do jugador se une
-            await _sut.JoinAsGuestAsync("Guest2");
-            var playersAfter2 = await _sut.GetConnectedPlayersAsync();
+            await sut.JoinAsGuestAsync("Guest2");
+            var playersAfter2 = await sut.GetConnectedPlayersAsync();
             Assert.Equal(2, playersAfter2.Count); // Deben haber 2 jugadores
             Assert.Equal(2, playersAfter2.Count(p => p.Role == "ClueGuy")); // Ambos deben ser ClueGuy
 
             // 3er jugador se une
-            await _sut.JoinAsGuestAsync("Guest3");
-            var playersAfter3 = await _sut.GetConnectedPlayersAsync();
+            await sut.JoinAsGuestAsync("Guest3");
+            var playersAfter3 = await sut.GetConnectedPlayersAsync();
             Assert.Equal(3, playersAfter3.Count); // Deben haber 3 jugadores
             Assert.Equal(2, playersAfter3.Count(p => p.Role == "ClueGuy")); // Contamos cuántos ClueGuys hay
             Assert.Equal(1, playersAfter3.Count(p => p.Role == "Guesser")); // Contamos cuántos Guessers hay
 
             // 4to jugador se une
-            await _sut.JoinAsGuestAsync("Guest4");
-            var playersAfter4 = await _sut.GetConnectedPlayersAsync();
+            await sut.JoinAsGuestAsync("Guest4");
+            var playersAfter4 = await sut.GetConnectedPlayersAsync();
             Assert.Equal(4, playersAfter4.Count); // Deben haber 4 jugadores
             Assert.Equal(2, playersAfter4.Count(p => p.Role == "ClueGuy"));
             Assert.Equal(2, playersAfter4.Count(p => p.Role == "Guesser"));
@@ -139,19 +139,15 @@ namespace Test.ServicesTests
         {
             // Arrange
             var guestUsername = "GuestToLeave";
-            _sut.JoinAsGuestAsync(guestUsername);
-            var players = await _sut.GetConnectedPlayersAsync();
+            await sut.JoinAsGuestAsync(guestUsername);
+            var players = await sut.GetConnectedPlayersAsync();
             var playerToRemove = players[0];
 
             // Act
-            await _sut.LeaveRoomAsync(playerToRemove.Id);
+            await sut.LeaveRoomAsync(playerToRemove.Id);
 
             // Assert
-            Assert.Empty(await _sut.GetConnectedPlayersAsync());
-
-            // Opcional: Verificar que el callback fue invocado para notificar a otros
-            // Nota: Esto solo funciona si hay otros jugadores.
-            // _mockCallbackChannel.Verify(c => c.OnPlayerLeft(playerToRemove.Id), Times.Once);
+            Assert.Empty(await sut.GetConnectedPlayersAsync());
         }
     }
 }

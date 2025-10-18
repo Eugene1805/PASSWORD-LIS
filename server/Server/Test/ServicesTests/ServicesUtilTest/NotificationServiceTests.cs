@@ -5,14 +5,14 @@ namespace Test.ServicesTests.ServicesUtilTest
 {
     public class NotificationServiceTests
     {
-        private readonly Mock<IEmailSender> _mockEmailSender;
-        private readonly INotificationService _notificationService;
+        private readonly Mock<IEmailSender> mockEmailSender;
+        private readonly INotificationService notificationService;
 
         public NotificationServiceTests()
         {
             // Arrange (Setup global para todas las pruebas)
-            _mockEmailSender = new Mock<IEmailSender>();
-            _notificationService = new NotificationService(_mockEmailSender.Object);
+            mockEmailSender = new Mock<IEmailSender>();
+            notificationService = new NotificationService(mockEmailSender.Object);
         }
 
         [Fact]
@@ -24,11 +24,11 @@ namespace Test.ServicesTests.ServicesUtilTest
             var expectedSubject = "Código de Verificación de Cuenta";
 
             // Act
-            await _notificationService.SendAccountVerificationEmailAsync(testEmail, testCode);
+            await notificationService.SendAccountVerificationEmailAsync(testEmail, testCode);
 
             // Assert
             // Verificamos que el método SendEmailAsync fue llamado exactamente una vez.
-            _mockEmailSender.Verify(
+            mockEmailSender.Verify(
                 sender => sender.SendEmailAsync(
                     // Verificamos que el email del destinatario sea el correcto.
                     It.Is<string>(email => email == testEmail),
@@ -50,11 +50,11 @@ namespace Test.ServicesTests.ServicesUtilTest
             var expectedSubject = "Restablecimiento de Contraseña";
 
             // Act
-            await _notificationService.SendPasswordResetEmailAsync(testEmail, testCode);
+            await notificationService.SendPasswordResetEmailAsync(testEmail, testCode);
 
             // Assert
             // Verificamos de nuevo, pero para el método de reseteo de contraseña.
-            _mockEmailSender.Verify(
+            mockEmailSender.Verify(
                 sender => sender.SendEmailAsync(
                     // Verificamos el email.
                     It.Is<string>(email => email == testEmail),
