@@ -96,11 +96,29 @@ namespace PASSWORD_LIS_Client.ViewModels
             topPlayersWindow.ShowDialog();
         }
         private void ShowHowToPlay(object parameter)
-        {
+        {/*
             var howToPlayViewModel = new HowToPlayViewModel();
             var howToPlayWindow = new HowToPlayWindow { DataContext = howToPlayViewModel };
 
-            howToPlayWindow.ShowDialog();
+            howToPlayWindow.ShowDialog();*/
+            Console.WriteLine($"ShowHowToPlay ejecutado");
+            Console.WriteLine($"Parameter type: {parameter?.GetType().Name}");
+            Console.WriteLine($"Parameter is Page: {parameter is Page}");
+
+            var page = parameter as Page;
+            if (page != null)
+            {
+                Console.WriteLine($"NavigationService is null: {page.NavigationService == null}");
+                var waitingRoomViewModel = new WaitingRoomViewModel(new WcfWaitingRoomManagerService(), windowService);
+                var waitingRoomPage = new WaitingRoomPage { DataContext = waitingRoomViewModel };
+
+                page.NavigationService.Navigate(waitingRoomPage);
+                Console.WriteLine("Navigate method called");
+            }
+            else
+            {
+                Console.WriteLine("Parameter is not a Page, using fallback");
+            }
         }
 
         private void ShowSettings(object parameter)

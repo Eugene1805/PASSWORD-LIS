@@ -12,19 +12,19 @@ namespace Services.Contracts
     public interface IWaitingRoomManager
     {
         [OperationContract]
-        bool JoinAsRegisteredPlayer(string username);
+        Task<bool> JoinAsRegisteredPlayerAsync(string username);
 
         [OperationContract]
-        bool JoinAsGuest(string guestUsername);
+        Task<bool> JoinAsGuestAsync(string guestUsername);
 
         [OperationContract]
-        void LeaveRoom(int playerId);
+        Task LeaveRoomAsync(int playerId);
 
         [OperationContract]
-        void SendMessage(ChatMessage message);
+        Task SendMessageAsync(ChatMessage message);
 
         [OperationContract]
-        List<PlayerDTO> GetConnectedPlayers();
+        Task<List<PlayerDTO>> GetConnectedPlayersAsync();
     }
     public interface IWaitingRoomCallback
     {
