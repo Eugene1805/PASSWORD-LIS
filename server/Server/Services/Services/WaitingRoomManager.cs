@@ -46,7 +46,7 @@ namespace Services.Services
             {
                 Id = playerEntity.Id,
                 Username = playerEntity.UserAccount.Nickname,
-                Role = await AssignRoleAsync(),
+                Role = AssignRole(),
                 IsReady = false
             };
 
@@ -55,8 +55,10 @@ namespace Services.Services
 
         public async Task<bool> JoinAsGuestAsync(string guestUsername)
         {
+            Console.WriteLine($"[DEBUG] Intento de unirse como invitado: '{guestUsername}'");
             if (connectedClients.Values.Any(p => p.PlayerData.Username.Equals(guestUsername, StringComparison.OrdinalIgnoreCase)))
             {
+                Console.WriteLine($"[DEBUG] INGRESO RECHAZADO: El nombre de usuario '{guestUsername}' ya existe en la sala.");
                 return false;
             }
 
@@ -66,9 +68,10 @@ namespace Services.Services
             {
                 Id = guestId,
                 Username = guestUsername,
-                Role = await AssignRoleAsync(),
+                Role = AssignRole(),
                 IsReady = false
             };
+            Console.WriteLine($"[DEBUG] '{guestUsername}' (ID:{guestId}) fue validado y será añadido a la sala.");
             Console.WriteLine($"Player {guestUsername} (ID:{guestId}) joined as {playerDto.Role}");
             return await AddPlayerToRoomAsync(playerDto);
         }
@@ -138,7 +141,7 @@ namespace Services.Services
             }
         }
 
-        private async Task<string> AssignRoleAsync()
+        private string AssignRole()
         {
             var rolesInUse = connectedClients.Values.Select(p => p.PlayerData.Role).ToList();
 
