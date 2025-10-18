@@ -1,12 +1,17 @@
-﻿using System;
+﻿using Services.Contracts.DTOs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Services.Contracts
 {
-    internal interface IFriendsManager
+    [ServiceContract]
+    public interface IFriendsManager
     {
+        [OperationContract]
+        Task<FriendDTO[]> GetFriendsAsync(int userAccountId);
     }
 }
