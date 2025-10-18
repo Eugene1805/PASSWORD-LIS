@@ -11,7 +11,7 @@
         WindowStartupLocation="CenterScreen"
         MinHeight="400" MinWidth="400"
         
-        Title="a{x:Static language:Lang.logInText}" Height="500" Width="500"> 
+        Title="{x:Static language:Lang.logInText}" Height="600" Width="600"> 
     
     <Grid>
         <Grid.Background>
@@ -30,11 +30,11 @@
 
             <TextBlock Text="{x:Static language:Lang.emailText}" Style="{StaticResource subtitleTextBlockStyle}"
                        HorizontalAlignment="Left"/>
-            <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource primaryTextBoxStyle}" Width="210"/>
+            <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource primaryTextBoxStyle}" Width="230"/>
 
             <TextBlock Text="{x:Static language:Lang.userPasswordText}" Style="{StaticResource subtitleTextBlockStyle}"
                        HorizontalAlignment="Left"/>
-            <PasswordBox Style="{StaticResource passwordboxStyle}" Width="210"
+            <PasswordBox Style="{StaticResource passwordboxStyle}" Width="230"
                          utils:PasswordBoxHelper.BindPassword="True"
                          utils:PasswordBoxHelper.BoundPassword="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 

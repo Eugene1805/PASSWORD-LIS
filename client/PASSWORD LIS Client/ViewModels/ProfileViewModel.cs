@@ -182,7 +182,9 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void ChangePassword(object parameter)
         {
-            // Implementar la navegación a la ventana de cambio de contraseña
+            var retrievePasswordViewModel = new RetrievePasswordViewModel(new WcfPasswordResetManagerService(), windowService);
+            var retrievePasswordWindow = new RetrievePasswordWindow { DataContext = retrievePasswordViewModel};
+            retrievePasswordWindow.ShowDialog();
         }
 
         private void BackToLobby(object parameter)

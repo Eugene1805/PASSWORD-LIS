@@ -12,10 +12,8 @@ namespace PASSWORD_LIS_Client.Views
     {
         public WaitingRoomPage()
         {
-            Console.WriteLine("Se intento inicializar el page");
             InitializeComponent();
             this.Loaded += WaitingRoomPage_Loaded;
-            Console.WriteLine("Se inicializo la page");
         }
 
         private async void WaitingRoomPage_Loaded(object sender, RoutedEventArgs e)
