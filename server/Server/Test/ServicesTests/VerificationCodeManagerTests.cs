@@ -3,11 +3,6 @@ using Moq;
 using Services.Contracts.DTOs;
 using Services.Services;
 using Services.Util;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Test.ServicesTests
 {
@@ -31,8 +26,6 @@ namespace Test.ServicesTests
                 _mockCodeService.Object
             );
         }
-
-        #region VerifyEmail Tests
 
         [Fact]
         public void VerifyEmail_WhenCodeIsValid_ShouldCallRepositoryAndReturnTrue()
@@ -77,10 +70,6 @@ namespace Test.ServicesTests
             _mockAccountRepository.Verify(repo => repo.VerifyEmail(It.IsAny<string>()), Times.Never);
         }
 
-        #endregion
-
-        #region ResendVerificationCode Tests
-
         [Fact]
         public async Task ResendVerificationCode_WhenCanRequestCode_ShouldGenerateAndSendEmail()
         {
@@ -123,7 +112,5 @@ namespace Test.ServicesTests
             // Verificamos que NO se intentó enviar ningún email
             _mockNotificationService.Verify(n => n.SendAccountVerificationEmailAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
-
-        #endregion
     }
 }

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Services.Util
 {
@@ -15,7 +13,7 @@ namespace Services.Util
     }
     public class VerificationCodeService : IVerificationCodeService
     {
-        private class CodeInfo
+        sealed class CodeInfo
         {
             public string Code { get; set; }
             public DateTime CreationTime { get; set; }

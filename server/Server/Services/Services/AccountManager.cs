@@ -22,7 +22,8 @@ namespace Services.Services
         private static readonly ILog log = LogManager.GetLogger(typeof(AccountManager));
 
 
-        public AccountManager(IAccountRepository accountRepository, INotificationService notificationService, IVerificationCodeService verificationCodeService)
+        public AccountManager(IAccountRepository accountRepository, INotificationService notificationService,
+            IVerificationCodeService verificationCodeService)
         {
             repository = accountRepository;
             notification = notificationService;

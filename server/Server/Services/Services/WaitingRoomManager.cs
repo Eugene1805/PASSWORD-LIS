@@ -16,7 +16,7 @@ namespace Services.Services
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Multiple)]
     public class WaitingRoomManager : IWaitingRoomManager
     {
-        private class ConnectedPlayer
+        sealed class ConnectedPlayer
         {
             public IWaitingRoomCallback CallbackChannel { get; set; }
             public PlayerDTO PlayerData { get; set; }
@@ -25,7 +25,7 @@ namespace Services.Services
         private readonly ConcurrentDictionary<int, ConnectedPlayer> connectedClients;
         private readonly IPlayerRepository repository;
         private readonly IOperationContextWrapper operationContext;
-        private static int _guestIdCounter = 0;
+        private static int guestIdCounter = 0;
 
         public WaitingRoomManager(IPlayerRepository playerRepository, IOperationContextWrapper operationContextWrapper)
         {
@@ -62,7 +62,7 @@ namespace Services.Services
                 return false;
             }
 
-            int guestId = Interlocked.Decrement(ref _guestIdCounter);
+            int guestId = Interlocked.Decrement(ref guestIdCounter);
 
             var playerDto = new PlayerDTO
             {
@@ -106,8 +106,7 @@ namespace Services.Services
 
         public async Task<List<PlayerDTO>> GetConnectedPlayersAsync()
         {
-            var players = await Task.Run(()=> connectedClients.Values.Select(p => p.PlayerData).ToList());
-            return players;
+            return await Task.Run(()=> connectedClients.Values.Select(p => p.PlayerData).ToList());
         }
 
         public async Task SendMessageAsync(ChatMessage message)

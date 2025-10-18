@@ -3,7 +3,6 @@ using Services.Contracts;
 using Services.Contracts.DTOs;
 using Services.Util;
 using System.ServiceModel;
-using System.Threading.Tasks;
 
 namespace Services.Services
 {
@@ -13,7 +12,8 @@ namespace Services.Services
         private readonly IAccountRepository repository;
         private readonly INotificationService notification;
         private readonly IVerificationCodeService codeService;
-        public PasswordResetManager(IAccountRepository accountRepository, INotificationService notificationService, IVerificationCodeService verificationCodeService)
+        public PasswordResetManager(IAccountRepository accountRepository, INotificationService notificationService,
+            IVerificationCodeService verificationCodeService)
         {
             repository = accountRepository;
             notification = notificationService;
@@ -22,7 +22,8 @@ namespace Services.Services
         }
         public bool RequestPasswordResetCode(EmailVerificationDTO emailVerificationDTO)
         {
-            if (!repository.AccountAlreadyExist(emailVerificationDTO.Email) || !codeService.CanRequestCode(emailVerificationDTO.Email, CodeType.PasswordReset))
+            if (!repository.AccountAlreadyExist(emailVerificationDTO.Email) ||
+                !codeService.CanRequestCode(emailVerificationDTO.Email, CodeType.PasswordReset))
             {
                 return false;
             }
@@ -33,8 +34,7 @@ namespace Services.Services
         }
 
         public bool ResetPassword(PasswordResetDTO passwordResetDTO)
-        {
-            
+        {   
             if (!codeService.ValidateCode(passwordResetDTO.Email, passwordResetDTO.ResetCode, CodeType.PasswordReset))
             {
                 return false;
@@ -45,7 +45,8 @@ namespace Services.Services
 
         public bool ValidatePasswordResetCode(EmailVerificationDTO emailVerificationDTO)
         {
-            return codeService.ValidateCode(emailVerificationDTO.Email, emailVerificationDTO.VerificationCode, CodeType.PasswordReset, consume:false);
+            return codeService.ValidateCode(emailVerificationDTO.Email, emailVerificationDTO.VerificationCode, 
+                CodeType.PasswordReset, consume:false);
         }
     }
 }
