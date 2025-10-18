@@ -50,41 +50,49 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         }
 
-        public async Task LoadInitialData()
-        {
-            await LoadInitialDataAsync();
-        }
-
-        private async Task LoadInitialDataAsync()
+        public async Task LoadInitialDataAsync(string username, bool isGuest)
         {
             try
             {
-                string username = SessionManager.CurrentUser.Nickname;
-                Console.WriteLine($"Nickname enviado {username}");
-                bool joined = await roomManagerClient.JoinAsRegisteredPlayerAsync(username);
-                if (joined)
+                bool joined = false;
+
+                // CAMBIO 2: Lógica condicional para llamar al método correcto
+                if (isGuest)
                 {
-                    var players = await roomManagerClient.GetConnectedPlayersAsync();
-                    foreach (var player in players)
-                    {
-                        ConnectedPlayers.Add(player);
-                    }
+                    Console.WriteLine($"Intentando unirse como invitado: {username}");
+                    joined = await roomManagerClient.JoinAsGuestAsync(username);
                 }
                 else
                 {
-                    windowService.ShowPopUp("No se pudo unir a la sala. ", "El usuario ya podría estar conectado.", PopUpIcon.Warning);
+                    Console.WriteLine($"Intentando unirse como jugador registrado: {username}");
+                    joined = await roomManagerClient.JoinAsRegisteredPlayerAsync(username);
+                }
+
+                if (joined)
+                {
+                    var players = await roomManagerClient.GetConnectedPlayersAsync();
+
+                    // Es más seguro actualizar la colección desde el hilo de la UI
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        ConnectedPlayers.Clear();
+                        foreach (var player in players)
+                        {
+                            ConnectedPlayers.Add(player);
+                        }
+                    });
+                }
+                else
+                {
+                    windowService.ShowPopUp("No se pudo unir a la sala.", "El nombre de usuario ya podría estar en uso.", PopUpIcon.Warning);
                 }
             }
             catch (Exception ex)
             {
-
                 Console.WriteLine("Error al cargar datos iniciales de la sala de espera.");
                 Console.WriteLine(ex.Message);
-                Console.WriteLine(ex.StackTrace);
             }
-            
         }
-
         // --- Lógica de los Comandos ---
         private bool CanSendMessage() => !string.IsNullOrWhiteSpace(CurrentMessage);
         private async Task SendMessageAsync()
