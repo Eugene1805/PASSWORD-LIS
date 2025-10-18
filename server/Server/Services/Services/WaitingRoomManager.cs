@@ -69,7 +69,7 @@ namespace Services.Services
                 Role = await AssignRoleAsync(),
                 IsReady = false
             };
-
+            Console.WriteLine($"Player {guestUsername} (ID:{guestId}) joined as {playerDto.Role}");
             return await AddPlayerToRoomAsync(playerDto);
         }
 
@@ -103,7 +103,8 @@ namespace Services.Services
 
         public async Task<List<PlayerDTO>> GetConnectedPlayersAsync()
         {
-            return this.connectedClients.Values.Select(p => p.PlayerData).ToList();
+            var players = await Task.Run(()=> connectedClients.Values.Select(p => p.PlayerData).ToList());
+            return players;
         }
 
         public async Task SendMessageAsync(ChatMessage message)

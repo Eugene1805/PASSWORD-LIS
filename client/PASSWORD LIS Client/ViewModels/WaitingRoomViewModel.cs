@@ -59,7 +59,8 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             try
             {
-                string username = SessionManager.CurrentUser.Nickname; // Obtener esto de tu gestor de sesión
+                string username = SessionManager.CurrentUser.Nickname;
+                Console.WriteLine($"Nickname enviado {username}");
                 bool joined = await roomManagerClient.JoinAsRegisteredPlayerAsync(username);
                 if (joined)
                 {
@@ -88,7 +89,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         private bool CanSendMessage() => !string.IsNullOrWhiteSpace(CurrentMessage);
         private async Task SendMessageAsync()
         {
-            await roomManagerClient.JoinAsRegisteredPlayerAsync(CurrentMessage);
+            await roomManagerClient.SendMessageAsync(CurrentMessage);
             CurrentMessage = string.Empty;
         }
 
@@ -107,7 +108,11 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                ConnectedPlayers.Add(player);
+                // Evitar añadir duplicados si ya está en la lista
+                if (!ConnectedPlayers.Any(p => p.Id == player.Id))
+                {
+                    ConnectedPlayers.Add(player);
+                }
             });
         }
 
