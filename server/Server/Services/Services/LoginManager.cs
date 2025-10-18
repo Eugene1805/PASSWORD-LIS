@@ -37,6 +37,7 @@ namespace Services.Services
                     {
                         var userDTO = new UserDTO
                         {
+                            UserAccountId = userAccount.Id,
                             PlayerId = player.Id,
                             Nickname = userAccount.Nickname,
                             Email = userAccount.Email,

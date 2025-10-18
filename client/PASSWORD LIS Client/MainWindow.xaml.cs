@@ -1,4 +1,5 @@
 ﻿using PASSWORD_LIS_Client.LoginManagerServiceReference;
+using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.ViewModels;
 using PASSWORD_LIS_Client.Views;
@@ -36,10 +37,10 @@ namespace PASSWORD_LIS_Client
             {
                 // --- LÓGICA CORREGIDA ---
                 // 1. Creamos las dependencias para el LobbyViewModel
-                var windowService = new WindowService();
-
+                var lobbywindowService = new WindowService();
+                var friendsService = new WcfFriendsManagerService();
                 // 2. Creamos el ViewModel, inyectando las dependencias
-                var lobbyViewModel = new LobbyViewModel(windowService);
+                var lobbyViewModel = new LobbyViewModel(lobbywindowService, friendsService);
 
                 // 3. Creamos la vista (la página) y le ASIGNAMOS el ViewModel
                 var lobbyPage = new LobbyPage { DataContext = lobbyViewModel };

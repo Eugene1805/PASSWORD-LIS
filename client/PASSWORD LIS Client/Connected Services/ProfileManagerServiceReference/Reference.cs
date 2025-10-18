@@ -43,6 +43,9 @@ namespace PASSWORD_LIS_Client.ProfileManagerServiceReference {
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private System.Collections.Generic.Dictionary<string, string> SocialAccountsField;
         
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private int UserAccountIdField;
+        
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
             get {
@@ -140,6 +143,19 @@ namespace PASSWORD_LIS_Client.ProfileManagerServiceReference {
                 if ((object.ReferenceEquals(this.SocialAccountsField, value) != true)) {
                     this.SocialAccountsField = value;
                     this.RaisePropertyChanged("SocialAccounts");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public int UserAccountId {
+            get {
+                return this.UserAccountIdField;
+            }
+            set {
+                if ((this.UserAccountIdField.Equals(value) != true)) {
+                    this.UserAccountIdField = value;
+                    this.RaisePropertyChanged("UserAccountId");
                 }
             }
         }

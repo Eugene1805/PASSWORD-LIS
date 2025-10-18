@@ -17,6 +17,7 @@
         <converters:AvatarIdToImageConverter x:Key="AvatarIdToImageConverter"/>
         <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibility"/>
         <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Page.Resources>
 
     <Grid >
@@ -71,8 +72,22 @@
 
                 <Border Grid.Row="2" Style ="{StaticResource floatingBorderStyle}" Margin="0,5,0,5"
                     Visibility="{Binding IsGuest, Converter={StaticResource InverseBooleanToVisibility}}">
-                    <ListView>
-                    </ListView>
+                    <Grid>
+                        <TextBlock Text="Cargando amigos ..." Style="{StaticResource bodyTextBlockStyle}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   Visibility="{Binding IsLoadingFriends, Converter= {StaticResource BooleanToVisibilityConverter}}"/>
+
+                        <ListView ItemsSource="{Binding Friends}"
+                                  Background="Transparent" BorderThickness="0"
+                                  Visibility="{Binding IsLoadingFriends, Converter={StaticResource InverseBooleanToVisibility}}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Nickname}" Margin="5"
+                                               Style="{StaticResource bodyTextBlockStyle}" TextAlignment="Left"/>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
                 </Border>
 
                 <StackPanel Grid.Row="3">
@@ -86,7 +101,8 @@
                         Height="35" Margin="0,5"
                         Command="{Binding HowToPlayCommand}"
                              CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Page}}"/>
-<!--Quitar el CommandParameter -->
+<!--Quitar CommandParameter-->
+    
                     <Button Content="{x:Static language:Lang.settingsText}" 
                         Style="{StaticResource primaryButtonStyle}"
                         Height="35" Margin="0,5"

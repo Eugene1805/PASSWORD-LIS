@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Controls;
+using System.Collections.ObjectModel;
+using PASSWORD_LIS_Client.FriendsManagerServiceReference;
 
 namespace PASSWORD_LIS_Client.ViewModels
 {
@@ -29,7 +31,19 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
 
         //Propiedad para la lista de amigos
+        private ObservableCollection<FriendDTO> friends;
+        public ObservableCollection<FriendDTO> Friends
+        {
+            get => friends;
+            set { friends = value; OnPropertyChanged(); }
+        }
 
+        private bool isLoadingFriends;
+        public bool IsLoadingFriends
+        {
+            get => isLoadingFriends;
+            set { isLoadingFriends = value; OnPropertyChanged(); }
+        }
         public ICommand NavigateToProfileCommand { get; }
         public ICommand AddFriendCommand { get; }
         public ICommand DeleteFriendCommand { get; }
@@ -38,16 +52,18 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand SettingsCommand { get; }
 
         private readonly IWindowService windowService;
-
-        public LobbyViewModel(IWindowService windowService)
+        private readonly IFriendsManagerService friendsManagerService;
+        public LobbyViewModel(IWindowService windowService, IFriendsManagerService friendsManagerService)
         {
             this.windowService = windowService;
+            this.friendsManagerService = friendsManagerService;
 
             NavigateToProfileCommand = new RelayCommand(NavigateToProfile, (_) => !IsGuest); // Solo se puede ejecutar si NO es invitado
+            Friends = new ObservableCollection<FriendDTO>();
             AddFriendCommand = new RelayCommand(AddFriend);
             DeleteFriendCommand = new RelayCommand(DeleteFriend);
             ShowTopPlayersCommand = new RelayCommand(ShowTopPlayers);
-            HowToPlayCommand = new RelayCommand(ShowHowToPlay); 
+            HowToPlayCommand = new RelayCommand(ShowHowToPlay);
             SettingsCommand = new RelayCommand(ShowSettings);
 
             LoadSessionData();
@@ -62,6 +78,10 @@ namespace PASSWORD_LIS_Client.ViewModels
             PhotoId = currentUser.PhotoId;
             IsGuest = currentUser.PlayerId < 0;
 
+            if (!IsGuest)
+            {
+                _ = LoadFriendsAsync(); //Por que el _ ?
+            }
             //lógica para cargar la lista de amigos
             // LoadFriendsListAsync();
         }
@@ -75,6 +95,25 @@ namespace PASSWORD_LIS_Client.ViewModels
             if (page != null)
             {
                 page.NavigationService.Navigate(new ProfilePage { DataContext = profileViewModel });
+            }
+        }
+
+        private async Task LoadFriendsAsync()
+        {
+            IsLoadingFriends = true;
+            try
+            {
+                var friendsArray = await friendsManagerService.GetFriendsAsync(SessionManager.CurrentUser.UserAccountId);
+                Friends = new ObservableCollection<FriendDTO>(friendsArray);
+            }
+            catch (Exception)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                            "No se pudo cargar la lista de amigos", PopUpIcon.Error); //
+            }
+            finally
+            {
+                IsLoadingFriends = false;
             }
         }
 

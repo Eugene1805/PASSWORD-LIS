@@ -11,6 +11,9 @@ namespace Services.Contracts.DTOs
     public class UserDTO
     {
         [DataMember]
+        public int UserAccountId { get; set; }
+
+        [DataMember]
         public int PlayerId { get; set; }
 
         [DataMember]

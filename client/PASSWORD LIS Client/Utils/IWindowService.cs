@@ -60,7 +60,7 @@ namespace PASSWORD_LIS_Client.Utils
 
         public void ShowMainWindow()
         {
-            var lobbyViewModel = new LobbyViewModel(new WindowService());
+            var lobbyViewModel = new LobbyViewModel(new WindowService(), new WcfFriendsManagerService());
             var lobbyPage = new LobbyPage { DataContext = lobbyViewModel };
             
             var mainWindowViewModel = new MainWindowViewModel(new WindowService());
