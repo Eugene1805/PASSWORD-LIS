@@ -10,5 +10,7 @@ namespace Data.DAL.Interfaces
     public interface IFriendshipRepository
     {
         List<UserAccount> GetFriendsByUserAccountId(int userAccountId);
+
+        bool DeleteFriendship(int currentUserId, int friendToDeleteId);
     }
 }

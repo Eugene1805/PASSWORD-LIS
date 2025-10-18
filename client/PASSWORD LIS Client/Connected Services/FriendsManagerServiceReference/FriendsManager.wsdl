@@ -42,10 +42,20 @@
   <wsdl:message name="IFriendsManager_GetFriends_OutputMessage">
     <wsdl:part name="parameters" element="tns:GetFriendsResponse" />
   </wsdl:message>
+  <wsdl:message name="IFriendsManager_DeleteFriend_InputMessage">
+    <wsdl:part name="parameters" element="tns:DeleteFriend" />
+  </wsdl:message>
+  <wsdl:message name="IFriendsManager_DeleteFriend_OutputMessage">
+    <wsdl:part name="parameters" element="tns:DeleteFriendResponse" />
+  </wsdl:message>
   <wsdl:portType name="IFriendsManager">
     <wsdl:operation name="GetFriends">
       <wsdl:input wsaw:Action="http://tempuri.org/IFriendsManager/GetFriends" message="tns:IFriendsManager_GetFriends_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IFriendsManager/GetFriendsResponse" message="tns:IFriendsManager_GetFriends_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteFriend">
+      <wsdl:input wsaw:Action="http://tempuri.org/IFriendsManager/DeleteFriend" message="tns:IFriendsManager_DeleteFriend_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IFriendsManager/DeleteFriendResponse" message="tns:IFriendsManager_DeleteFriend_OutputMessage" />
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="NetTcpBinding_IFriendsManager" type="tns:IFriendsManager">
@@ -53,6 +63,15 @@
     <soap12:binding transport="http://schemas.microsoft.com/soap/tcp" />
     <wsdl:operation name="GetFriends">
       <soap12:operation soapAction="http://tempuri.org/IFriendsManager/GetFriends" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteFriend">
+      <soap12:operation soapAction="http://tempuri.org/IFriendsManager/DeleteFriend" style="document" />
       <wsdl:input>
         <soap12:body use="literal" />
       </wsdl:input>

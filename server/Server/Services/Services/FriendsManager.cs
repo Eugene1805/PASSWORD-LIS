@@ -1,4 +1,5 @@
-﻿using Data.DAL.Interfaces;
+﻿using Data.DAL.Implementations;
+using Data.DAL.Interfaces;
 using Services.Contracts;
 using Services.Contracts.DTOs;
 using System;
@@ -19,6 +20,8 @@ namespace Services.Services
         {
             repository = friendshipRepository;
         }
+
+        
         public Task<FriendDTO[]> GetFriendsAsync(int userAccountId)
         {
             var friendAccounts = repository.GetFriendsByUserAccountId(userAccountId);
@@ -30,6 +33,12 @@ namespace Services.Services
             }).ToArray();
 
             return Task.FromResult(friendDTOs);
+        }
+
+        public Task<bool> DeleteFriendAsync(int currentUserId, int friendToDeleteId)
+        {
+            bool success = repository.DeleteFriendship(currentUserId, friendToDeleteId);
+            return Task.FromResult(success);
         }
     }
 }

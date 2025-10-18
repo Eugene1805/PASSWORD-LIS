@@ -13,5 +13,8 @@ namespace Services.Contracts
     {
         [OperationContract]
         Task<FriendDTO[]> GetFriendsAsync(int userAccountId);
+
+        [OperationContract]
+        Task<bool> DeleteFriendAsync(int currentUserId, int friendToDeleteId);
     }
 }

@@ -79,7 +79,8 @@
 
                         <ListView ItemsSource="{Binding Friends}"
                                   Background="Transparent" BorderThickness="0"
-                                  Visibility="{Binding IsLoadingFriends, Converter={StaticResource InverseBooleanToVisibility}}">
+                                  Visibility="{Binding IsLoadingFriends, Converter={StaticResource InverseBooleanToVisibility}}"
+                                  SelectedItem="{Binding SelectedFriend, Mode=TwoWay}">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Nickname}" Margin="5"

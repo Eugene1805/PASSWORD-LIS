@@ -13,6 +13,7 @@ namespace Data.DAL.Implementations
 {
     public class FriendshipRepository : IFriendshipRepository
     {
+        
         public List<UserAccount> GetFriendsByUserAccountId(int userAccountId)
         {
             using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
@@ -41,6 +42,31 @@ namespace Data.DAL.Implementations
                     .ToList();
 
                 return friends;
+            }
+        }
+
+        public bool DeleteFriendship(int currentUserId, int friendToDeleteId)
+        {
+            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            {
+                try
+                {
+                    var friendship = context.Friendship.FirstOrDefault(f =>
+                        (f.RequesterId == currentUserId && f.AddresseeId == friendToDeleteId) ||
+                        (f.RequesterId == friendToDeleteId && f.AddresseeId == currentUserId));
+
+                    if (friendship != null)
+                    {
+                        context.Friendship.Remove(friendship);
+                        context.SaveChanges();
+                        return true; // Éxito
+                    }
+                    return false; // No se encontró la amistad
+                }
+                catch (Exception)
+                {
+                    return false; // Error en la base de datos
+                }
             }
         }
     }

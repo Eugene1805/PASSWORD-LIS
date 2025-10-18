@@ -1,16 +1,17 @@
 ﻿using PASSWORD_LIS_Client.Commands;
+using PASSWORD_LIS_Client.FriendsManagerServiceReference;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Input;
+using System.Windows;
 using System.Windows.Controls;
-using System.Collections.ObjectModel;
-using PASSWORD_LIS_Client.FriendsManagerServiceReference;
+using System.Windows.Input;
 
 namespace PASSWORD_LIS_Client.ViewModels
 {
@@ -44,6 +45,13 @@ namespace PASSWORD_LIS_Client.ViewModels
             get => isLoadingFriends;
             set { isLoadingFriends = value; OnPropertyChanged(); }
         }
+
+        private FriendDTO selectedFriend;
+        public FriendDTO SelectedFriend
+        {
+            get => selectedFriend;
+            set { selectedFriend = value; OnPropertyChanged(); }
+        }
         public ICommand NavigateToProfileCommand { get; }
         public ICommand AddFriendCommand { get; }
         public ICommand DeleteFriendCommand { get; }
@@ -61,8 +69,8 @@ namespace PASSWORD_LIS_Client.ViewModels
             NavigateToProfileCommand = new RelayCommand(NavigateToProfile, (_) => !IsGuest); // Solo se puede ejecutar si NO es invitado
             Friends = new ObservableCollection<FriendDTO>();
             AddFriendCommand = new RelayCommand(AddFriend);
-            DeleteFriendCommand = new RelayCommand(DeleteFriend);
-            ShowTopPlayersCommand = new RelayCommand(ShowTopPlayers);
+            DeleteFriendCommand = new RelayCommand(async (_) => await DeleteFriendAsync(),
+                (_) => CanDeleteFriend()); ShowTopPlayersCommand = new RelayCommand(ShowTopPlayers);
             HowToPlayCommand = new RelayCommand(ShowHowToPlay);
             SettingsCommand = new RelayCommand(ShowSettings);
 
@@ -123,9 +131,47 @@ namespace PASSWORD_LIS_Client.ViewModels
             // windowService.ShowAddFriendWindow();
         }
 
-        private void DeleteFriend(object parameter)
+        private bool CanDeleteFriend()
         {
-            // Lógica para eliminar el amigo seleccionado de la lista
+            return SelectedFriend != null && !IsGuest;
+        }
+        private async Task DeleteFriendAsync()
+        {
+            MessageBoxResult result = MessageBox.Show(
+            string.Format("¿Estás seguro de que quieres eliminar a {0} de tu lista de amigos?", SelectedFriend.Nickname),
+            "Confirmar Eliminación",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.No)
+            {
+                return; // El usuario canceló
+            }
+
+            try
+            {
+                // 2. Llamar al servidor
+                bool success = await friendsManagerService.DeleteFriendAsync(
+                    SessionManager.CurrentUser.PlayerId,
+                    SelectedFriend.PlayerId
+                );
+
+                // 3. Procesar la respuesta
+                if (success)
+                {
+                    windowService.ShowPopUp("Éxito", "Amigo eliminado correctamente.", PopUpIcon.Success);
+                    // Actualizamos la lista en la UI al instante, sin volver a llamar al servidor
+                    Friends.Remove(SelectedFriend);
+                }
+                else
+                {
+                    windowService.ShowPopUp("Error", "No se pudo eliminar al amigo.", PopUpIcon.Error);
+                }
+            }
+            catch (Exception)
+            {
+                windowService.ShowPopUp("Error", "Error de conexión al intentar eliminar al amigo.", PopUpIcon.Error);
+            }
         }
 
         private void ShowTopPlayers(object parameter)

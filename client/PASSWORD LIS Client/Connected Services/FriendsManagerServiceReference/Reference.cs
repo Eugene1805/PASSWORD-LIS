@@ -83,6 +83,12 @@ namespace PASSWORD_LIS_Client.FriendsManagerServiceReference {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/GetFriends", ReplyAction="http://tempuri.org/IFriendsManager/GetFriendsResponse")]
         System.Threading.Tasks.Task<PASSWORD_LIS_Client.FriendsManagerServiceReference.FriendDTO[]> GetFriendsAsync(int userAccountId);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/DeleteFriend", ReplyAction="http://tempuri.org/IFriendsManager/DeleteFriendResponse")]
+        bool DeleteFriend(int currentUserId, int friendToDeleteId);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/DeleteFriend", ReplyAction="http://tempuri.org/IFriendsManager/DeleteFriendResponse")]
+        System.Threading.Tasks.Task<bool> DeleteFriendAsync(int currentUserId, int friendToDeleteId);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -118,6 +124,14 @@ namespace PASSWORD_LIS_Client.FriendsManagerServiceReference {
         
         public System.Threading.Tasks.Task<PASSWORD_LIS_Client.FriendsManagerServiceReference.FriendDTO[]> GetFriendsAsync(int userAccountId) {
             return base.Channel.GetFriendsAsync(userAccountId);
+        }
+        
+        public bool DeleteFriend(int currentUserId, int friendToDeleteId) {
+            return base.Channel.DeleteFriend(currentUserId, friendToDeleteId);
+        }
+        
+        public System.Threading.Tasks.Task<bool> DeleteFriendAsync(int currentUserId, int friendToDeleteId) {
+            return base.Channel.DeleteFriendAsync(currentUserId, friendToDeleteId);
         }
     }
 }
