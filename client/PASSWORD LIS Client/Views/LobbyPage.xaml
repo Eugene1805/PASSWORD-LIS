@@ -84,8 +84,9 @@
                     <Button Content="{x:Static language:Lang.howToPlayText}" 
                         Style="{StaticResource primaryButtonStyle}"
                         Height="35" Margin="0,5"
-                        Command="{Binding HowToPlayCommand}"/>
-
+                        Command="{Binding HowToPlayCommand}"
+                             CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Page}}"/>
+<!--Quitar el CommandParameter -->
                     <Button Content="{x:Static language:Lang.settingsText}" 
                         Style="{StaticResource primaryButtonStyle}"
                         Height="35" Margin="0,5"

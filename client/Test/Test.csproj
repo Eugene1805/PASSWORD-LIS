@@ -140,6 +140,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\SignUpWindowTests.cs" />
     <Compile Include="ViewModelsTests\SignUpViewModelTests.cs" />
   </ItemGroup>
   <ItemGroup>

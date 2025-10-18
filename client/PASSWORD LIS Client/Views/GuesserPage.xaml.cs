@@ -13,14 +13,14 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace PASSWORD_LIS_Client
+namespace PASSWORD_LIS_Client.Views
 {
     /// <summary>
-    /// Lógica de interacción para WaitingRoomPage.xaml
+    /// Lógica de interacción para GuesserPage.xaml
     /// </summary>
-    public partial class WaitingRoomPage : Page
+    public partial class GuesserPage : Page
     {
-        public WaitingRoomPage()
+        public GuesserPage()
         {
             InitializeComponent();
         }

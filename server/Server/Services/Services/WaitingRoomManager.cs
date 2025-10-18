@@ -9,10 +9,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Services.Services
 {
-    [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Reentrant)]
+    [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Multiple)]
     public class WaitingRoomManager : IWaitingRoomManager
     {
         private class ConnectedPlayer
@@ -33,7 +34,7 @@ namespace Services.Services
             this.operationContext = operationContextWrapper;
         }
 
-        public bool JoinAsRegisteredPlayer(string username)
+        public async Task<bool> JoinAsRegisteredPlayerAsync(string username)
         {
             Player playerEntity = repository.GetPlayerByUsername(username); 
             if (playerEntity == null || connectedClients.ContainsKey(playerEntity.Id))
@@ -45,14 +46,14 @@ namespace Services.Services
             {
                 Id = playerEntity.Id,
                 Username = playerEntity.UserAccount.Nickname,
-                Role = AssignRole(),
+                Role = await AssignRoleAsync(),
                 IsReady = false
             };
 
-            return AddPlayerToRoom(playerDto);
+            return await AddPlayerToRoomAsync(playerDto);
         }
 
-        public bool JoinAsGuest(string guestUsername)
+        public async Task<bool> JoinAsGuestAsync(string guestUsername)
         {
             if (connectedClients.Values.Any(p => p.PlayerData.Username.Equals(guestUsername, StringComparison.OrdinalIgnoreCase)))
             {
@@ -65,14 +66,14 @@ namespace Services.Services
             {
                 Id = guestId,
                 Username = guestUsername,
-                Role = AssignRole(),
+                Role = await AssignRoleAsync(),
                 IsReady = false
             };
 
-            return AddPlayerToRoom(playerDto);
+            return await AddPlayerToRoomAsync(playerDto);
         }
 
-        private bool AddPlayerToRoom(PlayerDTO playerDto)
+        private async Task<bool> AddPlayerToRoomAsync(PlayerDTO playerDto)
         {
             var callback = operationContext.GetCallbackChannel<IWaitingRoomCallback>();
             var newPlayer = new ConnectedPlayer
@@ -87,31 +88,31 @@ namespace Services.Services
             }
 
             Console.WriteLine($"Player {playerDto.Username} (ID: {playerDto.Id}) joined as {playerDto.Role}.");
-            Broadcast(client => client.CallbackChannel.OnPlayerJoined(playerDto));
+            await BroadcastAsync(client => client.CallbackChannel.OnPlayerJoined(playerDto));
             return true;
         }
 
-        public void LeaveRoom(int playerId)
+        public async Task LeaveRoomAsync(int playerId)
         {
             if (this.connectedClients.TryRemove(playerId, out _))
             {
                 Console.WriteLine($"Player with ID {playerId} left.");
-                Broadcast(client => client.CallbackChannel.OnPlayerLeft(playerId));
+                await BroadcastAsync(client => client.CallbackChannel.OnPlayerLeft(playerId));
             }
         }
 
-        public List<PlayerDTO> GetConnectedPlayers()
+        public async Task<List<PlayerDTO>> GetConnectedPlayersAsync()
         {
             return this.connectedClients.Values.Select(p => p.PlayerData).ToList();
         }
 
-        public void SendMessage(ChatMessage message)
+        public async Task SendMessageAsync(ChatMessage message)
         {
             Console.WriteLine($"Message from {message.SenderUsername}: {message.Message}");
-            Broadcast(client => client.CallbackChannel.OnMessageReceived(message));
+            await BroadcastAsync(client => client.CallbackChannel.OnMessageReceived(message));
         }
 
-        private void Broadcast(Action<ConnectedPlayer> action)
+        private async Task BroadcastAsync(Action<ConnectedPlayer> action)
         {
             List<int> disconnectedPlayerIds = new List<int>();
 
@@ -132,11 +133,11 @@ namespace Services.Services
             // Limpiar clientes desconectados
             foreach (var id in disconnectedPlayerIds)
             {
-                LeaveRoom(id);
+                await LeaveRoomAsync(id);
             }
         }
 
-        private string AssignRole()
+        private async Task<string> AssignRoleAsync()
         {
             var rolesInUse = connectedClients.Values.Select(p => p.PlayerData.Role).ToList();
 
