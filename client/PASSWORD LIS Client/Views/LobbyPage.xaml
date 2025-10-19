@@ -100,10 +100,8 @@
                     <Button Content="{x:Static language:Lang.howToPlayText}" 
                         Style="{StaticResource primaryButtonStyle}"
                         Height="35" Margin="0,5"
-                        Command="{Binding HowToPlayCommand}"
-                             CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Page}}"/>
-<!--Quitar CommandParameter-->
-    
+                        Command="{Binding HowToPlayCommand}"/>
+                    
                     <Button Content="{x:Static language:Lang.settingsText}" 
                         Style="{StaticResource primaryButtonStyle}"
                         Height="35" Margin="0,5"
@@ -137,6 +135,8 @@
                          Height="40" Margin="0,0,0,10"/>
                     <Button Content="{x:Static language:Lang.joingGameText}" 
                         Style="{StaticResource primaryButtonStyle}" 
+                        Command="{Binding JoinGameCommand}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Page}}"
                         Height="35"/>
                 </StackPanel>
             </Border>

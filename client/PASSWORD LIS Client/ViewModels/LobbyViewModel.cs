@@ -4,10 +4,7 @@ using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -58,6 +55,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand ShowTopPlayersCommand { get; }
         public ICommand HowToPlayCommand { get; }
         public ICommand SettingsCommand { get; }
+        public ICommand JoinGameCommand { get; }
 
         private readonly IWindowService windowService;
         private readonly IFriendsManagerService friendsManagerService;
@@ -70,10 +68,11 @@ namespace PASSWORD_LIS_Client.ViewModels
             Friends = new ObservableCollection<FriendDTO>();
             AddFriendCommand = new RelayCommand(AddFriend);
             DeleteFriendCommand = new RelayCommand(async (_) => await DeleteFriendAsync(),
-                (_) => CanDeleteFriend()); ShowTopPlayersCommand = new RelayCommand(ShowTopPlayers);
+                (_) => CanDeleteFriend()); 
+            ShowTopPlayersCommand = new RelayCommand(ShowTopPlayers);
             HowToPlayCommand = new RelayCommand(ShowHowToPlay);
             SettingsCommand = new RelayCommand(ShowSettings);
-
+            JoinGameCommand = new RelayCommand(JoinGame);
             LoadSessionData();
         }
         public void LoadSessionData()
@@ -181,21 +180,11 @@ namespace PASSWORD_LIS_Client.ViewModels
             topPlayersWindow.ShowDialog();
         }
         private void ShowHowToPlay(object parameter)
-        {/*
+        {
             var howToPlayViewModel = new HowToPlayViewModel();
             var howToPlayWindow = new HowToPlayWindow { DataContext = howToPlayViewModel };
 
-            howToPlayWindow.ShowDialog();*/
-
-            var page = parameter as Page;
-            if (page != null)
-            {
-                var waitingRoomViewModel = new WaitingRoomViewModel(new WcfWaitingRoomManagerService(), windowService);
-                var waitingRoomPage = new WaitingRoomPage(SessionManager.CurrentUser.Nickname,SessionManager.CurrentUser.PlayerId < 0);
-                waitingRoomPage.DataContext = waitingRoomViewModel;
-
-                page.NavigationService.Navigate(waitingRoomPage);
-            }
+            howToPlayWindow.ShowDialog();
         }
 
         private void ShowSettings(object parameter)
@@ -209,6 +198,23 @@ namespace PASSWORD_LIS_Client.ViewModels
                 windowService.ShowLoginWindow();
                 windowService.CloseMainWindow();
             }
+        }
+
+        private void JoinGame(object parameter) 
+        {
+            string username = SessionManager.CurrentUser.Nickname;
+            bool isGuest = SessionManager.CurrentUser.PlayerId < 0;
+
+            // Create the ViewModel for the next page, using the shared services
+            var waitingRoomViewModel = new WaitingRoomViewModel(App.WaitRoomManagerService, App.WindowService);
+
+            var waitingRoomPage = new WaitingRoomPage(username, isGuest)
+            {
+                DataContext = waitingRoomViewModel
+            };
+
+            // Use the service to navigate
+            windowService.NavigateTo(waitingRoomPage);
         }
     }
 }

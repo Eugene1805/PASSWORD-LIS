@@ -4,12 +4,11 @@ using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
 using PASSWORD_LIS_Client.WaitingRoomManagerServiceReference;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace PASSWORD_LIS_Client.ViewModels
@@ -27,8 +26,9 @@ namespace PASSWORD_LIS_Client.ViewModels
             get => currentMessage;
             set => SetProperty(ref currentMessage, value);
         }
-
+        private PlayerDTO currentPlayer;
         public ICommand SendMessageCommand { get; }
+        public ICommand LeaveRoomCommand { get; }
         public WaitingRoomViewModel(IWaitingRoomManagerService roomManagerService, IWindowService windowService)
         {
             this.roomManagerClient = roomManagerService;
@@ -38,7 +38,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             ConnectedPlayers = new ObservableCollection<PlayerDTO>();
 
             SendMessageCommand = new RelayCommand(async (_) => await SendMessageAsync(),(_) => CanSendMessage());
-
+            LeaveRoomCommand = new RelayCommand(async (_) => await LeaveRoomAsync(_));
             // 1. Suscribirse a los eventos del servicio
             // Necesitas castear si la interfaz no expone los eventos directamente
             if (roomManagerClient is WcfWaitingRoomManagerService wcfService)
@@ -71,9 +71,9 @@ namespace PASSWORD_LIS_Client.ViewModels
                 if (joined)
                 {
                     var players = await roomManagerClient.GetConnectedPlayersAsync();
+                    this.currentPlayer = players.FirstOrDefault(p => p.Username == username);
 
-                    // Es más seguro actualizar la colección desde el hilo de la UI
-                    Application.Current.Dispatcher.Invoke(() =>
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
                         ConnectedPlayers.Clear();
                         foreach (var player in players)
@@ -100,7 +100,27 @@ namespace PASSWORD_LIS_Client.ViewModels
             await roomManagerClient.SendMessageAsync(CurrentMessage);
             CurrentMessage = string.Empty;
         }
-
+        private async Task LeaveRoomAsync(object parameter)
+        {
+            try
+            {
+                // Notificamos al servidor solo si tenemos un jugador válido
+                if (this.currentPlayer != null)
+                {
+                    await roomManagerClient.LeaveRoomAsync(this.currentPlayer.Id);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al intentar salir de la sala: {ex.Message}");
+                // Aunque falle, igual intentamos navegar hacia atrás
+            }
+            finally
+            {
+                // Usamos el servicio de ventanas para regresar a la página anterior
+                windowService.GoBack();
+            }
+        }
         // --- Manejadores de Eventos del Servicio (Callbacks) ---
 
         private void OnMessageReceived(ChatMessage message)

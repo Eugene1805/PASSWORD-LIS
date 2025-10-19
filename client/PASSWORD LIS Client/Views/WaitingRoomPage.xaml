@@ -18,8 +18,17 @@
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
-
-        <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource floatingBorderStyle}" Margin="10,20,10,10" Padding="15">
+        <TextBlock x:Name="titleTextBlock" Style="{StaticResource titleTextBlockStyle}"
+                    Text="PASSWORD LIS" HorizontalAlignment="Center"
+                    VerticalAlignment="Top" Margin="10,15,10,10"/>
+        <Button Command="{Binding LeaveRoomCommand}"
+                Style="{StaticResource circleButtonStyle}"
+                HorizontalAlignment="Left" VerticalAlignment="Top"
+                Width="35" Height="35" Margin="15">
+            <Image Source="/Resources/GoBackIcon.png" Width="15" Height="15"/>
+        </Button>
+        
+        <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource floatingBorderStyle}" Margin="10,60,10,10" Padding="15">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -107,7 +116,6 @@
                 </Grid>
             </Grid>
         </Border>
-
         <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource floatingBorderStyle}" Padding="15" Margin="20,10,20,20">
             <StackPanel HorizontalAlignment="Center">
                 <Button Style="{StaticResource gameButtonStyle}" 
@@ -136,6 +144,5 @@
                 </StackPanel>
             </StackPanel>
         </Border>
-        
     </Grid>
 </Page>
