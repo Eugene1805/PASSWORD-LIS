@@ -143,7 +143,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             var chooseAvatarWindow = new ChooseAvatarWindow();
             if (chooseAvatarWindow.ShowDialog() == true)
             {
-                PhotoId = chooseAvatarWindow.selectedAvatarId;
+                PhotoId = chooseAvatarWindow.SelectedAvatarId;
             }
         }
         

@@ -2,12 +2,6 @@
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.ViewModels;
 using PASSWORD_LIS_Client.Views;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace PASSWORD_LIS_Client
