@@ -95,7 +95,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void NavigateToProfile(object parameter)
         {
-            var profileViewModel = new ProfileViewModel(new WcfProfileManagerService(), new WindowService());
+            var profileViewModel = new ProfileViewModel(App.ProfileManagerService, App.WindowService);
 
 
             var page = parameter as Page;
@@ -175,7 +175,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void ShowTopPlayers(object parameter)
         {
-            var topPlayersViewModel = new TopPlayersViewModel(new WcfTopPlayersManagerService(), new WindowService());
+            var topPlayersViewModel = new TopPlayersViewModel(App.TopPlayersManagerService, App.WindowService);
             var topPlayersWindow = new Views.TopPlayersWindow { DataContext = topPlayersViewModel};
             topPlayersWindow.ShowDialog();
         }
@@ -189,7 +189,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void ShowSettings(object parameter)
         {
-            var settingsViewModel = new SettingsViewModel(new WindowService());
+            var settingsViewModel = new SettingsViewModel(App.WindowService);
             var settingsWindow = new SettingsWindow { DataContext = settingsViewModel };
             settingsWindow.ShowDialog();
 
@@ -203,17 +203,14 @@ namespace PASSWORD_LIS_Client.ViewModels
         private void JoinGame(object parameter) 
         {
             string username = SessionManager.CurrentUser.Nickname;
-            bool isGuest = SessionManager.CurrentUser.PlayerId < 0;
 
-            // Create the ViewModel for the next page, using the shared services
             var waitingRoomViewModel = new WaitingRoomViewModel(App.WaitRoomManagerService, App.WindowService);
 
-            var waitingRoomPage = new WaitingRoomPage(username, isGuest)
+            var waitingRoomPage = new WaitingRoomPage(username, SessionManager.CurrentUser.PlayerId < 0)
             {
                 DataContext = waitingRoomViewModel
             };
 
-            // Use the service to navigate
             windowService.NavigateTo(waitingRoomPage);
         }
     }

@@ -8,7 +8,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace PASSWORD_LIS_Client.ViewModels
@@ -38,9 +37,8 @@ namespace PASSWORD_LIS_Client.ViewModels
             ConnectedPlayers = new ObservableCollection<PlayerDTO>();
 
             SendMessageCommand = new RelayCommand(async (_) => await SendMessageAsync(),(_) => CanSendMessage());
-            LeaveRoomCommand = new RelayCommand(async (_) => await LeaveRoomAsync(_));
-            // 1. Suscribirse a los eventos del servicio
-            // Necesitas castear si la interfaz no expone los eventos directamente
+            LeaveRoomCommand = new RelayCommand(async (_) => await LeaveRoomAsync());
+
             if (roomManagerClient is WcfWaitingRoomManagerService wcfService)
             {
                 wcfService.MessageReceived += OnMessageReceived;
@@ -56,7 +54,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 bool joined = false;
 
-                // CAMBIO 2: Lógica condicional para llamar al método correcto
                 if (isGuest)
                 {
                     Console.WriteLine($"Intentando unirse como invitado: {username}");
@@ -93,18 +90,20 @@ namespace PASSWORD_LIS_Client.ViewModels
                 Console.WriteLine(ex.Message);
             }
         }
-        // --- Lógica de los Comandos ---
-        private bool CanSendMessage() => !string.IsNullOrWhiteSpace(CurrentMessage);
+
+        private bool CanSendMessage()
+        {
+            return !string.IsNullOrWhiteSpace(CurrentMessage);
+        }
         private async Task SendMessageAsync()
         {
             await roomManagerClient.SendMessageAsync(CurrentMessage);
             CurrentMessage = string.Empty;
         }
-        private async Task LeaveRoomAsync(object parameter)
+        private async Task LeaveRoomAsync()
         {
             try
             {
-                // Notificamos al servidor solo si tenemos un jugador válido
                 if (this.currentPlayer != null)
                 {
                     await roomManagerClient.LeaveRoomAsync(this.currentPlayer.Id);
@@ -113,19 +112,15 @@ namespace PASSWORD_LIS_Client.ViewModels
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al intentar salir de la sala: {ex.Message}");
-                // Aunque falle, igual intentamos navegar hacia atrás
             }
             finally
             {
-                // Usamos el servicio de ventanas para regresar a la página anterior
                 windowService.GoBack();
             }
         }
-        // --- Manejadores de Eventos del Servicio (Callbacks) ---
 
         private void OnMessageReceived(ChatMessage message)
         {
-            // Usa el Dispatcher para actualizar la UI desde cualquier hilo
             Application.Current.Dispatcher.Invoke(() =>
             {
                 ChatMessages.Add($"{message.SenderUsername}: {message.Message}");
@@ -136,7 +131,6 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                // Evitar añadir duplicados si ya está en la lista
                 if (!ConnectedPlayers.Any(p => p.Id == player.Id))
                 {
                     ConnectedPlayers.Add(player);

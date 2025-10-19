@@ -70,6 +70,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand SignUpCommand { get; }
         public ICommand NavigateToLoginCommand { get; }
         public ICommand OpenTermsAndConditionsCommand { get; }
+
         private readonly IAccountManagerService client;
         
         private readonly IWindowService windowService;
@@ -213,6 +214,5 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             return true;
         }    
-        
     }
 }

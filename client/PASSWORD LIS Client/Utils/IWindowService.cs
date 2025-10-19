@@ -44,21 +44,22 @@ namespace PASSWORD_LIS_Client.Utils
         }
         public void ShowVerifyCodeWindow(string email, VerificationReason reason)
         {
-            var viewModel = new VerifyCodeViewModel(email, reason, this,
-                new WcfVerificationCodeManagerService(), new WcfPasswordResetManagerService());
+            var viewModel = new VerifyCodeViewModel(email, reason, App.WindowService,
+                App.VerificationCodeManagerService, App.PasswordResetManagerService);
             var window = new VerifyCodeWindow { DataContext = viewModel };
             window.Show();
         }
         public void ShowChangePasswordWindow(string email, string verificationCode)
         {
-            var viewModel = new ChangePasswordViewModel(email, verificationCode, this, new WcfPasswordResetManagerService());
+            var viewModel = new ChangePasswordViewModel(email, verificationCode, App.WindowService,
+                App.PasswordResetManagerService);
             var window = new ChangePasswordWindow { DataContext = viewModel };
             window.Show();
         }
 
         public void ShowLoginWindow()
         {
-            var loginViewModel = new LoginViewModel(new WcfLoginManagerService(), new WindowService());
+            var loginViewModel = new LoginViewModel(App.LoginManagerService, App.WindowService);
             var loginWindow = new LoginWindow { DataContext = loginViewModel};
             loginWindow.Show();
         }
@@ -79,14 +80,7 @@ namespace PASSWORD_LIS_Client.Utils
         }
 
         public void ShowMainWindow()
-        {/*
-            var lobbyViewModel = new LobbyViewModel(new WindowService(), new WcfFriendsManagerService());
-            var lobbyPage = new LobbyPage { DataContext = lobbyViewModel };
-            
-            var mainWindowViewModel = new MainWindowViewModel(new WindowService());
-            var mainWindow = new MainWindow { DataContext = mainWindowViewModel };
-
-            mainWindow.mainFrame.NavigationService.Navigate(lobbyPage);*/
+        {
             var mainWindow = new MainWindow();
             Application.Current.MainWindow = mainWindow;
             mainWindow.Show();

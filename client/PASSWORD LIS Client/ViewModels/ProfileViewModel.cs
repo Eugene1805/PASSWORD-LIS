@@ -189,11 +189,6 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void BackToLobby(object parameter)
         {
-            var page = parameter as Page;
-            if (page == null)
-            {
-                return;
-            }
             if (IsEditMode)
             {
                 // Aquí usarías el servicio IWindowService si tuvieras un PopUp con Yes/No
@@ -208,11 +203,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                     return;
                 }
             }
-
-            if (page.NavigationService != null && page.NavigationService.CanGoBack)
-            {
-                page.NavigationService.GoBack();
-            }
+            windowService.GoBack();
         }
 
         private bool AreFieldsValid()

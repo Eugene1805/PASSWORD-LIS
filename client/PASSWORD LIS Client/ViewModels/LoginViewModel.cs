@@ -136,7 +136,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void NavigateToSignUp(object parameter)
         {
-            var signUpViewModel = new SignUpViewModel(new WcfAccountManagerService(), windowService); 
+            var signUpViewModel = new SignUpViewModel(App.AccountManagerService, windowService); 
             var signUpWindow = new SignUpWindow { DataContext = signUpViewModel };
             signUpWindow.Show();
             windowService.CloseWindow(this);
@@ -144,11 +144,10 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void NavigateToForgotPassword(object parameter)
         {
-            var retreivePasswordViewModel = new RetrievePasswordViewModel(new WcfPasswordResetManagerService(), windowService);
+            var retreivePasswordViewModel = new RetrievePasswordViewModel(App.PasswordResetManagerService, windowService);
             var retrievePasswordWindow = new RetrievePasswordWindow { DataContext = retreivePasswordViewModel};
             retrievePasswordWindow.ShowDialog();
         }
-
 
     }
 }

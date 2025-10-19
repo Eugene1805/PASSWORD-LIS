@@ -6,7 +6,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.ServiceModel;
 using System.Threading.Tasks;
-using System.Windows;
 
 namespace PASSWORD_LIS_Client.ViewModels
 {

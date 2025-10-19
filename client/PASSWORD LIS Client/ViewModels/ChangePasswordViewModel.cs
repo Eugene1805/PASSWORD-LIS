@@ -38,7 +38,8 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         public RelayCommand ChangePasswordCommand { get; }
 
-        public ChangePasswordViewModel(string email, string code, IWindowService windowService, IPasswordResetManagerService passwordResetService)
+        public ChangePasswordViewModel(string email, string code, IWindowService windowService, 
+            IPasswordResetManagerService passwordResetService)
         {
             this.email = email;
             this.verificationCode = code;
@@ -49,7 +50,8 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ChangePasswordViewModel() { }
         private bool CanChangePassword()
         {
-            return !this.IsBusy && !string.IsNullOrWhiteSpace(this.NewPassword) && !string.IsNullOrWhiteSpace(this.ConfirmPassword);
+            return !this.IsBusy && !string.IsNullOrWhiteSpace(this.NewPassword) && 
+                !string.IsNullOrWhiteSpace(this.ConfirmPassword);
         }
 
         private async Task ChangePasswordAsync()
