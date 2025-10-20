@@ -194,31 +194,8 @@
         <Border Grid.Row="1" Grid.ColumnSpan="3"
                 HorizontalAlignment="Center" VerticalAlignment="Bottom"
                 Background="#323232" CornerRadius="5"
-                Padding="15,10" Margin="20"
+                Padding="15,10" Margin="20" Style="{StaticResource snackbarBorderStyle}"
                 Visibility="{Binding IsSnackbarVisible, Converter={StaticResource BoolToVisConverter}}">
-            <Border.Style>
-                <Style TargetType="Border">
-                    <Setter Property="Opacity" Value="0"/>
-                    <Style.Triggers>
-                        <Trigger Property="Visibility" Value="Visible">
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.3"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.3"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </Border.Style>
             <TextBlock Text="{Binding SnackbarMessage}" Foreground="White" FontSize="14"/>
         </Border>
     </Grid>
