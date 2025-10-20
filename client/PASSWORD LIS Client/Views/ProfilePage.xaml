@@ -12,102 +12,159 @@
       d:DesignHeight="450" d:DesignWidth="800"
       Title="{x:Static language:Lang.profileText}">
 
-
     <Page.Resources>
         <converters:AvatarIdToImageConverter x:Key="AvatarIdToImageConverter"/>
     </Page.Resources>
 
-    <Grid Margin="20" Background="#F5F5F5">
+    <!-- Grid principal que ocupa toda la ventana -->
+    <Grid Background="#F5F5F5">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <!-- Header -->
+            <RowDefinition Height="*"/>
+            <!-- Contenido principal -->
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
 
-        <Button Grid.Column="0" Style="{StaticResource circleButtonStyle}"
-            HorizontalAlignment="Left" VerticalAlignment="Top"
-            Margin="0,10,10,0" Width="50" Height="50"
-            Command="{Binding BackToLobbyCommand}"
-            CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Page}}">
-            <Image Source="/Resources/GoBackIcon.png" Width="30" Stretch="Uniform"/>
-        </Button>
+        <!-- Header con botones en esquinas y título centrado -->
+        <Border Grid.Row="0" Style="{StaticResource floatingBorderStyle}" Padding="15" Margin="10,10,10,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-        <TextBlock Text="{x:Static language:Lang.profileText}"
-               Style="{StaticResource titleTextBlockStyle}"
-               HorizontalAlignment="Center"
-               Grid.ColumnSpan="2"
-               Margin="0,10,0,20"/>
+                <!-- Botón retroceso - Esquina izquierda -->
+                <Button Grid.Column="0" 
+                        Style="{StaticResource circleButtonStyle}"
+                        HorizontalAlignment="Left" 
+                        VerticalAlignment="Center"
+                        Width="50" Height="50"
+                        Command="{Binding BackToLobbyCommand}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Page}}">
+                    <Image Source="/Resources/GoBackIcon.png" Width="30" Stretch="Uniform"/>
+                </Button>
 
-        <Button Grid.Column="1" Style="{StaticResource circleButtonStyle}"
-            HorizontalAlignment="Right" VerticalAlignment="Top"
-            Margin="0,10,10,0" Width="50" Height="50"
-            Command="{Binding EditProfileCommand}">
-            <Image Source="/Resources/pencil_icon.png" Width="30" Stretch="Uniform"/>
-        </Button>
+                <!-- Título centrado -->
+                <TextBlock Grid.Column="1"
+                       Text="{x:Static language:Lang.profileText}"
+                       Style="{StaticResource titleTextBlockStyle}"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"/>
 
-        <StackPanel Grid.Row="2" Grid.Column="0" Margin="20,0,20,0">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <Ellipse x:Name="avatarEllipse" Style="{StaticResource circleEllipseStyle}"  HorizontalAlignment="Left" Margin="0,0,20,0">
-                    <Ellipse.Fill>
-                        <ImageBrush ImageSource="{Binding PhotoId, Converter={StaticResource AvatarIdToImageConverter}, FallbackValue=/Resources/AvatarDefault.png}"/>
-                    </Ellipse.Fill>
-                </Ellipse>
-                <Button Content="{x:Static language:Lang.selectAvatarText}"
-                    Style="{StaticResource primaryButtonStyle}"
-                    Width="150" Height="30"
-                    Command="{Binding ChooseAnAvatarCommand}"
-                    IsEnabled="{Binding IsEditMode}"/>
-            </StackPanel>
+                <!-- Botón editar - Esquina derecha -->
+                <Button Grid.Column="2"
+                        Style="{StaticResource circleButtonStyle}"
+                        HorizontalAlignment="Right" 
+                        VerticalAlignment="Center"
+                        Width="50" Height="50"
+                        Command="{Binding EditProfileCommand}">
+                    <Image Source="/Resources/pencil_icon.png" Width="30" Stretch="Uniform"/>
+                </Button>
+            </Grid>
+        </Border>
 
-            <TextBlock Text="{x:Static language:Lang.nicknameText}" Style="{StaticResource bodyTextBlockStyle}" Margin="0,10,0,5"/>
-            <TextBox Text="{Binding Nickname, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource primaryTextBoxStyle}" Margin="0,0,0,5" IsEnabled="{Binding IsEditMode}"/>
+        <!-- Contenido principal centrado -->
+        <Border Grid.Row="1" Style="{StaticResource floatingBorderStyle}" Padding="20" Margin="10,10,10,10">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <Grid VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-            <TextBlock Text="{x:Static language:Lang.nameText}" Style="{StaticResource bodyTextBlockStyle}" Margin="0,10,0,5"/>
-            <TextBox Text="{Binding FirstName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource primaryTextBoxStyle}" Margin="0,0,0,5" IsEnabled="{Binding IsEditMode}"/>
+                    <!-- Columna izquierda - Información personal -->
+                    <StackPanel Grid.Column="0" Margin="20,0,20,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,30">
+                            <Ellipse x:Name="avatarEllipse" Style="{StaticResource circleEllipseStyle}" 
+                                     HorizontalAlignment="Center" 
+                                     Width="120" Height="120"
+                                     Margin="0,0,20,0">
+                                <Ellipse.Fill>
+                                    <ImageBrush ImageSource="{Binding PhotoId, Converter={StaticResource AvatarIdToImageConverter}, FallbackValue=/Resources/AvatarDefault.png}"/>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <Button Content="{x:Static language:Lang.selectAvatarText}"
+                                Style="{StaticResource primaryButtonStyle}"
+                                Width="150" Height="35"
+                                Command="{Binding ChooseAnAvatarCommand}"
+                                IsEnabled="{Binding IsEditMode}"
+                                VerticalAlignment="Center"/>
+                        </StackPanel>
 
-            <TextBlock Text="{x:Static language:Lang.lastNameText}" Style="{StaticResource bodyTextBlockStyle}" Margin="0,10,0,5"/>
-            <TextBox Text="{Binding LastName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource primaryTextBoxStyle}" Margin="0,0,0,5" IsEnabled="{Binding IsEditMode}"/>
+                        <TextBlock Text="{x:Static language:Lang.nicknameText}" Style="{StaticResource bodyTextBlockStyle}" Margin="0,10,0,5"/>
+                        <TextBox Text="{Binding Nickname, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource primaryTextBoxStyle}" Margin="0,0,0,15" IsEnabled="{Binding IsEditMode}"/>
 
-        </StackPanel>
+                        <TextBlock Text="{x:Static language:Lang.nameText}" Style="{StaticResource bodyTextBlockStyle}" Margin="0,10,0,5"/>
+                        <TextBox Text="{Binding FirstName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource primaryTextBoxStyle}" Margin="0,0,0,15" IsEnabled="{Binding IsEditMode}"/>
 
-        <StackPanel Grid.Row="2" Grid.Column="1" Margin="20,0,0,0">
-            <TextBlock Text="{x:Static language:Lang.socialMediaText}"
-                   Style="{StaticResource subtitleTextBlockStyle}"
-                   Margin="0,0,0,10"/>
+                        <TextBlock Text="{x:Static language:Lang.lastNameText}" Style="{StaticResource bodyTextBlockStyle}" Margin="0,10,0,5"/>
+                        <TextBox Text="{Binding LastName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource primaryTextBoxStyle}" Margin="0,0,0,15" IsEnabled="{Binding IsEditMode}"/>
+                    </StackPanel>
 
-            <StackPanel Orientation="Horizontal" Margin="0,5">
-                <Image Source="/Resources/facebook_logo.png" Width="40" Height="40" Margin="0,0,10,0"/>
-                <TextBox Text="{Binding Facebook,UpdateSourceTrigger=PropertyChanged}" Width="200" Style="{StaticResource primaryTextBoxStyle}" VerticalAlignment="Center" IsEnabled="{Binding IsEditMode}"/>
-            </StackPanel>
+                    <!-- Columna derecha - Redes sociales -->
+                    <StackPanel Grid.Column="1" Margin="20,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="{x:Static language:Lang.socialMediaText}"
+                               Style="{StaticResource subtitleTextBlockStyle}"
+                               Margin="0,0,0,20"
+                               HorizontalAlignment="Center"
+                               FontSize="18"/>
 
-            <StackPanel Orientation="Horizontal" Margin="0,5">
-                <Image Source="/Resources/instagram_logo.png" Width="40" Height="40" Margin="0,0,10,0"/>
-                <TextBox Text="{Binding Instagram,UpdateSourceTrigger=PropertyChanged}" Width="200" Style="{StaticResource primaryTextBoxStyle}" VerticalAlignment="Center" IsEnabled="{Binding IsEditMode}"/>
-            </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,15" HorizontalAlignment="Center">
+                            <Image Source="/Resources/facebook_logo.png" Width="40" Height="40" Margin="0,0,15,0"/>
+                            <TextBox Text="{Binding Facebook,UpdateSourceTrigger=PropertyChanged}" 
+                                     Style="{StaticResource primaryTextBoxStyle}" 
+                                     VerticalAlignment="Center" 
+                                     IsEnabled="{Binding IsEditMode}"
+                                     MinWidth="200"/>
+                        </StackPanel>
 
-            <StackPanel Orientation="Horizontal" Margin="0,5">
-                <Image Source="/Resources/x_logo.png" Width="40" Height="40" Margin="0,0,10,0"/>
-                <TextBox Text="{Binding XSocialMedia, UpdateSourceTrigger=PropertyChanged}" Width="200" Style="{StaticResource primaryTextBoxStyle}" VerticalAlignment="Center" IsEnabled="{Binding IsEditMode}" />
-            </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,15" HorizontalAlignment="Center">
+                            <Image Source="/Resources/instagram_logo.png" Width="40" Height="40" Margin="0,0,15,0"/>
+                            <TextBox Text="{Binding Instagram,UpdateSourceTrigger=PropertyChanged}" 
+                                     Style="{StaticResource primaryTextBoxStyle}" 
+                                     VerticalAlignment="Center" 
+                                     IsEnabled="{Binding IsEditMode}"
+                                     MinWidth="200"/>
+                        </StackPanel>
 
-            <StackPanel Orientation="Horizontal" Margin="0,5">
-                <Image Source="/Resources/tiktok_logo.png" Width="40" Height="40" Margin="0,0,10,0"/>
-                <TextBox Text="{Binding Tiktok, UpdateSourceTrigger=PropertyChanged}" Width="200" Style="{StaticResource primaryTextBoxStyle}" VerticalAlignment="Center" IsEnabled="{Binding IsEditMode}"/>
-            </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="40,40,40,0">
-                <Button Content="{x:Static language:Lang.changePasswordText}" Style="{StaticResource gameButtonStyle}"
-                Margin="10,10,20,10" Height="35" Width="130"
-                Command="{Binding ChangePasswordCommand}"/>
-                <Button Content="{x:Static language:Lang.saveChangesText}" Style="{StaticResource LoadingButtonStyle}"
-                Height="35" Width="100"
-                Margin="10,10,10,10"
-                Command="{Binding SaveChangesCommand}"
-                IsEnabled="{Binding IsEditMode}"/>
-            </StackPanel>
-        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,15" HorizontalAlignment="Center">
+                            <Image Source="/Resources/x_logo.png" Width="40" Height="40" Margin="0,0,15,0"/>
+                            <TextBox Text="{Binding XSocialMedia, UpdateSourceTrigger=PropertyChanged}" 
+                                     Style="{StaticResource primaryTextBoxStyle}" 
+                                     VerticalAlignment="Center" 
+                                     IsEnabled="{Binding IsEditMode}"
+                                     MinWidth="200"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,30" HorizontalAlignment="Center">
+                            <Image Source="/Resources/tiktok_logo.png" Width="40" Height="40" Margin="0,0,15,0"/>
+                            <TextBox Text="{Binding Tiktok, UpdateSourceTrigger=PropertyChanged}" 
+                                     Style="{StaticResource primaryTextBoxStyle}" 
+                                     VerticalAlignment="Center" 
+                                     IsEnabled="{Binding IsEditMode}"
+                                     MinWidth="200"/>
+                        </StackPanel>
+
+                        <!-- Botones en la parte inferior -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                            <Button Content="{x:Static language:Lang.changePasswordText}" 
+                                    Style="{StaticResource gameButtonStyle}"
+                                    Height="40" 
+                                    MinWidth="140"
+                                    Margin="10,10,20,10"
+                                    Command="{Binding ChangePasswordCommand}"/>
+                            <Button Content="{x:Static language:Lang.saveChangesText}" 
+                                    Style="{StaticResource LoadingButtonStyle}"
+                                    Height="40" 
+                                    MinWidth="120"
+                                    Margin="10,10,10,10"
+                                    Command="{Binding SaveChangesCommand}"
+                                    IsEnabled="{Binding IsEditMode}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+        </Border>
     </Grid>
 </Page>
