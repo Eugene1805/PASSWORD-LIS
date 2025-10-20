@@ -25,6 +25,19 @@ namespace PASSWORD_LIS_Client.ViewModels
             get => currentMessage;
             set => SetProperty(ref currentMessage, value);
         }
+        private bool isSnackbarVisible;
+        public bool IsSnackbarVisible
+        {
+            get => isSnackbarVisible;
+            set => SetProperty(ref isSnackbarVisible, value);
+        }
+
+        private string snackbarMessage;
+        public string SnackbarMessage
+        {
+            get => snackbarMessage;
+            set => SetProperty(ref snackbarMessage, value);
+        }
         private PlayerDTO currentPlayer;
         public ICommand SendMessageCommand { get; }
         public ICommand LeaveRoomCommand { get; }
@@ -134,6 +147,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 if (!ConnectedPlayers.Any(p => p.Id == player.Id))
                 {
                     ConnectedPlayers.Add(player);
+                    _ = ShowSnackbarAsync($"{player.Username} joined");
                 }
             });
         }
@@ -146,8 +160,19 @@ namespace PASSWORD_LIS_Client.ViewModels
                 if (playerToRemove != null)
                 {
                     ConnectedPlayers.Remove(playerToRemove);
+                    _ = ShowSnackbarAsync($"{playerToRemove.Username} left");
                 }
             });
+        }
+
+        private async Task ShowSnackbarAsync(string message)
+        {
+            SnackbarMessage = message;
+            IsSnackbarVisible = true;
+
+            await Task.Delay(3000);
+
+            IsSnackbarVisible = false;
         }
     }
 }

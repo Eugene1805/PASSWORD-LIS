@@ -4,10 +4,14 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:PASSWORD_LIS_Client.Views"
+      xmlns:converters="clr-namespace:PASSWORD_LIS_Client.Converters"
       xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="WaitingRoomPage">
+    <Page.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
+    </Page.Resources>
 
     <Grid Background="#F5F5F5">
         <Grid.RowDefinitions>
@@ -16,10 +20,12 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
         <TextBlock x:Name="titleTextBlock" Style="{StaticResource titleTextBlockStyle}"
-                    Text="PASSWORD LIS" HorizontalAlignment="Center"
+                   Grid.ColumnSpan="2" 
+                   Text="PASSWORD LIS" HorizontalAlignment="Center"
                     VerticalAlignment="Top" Margin="10,15,10,10"/>
         <Button Command="{Binding LeaveRoomCommand}"
                 Style="{StaticResource circleButtonStyle}"
@@ -28,7 +34,7 @@
             <Image Source="/Resources/GoBackIcon.png" Width="15" Height="15"/>
         </Button>
         
-        <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource floatingBorderStyle}" Margin="10,60,10,10" Padding="15">
+        <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Style="{StaticResource floatingBorderStyle}" Margin="10,60,10,10" Padding="15">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -44,11 +50,14 @@
 
                     <TextBlock Grid.Column="0" Style="{StaticResource subtitleTextBlockStyle}"
                        Text="{x:Static language:Lang.inviteYourFriendsText}"
-                       VerticalAlignment="Center"/>
+                               TextWrapping="Wrap"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Left"/>
 
                     <Button Grid.Column="1" Style="{StaticResource circleButtonStyle}"
-                    Width="30" Height="30" VerticalAlignment="Center">
-                        <Image Source="/Resources/invitationIcon.png" Width="15" Height="15"/>
+                    Width="45" Height="45" VerticalAlignment="Center"
+                        HorizontalAlignment="Right">
+                        <Image Source="/Resources/invitationIcon.png" Width="20" Height="20"/>
                     </Button>
                 </Grid>
 
@@ -72,7 +81,40 @@
             </Grid>
         </Border>
 
-        <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource floatingBorderStyle}" Margin="10,20,10,10" Padding="15">
+        <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource floatingBorderStyle}" Margin="10,60,10,10" Padding="15">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.Row="0" Style="{StaticResource subtitleTextBlockStyle}"
+                           Text="Players in the room"
+                           VerticalAlignment="Center"/>
+
+                <Border Grid.Row="1" Style="{StaticResource floatingBorderStyle}" Margin="0,10,0,0" Padding="5">
+                    <ListBox ItemsSource="{Binding ConnectedPlayers}" BorderThickness="0" Background="Transparent">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Image Grid.Column="0" Source="/Resources/AvatarDefault.png" Width="20" Height="20" Margin="0,0,10,0" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Username}" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding Role}" VerticalAlignment="Center" FontStyle="Italic" Foreground="Gray"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Border>
+            </Grid>
+        </Border>
+
+
+        <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource floatingBorderStyle}" Margin="10,20,10,10" Padding="15">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -116,7 +158,7 @@
                 </Grid>
             </Grid>
         </Border>
-        <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource floatingBorderStyle}" Padding="15" Margin="20,10,20,20">
+        <Border Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource floatingBorderStyle}" Padding="15" Margin="20,10,20,20">
             <StackPanel HorizontalAlignment="Center">
                 <Button Style="{StaticResource gameButtonStyle}" 
                         Content="{x:Static language:Lang.startGameText}" 
@@ -143,6 +185,37 @@
                                VerticalAlignment="Center"/>
                 </StackPanel>
             </StackPanel>
+        </Border>
+
+        <Border Grid.Row="1" Grid.ColumnSpan="3"
+                HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                Background="#323232" CornerRadius="5"
+                Padding="15,10" Margin="20"
+                Visibility="{Binding IsSnackbarVisible, Converter={StaticResource BoolToVisConverter}}">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Opacity" Value="0"/>
+                    <Style.Triggers>
+                        <Trigger Property="Visibility" Value="Visible">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.3"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.3"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <TextBlock Text="{Binding SnackbarMessage}" Foreground="White" FontSize="14"/>
         </Border>
     </Grid>
 </Page>
