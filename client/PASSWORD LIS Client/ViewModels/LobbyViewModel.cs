@@ -59,6 +59,8 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private readonly IWindowService windowService;
         private readonly IFriendsManagerService friendsManagerService;
+
+        private bool friendsLoaded = false;
         public LobbyViewModel(IWindowService windowService, IFriendsManagerService friendsManagerService)
         {
             this.windowService = windowService;
@@ -85,7 +87,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             PhotoId = currentUser.PhotoId;
             IsGuest = currentUser.PlayerId < 0;
 
-            if (!IsGuest)
+            if (!IsGuest && !friendsLoaded)
             {
                 _ = LoadFriendsAsync(); //Por que el _ ?
             }
@@ -107,11 +109,17 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private async Task LoadFriendsAsync()
         {
+            if (isLoadingFriends)
+            {
+                return;
+            }
+
             IsLoadingFriends = true;
             try
             {
                 var friendsArray = await friendsManagerService.GetFriendsAsync(SessionManager.CurrentUser.UserAccountId);
                 Friends = new ObservableCollection<FriendDTO>(friendsArray);
+                friendsLoaded = true;
             }
             catch (Exception)
             {
