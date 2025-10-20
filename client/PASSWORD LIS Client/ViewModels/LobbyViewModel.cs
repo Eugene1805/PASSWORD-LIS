@@ -145,8 +145,8 @@ namespace PASSWORD_LIS_Client.ViewModels
         private async Task DeleteFriendAsync()
         {
             MessageBoxResult result = MessageBox.Show(
-            string.Format("¿Estás seguro de que quieres eliminar a {0} de tu lista de amigos?", SelectedFriend.Nickname),
-            "Confirmar Eliminación",
+            string.Format("Are you sure you want to remove {0} from your friends list?", SelectedFriend.Nickname),
+            "Confirm Deletion",
             MessageBoxButton.YesNo,
             MessageBoxImage.Warning);
 
@@ -166,7 +166,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 // 3. Procesar la respuesta
                 if (success)
                 {
-                    windowService.ShowPopUp("Éxito", "Amigo eliminado correctamente.", PopUpIcon.Success);
+                    windowService.ShowPopUp("Succesful", "friend successfully deleted", PopUpIcon.Success);
                     // Actualizamos la lista en la UI al instante, sin volver a llamar al servidor
                     Friends.Remove(SelectedFriend);
                 }
