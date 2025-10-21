@@ -8,7 +8,7 @@ namespace Services.Contracts.DTOs
         [DataMember]
         public int Id { get; set; }
         [DataMember]
-        public string Username { get; set; }
+        public string Nickname { get; set; }
 
         [DataMember]
         public string Role { get; set; }

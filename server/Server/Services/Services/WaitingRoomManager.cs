@@ -34,9 +34,9 @@ namespace Services.Services
             this.operationContext = operationContextWrapper;
         }
 
-        public async Task<bool> JoinAsRegisteredPlayerAsync(string username)
+        public async Task<bool> JoinAsRegisteredPlayerAsync(string nickname)
         {
-            Player playerEntity = repository.GetPlayerByUsername(username); 
+            Player playerEntity = repository.GetPlayerByUsername(nickname); 
             if (playerEntity == null || connectedClients.ContainsKey(playerEntity.Id))
             {
                 return false;
@@ -45,7 +45,7 @@ namespace Services.Services
             var playerDto = new PlayerDTO
             {
                 Id = playerEntity.Id,
-                Username = playerEntity.UserAccount.Nickname,
+                Nickname = playerEntity.UserAccount.Nickname,
                 Role = AssignRole(),
                 IsReady = false
             };
@@ -53,12 +53,12 @@ namespace Services.Services
             return await AddPlayerToRoomAsync(playerDto);
         }
 
-        public async Task<bool> JoinAsGuestAsync(string guestUsername)
+        public async Task<bool> JoinAsGuestAsync(string guestNickname)
         {
-            Console.WriteLine($"[DEBUG] Intento de unirse como invitado: '{guestUsername}'");
-            if (connectedClients.Values.Any(p => p.PlayerData.Username.Equals(guestUsername, StringComparison.OrdinalIgnoreCase)))
+            Console.WriteLine($"[DEBUG] Intento de unirse como invitado: '{guestNickname}'");
+            if (connectedClients.Values.Any(p => p.PlayerData.Nickname.Equals(guestNickname, StringComparison.OrdinalIgnoreCase)))
             {
-                Console.WriteLine($"[DEBUG] INGRESO RECHAZADO: El nombre de usuario '{guestUsername}' ya existe en la sala.");
+                Console.WriteLine($"[DEBUG] INGRESO RECHAZADO: El nombre de usuario '{guestNickname}' ya existe en la sala.");
                 return false;
             }
 
@@ -67,12 +67,12 @@ namespace Services.Services
             var playerDto = new PlayerDTO
             {
                 Id = guestId,
-                Username = guestUsername,
+                Nickname = guestNickname,
                 Role = AssignRole(),
                 IsReady = false
             };
-            Console.WriteLine($"[DEBUG] '{guestUsername}' (ID:{guestId}) fue validado y será añadido a la sala.");
-            Console.WriteLine($"Player {guestUsername} (ID:{guestId}) joined as {playerDto.Role}");
+            Console.WriteLine($"[DEBUG] '{guestNickname}' (ID:{guestId}) fue validado y será añadido a la sala.");
+            Console.WriteLine($"Player {guestNickname} (ID:{guestId}) joined as {playerDto.Role}");
             return await AddPlayerToRoomAsync(playerDto);
         }
 
@@ -90,7 +90,7 @@ namespace Services.Services
                 return false;
             }
 
-            Console.WriteLine($"Player {playerDto.Username} (ID: {playerDto.Id}) joined as {playerDto.Role}.");
+            Console.WriteLine($"Player {playerDto.Nickname} (ID: {playerDto.Id}) joined as {playerDto.Role}.");
             await BroadcastAsync(client => client.CallbackChannel.OnPlayerJoined(playerDto));
             return true;
         }
@@ -111,7 +111,7 @@ namespace Services.Services
 
         public async Task SendMessageAsync(ChatMessage message)
         {
-            Console.WriteLine($"Message from {message.SenderUsername}: {message.Message}");
+            Console.WriteLine($"Message from {message.SenderNickname}: {message.Message}");
             await BroadcastAsync(client => client.CallbackChannel.OnMessageReceived(message));
         }
 
