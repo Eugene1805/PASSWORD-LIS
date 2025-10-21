@@ -139,33 +139,41 @@ namespace Data.DAL.Implementations
                         userAccount.Nickname = nickname;
                         userAccount.FirstName = firstName;
                         userAccount.LastName = lastName;
-                        userAccount.PhotoId = (byte?)photoId;
 
-                        foreach (var socialAcccount in socialAccounts)
+                        if (photoId >= 1 && photoId <= 6)
                         {
-                            var existingAccount = userAccount.SocialAccount
-                                .FirstOrDefault(sa => sa.Provider == socialAcccount.Key);
-
-                            if (existingAccount != null)
-                            {
-                                if (string.IsNullOrEmpty(socialAcccount.Value))
-                                {
-                                    context.SocialAccount.Remove(existingAccount);
-                                }
-                                else
-                                {
-                                    existingAccount.Username = socialAcccount.Value;
-                                }
-                            }
-                            else if (!string.IsNullOrEmpty(socialAcccount.Value))
-                            {
-                                userAccount.SocialAccount.Add(new SocialAccount
-                                {
-                                    Provider = socialAcccount.Key,
-                                    Username = socialAcccount.Value
-                                });
-                            }
+                            userAccount.PhotoId = (byte?)photoId;
                         }
+                        else
+                        {
+                            userAccount.PhotoId = null;
+                        }
+
+                            foreach (var socialAcccount in socialAccounts)
+                            {
+                                var existingAccount = userAccount.SocialAccount
+                                    .FirstOrDefault(sa => sa.Provider == socialAcccount.Key);
+
+                                if (existingAccount != null)
+                                {
+                                    if (string.IsNullOrEmpty(socialAcccount.Value))
+                                    {
+                                        context.SocialAccount.Remove(existingAccount);
+                                    }
+                                    else
+                                    {
+                                        existingAccount.Username = socialAcccount.Value;
+                                    }
+                                }
+                                else if (!string.IsNullOrEmpty(socialAcccount.Value))
+                                {
+                                    userAccount.SocialAccount.Add(new SocialAccount
+                                    {
+                                        Provider = socialAcccount.Key,
+                                        Username = socialAcccount.Value
+                                    });
+                                }
+                            }
 
                         context.SaveChanges();
                         transaction.Commit();
