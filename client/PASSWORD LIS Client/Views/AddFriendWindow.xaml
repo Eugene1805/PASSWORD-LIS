@@ -7,17 +7,23 @@
         xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
         mc:Ignorable="d"
         Title="AddFriendWindow" Height="250" Width="500">
+   
     <Grid>
         <Border Style="{StaticResource floatingBorderStyle}">
             <StackPanel>
                 <TextBlock Style="{StaticResource subtitleTextBlockStyle}" Margin="20,20,20,10"
                    Text="{x:Static language:Lang.enterFriendEmailToAddText}"/>
-                <TextBox x:Name="emailFriendTextBox"
+                
+                <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"
                  Style="{StaticResource primaryTextBoxStyle}" Margin="20,10,20,10"/>
-                <Button Style="{StaticResource primaryButtonStyle}" Margin="20,15,20,20" Height="30"
-                Content="{x:Static language:Lang.sendFriendRequestText}"/>
+                
+                <Button Style="{StaticResource primaryButtonStyle}" 
+                        Margin="20,15,20,20" Height="30"
+                        Content="{x:Static language:Lang.sendFriendRequestText}"
+                        Command="{Binding SendRequestCommand}"/>
             </StackPanel>
         </Border>
 
     </Grid>
+    
 </Window>

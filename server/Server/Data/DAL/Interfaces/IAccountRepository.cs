@@ -12,5 +12,8 @@ namespace Data.DAL.Interfaces
         bool VerifyEmail(string email);
         bool ResetPassword(string email, string passwordHash);
         bool UpdateUserProfile(int playerId, string nickname, string firstName, string lastName, int photoId, Dictionary<string, string> socialAccounts);
+        UserAccount GetUserByPlayerId(int playerId);
+        UserAccount GetUserByUserAccountId(int userAccountId);
+
     }
 }

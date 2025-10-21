@@ -2,50 +2,87 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Contexts;
+using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace PASSWORD_LIS_Client.Services
 {
-    public interface IFriendsManagerService
+    public interface IFriendsManagerService : IFriendsManagerCallback
     {
-        Task<FriendDTO[]> GetFriendsAsync(int userAccountId);
+        event Action<FriendDTO> FriendRequestReceived;
+        event Action<FriendDTO> FriendAdded;
+        event Action<int> FriendRemoved;
 
+        Task<List<FriendDTO>> GetFriendsAsync(int userAccountId);
         Task<bool> DeleteFriendAsync(int currentUserId, int friendToDeleteId);
+        Task<FriendRequestResult> SendFriendRequestAsync(string addresseeEmail);
+        Task SubscribeToFriendUpdatesAsync(int userAccountId);
+        Task<List<FriendDTO>> GetPendingRequestsAsync();
+        Task RespondToFriendRequestAsync(int requesterPlayerId, bool accepted);
     }
 
     public class WcfFriendsManagerService : IFriendsManagerService
     {
-        public async Task<FriendDTO[]> GetFriendsAsync(int userAccountId)
+        public event Action<FriendDTO> FriendRequestReceived;
+        public event Action<FriendDTO> FriendAdded;
+        public event Action<int> FriendRemoved;
+
+        private readonly IFriendsManager proxy;
+
+        public WcfFriendsManagerService()
         {
-            var wcfClient = new FriendsManagerClient();
-            try
-            {
-                var result = await wcfClient.GetFriendsAsync(userAccountId);
-                wcfClient.Close();
-                return result;
-            }
-            catch
-            {
-                wcfClient.Abort();
-                throw;
-            }
+            var context = new InstanceContext(this);
+            var factory = new DuplexChannelFactory<IFriendsManager>(context, "*"); //"NetTcpBinding_IFriendsManager"
+            proxy = factory.CreateChannel();
         }
 
-        public async Task<bool> DeleteFriendAsync(int currentUserId, int friendToDeleteId)
+
+        public async Task<List<FriendDTO>> GetFriendsAsync(int userAccountId)
         {
-            var wcfClient = new FriendsManagerClient();
-            try
-            {
-                var result = await wcfClient.DeleteFriendAsync(currentUserId, friendToDeleteId);
-                wcfClient.Close();
-                return result;
-            }
-            catch
-            {
-                wcfClient.Abort();
-                throw;
-            }
+            var result = await proxy.GetFriendsAsync(userAccountId);
+            return result.ToList();
         }
+        public Task<bool> DeleteFriendAsync(int currentUserId, int friendToDeleteId)
+        {
+            return proxy.DeleteFriendAsync(currentUserId, friendToDeleteId);
+        }
+
+        public Task<FriendRequestResult> SendFriendRequestAsync(string addresseeEmail)
+        {
+            return proxy.SendFriendRequestAsync(addresseeEmail);
+        }
+
+        public Task SubscribeToFriendUpdatesAsync(int userAccountId)
+        {
+            return proxy.SubscribeToFriendUpdatesAsync(userAccountId);
+        }
+
+        public async Task<List<FriendDTO>> GetPendingRequestsAsync()
+        {
+            var result = await proxy.GetPendingRequestsAsync();
+            return result.ToList();
+        }
+        public Task RespondToFriendRequestAsync(int requesterPlayerId, bool accepted)
+        {
+            return proxy.RespondToFriendRequestAsync(requesterPlayerId, accepted);
+        }
+
+        public void OnFriendRequestReceived(FriendDTO requester)
+        {
+            FriendRequestReceived?.Invoke(requester);
+        }
+
+        public void OnFriendAdded(FriendDTO newFriend)
+        {
+            FriendAdded?.Invoke(newFriend);
+        }
+
+        public void OnFriendRemoved(int friendPlayerId)
+        {
+            FriendRemoved?.Invoke(friendPlayerId);
+        }
+
     }
 }

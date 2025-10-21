@@ -53,18 +53,26 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" Style="{StaticResource bodyTextBlockStyle}"
                            Text="{x:Static language:Lang.friendsListText}"
                            VerticalAlignment="Center"
                            TextAlignment="Left"/>
+                    
                     <Button Grid.Column="1" Style="{StaticResource circleButtonStyle}"
+                        Width="30" Height="30" VerticalAlignment="Top" 
+                        Command="{Binding ViewFriendRequestsCommand}">
+                        <Image Source="/Resources/MailBoxIcon.png" Width="15" Height="15"/>
+                    </Button>                    
+                    
+                    <Button Grid.Column="2" Style="{StaticResource circleButtonStyle}"
                         Width="30" Height="30" VerticalAlignment="Top" 
                         Command="{Binding AddFriendCommand}">
                         <Image Source="/Resources/AddFriendIcon.png" Width="15" Height="15"/>
                     </Button>
-                    <Button Grid.Column="2" Style="{StaticResource circleButtonStyle}"
+                    <Button Grid.Column="3" Style="{StaticResource circleButtonStyle}"
                         Width="30" Height="30" VerticalAlignment="Center" 
                         Command="{Binding DeleteFriendCommand}">
                         <Image Source="/Resources/DeleteFriendIcon.png" Width="15" Height="15"/>

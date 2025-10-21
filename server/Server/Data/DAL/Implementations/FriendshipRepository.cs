@@ -67,5 +67,80 @@ namespace Data.DAL.Implementations
                 }
             }
         }
+
+        public bool CreateFriendRequest(int requesterPlayerId, int addresseePlayerId)
+        {
+            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            {
+                try
+                {
+                    bool requestExists = context.Friendship.Any(f =>
+                    (f.RequesterId == requesterPlayerId && f.AddresseeId == addresseePlayerId) ||
+                    (f.RequesterId == addresseePlayerId && f.AddresseeId == requesterPlayerId));
+
+                    if (requestExists)
+                    {
+                        return false; // Ya existe una solicitud o amistad
+                    }
+
+                    var newRequest = new Friendship
+                    {
+                        RequesterId = requesterPlayerId,
+                        AddresseeId = addresseePlayerId,
+                        Status = 0, // 0 = Pendiente
+                        RequestedAt = System.DateTime.UtcNow
+                    };
+
+                    context.Friendship.Add(newRequest);
+                    context.SaveChanges();
+                    return true;
+                }
+                catch (Exception)
+                {
+                    return false; // Error en la base de datos
+                }
+            }
+        }
+
+        public List<Friendship> GetPendingRequests(int userAccountId)
+        {
+            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            {
+                var player = context.Player.FirstOrDefault(p => p.UserAccountId == userAccountId);
+                if (player == null)
+                {
+                    return new List<Friendship>();
+                }
+                // Buscamos todas las solicitudes donde YO soy el destinatario y el estado es Pendiente
+                return context.Friendship
+                    .Include(f => f.Player1.UserAccount) // Incluimos la información del jugador que envió la solicitud
+                    .Where(f => f.AddresseeId == player.Id && f.Status == 0)
+                    .ToList();
+            }
+        }
+
+        public bool RespondToFriendRequest(int requesterPlayerId, int addresseePlayerId, bool accept)
+        {
+            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            {
+                var request = context.Friendship.FirstOrDefault(f =>
+                    f.RequesterId == requesterPlayerId && f.AddresseeId == addresseePlayerId && f.Status == 0);
+
+                if (request == null) return false;
+
+                if (accept)
+                {
+                    request.Status = 1; // 1 = Aceptado
+                    request.RespondedAt = System.DateTime.UtcNow;
+                }
+                else
+                {
+                    context.Friendship.Remove(request); // Si rechaza, simplemente borramos la solicitud
+                }
+
+                context.SaveChanges();
+                return true;
+            }
+        }
     }
 }

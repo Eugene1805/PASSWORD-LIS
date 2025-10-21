@@ -37,7 +37,7 @@ namespace Host
                 var profileManagerInstance = new ProfileManager(accountRepository);
                 var topPlayersManagerInstance = new TopPlayersManager(statisticsRepository);
                 var waitingRoomManagerInstance = new WaitingRoomManager(playerRepository,operationContextWrapper);
-                var friendsManagerInstance = new FriendsManager(friendshipRepository);
+                var friendsManagerInstance = new FriendsManager(friendshipRepository, accountRepository, operationContextWrapper);
 
                 // --- PASO 3: Crear un ServiceHost para CADA instancia de servicio ---
                 var accountManagerHost = new ServiceHost(accountManagerInstance);

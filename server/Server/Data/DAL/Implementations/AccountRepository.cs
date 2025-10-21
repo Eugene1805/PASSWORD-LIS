@@ -189,5 +189,24 @@ namespace Data.DAL.Implementations
             }
         }
 
+        public UserAccount GetUserByPlayerId(int playerId)
+        {
+            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            {
+                return context.UserAccount
+                    .Include(u => u.Player)
+                    .FirstOrDefault(u => u.Player.Any(p => p.Id == playerId));
+            }
+        }
+        public UserAccount GetUserByUserAccountId(int userAccountId)
+        {
+            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            {
+                // Buscamos la cuenta directamente por su ID e incluimos las relaciones que necesitaremos
+                return context.UserAccount
+                              .Include(u => u.Player)
+                              .FirstOrDefault(u => u.Id == userAccountId);
+            }
+        }
     }
 }
