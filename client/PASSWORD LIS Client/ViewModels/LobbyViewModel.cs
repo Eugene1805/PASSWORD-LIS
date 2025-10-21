@@ -5,6 +5,7 @@ using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -50,6 +51,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             set { selectedFriend = value; OnPropertyChanged(); }
         }
         public ICommand NavigateToProfileCommand { get; }
+        public ICommand ViewFriendRequestsCommand { get; }
         public ICommand AddFriendCommand { get; }
         public ICommand DeleteFriendCommand { get; }
         public ICommand ShowTopPlayersCommand { get; }
@@ -60,14 +62,19 @@ namespace PASSWORD_LIS_Client.ViewModels
         private readonly IWindowService windowService;
         private readonly IFriendsManagerService friendsManagerService;
 
-        private bool friendsLoaded = false;
         public LobbyViewModel(IWindowService windowService, IFriendsManagerService friendsManagerService)
         {
             this.windowService = windowService;
             this.friendsManagerService = friendsManagerService;
 
+            friendsManagerService.FriendRequestReceived += OnFriendRequestReceived;
+            friendsManagerService.FriendAdded += OnFriendAdded;
+            friendsManagerService.FriendRemoved += OnFriendRemoved;
+
+
             NavigateToProfileCommand = new RelayCommand(NavigateToProfile, (_) => !IsGuest); // Solo se puede ejecutar si NO es invitado
             Friends = new ObservableCollection<FriendDTO>();
+            ViewFriendRequestsCommand = new RelayCommand(ViewFriendRequests);
             AddFriendCommand = new RelayCommand(AddFriend);
             DeleteFriendCommand = new RelayCommand(async (_) => await DeleteFriendAsync(),
                 (_) => CanDeleteFriend()); 
@@ -76,6 +83,12 @@ namespace PASSWORD_LIS_Client.ViewModels
             SettingsCommand = new RelayCommand(ShowSettings);
             JoinGameCommand = new RelayCommand(JoinGame);
             LoadSessionData();
+
+            if (SessionManager.IsUserLoggedIn() && !IsGuest)
+            {
+                _ = friendsManagerService.SubscribeToFriendUpdatesAsync(SessionManager.CurrentUser.UserAccountId);
+            }
+
         }
         public void LoadSessionData()
         {
@@ -118,7 +131,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 var friendsArray = await friendsManagerService.GetFriendsAsync(SessionManager.CurrentUser.UserAccountId);
                 Friends = new ObservableCollection<FriendDTO>(friendsArray);
-                friendsLoaded = true;
             }
             catch (Exception)
             {
@@ -131,10 +143,20 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
         }
 
+        private void ViewFriendRequests(object parameter)
+        {
+            var friendRequestsViewModel = new FriendRequestsViewModel(App.FriendsManagerService);
+            var friendRequestsWindow = new FriendRequestsWindow { DataContext = friendRequestsViewModel };
+            friendRequestsWindow.ShowDialog();
+
+            _ = LoadFriendsAsync();
+        }
         private void AddFriend(object parameter)
         {
-            // Lógica para abrir la ventana de añadir amigo
-            // windowService.ShowAddFriendWindow();
+            var addFriendViewModel = new AddFriendViewModel(App.FriendsManagerService, App.WindowService);
+            var addFriendWindow = new AddFriendWindow { DataContext = addFriendViewModel };
+            addFriendWindow.ShowDialog();
+ 
         }
 
         private bool CanDeleteFriend()
@@ -151,18 +173,16 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             if (result == MessageBoxResult.No)
             {
-                return; // El usuario canceló
+                return; 
             }
 
             try
             {
-                // 2. Llamar al servidor
                 bool success = await friendsManagerService.DeleteFriendAsync(
                     SessionManager.CurrentUser.PlayerId,
                     SelectedFriend.PlayerId
                 );
 
-                // 3. Procesar la respuesta
                 if (success)
                 {
                     _ = LoadFriendsAsync();
@@ -180,6 +200,36 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
         }
 
+        private void OnFriendRequestReceived(FriendDTO requester)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+                {
+                    windowService.ShowPopUp("Nueva Solicitud", $"Has recibido una solicitud de amistad de {requester.Nickname}", PopUpIcon.Information);
+                });
+        }
+
+        private void OnFriendAdded(FriendDTO newFriend)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                if (!Friends.Any(f => f.PlayerId == newFriend.PlayerId))
+                {
+                    Friends.Add(newFriend);
+                }
+            });
+        }
+
+        private void OnFriendRemoved(int friendPlayerId)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                var friendToRemove = Friends.FirstOrDefault(f => f.PlayerId == friendPlayerId);
+                if (friendToRemove != null)
+                {
+                    Friends.Remove(friendToRemove);
+                }
+            });
+        }
         private void ShowTopPlayers(object parameter)
         {
             var topPlayersViewModel = new TopPlayersViewModel(App.TopPlayersManagerService, App.WindowService);

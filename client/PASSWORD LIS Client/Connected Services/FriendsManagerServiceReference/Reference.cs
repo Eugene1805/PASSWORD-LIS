@@ -74,9 +74,35 @@ namespace PASSWORD_LIS_Client.FriendsManagerServiceReference {
         }
     }
     
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="FriendRequestResult", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts")]
+    public enum FriendRequestResult : int {
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        Success = 0,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        UserNotFound = 1,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        AlreadyFriends = 2,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        RequestAlreadySent = 3,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        Failed = 4,
+    }
+    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    [System.ServiceModel.ServiceContractAttribute(ConfigurationName="FriendsManagerServiceReference.IFriendsManager")]
+    [System.ServiceModel.ServiceContractAttribute(ConfigurationName="FriendsManagerServiceReference.IFriendsManager", CallbackContract=typeof(PASSWORD_LIS_Client.FriendsManagerServiceReference.IFriendsManagerCallback))]
     public interface IFriendsManager {
+        
+        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IFriendsManager/SubscribeToFriendUpdates")]
+        void SubscribeToFriendUpdates(int userAccountId);
+        
+        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IFriendsManager/SubscribeToFriendUpdates")]
+        System.Threading.Tasks.Task SubscribeToFriendUpdatesAsync(int userAccountId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/GetFriends", ReplyAction="http://tempuri.org/IFriendsManager/GetFriendsResponse")]
         PASSWORD_LIS_Client.FriendsManagerServiceReference.FriendDTO[] GetFriends(int userAccountId);
@@ -84,11 +110,42 @@ namespace PASSWORD_LIS_Client.FriendsManagerServiceReference {
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/GetFriends", ReplyAction="http://tempuri.org/IFriendsManager/GetFriendsResponse")]
         System.Threading.Tasks.Task<PASSWORD_LIS_Client.FriendsManagerServiceReference.FriendDTO[]> GetFriendsAsync(int userAccountId);
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/DeleteFriend", ReplyAction="http://tempuri.org/IFriendsManager/DeleteFriendResponse")]
-        bool DeleteFriend(int currentUserId, int friendToDeleteId);
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/SendFriendRequest", ReplyAction="http://tempuri.org/IFriendsManager/SendFriendRequestResponse")]
+        PASSWORD_LIS_Client.FriendsManagerServiceReference.FriendRequestResult SendFriendRequest(string addresseeEmail);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/SendFriendRequest", ReplyAction="http://tempuri.org/IFriendsManager/SendFriendRequestResponse")]
+        System.Threading.Tasks.Task<PASSWORD_LIS_Client.FriendsManagerServiceReference.FriendRequestResult> SendFriendRequestAsync(string addresseeEmail);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/DeleteFriend", ReplyAction="http://tempuri.org/IFriendsManager/DeleteFriendResponse")]
-        System.Threading.Tasks.Task<bool> DeleteFriendAsync(int currentUserId, int friendToDeleteId);
+        bool DeleteFriend(int currentPlayerId, int friendToDeleteId);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/DeleteFriend", ReplyAction="http://tempuri.org/IFriendsManager/DeleteFriendResponse")]
+        System.Threading.Tasks.Task<bool> DeleteFriendAsync(int currentPlayerId, int friendToDeleteId);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/GetPendingRequests", ReplyAction="http://tempuri.org/IFriendsManager/GetPendingRequestsResponse")]
+        PASSWORD_LIS_Client.FriendsManagerServiceReference.FriendDTO[] GetPendingRequests();
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/GetPendingRequests", ReplyAction="http://tempuri.org/IFriendsManager/GetPendingRequestsResponse")]
+        System.Threading.Tasks.Task<PASSWORD_LIS_Client.FriendsManagerServiceReference.FriendDTO[]> GetPendingRequestsAsync();
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/RespondToFriendRequest", ReplyAction="http://tempuri.org/IFriendsManager/RespondToFriendRequestResponse")]
+        void RespondToFriendRequest(int requesterPlayerId, bool accepted);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/RespondToFriendRequest", ReplyAction="http://tempuri.org/IFriendsManager/RespondToFriendRequestResponse")]
+        System.Threading.Tasks.Task RespondToFriendRequestAsync(int requesterPlayerId, bool accepted);
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
+    public interface IFriendsManagerCallback {
+        
+        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IFriendsManager/OnFriendRequestReceived")]
+        void OnFriendRequestReceived(PASSWORD_LIS_Client.FriendsManagerServiceReference.FriendDTO requester);
+        
+        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IFriendsManager/OnFriendAdded")]
+        void OnFriendAdded(PASSWORD_LIS_Client.FriendsManagerServiceReference.FriendDTO newFriend);
+        
+        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IFriendsManager/OnFriendRemoved")]
+        void OnFriendRemoved(int friendPlayerId);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -97,25 +154,34 @@ namespace PASSWORD_LIS_Client.FriendsManagerServiceReference {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
-    public partial class FriendsManagerClient : System.ServiceModel.ClientBase<PASSWORD_LIS_Client.FriendsManagerServiceReference.IFriendsManager>, PASSWORD_LIS_Client.FriendsManagerServiceReference.IFriendsManager {
+    public partial class FriendsManagerClient : System.ServiceModel.DuplexClientBase<PASSWORD_LIS_Client.FriendsManagerServiceReference.IFriendsManager>, PASSWORD_LIS_Client.FriendsManagerServiceReference.IFriendsManager {
         
-        public FriendsManagerClient() {
+        public FriendsManagerClient(System.ServiceModel.InstanceContext callbackInstance) : 
+                base(callbackInstance) {
         }
         
-        public FriendsManagerClient(string endpointConfigurationName) : 
-                base(endpointConfigurationName) {
+        public FriendsManagerClient(System.ServiceModel.InstanceContext callbackInstance, string endpointConfigurationName) : 
+                base(callbackInstance, endpointConfigurationName) {
         }
         
-        public FriendsManagerClient(string endpointConfigurationName, string remoteAddress) : 
-                base(endpointConfigurationName, remoteAddress) {
+        public FriendsManagerClient(System.ServiceModel.InstanceContext callbackInstance, string endpointConfigurationName, string remoteAddress) : 
+                base(callbackInstance, endpointConfigurationName, remoteAddress) {
         }
         
-        public FriendsManagerClient(string endpointConfigurationName, System.ServiceModel.EndpointAddress remoteAddress) : 
-                base(endpointConfigurationName, remoteAddress) {
+        public FriendsManagerClient(System.ServiceModel.InstanceContext callbackInstance, string endpointConfigurationName, System.ServiceModel.EndpointAddress remoteAddress) : 
+                base(callbackInstance, endpointConfigurationName, remoteAddress) {
         }
         
-        public FriendsManagerClient(System.ServiceModel.Channels.Binding binding, System.ServiceModel.EndpointAddress remoteAddress) : 
-                base(binding, remoteAddress) {
+        public FriendsManagerClient(System.ServiceModel.InstanceContext callbackInstance, System.ServiceModel.Channels.Binding binding, System.ServiceModel.EndpointAddress remoteAddress) : 
+                base(callbackInstance, binding, remoteAddress) {
+        }
+        
+        public void SubscribeToFriendUpdates(int userAccountId) {
+            base.Channel.SubscribeToFriendUpdates(userAccountId);
+        }
+        
+        public System.Threading.Tasks.Task SubscribeToFriendUpdatesAsync(int userAccountId) {
+            return base.Channel.SubscribeToFriendUpdatesAsync(userAccountId);
         }
         
         public PASSWORD_LIS_Client.FriendsManagerServiceReference.FriendDTO[] GetFriends(int userAccountId) {
@@ -126,12 +192,36 @@ namespace PASSWORD_LIS_Client.FriendsManagerServiceReference {
             return base.Channel.GetFriendsAsync(userAccountId);
         }
         
-        public bool DeleteFriend(int currentUserId, int friendToDeleteId) {
-            return base.Channel.DeleteFriend(currentUserId, friendToDeleteId);
+        public PASSWORD_LIS_Client.FriendsManagerServiceReference.FriendRequestResult SendFriendRequest(string addresseeEmail) {
+            return base.Channel.SendFriendRequest(addresseeEmail);
         }
         
-        public System.Threading.Tasks.Task<bool> DeleteFriendAsync(int currentUserId, int friendToDeleteId) {
-            return base.Channel.DeleteFriendAsync(currentUserId, friendToDeleteId);
+        public System.Threading.Tasks.Task<PASSWORD_LIS_Client.FriendsManagerServiceReference.FriendRequestResult> SendFriendRequestAsync(string addresseeEmail) {
+            return base.Channel.SendFriendRequestAsync(addresseeEmail);
+        }
+        
+        public bool DeleteFriend(int currentPlayerId, int friendToDeleteId) {
+            return base.Channel.DeleteFriend(currentPlayerId, friendToDeleteId);
+        }
+        
+        public System.Threading.Tasks.Task<bool> DeleteFriendAsync(int currentPlayerId, int friendToDeleteId) {
+            return base.Channel.DeleteFriendAsync(currentPlayerId, friendToDeleteId);
+        }
+        
+        public PASSWORD_LIS_Client.FriendsManagerServiceReference.FriendDTO[] GetPendingRequests() {
+            return base.Channel.GetPendingRequests();
+        }
+        
+        public System.Threading.Tasks.Task<PASSWORD_LIS_Client.FriendsManagerServiceReference.FriendDTO[]> GetPendingRequestsAsync() {
+            return base.Channel.GetPendingRequestsAsync();
+        }
+        
+        public void RespondToFriendRequest(int requesterPlayerId, bool accepted) {
+            base.Channel.RespondToFriendRequest(requesterPlayerId, accepted);
+        }
+        
+        public System.Threading.Tasks.Task RespondToFriendRequestAsync(int requesterPlayerId, bool accepted) {
+            return base.Channel.RespondToFriendRequestAsync(requesterPlayerId, accepted);
         }
     }
 }
