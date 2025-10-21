@@ -87,12 +87,11 @@ namespace PASSWORD_LIS_Client.ViewModels
             PhotoId = currentUser.PhotoId;
             IsGuest = currentUser.PlayerId < 0;
 
-            if (!IsGuest && !friendsLoaded)
+            if (!IsGuest)
             {
-                _ = LoadFriendsAsync(); //Por que el _ ?
+                _ = LoadFriendsAsync(); 
             }
-            //lógica para cargar la lista de amigos
-            // LoadFriendsListAsync();
+            
         }
 
         private void NavigateToProfile(object parameter)
@@ -166,9 +165,9 @@ namespace PASSWORD_LIS_Client.ViewModels
                 // 3. Procesar la respuesta
                 if (success)
                 {
+                    _ = LoadFriendsAsync();
                     windowService.ShowPopUp("Succesful", "friend successfully deleted", PopUpIcon.Success);
                     // Actualizamos la lista en la UI al instante, sin volver a llamar al servidor
-                    Friends.Remove(SelectedFriend);
                 }
                 else
                 {

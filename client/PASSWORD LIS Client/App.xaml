@@ -278,5 +278,7 @@
             </Style.Triggers>
         </Style>
 
+        <BitmapImage x:Key="DefaultAvatarImage" UriSource="/Resources/AvatarDefault.png"/>
+
     </Application.Resources>
 </Application>

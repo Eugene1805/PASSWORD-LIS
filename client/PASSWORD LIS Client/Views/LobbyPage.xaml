@@ -44,7 +44,7 @@
     
                     <Ellipse Style="{StaticResource circleTransparentEllipseStyle}" Width="90" Height="90">
                         <Ellipse.Fill>
-                            <ImageBrush ImageSource="{Binding PhotoId, Converter={StaticResource AvatarIdToImageConverter}, FallbackValue=/Resources/AvatarDefault.png}"/>
+                            <ImageBrush ImageSource="{Binding PhotoId, Converter={StaticResource AvatarIdToImageConverter}, FallbackValue={StaticResource DefaultAvatarImage}}"/>
                         </Ellipse.Fill>
                     </Ellipse>
                 </Button>
