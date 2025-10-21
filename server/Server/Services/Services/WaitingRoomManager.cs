@@ -45,6 +45,7 @@ namespace Services.Services
             var playerDto = new PlayerDTO
             {
                 Id = playerEntity.Id,
+                PhotoId = playerEntity.UserAccount.PhotoId ?? 0,
                 Nickname = playerEntity.UserAccount.Nickname,
                 Role = AssignRole(),
                 IsReady = false

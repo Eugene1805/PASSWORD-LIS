@@ -11,6 +11,7 @@
       Title="WaitingRoomPage">
     <Page.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
+        <converters:AvatarIdToImageConverter x:Key="AvatarIdToImageConverter"/>
     </Page.Resources>
 
     <Grid Background="#F5F5F5">
@@ -89,7 +90,7 @@
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.Row="0" Style="{StaticResource subtitleTextBlockStyle}"
-                           Text="Players in the room"
+                           Text="Players in the room" HorizontalAlignment="Left"
                            VerticalAlignment="Center"/>
 
                 <Border Grid.Row="1" Style="{StaticResource floatingBorderStyle}" Margin="0,10,0,0" Padding="5">
@@ -102,9 +103,11 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <Image Grid.Column="0" Source="/Resources/AvatarDefault.png" Width="20" Height="20" Margin="0,0,10,0" />
-                                    <TextBlock Grid.Column="1" Text="{Binding Nickname}" VerticalAlignment="Center" FontWeight="SemiBold"/>
-                                    <TextBlock Grid.Column="2" Text="{Binding Role}" VerticalAlignment="Center" FontStyle="Italic" Foreground="Gray"/>
+                                    <Image Grid.Column="0" Source="{Binding PhotoId, Converter={StaticResource AvatarIdToImageConverter}, 
+                                        FallbackValue={StaticResource DefaultAvatarImage}}" Width="90" Height="90" Margin="0,0,10,0" />
+                                    <TextBlock Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="1" Text="{Binding Nickname}" VerticalAlignment="Center"/>
+                                    
+                                    <TextBlock Grid.Column="2" Style="{StaticResource bodyTextBlockStyle}" Text="{Binding Role}" VerticalAlignment="Bottom"/>
                                 </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>

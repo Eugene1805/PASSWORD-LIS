@@ -19,6 +19,7 @@
       <xs:element minOccurs="0" name="Id" type="xs:int" />
       <xs:element minOccurs="0" name="IsReady" type="xs:boolean" />
       <xs:element minOccurs="0" name="Nickname" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="PhotoId" type="xs:int" />
       <xs:element minOccurs="0" name="Role" nillable="true" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
