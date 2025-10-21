@@ -1,23 +1,27 @@
 ﻿using Data.DAL.Implementations;
+using log4net;
+using log4net.Config;
 using Services.Services;
 using Services.Util;
 using Services.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.ServiceModel;
-// Lee la configuración del App.config
-[assembly: log4net.Config.XmlConfigurator(Watch = true)]
+
 namespace Host
 {
     class Program
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(Program));
         static void Main(string[] args)
         {
+            XmlConfigurator.Configure();
             // Lista para manejar todos los hosts de manera ordenada
             var hosts = new List<ServiceHost>();
 
             try
             {
+                log.Info("La aplicación ha iniciado.");
                 // --- PASO 1: Crear las dependencias UNA SOLA VEZ ---
                 // Estas instancias se compartirán entre todos los servicios que las necesiten.
                 var accountRepository = new AccountRepository();
