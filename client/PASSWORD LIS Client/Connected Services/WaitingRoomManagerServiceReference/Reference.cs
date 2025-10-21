@@ -29,10 +29,7 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
         private int SenderIdField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string SenderUsernameField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private System.DateTime TimestampField;
+        private string SenderNicknameField;
         
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
@@ -71,27 +68,14 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public string SenderUsername {
+        public string SenderNickname {
             get {
-                return this.SenderUsernameField;
+                return this.SenderNicknameField;
             }
             set {
-                if ((object.ReferenceEquals(this.SenderUsernameField, value) != true)) {
-                    this.SenderUsernameField = value;
-                    this.RaisePropertyChanged("SenderUsername");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public System.DateTime Timestamp {
-            get {
-                return this.TimestampField;
-            }
-            set {
-                if ((this.TimestampField.Equals(value) != true)) {
-                    this.TimestampField = value;
-                    this.RaisePropertyChanged("Timestamp");
+                if ((object.ReferenceEquals(this.SenderNicknameField, value) != true)) {
+                    this.SenderNicknameField = value;
+                    this.RaisePropertyChanged("SenderNickname");
                 }
             }
         }
@@ -122,10 +106,10 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
         private bool IsReadyField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string RoleField;
+        private string NicknameField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string UsernameField;
+        private string RoleField;
         
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
@@ -164,6 +148,19 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Nickname {
+            get {
+                return this.NicknameField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.NicknameField, value) != true)) {
+                    this.NicknameField = value;
+                    this.RaisePropertyChanged("Nickname");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
         public string Role {
             get {
                 return this.RoleField;
@@ -172,19 +169,6 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
                 if ((object.ReferenceEquals(this.RoleField, value) != true)) {
                     this.RoleField = value;
                     this.RaisePropertyChanged("Role");
-                }
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public string Username {
-            get {
-                return this.UsernameField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.UsernameField, value) != true)) {
-                    this.UsernameField = value;
-                    this.RaisePropertyChanged("Username");
                 }
             }
         }
@@ -204,16 +188,16 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
     public interface IWaitingRoomManager {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/JoinAsRegisteredPlayer", ReplyAction="http://tempuri.org/IWaitingRoomManager/JoinAsRegisteredPlayerResponse")]
-        bool JoinAsRegisteredPlayer(string username);
+        bool JoinAsRegisteredPlayer(string email);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/JoinAsRegisteredPlayer", ReplyAction="http://tempuri.org/IWaitingRoomManager/JoinAsRegisteredPlayerResponse")]
-        System.Threading.Tasks.Task<bool> JoinAsRegisteredPlayerAsync(string username);
+        System.Threading.Tasks.Task<bool> JoinAsRegisteredPlayerAsync(string email);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/JoinAsGuest", ReplyAction="http://tempuri.org/IWaitingRoomManager/JoinAsGuestResponse")]
-        bool JoinAsGuest(string guestUsername);
+        bool JoinAsGuest(string guestNickname);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/JoinAsGuest", ReplyAction="http://tempuri.org/IWaitingRoomManager/JoinAsGuestResponse")]
-        System.Threading.Tasks.Task<bool> JoinAsGuestAsync(string guestUsername);
+        System.Threading.Tasks.Task<bool> JoinAsGuestAsync(string guestNickname);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/LeaveRoom", ReplyAction="http://tempuri.org/IWaitingRoomManager/LeaveRoomResponse")]
         void LeaveRoom(int playerId);
@@ -275,20 +259,20 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
                 base(callbackInstance, binding, remoteAddress) {
         }
         
-        public bool JoinAsRegisteredPlayer(string username) {
-            return base.Channel.JoinAsRegisteredPlayer(username);
+        public bool JoinAsRegisteredPlayer(string email) {
+            return base.Channel.JoinAsRegisteredPlayer(email);
         }
         
-        public System.Threading.Tasks.Task<bool> JoinAsRegisteredPlayerAsync(string username) {
-            return base.Channel.JoinAsRegisteredPlayerAsync(username);
+        public System.Threading.Tasks.Task<bool> JoinAsRegisteredPlayerAsync(string email) {
+            return base.Channel.JoinAsRegisteredPlayerAsync(email);
         }
         
-        public bool JoinAsGuest(string guestUsername) {
-            return base.Channel.JoinAsGuest(guestUsername);
+        public bool JoinAsGuest(string guestNickname) {
+            return base.Channel.JoinAsGuest(guestNickname);
         }
         
-        public System.Threading.Tasks.Task<bool> JoinAsGuestAsync(string guestUsername) {
-            return base.Channel.JoinAsGuestAsync(guestUsername);
+        public System.Threading.Tasks.Task<bool> JoinAsGuestAsync(string guestNickname) {
+            return base.Channel.JoinAsGuestAsync(guestNickname);
         }
         
         public void LeaveRoom(int playerId) {

@@ -34,9 +34,9 @@ namespace Services.Services
             this.operationContext = operationContextWrapper;
         }
 
-        public async Task<bool> JoinAsRegisteredPlayerAsync(string nickname)
+        public async Task<bool> JoinAsRegisteredPlayerAsync(string email)
         {
-            Player playerEntity = repository.GetPlayerByUsername(nickname); 
+            Player playerEntity = repository.GetPlayerByEmail(email); 
             if (playerEntity == null || connectedClients.ContainsKey(playerEntity.Id))
             {
                 return false;

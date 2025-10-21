@@ -9,7 +9,7 @@ namespace Services.Contracts
     public interface IWaitingRoomManager
     {
         [OperationContract]
-        Task<bool> JoinAsRegisteredPlayerAsync(string nickname);
+        Task<bool> JoinAsRegisteredPlayerAsync(string email);
 
         [OperationContract]
         Task<bool> JoinAsGuestAsync(string guestNickname);
