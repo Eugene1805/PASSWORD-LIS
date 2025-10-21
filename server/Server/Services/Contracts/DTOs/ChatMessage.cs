@@ -9,12 +9,10 @@ namespace Services.Contracts.DTOs
         [DataMember]
         public int SenderId { get; set; }
         [DataMember]
-        public string SenderUsername { get; set; }
+        public string SenderNickname { get; set; }
 
         [DataMember]
         public string Message { get; set; }
 
-        [DataMember]
-        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
     }
 }

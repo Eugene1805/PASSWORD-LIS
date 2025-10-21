@@ -11,8 +11,8 @@ namespace PASSWORD_LIS_Client.Services
 {
     public interface IWaitingRoomManagerService
     {
-        Task<bool> JoinAsRegisteredPlayerAsync(string username);
-        Task<bool> JoinAsGuestAsync(string guestUsername);
+        Task<bool> JoinAsRegisteredPlayerAsync(string email);
+        Task<bool> JoinAsGuestAsync(string guestNickname);
         Task LeaveRoomAsync(int playerId);
         Task<List<PlayerDTO>> GetConnectedPlayersAsync();
         Task SendMessageAsync(string message);
@@ -39,11 +39,11 @@ namespace PASSWORD_LIS_Client.Services
             return playersArray.ToList();
         }
 
-        public async Task<bool> JoinAsGuestAsync(string guestUsername)
+        public async Task<bool> JoinAsGuestAsync(string guestNickname)
         {
             try
             {
-                await proxy.JoinAsGuestAsync(guestUsername);
+                await proxy.JoinAsGuestAsync(guestNickname);
                 return true;
             }
             catch (Exception)
@@ -53,11 +53,11 @@ namespace PASSWORD_LIS_Client.Services
             }
         }
 
-        public async Task<bool> JoinAsRegisteredPlayerAsync(string username)
+        public async Task<bool> JoinAsRegisteredPlayerAsync(string email)
         {
             try
             {
-                return await proxy.JoinAsRegisteredPlayerAsync(username);
+                return await proxy.JoinAsRegisteredPlayerAsync(email);
             }
             catch (Exception ex)
             {
@@ -74,9 +74,8 @@ namespace PASSWORD_LIS_Client.Services
         {
             var chatMessage = new ChatMessage
             {
-                SenderUsername = SessionManager.CurrentUser.Nickname,
-                Message = message,
-                Timestamp = DateTime.UtcNow
+                SenderNickname = SessionManager.CurrentUser.Nickname,
+                Message = message
             };
             await proxy.SendMessageAsync(chatMessage);
         }

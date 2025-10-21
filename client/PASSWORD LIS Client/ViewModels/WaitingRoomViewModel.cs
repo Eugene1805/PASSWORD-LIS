@@ -75,13 +75,13 @@ namespace PASSWORD_LIS_Client.ViewModels
                 else
                 {
                     Console.WriteLine($"Intentando unirse como jugador registrado: {username}");
-                    joined = await roomManagerClient.JoinAsRegisteredPlayerAsync(username);
+                    joined = await roomManagerClient.JoinAsRegisteredPlayerAsync(SessionManager.CurrentUser.Email);
                 }
 
                 if (joined)
                 {
                     var players = await roomManagerClient.GetConnectedPlayersAsync();
-                    this.currentPlayer = players.FirstOrDefault(p => p.Username == username);
+                    this.currentPlayer = players.FirstOrDefault(p => p.Nickname == username);
 
                     await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
@@ -136,7 +136,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                ChatMessages.Add($"{message.SenderUsername}: {message.Message}");
+                ChatMessages.Add($"{message.SenderNickname}: {message.Message}");
             });
         }
 
@@ -147,7 +147,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 if (!ConnectedPlayers.Any(p => p.Id == player.Id))
                 {
                     ConnectedPlayers.Add(player);
-                    _ = ShowSnackbarAsync($"{player.Username} joined");
+                    _ = ShowSnackbarAsync($"{player.Nickname} joined");
                 }
             });
         }
@@ -160,7 +160,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 if (playerToRemove != null)
                 {
                     ConnectedPlayers.Remove(playerToRemove);
-                    _ = ShowSnackbarAsync($"{playerToRemove.Username} left");
+                    _ = ShowSnackbarAsync($"{playerToRemove.Nickname} left");
                 }
             });
         }

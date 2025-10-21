@@ -8,13 +8,12 @@ namespace Data.DAL.Implementations
 {
     public class PlayerRepository : IPlayerRepository
     {
-        public Player GetPlayerByUsername(string username)
+        public Player GetPlayerByEmail(string email)
         {
             using(var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
                 var userAccount = context.UserAccount.FirstOrDefault(u =>
-                u.Nickname.Equals(username, StringComparison.OrdinalIgnoreCase));
-
+                u.Email.Equals(email));
                 if (userAccount == null)
                 {
                     return null;

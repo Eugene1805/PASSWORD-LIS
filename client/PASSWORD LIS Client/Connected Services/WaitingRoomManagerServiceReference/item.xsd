@@ -4,8 +4,7 @@
     <xs:sequence>
       <xs:element minOccurs="0" name="Message" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="SenderId" type="xs:int" />
-      <xs:element minOccurs="0" name="SenderUsername" nillable="true" type="xs:string" />
-      <xs:element minOccurs="0" name="Timestamp" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="SenderNickname" nillable="true" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="ChatMessage" nillable="true" type="tns:ChatMessage" />
@@ -19,8 +18,8 @@
     <xs:sequence>
       <xs:element minOccurs="0" name="Id" type="xs:int" />
       <xs:element minOccurs="0" name="IsReady" type="xs:boolean" />
+      <xs:element minOccurs="0" name="Nickname" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Role" nillable="true" type="xs:string" />
-      <xs:element minOccurs="0" name="Username" nillable="true" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="PlayerDTO" nillable="true" type="tns:PlayerDTO" />
