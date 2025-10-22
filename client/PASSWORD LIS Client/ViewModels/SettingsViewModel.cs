@@ -50,6 +50,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
         private void Logout(object parameter)
         {
+            if (SessionManager.IsUserLoggedIn() && SessionManager.CurrentUser.PlayerId >=0) //&& !SessionManager.CurrentUser. 
             backgroundMusicService.Stop();
             if (SessionManager.IsUserLoggedIn()) //&& !SessionManager.CurrentUser. 
             {
