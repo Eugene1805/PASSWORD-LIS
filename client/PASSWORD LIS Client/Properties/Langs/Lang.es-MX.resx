@@ -540,4 +540,64 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
   <data name="guestText" xml:space="preserve">
     <value>Invitado</value>
   </data>
+  <data name="playersInTheRoomText" xml:space="preserve">
+    <value>Jugadores en la sala</value>
+  </data>
+  <data name="joinedText" xml:space="preserve">
+    <value>se ha unido</value>
+  </data>
+  <data name="leftText" xml:space="preserve">
+    <value>se ha retirado</value>
+  </data>
+  <data name="couldNotJoinText" xml:space="preserve">
+    <value>No se pudo unir a la sala</value>
+  </data>
+  <data name="nicknameInUseText" xml:space="preserve">
+    <value>El nickname ya podría estar en uso</value>
+  </data>
+  <data name="newRequestTitleText" xml:space="preserve">
+    <value>Nueva solicitud</value>
+  </data>
+  <data name="newRequestText" xml:space="preserve">
+    <value>Has recibido una solicitud de amistad de </value>
+  </data>
+  <data name="couldNotRemoveFriendTitleText" xml:space="preserve">
+    <value>No se pudo eliminar al amigo</value>
+  </data>
+  <data name="connectionErrorAtRemovingFriendText" xml:space="preserve">
+    <value>Error de conexión al intentar eliminar al amigo</value>
+  </data>
+  <data name="successTitleText" xml:space="preserve">
+    <value>Éxito</value>
+  </data>
+  <data name="successDeletionText" xml:space="preserve">
+    <value>Amigo eliminado con éxito</value>
+  </data>
+  <data name="deletionConfirmationText" xml:space="preserve">
+    <value>¿Estás seguro de que quieres eliminar a {0} de tu lista de amigos?</value>
+  </data>
+  <data name="deletionConfirmationTitleText" xml:space="preserve">
+    <value>Confirmar eliminación</value>
+  </data>
+  <data name="couldNotLoadFriendsText" xml:space="preserve">
+    <value>No se pudo cargar la lista de amigos</value>
+  </data>
+  <data name="requestSentTitleText" xml:space="preserve">
+    <value>Solicitud enviada</value>
+  </data>
+  <data name="requestSentText" xml:space="preserve">
+    <value>Tu solicitud de amistad ha sido enviada</value>
+  </data>
+  <data name="playerNotFoundText" xml:space="preserve">
+    <value>No se encontró ningún jugador con ese correo electrónico</value>
+  </data>
+  <data name="alreadyFriendsText" xml:space="preserve">
+    <value>Ya existe una solicitud de amistad o ya eres amigo de este jugador</value>
+  </data>
+  <data name="couldNotSentRequestText" xml:space="preserve">
+    <value>No se pudo enviar la solicitud de amistad</value>
+  </data>
+  <data name="informationText" xml:space="preserve">
+    <value>Información</value>
+  </data>
 </root>

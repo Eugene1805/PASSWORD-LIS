@@ -6,6 +6,7 @@ using PASSWORD_LIS_Client.WaitingRoomManagerServiceReference;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -97,10 +98,25 @@ namespace PASSWORD_LIS_Client.ViewModels
                     windowService.ShowPopUp("No se pudo unir a la sala.", "El nombre de usuario ya podría estar en uso.", PopUpIcon.Warning);
                 }
             }
-            catch (Exception ex)
+            catch (TimeoutException)
             {
-                Console.WriteLine("Error al cargar datos iniciales de la sala de espera.");
-                Console.WriteLine(ex.Message);
+                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
+                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+            }
+            catch (EndpointNotFoundException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
+                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
+            }
+            catch (CommunicationException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
+                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
+            }
+            catch (Exception)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
             }
         }
 
@@ -122,9 +138,25 @@ namespace PASSWORD_LIS_Client.ViewModels
                     await roomManagerClient.LeaveRoomAsync(this.currentPlayer.Id);
                 }
             }
-            catch (Exception ex)
+            catch (TimeoutException)
             {
-                Console.WriteLine($"Error al intentar salir de la sala: {ex.Message}");
+                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
+                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+            }
+            catch (EndpointNotFoundException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
+                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
+            }
+            catch (CommunicationException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
+                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
+            }
+            catch (Exception)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
             }
             finally
             {
