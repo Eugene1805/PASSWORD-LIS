@@ -6,7 +6,7 @@
              >
     <Application.Resources>
         <Style x:Key="floatingBorderStyle" TargetType="Border">
-            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Background" Value="#55000000"/>
             <Setter Property="CornerRadius" Value="12"/>
             <Setter Property="BorderBrush" Value="White"/>
             <Setter Property="BorderThickness" Value="1"/>
