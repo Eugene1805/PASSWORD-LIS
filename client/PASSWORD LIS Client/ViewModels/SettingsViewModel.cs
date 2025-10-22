@@ -37,7 +37,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void Logout(object parameter)
         {
-            if (SessionManager.IsUserLoggedIn()) //&& !SessionManager.CurrentUser. 
+            if (SessionManager.IsUserLoggedIn() && SessionManager.CurrentUser.PlayerId >=0) //&& !SessionManager.CurrentUser. 
             {
                 // Le decimos al servidor de amigos que nos vamos
                 _ = friendsManagerService.UnsubscribeFromFriendUpdatesAsync(SessionManager.CurrentUser.UserAccountId);

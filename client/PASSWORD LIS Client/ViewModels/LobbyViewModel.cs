@@ -202,15 +202,12 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void OnFriendRequestReceived(FriendDTO requester)
         {
-            Application.Current.Dispatcher.Invoke(() =>
-                {
-                    windowService.ShowPopUp("Nueva Solicitud", $"Has recibido una solicitud de amistad de {requester.Nickname}", PopUpIcon.Information);
-                });
+            //Pensar si colocar algo como indicativo visual
         }
 
         private void OnFriendAdded(FriendDTO newFriend)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.InvokeAsync(() =>
             {
                 if (!Friends.Any(f => f.PlayerId == newFriend.PlayerId))
                 {
@@ -221,7 +218,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void OnFriendRemoved(int friendPlayerId)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.InvokeAsync(() =>
             {
                 var friendToRemove = Friends.FirstOrDefault(f => f.PlayerId == friendPlayerId);
                 if (friendToRemove != null)
