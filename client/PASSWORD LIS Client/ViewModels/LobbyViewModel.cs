@@ -246,7 +246,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void ShowSettings(object parameter)
         {
-            var settingsViewModel = new SettingsViewModel(App.WindowService, App.FriendsManagerService);
+            var settingsViewModel = new SettingsViewModel(App.WindowService, App.FriendsManagerService, App.BackgroundMusicService);
             var settingsWindow = new SettingsWindow { DataContext = settingsViewModel };
             settingsWindow.ShowDialog();
 

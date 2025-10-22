@@ -81,7 +81,9 @@ namespace PASSWORD_LIS_Client.Utils
 
         public void ShowMainWindow()
         {
-            var mainWindow = new MainWindow();
+            var mainWindowViewModel = new MainWindowViewModel(this,App.BackgroundMusicService);
+            var mainWindow = new MainWindow { DataContext = mainWindowViewModel};
+            mainWindow.Closed += (s, _) => mainWindowViewModel.OnClosed();
             Application.Current.MainWindow = mainWindow;
             mainWindow.Show();
         }

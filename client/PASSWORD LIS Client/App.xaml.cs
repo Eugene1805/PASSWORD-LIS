@@ -11,6 +11,7 @@ namespace PASSWORD_LIS_Client
     /// </summary>
     public partial class App : Application
     {
+        public static BackgroundMusicService BackgroundMusicService { get; private set; }
         public static IWindowService WindowService { get; private set; }
         public static ILoginManagerService LoginManagerService { get; private set; }
         public static IAccountManagerService AccountManagerService { get; private set; }
@@ -29,6 +30,7 @@ namespace PASSWORD_LIS_Client
             LoginManagerService = new WcfLoginManagerService();
             WindowService = new WindowService();
             // Other dependencies
+            BackgroundMusicService = new BackgroundMusicService();
             AccountManagerService = new WcfAccountManagerService();
             FriendsManagerService = new WcfFriendsManagerService();
             PasswordResetManagerService = new WcfPasswordResetManagerService();
