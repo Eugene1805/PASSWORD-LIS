@@ -61,6 +61,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There is already a friend request, or you are already friends with this player.
+        /// </summary>
+        public static string alreadyFriendsText {
+            get {
+                return ResourceManager.GetString("alreadyFriendsText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Already have an Account?.
         /// </summary>
         public static string alreadyHaveAccountText {
@@ -187,11 +196,56 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Connection error when attempting to remove friend.
+        /// </summary>
+        public static string connectionErrorAtRemovingFriendText {
+            get {
+                return ResourceManager.GetString("connectionErrorAtRemovingFriendText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Connection Error.
         /// </summary>
         public static string connectionErrorTitleText {
             get {
                 return ResourceManager.GetString("connectionErrorTitleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not join the room.
+        /// </summary>
+        public static string couldNotJoinText {
+            get {
+                return ResourceManager.GetString("couldNotJoinText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The friends list could not be loaded.
+        /// </summary>
+        public static string couldNotLoadFriendsText {
+            get {
+                return ResourceManager.GetString("couldNotLoadFriendsText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The friend could not be removed.
+        /// </summary>
+        public static string couldNotRemoveFriendTitleText {
+            get {
+                return ResourceManager.GetString("couldNotRemoveFriendTitleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The friend request could not be sent.
+        /// </summary>
+        public static string couldNotSentRequestText {
+            get {
+                return ResourceManager.GetString("couldNotSentRequestText", resourceCulture);
             }
         }
         
@@ -228,6 +282,24 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         public static string currentWordText {
             get {
                 return ResourceManager.GetString("currentWordText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Are you sure you want to remove {0}  from your friends list?.
+        /// </summary>
+        public static string deletionConfirmationText {
+            get {
+                return ResourceManager.GetString("deletionConfirmationText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Confirm deletion.
+        /// </summary>
+        public static string deletionConfirmationTitleText {
+            get {
+                return ResourceManager.GetString("deletionConfirmationTitleText", resourceCulture);
             }
         }
         
@@ -358,7 +430,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
-        ///   Busca una cadena traducida similar a Guest.
+        ///   Looks up a localized string similar to Guest.
         /// </summary>
         public static string guestText {
             get {
@@ -367,12 +439,20 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
-        ///   Busca una cadena traducida similar a How to Play?.
         ///   Looks up a localized string similar to How to Play?.
         /// </summary>
         public static string howToPlayText {
             get {
                 return ResourceManager.GetString("howToPlayText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Information.
+        /// </summary>
+        public static string informationText {
+            get {
+                return ResourceManager.GetString("informationText", resourceCulture);
             }
         }
         
@@ -422,6 +502,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to joined.
+        /// </summary>
+        public static string joinedText {
+            get {
+                return ResourceManager.GetString("joinedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Join Game.
         /// </summary>
         public static string joingGameText {
@@ -454,6 +543,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         public static string lastNameTooLongText {
             get {
                 return ResourceManager.GetString("lastNameTooLongText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to left.
+        /// </summary>
+        public static string leftText {
+            get {
+                return ResourceManager.GetString("leftText", resourceCulture);
             }
         }
         
@@ -593,11 +691,38 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You have received a friend request from.
+        /// </summary>
+        public static string newRequestText {
+            get {
+                return ResourceManager.GetString("newRequestText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to New request.
+        /// </summary>
+        public static string newRequestTitleText {
+            get {
+                return ResourceManager.GetString("newRequestTitleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to nextRound.
         /// </summary>
         public static string nextRoundText {
             get {
                 return ResourceManager.GetString("nextRoundText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The nickname may already be in use.
+        /// </summary>
+        public static string nicknameInUseText {
+            get {
+                return ResourceManager.GetString("nicknameInUseText", resourceCulture);
             }
         }
         
@@ -701,6 +826,24 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No player was found with that email address.
+        /// </summary>
+        public static string playerNotFoundText {
+            get {
+                return ResourceManager.GetString("playerNotFoundText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Players in the room.
+        /// </summary>
+        public static string playersInTheRoomText {
+            get {
+                return ResourceManager.GetString("playersInTheRoomText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Players.
         /// </summary>
         public static string playersText {
@@ -751,6 +894,24 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         public static string redTeamText {
             get {
                 return ResourceManager.GetString("redTeamText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your friend request has been sent.
+        /// </summary>
+        public static string requestSentText {
+            get {
+                return ResourceManager.GetString("requestSentText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Request sent.
+        /// </summary>
+        public static string requestSentTitleText {
+            get {
+                return ResourceManager.GetString("requestSentTitleText", resourceCulture);
             }
         }
         
@@ -992,6 +1153,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Friend successfully deleted.
+        /// </summary>
+        public static string successDeletionText {
+            get {
+                return ResourceManager.GetString("successDeletionText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Successful Login.
         /// </summary>
         public static string successfulLoginText {
@@ -1024,6 +1194,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         public static string successfulSignUpText {
             get {
                 return ResourceManager.GetString("successfulSignUpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Successful.
+        /// </summary>
+        public static string successTitleText {
+            get {
+                return ResourceManager.GetString("successTitleText", resourceCulture);
             }
         }
         

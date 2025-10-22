@@ -540,4 +540,64 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="guestText" xml:space="preserve">
     <value>Guest</value>
   </data>
+  <data name="playersInTheRoomText" xml:space="preserve">
+    <value>Players in the room</value>
+  </data>
+  <data name="joinedText" xml:space="preserve">
+    <value>joined</value>
+  </data>
+  <data name="leftText" xml:space="preserve">
+    <value>left</value>
+  </data>
+  <data name="couldNotJoinText" xml:space="preserve">
+    <value>Could not join the room</value>
+  </data>
+  <data name="nicknameInUseText" xml:space="preserve">
+    <value>The nickname may already be in use</value>
+  </data>
+  <data name="newRequestTitleText" xml:space="preserve">
+    <value>New request</value>
+  </data>
+  <data name="newRequestText" xml:space="preserve">
+    <value>You have received a friend request from</value>
+  </data>
+  <data name="couldNotRemoveFriendTitleText" xml:space="preserve">
+    <value>The friend could not be removed</value>
+  </data>
+  <data name="connectionErrorAtRemovingFriendText" xml:space="preserve">
+    <value>Connection error when attempting to remove friend</value>
+  </data>
+  <data name="successTitleText" xml:space="preserve">
+    <value>Successful</value>
+  </data>
+  <data name="successDeletionText" xml:space="preserve">
+    <value>Friend successfully deleted</value>
+  </data>
+  <data name="deletionConfirmationText" xml:space="preserve">
+    <value>Are you sure you want to remove {0}  from your friends list?</value>
+  </data>
+  <data name="deletionConfirmationTitleText" xml:space="preserve">
+    <value>Confirm deletion</value>
+  </data>
+  <data name="couldNotLoadFriendsText" xml:space="preserve">
+    <value>The friends list could not be loaded</value>
+  </data>
+  <data name="requestSentTitleText" xml:space="preserve">
+    <value>Request sent</value>
+  </data>
+  <data name="requestSentText" xml:space="preserve">
+    <value>Your friend request has been sent</value>
+  </data>
+  <data name="playerNotFoundText" xml:space="preserve">
+    <value>No player was found with that email address</value>
+  </data>
+  <data name="alreadyFriendsText" xml:space="preserve">
+    <value>There is already a friend request, or you are already friends with this player</value>
+  </data>
+  <data name="couldNotSentRequestText" xml:space="preserve">
+    <value>The friend request could not be sent</value>
+  </data>
+  <data name="informationText" xml:space="preserve">
+    <value>Information</value>
+  </data>
 </root>
