@@ -24,15 +24,15 @@
         <StackPanel Grid.Column="2" Margin="10" VerticalAlignment="Center">
 
             <TextBlock Text="{x:Static language:Lang.logInText}" 
-                   Style="{StaticResource titleTextBlockStyle}" 
+                   Style="{StaticResource titleBlackTextBlockStyle}" 
                    HorizontalAlignment="Center" 
                    Margin="0,0,0,20"/>
 
-            <TextBlock Text="{x:Static language:Lang.emailText}" Style="{StaticResource subtitleTextBlockStyle}"
+            <TextBlock Text="{x:Static language:Lang.emailText}" Style="{StaticResource subtitleBlackTextBlockStyle}"
                        HorizontalAlignment="Left"/>
             <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource primaryTextBoxStyle}" Width="230"/>
 
-            <TextBlock Text="{x:Static language:Lang.userPasswordText}" Style="{StaticResource subtitleTextBlockStyle}"
+            <TextBlock Text="{x:Static language:Lang.userPasswordText}" Style="{StaticResource subtitleBlackTextBlockStyle}"
                        HorizontalAlignment="Left"/>
             <PasswordBox Style="{StaticResource passwordboxStyle}" Width="230"
                          utils:PasswordBoxHelper.BindPassword="True"

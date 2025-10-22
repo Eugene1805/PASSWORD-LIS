@@ -18,6 +18,18 @@
             </Setter>
         </Style>
 
+        <Style x:Key="chatBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="#55000000"/>
+            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="BorderBrush" Value="#f7b89d"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="20"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect ShadowDepth="1" BlurRadius="10" Color="Black" Opacity="0.1"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style x:Key="primaryButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="#66B2FF"/>
             <Setter Property="Foreground" Value="#FFFFFF"/>
@@ -155,16 +167,30 @@
 
         <Style x:Key="titleTextBlockStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="24"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Foreground" Value="#343A40"/>
+            <Setter Property="FontWeight" Value="ExtraBold"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="TextAlignment" Value="Center"/>
             
         </Style>
+        <Style x:Key="titleBlackTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="ExtraBold"/>
+            <Setter Property="Foreground" Value="#343A40"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+
+        </Style>
 
         <Style x:Key="subtitleTextBlockStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="18"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="subtitleBlackTextBlockStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="Foreground" Value="#343A40"/>
             <Setter Property="TextAlignment" Value="Center"/>
         </Style>
@@ -172,7 +198,7 @@
         <Style x:Key="bodyTextBlockStyle" TargetType="TextBlock">
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="Normal"/>
-            <Setter Property="Foreground" Value="#6C757D"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
         </Style>
 
         <Style x:Key="cleanDataGridCellStyle" TargetType="DataGridCell">

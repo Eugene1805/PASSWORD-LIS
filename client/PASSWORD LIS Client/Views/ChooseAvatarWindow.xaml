@@ -37,12 +37,12 @@
         </Style>
     </Window.Resources>
 
-    <Grid>
+    <Grid Background="#343A40">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Style="{StaticResource floatingBorderStyle}" Padding="20">
+        <Border Grid.Column="0" Padding="20">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -50,7 +50,7 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Style="{StaticResource subtitleTextBlockStyle}" Margin="20,0,20,10"
+                <TextBlock Grid.Row="0" Style="{StaticResource subtitleBlackTextBlockStyle}" Margin="20,0,20,10"
                            HorizontalAlignment="Center"
                            Text="{x:Static language:Lang.selectAvatarText}"/>
 

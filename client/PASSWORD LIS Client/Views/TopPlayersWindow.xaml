@@ -11,7 +11,7 @@
         WindowStartupLocation="CenterScreen"
         MinHeight="350" MinWidth="350"
         Title="TopPlayersWindow" Height="450" Width="450"
-        Background="#EEEFF0">
+        Background="#FFFFFF">
 
     <Window.Resources>
         <converters:NicknamesConverter x:Key="NicknamesConverter"/>
@@ -29,13 +29,12 @@
                     Margin="10,0,10,0"/>
             <TextBlock
             Text="{x:Static language:Lang.topPlayersText}"
-            Style="{StaticResource titleTextBlockStyle}"
+            Style="{StaticResource titleBlackTextBlockStyle}"
             Margin="0,10,0,15"/>
         </StackPanel>
        
 
         <Border Grid.Row="1"
-                Style="{StaticResource floatingBorderStyle}"
                 Padding="15" Margin="20">
             <Grid>
                 <DataGrid x:Name="topTeamsDataGrid"

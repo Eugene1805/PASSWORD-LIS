@@ -31,7 +31,7 @@
                          MaxHeight="120"
                          VerticalScrollBarVisibility="Auto">
                 <TextBlock x:Name="messageTextBlock" 
-                           Style="{StaticResource subtitleTextBlockStyle}" 
+                           Style="{StaticResource subtitleBlackTextBlockStyle}" 
                            Text="This is a pop-up message!" 
                            TextWrapping="Wrap"/>
             </ScrollViewer>

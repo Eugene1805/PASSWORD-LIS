@@ -19,7 +19,7 @@
 
                 <TextBlock Grid.Row="0" Style="{StaticResource subtitleTextBlockStyle}"
                    Text="{x:Static language:Lang.howToPlayText}"/>
-                <ScrollViewer Grid.Row="1" Margin="20">
+                <ScrollViewer Grid.Row="1" Margin="20" VerticalScrollBarVisibility="Disabled">
                     <TextBlock Style="{StaticResource bodyTextBlockStyle}"
                        Text="{x:Static language:Lang.rulesGameText}"
                        TextWrapping="Wrap"

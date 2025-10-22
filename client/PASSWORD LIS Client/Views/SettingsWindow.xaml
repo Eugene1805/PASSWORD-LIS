@@ -8,8 +8,8 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         Title="SettingsWindow" Height="250" Width="450"> <!--Cambiar nombre a Internacionalizacion-->
-   
-    <Grid>
+
+    <Grid Background="#343A40">
         <Border Style="{StaticResource floatingBorderStyle}" Padding="10" Margin="20">
             <Grid>
                 <Grid.RowDefinitions>
