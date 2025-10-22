@@ -51,8 +51,10 @@
                         <DataGridTextColumn HeaderStyle="{StaticResource cleanDataGridColumnHeaderStyle}"
                                             Header="{x:Static language:Lang.scoreTopText}"
                                             Binding="{Binding Score}"
+                                            FontWeight="Bold" FontSize="22"
                                             Width="*"/>
                         <DataGridTextColumn HeaderStyle="{StaticResource cleanDataGridColumnHeaderStyle}"
+                                            FontWeight="ExtraBlack" FontSize="16"
                                             Header="{x:Static language:Lang.playersText}"
                                             Binding="{Binding PlayersNicknames, Converter={StaticResource NicknamesConverter}}"
                                             Width="2*"/>

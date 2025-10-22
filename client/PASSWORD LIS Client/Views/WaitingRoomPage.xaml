@@ -24,6 +24,7 @@
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
+        
         <TextBlock x:Name="titleTextBlock" Style="{StaticResource titleTextBlockStyle}"
                    Grid.ColumnSpan="2" 
                    Text="PASSWORD LIS" HorizontalAlignment="Center"
@@ -31,11 +32,11 @@
         <Button Command="{Binding LeaveRoomCommand}"
                 Style="{StaticResource circleButtonStyle}"
                 HorizontalAlignment="Left" VerticalAlignment="Top"
-                Width="35" Height="35" Margin="15">
-            <Image Source="/Resources/GoBackIcon.png" Width="15" Height="15"/>
+                Width="40" Height="40" Margin="20">
+            <Image Source="/Resources/GoBackIcon.png" Width="25" Height="25"/>
         </Button>
         
-        <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Style="{StaticResource floatingBorderStyle}" Margin="10,60,10,20" Padding="15">
+        <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Style="{StaticResource floatingBorderStyle}" Margin="10,90,10,20" Padding="15">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -82,17 +83,22 @@
             </Grid>
         </Border>
 
-        <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource floatingBorderStyle}" Margin="10,60,10,10" Padding="15">
+        <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource floatingBorderStyle}" Margin="10,90,10,10" Padding="15">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-
-                <TextBlock Grid.Row="0" Style="{StaticResource subtitleTextBlockStyle}"
-                           Text="Players in the room" HorizontalAlignment="Left"
-                           VerticalAlignment="Center"/>
-
+                <StackPanel  Grid.Row="0" Orientation="Horizontal">
+                    <TextBlock Style="{StaticResource subtitleTextBlockStyle}" Width="150"
+                        Text="Players in the room" HorizontalAlignment="Left" TextWrapping="Wrap"
+                        VerticalAlignment="Center"/>
+                    <Button Style="{StaticResource circleButtonStyle}" VerticalAlignment="Top"
+                            Width="50" Height="50" HorizontalAlignment="Right" Margin="140,5,0,0">
+                        <Image Source="/Resources/ReportIcon.jpg" Width="30" Height="30" />
+                    </Button>
+                </StackPanel>
+                
                 <Border Grid.Row="1" Style="{StaticResource floatingBorderStyle}" Margin="0,10,0,0" Padding="5">
                     <ListBox ItemsSource="{Binding ConnectedPlayers}" BorderThickness="0" Background="Transparent">
                         <ListBox.ItemTemplate>
