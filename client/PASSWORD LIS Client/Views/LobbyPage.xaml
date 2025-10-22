@@ -101,20 +101,35 @@
                 </Border>
 
                 <StackPanel Grid.Row="3">
-                    <Button Content="{x:Static language:Lang.topPlayersText}" 
+                    <Button 
                         Style="{StaticResource primaryButtonStyle}"
-                        Height="35" Margin="0,5"
-                        Command="{Binding ShowTopPlayersCommand}"/>
+                        Height="40" Margin="0,10"
+                        Command="{Binding ShowTopPlayersCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="/Resources/CupIcon.png" Width="20" Height="20" Margin="0,0,10,0"/>
+                            <TextBlock Text="{x:Static language:Lang.topPlayersText}"/>
+                        </StackPanel>
+                        </Button>
 
-                    <Button Content="{x:Static language:Lang.howToPlayText}" 
+                    <Button 
                         Style="{StaticResource primaryButtonStyle}"
-                        Height="35" Margin="0,5"
-                        Command="{Binding HowToPlayCommand}"/>
-                    
-                    <Button Content="{x:Static language:Lang.settingsText}" 
+                        Height="40" Margin="0,10"
+                        Command="{Binding HowToPlayCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="/Resources/QuestionMarkIcon.png" Width="20" Height="20" Margin="0,0,10,0"/>
+                            <TextBlock Text="{x:Static language:Lang.howToPlayText}"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button 
                         Style="{StaticResource primaryButtonStyle}"
-                        Height="35" Margin="0,5"
-                        Command="{Binding SettingsCommand}"/>
+                        Height="40" Margin="0,10"
+                        Command="{Binding SettingsCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="/Resources/SettingsIcon.png" Width="20" Height="20" Margin="0,0,10,0"/>
+                            <TextBlock Text="{x:Static language:Lang.settingsText}"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>
@@ -127,10 +142,15 @@
 
             <Border Grid.Row="0" Style="{StaticResource floatingBorderStyle}" Padding="15">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <TextBlock Text="PASSWORD" Style="{StaticResource titleTextBlockStyle}"  Margin="0,0,0,20"/>
-                    <Button Content="{x:Static language:Lang.playText}"
+                    <TextBlock Text="PASSWORD LIS" Style="{StaticResource titleTextBlockStyle}"  Margin="0,0,0,20"/>
+                    <Button 
                         Style="{StaticResource gameButtonStyle}"
-                        Height="30"/>
+                        Height="40">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock Text="{x:Static language:Lang.playText}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                            <Image Source="/Resources/PlayIcon.png" Width="30" Height="30" />
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Border>
 
@@ -146,7 +166,7 @@
                         Style="{StaticResource primaryButtonStyle}" 
                         Command="{Binding JoinGameCommand}"
                         CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Page}}"
-                        Height="35"/>
+                        Height="40"/>
                 </StackPanel>
             </Border>
         </Grid>

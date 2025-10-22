@@ -79,7 +79,7 @@
 
                 <Button Grid.Row="2" Style="{StaticResource primaryButtonStyle}"
                 Content="{x:Static language:Lang.invitationMailText}" 
-                Height="37" />
+                Height="40" />
             </Grid>
         </Border>
 
