@@ -7,15 +7,34 @@
         WindowStartupLocation="CenterScreen"
         WindowStyle="ToolWindow"
         mc:Ignorable="d"
-        Title="PopUpWindow" Height="150" Width="300">
+        Title="PopUpWindow" Height="200" Width="300">
     <Grid>
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
-            <Image x:Name="iconImage" Width="48" Height="48" Margin="0,0,20,0"/>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-            <TextBlock x:Name="messageTextBlock" Style="{StaticResource subtitleTextBlockStyle}" Text="This is a pop-up message!"
-                       HorizontalAlignment="Center" VerticalAlignment="Center"
-                       TextWrapping="Wrap"/>
-        </StackPanel>
-        
+        <Grid Margin="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Image x:Name="iconImage" Width="50" Height="50" 
+                   Grid.Column="0"
+                   VerticalAlignment="Center" 
+                   HorizontalAlignment="Center"
+                   Margin="0,0,15,0"/>
+
+            <ScrollViewer Grid.Column="1" 
+                         VerticalAlignment="Center"
+                         HorizontalAlignment="Stretch"
+                         MaxHeight="120"
+                         VerticalScrollBarVisibility="Auto">
+                <TextBlock x:Name="messageTextBlock" 
+                           Style="{StaticResource subtitleTextBlockStyle}" 
+                           Text="This is a pop-up message!" 
+                           TextWrapping="Wrap"/>
+            </ScrollViewer>
+        </Grid>
     </Grid>
 </Window>
