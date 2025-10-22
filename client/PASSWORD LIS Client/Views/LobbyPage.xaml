@@ -21,7 +21,10 @@
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </Page.Resources>
 
-    <Grid >
+    <Grid>
+        <Grid.Background>
+            <ImageBrush ImageSource="/Resources/wallpaper.jpg"/>
+        </Grid.Background>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition/>

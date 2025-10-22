@@ -16,7 +16,10 @@
         <converters:AvatarIdToImageConverter x:Key="AvatarIdToImageConverter"/>
     </Page.Resources>
 
-    <Grid Background="#F5F5F5">
+    <Grid>
+        <Grid.Background>
+            <ImageBrush ImageSource="/Resources/wallpaperProfile.jpg"/>
+        </Grid.Background>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>

@@ -14,7 +14,10 @@
         <converters:AvatarIdToImageConverter x:Key="AvatarIdToImageConverter"/>
     </Page.Resources>
 
-    <Grid Background="#F5F5F5">
+    <Grid>
+        <Grid.Background>
+            <ImageBrush ImageSource="/Resources/wallpaperWaitingRoom.jpg"/>
+        </Grid.Background>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
@@ -63,8 +66,8 @@
                     </Button>
                 </Grid>
 
-                <Border Grid.Row="1" Style="{StaticResource floatingBorderStyle}" Margin="0,10,0,10" Padding="5">
-                    <ListBox x:Name="friendsListBox" BorderThickness="0">
+                <Border Grid.Row="1" Margin="0,10,0,10" Padding="5">
+                    <ListBox x:Name="friendsListBox" BorderThickness="0" Background="Transparent">
                         <ListBoxItem Content="Eugenio"/>
                         <ListBoxItem Content="Uriel"/>
                         <ListBoxItem Content="Miguel"/>
@@ -91,15 +94,15 @@
                 </Grid.RowDefinitions>
                 <StackPanel  Grid.Row="0" Orientation="Horizontal">
                     <TextBlock Style="{StaticResource subtitleTextBlockStyle}" Width="150"
-                        Text="Players in the room" HorizontalAlignment="Left" TextWrapping="Wrap"
+                        Text="{x:Static language:Lang.playersInTheRoomText}" HorizontalAlignment="Left" TextWrapping="Wrap"
                         VerticalAlignment="Center"/>
                     <Button Style="{StaticResource circleButtonStyle}" VerticalAlignment="Top"
                             Width="50" Height="50" HorizontalAlignment="Right" Margin="140,5,0,0">
-                        <Image Source="/Resources/ReportIcon.jpg" Width="30" Height="30" />
+                        <Image Source="/Resources/ReportIcon.png" Width="30" Height="30" />
                     </Button>
                 </StackPanel>
                 
-                <Border Grid.Row="1" Style="{StaticResource floatingBorderStyle}" Margin="0,10,0,0" Padding="5">
+                <Border Grid.Row="1"  Margin="0,10,0,0" Padding="5">
                     <ListBox ItemsSource="{Binding ConnectedPlayers}" BorderThickness="0" Background="Transparent">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
@@ -137,7 +140,7 @@
                            TextAlignment="Left"/>
 
                 <Border Grid.Row="1" Style="{StaticResource floatingBorderStyle}" Padding="10" Margin="0,10,0,10">
-                    <ScrollViewer>
+                    <ScrollViewer VerticalScrollBarVisibility="Hidden" Background="Transparent" BorderBrush="White">
                         <ItemsControl ItemsSource="{Binding ChatMessages}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -156,7 +159,7 @@
                     <TextBox x:Name="messageGroupChatTextBox" 
                              Text="{Binding CurrentMessage, UpdateSourceTrigger=PropertyChanged}"
                              Style="{StaticResource primaryTextBoxStyle}" 
-                             Grid.Column="0" 
+                             Grid.Column="0" MaxLength="250"
                              Height="40">
                         <TextBox.InputBindings>
                             <KeyBinding Key="Enter" Command="{Binding SendMessageCommand}"/>

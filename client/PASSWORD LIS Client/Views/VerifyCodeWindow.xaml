@@ -40,7 +40,7 @@
                     HorizontalAlignment="Center" FontWeight="Bold" FontFamily="Consolas"
                     Margin="0,0,0,20" Height="50" Width="200"/>
 
-            <TextBox x:Name="verificationCodeTextBox" 
+            <TextBox x:Name="verificationCodeTextBox"  MaxLength="6"
                      Text="{Binding EnteredCode, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource primaryTextBoxStyle}" Width="220"/>
             <Button x:Name="verifyCodeButton"

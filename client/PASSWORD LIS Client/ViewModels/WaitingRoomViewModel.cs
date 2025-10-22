@@ -95,7 +95,8 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
                 else
                 {
-                    windowService.ShowPopUp("No se pudo unir a la sala.", "El nombre de usuario ya podría estar en uso.", PopUpIcon.Warning);
+                    windowService.ShowPopUp(Properties.Langs.Lang.couldNotJoinText,
+                        Properties.Langs.Lang.nicknameInUseText, PopUpIcon.Warning);
                 }
             }
             catch (TimeoutException)
