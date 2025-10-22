@@ -133,6 +133,12 @@ namespace PASSWORD_LIS_Client.FriendsManagerServiceReference {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/RespondToFriendRequest", ReplyAction="http://tempuri.org/IFriendsManager/RespondToFriendRequestResponse")]
         System.Threading.Tasks.Task RespondToFriendRequestAsync(int requesterPlayerId, bool accepted);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/UnsubscribeFromFriendUpdates", ReplyAction="http://tempuri.org/IFriendsManager/UnsubscribeFromFriendUpdatesResponse")]
+        void UnsubscribeFromFriendUpdates(int userAccountId);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/UnsubscribeFromFriendUpdates", ReplyAction="http://tempuri.org/IFriendsManager/UnsubscribeFromFriendUpdatesResponse")]
+        System.Threading.Tasks.Task UnsubscribeFromFriendUpdatesAsync(int userAccountId);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -222,6 +228,14 @@ namespace PASSWORD_LIS_Client.FriendsManagerServiceReference {
         
         public System.Threading.Tasks.Task RespondToFriendRequestAsync(int requesterPlayerId, bool accepted) {
             return base.Channel.RespondToFriendRequestAsync(requesterPlayerId, accepted);
+        }
+        
+        public void UnsubscribeFromFriendUpdates(int userAccountId) {
+            base.Channel.UnsubscribeFromFriendUpdates(userAccountId);
+        }
+        
+        public System.Threading.Tasks.Task UnsubscribeFromFriendUpdatesAsync(int userAccountId) {
+            return base.Channel.UnsubscribeFromFriendUpdatesAsync(userAccountId);
         }
     }
 }

@@ -15,12 +15,13 @@ namespace Services.Services
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Multiple)]
     public class FriendsManager : IFriendsManager
     {
-        private readonly ConcurrentDictionary<int, IFriendsCallback> connectedClients = new ConcurrentDictionary<int, IFriendsCallback>();
+        private readonly ConcurrentDictionary<int, IFriendsCallback> connectedClients; 
         private readonly IFriendshipRepository friendshipRepository;
         private readonly IAccountRepository accountRepository;
         private readonly IOperationContextWrapper operationContext;
         public FriendsManager(IFriendshipRepository friendshipRepository, IAccountRepository accountRepository, IOperationContextWrapper operationContext)
         {
+            connectedClients = new ConcurrentDictionary<int, IFriendsCallback>();
             this.friendshipRepository = friendshipRepository;
             this.accountRepository = accountRepository;
             this.operationContext = operationContext;
@@ -67,61 +68,67 @@ namespace Services.Services
         public Task SubscribeToFriendUpdatesAsync(int userAccountId)
         {
             var callbackChannel = operationContext.GetCallbackChannel<IFriendsCallback>();
-            connectedClients.TryAdd(userAccountId, callbackChannel);
+            connectedClients[userAccountId] = callbackChannel;
+
+            //Logica para limpiar clientes muertos
+            var communicationObject = (ICommunicationObject)callbackChannel;
+            communicationObject.Faulted += (sender, e) => {
+                connectedClients.TryRemove(userAccountId, out _); 
+            };
+            communicationObject.Closed += (sender, e) => {
+                connectedClients.TryRemove(userAccountId, out _); 
+            };
 
             return Task.CompletedTask;
         }
 
         public Task<FriendRequestResult> SendFriendRequestAsync(string addresseeEmail)
         {
-            var requesterCallback = operationContext.GetCallbackChannel<IFriendsCallback>();
-            var requesterUserAccountId = connectedClients.FirstOrDefault(x => x.Value == requesterCallback).Key;
+            int requesterUserAccountId = GetUserAccountIdFromCallback();
+            if (requesterUserAccountId == 0)
+            {
+                return Task.FromResult(FriendRequestResult.Failed);
 
-            var requesterAccount = accountRepository.GetUserByPlayerId(requesterUserAccountId);
+            }
+         
+            //Obtener datos de los dos jugadores
+            var requesterAccount = accountRepository.GetUserByUserAccountId(requesterUserAccountId);
             var addresseeAccount = accountRepository.GetUserByEmail(addresseeEmail);
-
-            if (addresseeAccount == null)
-            {
-                return Task.FromResult(FriendRequestResult.UserNotFound);
-            }
-
-            if (requesterAccount == null)
-            {
-                return Task.FromResult(FriendRequestResult.Failed); // Cuenta del solicitante no encontrada
-            }
-
-            if (requesterAccount.Id == addresseeAccount.Id)
-            {
-                return Task.FromResult(FriendRequestResult.Failed); // No se puede agregar a uno mismo
-            }
+            
+            if (addresseeAccount == null) return Task.FromResult(FriendRequestResult.UserNotFound);
+            if (requesterAccount == null) return Task.FromResult(FriendRequestResult.Failed);
+            if (requesterAccount.Id == addresseeAccount.Id) return Task.FromResult(FriendRequestResult.Failed);
 
             int requesterPlayerId = requesterAccount.Player.First().Id;
             int addresseePlayerId = addresseeAccount.Player.First().Id;
 
             bool success = friendshipRepository.CreateFriendRequest(requesterPlayerId, addresseePlayerId);
-            if (!success)
-            {
-                return Task.FromResult(FriendRequestResult.RequestAlreadySent); // O ya son amigos
-            }
+            if (!success) return Task.FromResult(FriendRequestResult.RequestAlreadySent);
 
-            // Notificar al destinatario si está conectado
+            // 5. Notificar al destinatario (si está conectado)
             if (connectedClients.TryGetValue(addresseeAccount.Id, out var addresseeCallback))
             {
                 var requesterDto = new FriendDTO
                 {
                     PlayerId = requesterPlayerId,
-                    Nickname = requesterAccount.Nickname
+                    Nickname = requesterAccount.Nickname,
                 };
+
+                // Esta llamada ahora es segura, porque TryGetValue nos asegura que el canal está "vivo"
                 addresseeCallback.OnFriendRequestReceived(requesterDto);
             }
+
             return Task.FromResult(FriendRequestResult.Success);
         }
-
+        
         public Task<List<FriendDTO>> GetPendingRequestsAsync()
         {
-            var callback = operationContext.GetCallbackChannel<IFriendsCallback>();
-            var userAccountId = connectedClients.FirstOrDefault(x => x.Value == callback).Key;
-
+            int userAccountId = GetUserAccountIdFromCallback();
+            if (userAccountId == 0)
+            {
+                return Task.FromResult(new List<FriendDTO>());
+            }
+            
             var requests = friendshipRepository.GetPendingRequests(userAccountId);
 
             var requestDTOs = requests.Select(req => new FriendDTO
@@ -135,9 +142,14 @@ namespace Services.Services
 
         public Task RespondToFriendRequestAsync(int requesterPlayerId, bool accepted)
         {
-            var callback = operationContext.GetCallbackChannel<IFriendsCallback>();
-            var addresseeUserAccountId = connectedClients.FirstOrDefault(x => x.Value == callback).Key;
-            var addresseeAccount = accountRepository.GetUserByUserAccountId(addresseeUserAccountId); // Necesitarás este método en el repo
+            int addreseeUserAccountId = GetUserAccountIdFromCallback();
+            if (addreseeUserAccountId == 0)
+            {
+                return Task.CompletedTask;
+
+            }
+
+            var addresseeAccount = accountRepository.GetUserByUserAccountId(addreseeUserAccountId); 
 
             if (addresseeAccount == null || !addresseeAccount.Player.Any())
             {
@@ -158,10 +170,13 @@ namespace Services.Services
                
                 if (requesterAccount == null) return Task.CompletedTask; // Comprobación de seguridad
 
+                var callback = connectedClients[addreseeUserAccountId];
+
                 var requesterDto = new FriendDTO { 
                     PlayerId = requesterPlayerId,
                     Nickname = requesterAccount.Nickname 
                 };
+
                 callback.OnFriendAdded(requesterDto);
 
                 // 2. Notificar al que envió la solicitud (Requester), si está conectado
@@ -176,6 +191,20 @@ namespace Services.Services
             }
 
             return Task.CompletedTask;
+        }
+
+        public Task UnsubscribeFromFriendUpdatesAsync(int userAccountId)
+        {
+            connectedClients.TryRemove(userAccountId, out _);
+            return Task.CompletedTask;
+        }
+
+        private int GetUserAccountIdFromCallback()
+        {
+            var callback = operationContext.GetCallbackChannel<IFriendsCallback>();
+            var entry = connectedClients.FirstOrDefault(pair => pair.Value == callback);
+            
+            return entry.Key;
         }
     }
 }

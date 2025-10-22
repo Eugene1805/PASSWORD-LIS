@@ -21,6 +21,7 @@ namespace PASSWORD_LIS_Client.Services
         Task SubscribeToFriendUpdatesAsync(int userAccountId);
         Task<List<FriendDTO>> GetPendingRequestsAsync();
         Task RespondToFriendRequestAsync(int requesterPlayerId, bool accepted);
+        Task UnsubscribeFromFriendUpdatesAsync(int userAccountId);
     }
 
     public class WcfFriendsManagerService : IFriendsManagerService
@@ -67,6 +68,11 @@ namespace PASSWORD_LIS_Client.Services
         public Task RespondToFriendRequestAsync(int requesterPlayerId, bool accepted)
         {
             return proxy.RespondToFriendRequestAsync(requesterPlayerId, accepted);
+        }
+
+        public Task UnsubscribeFromFriendUpdatesAsync(int userAccountId)
+        {
+            return proxy.UnsubscribeFromFriendUpdatesAsync(userAccountId);
         }
 
         public void OnFriendRequestReceived(FriendDTO requester)

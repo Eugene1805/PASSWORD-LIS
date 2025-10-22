@@ -26,6 +26,9 @@ namespace Services.Contracts
 
         [OperationContract]
         Task RespondToFriendRequestAsync(int requesterPlayerId, bool accepted);
+
+        [OperationContract]
+        Task UnsubscribeFromFriendUpdatesAsync(int userAccountId);
     }
 
     public interface IFriendsCallback
