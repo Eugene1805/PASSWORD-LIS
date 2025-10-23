@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         MinHeight="800" MinWidth="1200"
-        Title="MainWindow" Height="800" Width="1400">
+        Title="PASSWORD LIS" Height="800" Width="1400">
     <Grid>
         <Frame x:Name="mainFrame" NavigationUIVisibility="Hidden"/>
     </Grid>

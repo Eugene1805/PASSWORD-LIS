@@ -5,11 +5,12 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:PASSWORD_LIS_Client.Views"
       xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
+      xmlns:utils="clr-namespace:PASSWORD_LIS_Client.Utils"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="a{x:Static language:Lang.roundValidationText}">
 
-    <Grid Margin="20" Background="#F5F5F5">
+    <Grid Margin="20" Background="Black">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -17,7 +18,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="{x:Static language:Lang.roundValidationText}"
+        <TextBlock Text="{utils:Translate roundValidationText}"
                    Style="{StaticResource titleTextBlockStyle}"
                    HorizontalAlignment="Center"
                    Margin="0,10,0,20"/>
@@ -30,10 +31,10 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Text="{x:Static language:Lang.currentWordText}" Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="0"/>
-            <TextBlock Text="Pistas" Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="1"/>
-            <TextBlock Text="{x:Static language:Lang.sinonymsQuestionText}" Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="2" TextWrapping="Wrap"/>
-            <TextBlock Text="{x:Static language:Lang.oneMoreWordQuestionText}" Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="3" TextWrapping="Wrap"/>
+            <TextBlock Text="{utils:Translate currentWordText}" Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="0"/>
+            <TextBlock Text="{utils:Translate clueText}" Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="1"/>
+            <TextBlock Text="{utils:Translate sinonymsQuestionText}" Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="2" TextWrapping="Wrap"/>
+            <TextBlock Text="{utils:Translate oneMoreWordQuestionText}" Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="3" TextWrapping="Wrap"/>
         </Grid>
 
         <StackPanel Grid.Row="2">
@@ -85,7 +86,7 @@
             </Grid>
         </StackPanel>
 
-        <Button Content="{x:Static language:Lang.nextRoundText}"
+        <Button Content="{utils:Translate nextRoundText}"
                 Grid.Row="3"
                 Grid.ColumnSpan="2"
                 Style="{StaticResource primaryButtonStyle}"

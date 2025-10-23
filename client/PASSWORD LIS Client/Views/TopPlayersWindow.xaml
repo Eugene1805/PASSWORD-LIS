@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:PASSWORD_LIS_Client"
         xmlns:viewModels="clr-namespace:PASSWORD_LIS_Client.ViewModels"
         xmlns:converters="clr-namespace:PASSWORD_LIS_Client.Converters"
+        xmlns:utils="clr-namespace:PASSWORD_LIS_Client.Utils"
         xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
@@ -28,7 +29,7 @@
                     Width="50" Height="50"
                     Margin="10,0,10,0"/>
             <TextBlock
-            Text="{x:Static language:Lang.topPlayersText}"
+            Text="{utils:Translate topPlayersText}"
             Style="{StaticResource titleBlackTextBlockStyle}"
             Margin="0,10,0,15"/>
         </StackPanel>
@@ -48,13 +49,13 @@
                           Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConv}}">
                     <DataGrid.Columns>
                         <DataGridTextColumn HeaderStyle="{StaticResource cleanDataGridColumnHeaderStyle}"
-                                            Header="{x:Static language:Lang.scoreTopText}"
+                                            Header="{utils:Translate scoreTopText}"
                                             Binding="{Binding Score}"
                                             FontWeight="Bold" FontSize="22"
                                             Width="*"/>
                         <DataGridTextColumn HeaderStyle="{StaticResource cleanDataGridColumnHeaderStyle}"
                                             FontWeight="ExtraBlack" FontSize="16"
-                                            Header="{x:Static language:Lang.playersText}"
+                                            Header="{utils:Translate playersText}"
                                             Binding="{Binding PlayersNicknames, Converter={StaticResource NicknamesConverter}}"
                                             Width="2*"/>
                     </DataGrid.Columns>

@@ -4,10 +4,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PASSWORD_LIS_Client.Views"
+        xmlns:utils="clr-namespace:PASSWORD_LIS_Client.Utils"
         xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="SettingsWindow" Height="250" Width="450"> <!--Cambiar nombre a Internacionalizacion-->
+        Title="SettingsWindow" Height="280" Width="450"> <!--Cambiar nombre a Internacionalizacion-->
 
     <Grid Background="#343A40">
         <Border Style="{StaticResource floatingBorderStyle}" Padding="10" Margin="20">
@@ -16,36 +17,50 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Text="{x:Static language:Lang.settingsText}"
+                <TextBlock Grid.Row="0" Text="{utils:Translate settingsText}"
                         Style="{StaticResource titleTextBlockStyle}"
                         Margin="20,0,20,10"/>
+                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Cursor="Hand">
+                    <RadioButton Content="en-US"
+                 GroupName="Language"
+                 Style="{StaticResource SegmentedLeftRadioButton}"
+                 IsChecked="{Binding IsEnglishSelected}"
+                 Width="70"/>
 
-                <Grid Grid.Row="1" Margin="20,0,20,10">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="{x:Static language:Lang.musicText}"
-                            Style="{StaticResource subtitleTextBlockStyle}"
-                            TextAlignment="Left"/>
-                    <Slider Grid.Column="1" Value="{Binding MusicVolume}" VerticalAlignment="Center"/>
-                </Grid>
+                    <RadioButton Content="es-MX"
+                 GroupName="Language"
+                 Style="{StaticResource SegmentedRightRadioButton}"
+                 IsChecked="{Binding IsSpanishSelected}"
+                 Width="70"/>
+                </StackPanel>
 
                 <Grid Grid.Row="2" Margin="20,0,20,10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="{x:Static language:Lang.soundEffectsText}"
-                          Style="{StaticResource subtitleTextBlockStyle}"
-                          TextAlignment="Left"/>
-                    <Slider Grid.Column="1" Value="{Binding SoundEffectsVolume}" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="0" Text="{utils:Translate musicText}"
+                            Style="{StaticResource subtitleTextBlockStyle}"
+                            TextAlignment="Left"/>
+                    <Slider Grid.Column="1" Value="{Binding MusicVolume}" VerticalAlignment="Center" Cursor="Hand"/>
                 </Grid>
 
-                <Button Grid.Row="4" Content="{x:Static language:Lang.logOutText}"
+                <Grid Grid.Row="3" Margin="20,0,20,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="{utils:Translate soundEffectsText}"
+                          Style="{StaticResource subtitleTextBlockStyle}"
+                          TextAlignment="Left"/>
+                    <Slider Grid.Column="1" Value="{Binding SoundEffectsVolume}" VerticalAlignment="Center" Cursor="Hand"/>
+                </Grid>
+
+                <Button Grid.Row="4" Content="{utils:Translate logOutText}"
                      Style="{StaticResource logOutButtonStyle}"
                      Width="180" Height="35"
                      Command="{Binding LogoutCommand}"/>

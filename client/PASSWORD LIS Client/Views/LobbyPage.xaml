@@ -7,6 +7,7 @@
       xmlns:local="clr-namespace:PASSWORD_LIS_Client.Views"
       xmlns:viewModels="clr-namespace:PASSWORD_LIS_Client.ViewModels"
       xmlns:converters="clr-namespace:PASSWORD_LIS_Client.Converters"
+      xmlns:utils="clr-namespace:PASSWORD_LIS_Client.Utils"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       MinHeight="450" MinWidth="800"
@@ -60,7 +61,7 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" Style="{StaticResource bodyTextBlockStyle}"
-                           Text="{x:Static language:Lang.friendsListText}"
+                           Text="{utils:Translate friendsListText}"
                            VerticalAlignment="Center"
                            TextAlignment="Left"/>
                     
@@ -110,7 +111,7 @@
                         Command="{Binding ShowTopPlayersCommand}">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Resources/CupIcon.png" Width="20" Height="20" Margin="0,0,10,0"/>
-                            <TextBlock Text="{x:Static language:Lang.topPlayersText}"/>
+                            <TextBlock Text="{utils:Translate topPlayersText}"/>
                         </StackPanel>
                         </Button>
 
@@ -120,7 +121,7 @@
                         Command="{Binding HowToPlayCommand}">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Resources/QuestionMarkIcon.png" Width="20" Height="20" Margin="0,0,10,0"/>
-                            <TextBlock Text="{x:Static language:Lang.howToPlayText}"/>
+                            <TextBlock Text="{utils:Translate howToPlayText}"/>
                         </StackPanel>
                     </Button>
 
@@ -130,7 +131,7 @@
                         Command="{Binding SettingsCommand}">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Resources/SettingsIcon.png" Width="20" Height="20" Margin="0,0,10,0"/>
-                            <TextBlock Text="{x:Static language:Lang.settingsText}"/>
+                            <TextBlock Text="{utils:Translate settingsText}"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -150,7 +151,7 @@
                         Style="{StaticResource gameButtonStyle}"
                         Height="40">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBlock Text="{x:Static language:Lang.playText}" Margin="0,0,10,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{utils:Translate playText}" Margin="0,0,10,0" VerticalAlignment="Center"/>
                             <Image Source="/Resources/PlayIcon.png" Width="30" Height="30" />
                         </StackPanel>
                     </Button>
@@ -159,13 +160,13 @@
 
             <Border Grid.Row="1" Style="{StaticResource floatingBorderStyle}" Padding="15">
                 <StackPanel>
-                    <TextBlock Text="{x:Static language:Lang.enterCodeToJoinText}" 
+                    <TextBlock Text="{utils:Translate enterCodeToJoinText}" 
                            Style="{StaticResource subtitleTextBlockStyle}" 
                            Margin="0,0,0,10"/>
                     <TextBox x:Name="codeJoinTextBox" 
                          Style="{StaticResource primaryTextBoxStyle}" 
                          Height="40" Margin="0,0,0,10"/>
-                    <Button Content="{x:Static language:Lang.joingGameText}" 
+                    <Button Content="{utils:Translate joingGameText}" 
                         Style="{StaticResource primaryButtonStyle}" 
                         Command="{Binding JoinGameCommand}"
                         CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Page}}"

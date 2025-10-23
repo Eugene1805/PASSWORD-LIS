@@ -2,6 +2,8 @@
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.ViewModels;
 using PASSWORD_LIS_Client.Views;
+using System.Globalization;
+using System.Threading;
 using System.Windows;
 
 namespace PASSWORD_LIS_Client
@@ -25,6 +27,15 @@ namespace PASSWORD_LIS_Client
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            var lang = PASSWORD_LIS_Client.Properties.Settings.Default.languageCode;
+
+            if (!string.IsNullOrEmpty(lang))
+            {
+                var culture = new CultureInfo(lang);
+                TranslationProvider.Instance.SetLanguage(culture);
+                Thread.CurrentThread.CurrentUICulture = culture;
+            }
 
             // Dependencies for LoginViewModel
             LoginManagerService = new WcfLoginManagerService();

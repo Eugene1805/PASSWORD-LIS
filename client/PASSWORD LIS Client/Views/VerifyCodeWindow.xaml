@@ -10,7 +10,7 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         MinHeight="400" MinWidth="400"
-        Title="{x:Static language:Lang.verifyCodeText}" Height="600" Width="600">
+        Title="{utils:Translate verifyCodeText}" Height="600" Width="600">
     <Window.Resources>
         <Style TargetType="Hyperlink">
             <Style.Triggers>
@@ -31,7 +31,7 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel Grid.Column="2" Margin="10" VerticalAlignment="Center">
-            <TextBlock Text="{x:Static language:Lang.verifyCodeMessageText}" 
+            <TextBlock Text="{utils:Translate verifyCodeMessageText}" 
                    Style="{StaticResource titleBlackTextBlockStyle}" 
                    TextWrapping="Wrap"
                    HorizontalAlignment="Center" 
@@ -44,7 +44,7 @@
                      Text="{Binding EnteredCode, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource primaryTextBoxStyle}" Width="220"/>
             <Button x:Name="verifyCodeButton"
-                Content="{x:Static language:Lang.verifyCodeText}" 
+                Content="{utils:Translate verifyCodeText}" 
                 Style="{StaticResource LoadingButtonStyle}"
                 utils:ButtonProperties.IsBusy="{Binding IsBusy}"
                 Width="180" 
@@ -53,13 +53,13 @@
                 HorizontalAlignment="Center" FontSize="14"
                 Command="{Binding VerifyCodeCommand}"
                 />
-            <TextBlock Text="{x:Static language:Lang.verifyCodeNotSendText}" Style="{StaticResource bodyTextBlockStyle}"
+            <TextBlock Text="{utils:Translate verifyCodeNotSendText}" Style="{StaticResource bodyTextBlockStyle}"
                    HorizontalAlignment="Center"/>
             <TextBlock Style="{StaticResource bodyTextBlockStyle}"
                     TextWrapping="Wrap"
                     HorizontalAlignment="Center">
                     <Hyperlink x:Name="resendCodeHyperlink" Command="{Binding ResendCodeCommand}"> 
-                        <Run Text="{x:Static language:Lang.verifyCodeResendCodeText}"/>
+                        <Run Text="{utils:Translate verifyCodeResendCodeText}"/>
                     </Hyperlink>
             </TextBlock>
         </StackPanel>

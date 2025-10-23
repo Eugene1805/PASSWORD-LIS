@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
+        xmlns:utils="clr-namespace:PASSWORD_LIS_Client.Utils"
         WindowStartupLocation="CenterScreen"
         WindowStyle="ToolWindow"
         mc:Ignorable="d"

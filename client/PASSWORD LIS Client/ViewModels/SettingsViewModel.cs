@@ -2,8 +2,8 @@
 using PASSWORD_LIS_Client.Properties;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Windows.Input;
 
 
@@ -14,7 +14,31 @@ namespace PASSWORD_LIS_Client.ViewModels
         private readonly IWindowService windowService;
         private readonly IFriendsManagerService friendsManagerService;
         private readonly BackgroundMusicService backgroundMusicService;
+        private bool isEnglishSelected;
+        public bool IsEnglishSelected
+        {
+            get => isEnglishSelected;
+            set
+            {
+                if (SetProperty(ref isEnglishSelected, value) && value)
+                {
+                    UpdateLanguage("en-US");
+                }
+            }
+        }
 
+        private bool isSpanishSelected;
+        public bool IsSpanishSelected
+        {
+            get => isSpanishSelected;
+            set
+            {
+                if (SetProperty(ref isSpanishSelected, value) && value)
+                {
+                    UpdateLanguage("es-MX");
+                }
+            }
+        }
         private double musicVolume;
         public double MusicVolume
         {
@@ -41,12 +65,35 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         public bool WasLogoutSuccessful { get; private set; } = false;
         public SettingsViewModel(IWindowService windowService, IFriendsManagerService friendsManagerService,
-            BackgroundMusicService backgroundMusicService) { 
+            BackgroundMusicService backgroundMusicService) {
+
+            // Cargar el idioma guardado al abrir la ventana de configuración
+            var currentLang = Properties.Settings.Default.languageCode;
+            if (string.IsNullOrEmpty(currentLang) || currentLang == "en-US")
+            {
+                isEnglishSelected = true;
+            }
+            else
+            {
+                isSpanishSelected = true;
+            }
             this.windowService = windowService;
             this.friendsManagerService = friendsManagerService;
             this.backgroundMusicService = backgroundMusicService;
             this.musicVolume = Settings.Default.MusicVolume;
             LogoutCommand = new RelayCommand(Logout);
+        }
+
+        private void UpdateLanguage(string cultureName)
+        {
+            var culture = new CultureInfo(cultureName);
+
+            // 1. Cambia el idioma en tiempo real
+            TranslationProvider.Instance.SetLanguage(culture);
+
+            // 2. Guarda la preferencia del usuario
+            Properties.Settings.Default.languageCode = cultureName;
+            Properties.Settings.Default.Save();
         }
         private void Logout(object parameter)
         {

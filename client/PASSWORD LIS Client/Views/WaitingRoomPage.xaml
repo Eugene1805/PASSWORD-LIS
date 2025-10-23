@@ -5,6 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:PASSWORD_LIS_Client.Views"
       xmlns:converters="clr-namespace:PASSWORD_LIS_Client.Converters"
+      xmlns:utils="clr-namespace:PASSWORD_LIS_Client.Utils"
       xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
@@ -54,7 +55,7 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Column="0" Style="{StaticResource subtitleTextBlockStyle}"
-                       Text="{x:Static language:Lang.inviteYourFriendsText}"
+                       Text="{utils:Translate inviteYourFriendsText}"
                                TextWrapping="Wrap"
                        VerticalAlignment="Center"
                        HorizontalAlignment="Left"/>
@@ -81,7 +82,7 @@
                 </Border>
 
                 <Button Grid.Row="2" Style="{StaticResource primaryButtonStyle}"
-                Content="{x:Static language:Lang.invitationMailText}" 
+                Content="{utils:Translate invitationMailText}" 
                 Height="40" />
             </Grid>
         </Border>
@@ -94,7 +95,7 @@
                 </Grid.RowDefinitions>
                 <StackPanel  Grid.Row="0" Orientation="Horizontal">
                     <TextBlock Style="{StaticResource subtitleTextBlockStyle}" Width="150"
-                        Text="{x:Static language:Lang.playersInTheRoomText}" HorizontalAlignment="Left" TextWrapping="Wrap"
+                        Text="{utils:Translate playersInTheRoomText}" HorizontalAlignment="Left" TextWrapping="Wrap"
                         VerticalAlignment="Center"/>
                     <Button Style="{StaticResource circleButtonStyle}" VerticalAlignment="Top"
                             Width="50" Height="50" HorizontalAlignment="Right" Margin="140,5,0,0">
@@ -136,7 +137,7 @@
 
                 <TextBlock Grid.Row="0"
                            Style="{StaticResource subtitleTextBlockStyle}"
-                           Text="{x:Static language:Lang.groupChatText}"
+                           Text="{utils:Translate groupChatText}"
                            TextAlignment="Left"/>
 
                 <Border Grid.Row="1" Style="{StaticResource floatingBorderStyle}" Padding="10" Margin="0,10,0,10">
@@ -177,14 +178,14 @@
         <Border Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource floatingBorderStyle}" Padding="15" Margin="10,10,10,20">
             <StackPanel HorizontalAlignment="Center">
                 <Button Style="{StaticResource gameButtonStyle}" 
-                        Content="{x:Static language:Lang.startGameText}" 
+                        Content="{utils:Translate startGameText}" 
                         HorizontalAlignment="Center"
                         Width="100"
                         Height="40"/>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <TextBlock Style="{StaticResource subtitleTextBlockStyle}" 
-                               Text="{x:Static language:Lang.codeWordText}" 
+                               Text="{utils:Translate codeWordText}" 
                                VerticalAlignment="Center" Margin="5"/>
                     <TextBlock x:Name="codeGeneratedTextBlock" Style="{StaticResource titleTextBlockStyle}"
                                Text="EXAMPLE"
