@@ -1,6 +1,7 @@
 ﻿using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.ViewModels;
 using PASSWORD_LIS_Client.Views;
+using PASSWORD_LIS_Client.WaitingRoomManagerServiceReference;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,6 +18,7 @@ namespace PASSWORD_LIS_Client.Utils
         void ShowLoginWindow();
         void CloseWindow(object viewModel);
         void ShowPopUp(string title, string message, PopUpIcon icon);
+        void ShowReportWindow(PlayerDTO reportedPlayer);
         void ShowMainWindow();
         void CloseMainWindow();
 
@@ -79,11 +81,19 @@ namespace PASSWORD_LIS_Client.Utils
             popUp.ShowDialog();
         }
 
+        public void ShowReportWindow(PlayerDTO reportedPlayer)
+        {
+            var reporter = SessionManager.CurrentUser;
+
+            var reportViewModel = new ReportViewModel(reporter, reportedPlayer, App.WindowService, App.ReportManagerService);
+            var reportWindow = new ReportWindow { DataContext = reportViewModel };
+            reportWindow.ShowDialog();
+        }
+
         public void ShowMainWindow()
         {
             var mainWindowViewModel = new MainWindowViewModel(this,App.BackgroundMusicService);
             var mainWindow = new MainWindow { DataContext = mainWindowViewModel};
-            mainWindow.Closed += (s, _) => mainWindowViewModel.OnClosed();
             Application.Current.MainWindow = mainWindow;
             mainWindow.Show();
         }

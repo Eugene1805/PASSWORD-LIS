@@ -3,6 +3,7 @@ using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.ViewModels;
 using PASSWORD_LIS_Client.Views;
 using System.Globalization;
+using System.Net.NetworkInformation;
 using System.Threading;
 using System.Windows;
 
@@ -23,6 +24,7 @@ namespace PASSWORD_LIS_Client
         public static ITopPlayersManagerService TopPlayersManagerService { get; private set; }
         public static IVerificationCodeManagerService VerificationCodeManagerService { get; private set; }
         public static IWaitingRoomManagerService WaitRoomManagerService { get; private set; }
+        public static IReportManagerService ReportManagerService { get; private set; }
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -49,12 +51,19 @@ namespace PASSWORD_LIS_Client
             TopPlayersManagerService = new WcfTopPlayersManagerService();
             VerificationCodeManagerService = new WcfVerificationCodeManagerService();
             WaitRoomManagerService = new WcfWaitingRoomManagerService();
-            
+            ReportManagerService = new WcfReportManagerService();
+
 
             var loginViewModel = new LoginViewModel(LoginManagerService, WindowService);
-            var loginWindow = new LoginWindow {DataContext = loginViewModel};
+            var loginWindow = new LoginWindow { DataContext = loginViewModel };
             loginWindow.Show();
 
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            BackgroundMusicService?.Dispose();
+            base.OnExit(e);
         }
     }
 }

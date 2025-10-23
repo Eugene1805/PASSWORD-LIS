@@ -20,6 +20,16 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ObservableCollection<string> ChatMessages { get; }
         public ObservableCollection<PlayerDTO> ConnectedPlayers { get; }
 
+        private PlayerDTO selectedPlayer;
+        public PlayerDTO SelectedPlayer
+        {
+            get => selectedPlayer;
+            set
+            {
+                SetProperty(ref selectedPlayer, value);
+                ((RelayCommand)ReportCommand).RaiseCanExecuteChanged();
+            }
+        }
         private string currentMessage;
         public string CurrentMessage
         {
@@ -42,6 +52,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         private PlayerDTO currentPlayer;
         public ICommand SendMessageCommand { get; }
         public ICommand LeaveRoomCommand { get; }
+        public ICommand ReportCommand { get; }
         public WaitingRoomViewModel(IWaitingRoomManagerService roomManagerService, IWindowService windowService)
         {
             this.roomManagerClient = roomManagerService;
@@ -52,6 +63,10 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             SendMessageCommand = new RelayCommand(async (_) => await SendMessageAsync(),(_) => CanSendMessage());
             LeaveRoomCommand = new RelayCommand(async (_) => await LeaveRoomAsync());
+            ReportCommand = new RelayCommand(
+            execute: (_) => OpenReportWindow(),
+            canExecute: (_) => CanReportPlayer()
+            );  
 
             if (roomManagerClient is WcfWaitingRoomManagerService wcfService)
             {
@@ -120,7 +135,18 @@ namespace PASSWORD_LIS_Client.ViewModels
                     Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
             }
         }
+        private bool CanReportPlayer()
+        {
+            return SelectedPlayer != null;
+        }
 
+        private void OpenReportWindow()
+        {
+            if (SelectedPlayer != null)
+            {
+                windowService.ShowReportWindow(SelectedPlayer);
+            }
+        }
         private bool CanSendMessage()
         {
             return !string.IsNullOrWhiteSpace(CurrentMessage);

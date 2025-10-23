@@ -77,7 +77,15 @@ namespace PASSWORD_LIS_Client.Services
                 SenderNickname = SessionManager.CurrentUser.Nickname,
                 Message = message
             };
-            await proxy.SendMessageAsync(chatMessage);
+            try
+            {
+                await proxy.SendMessageAsync(chatMessage);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Error al enviar el mensaje");
+            }
+            
         }
 
 

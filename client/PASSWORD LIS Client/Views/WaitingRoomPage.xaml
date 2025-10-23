@@ -30,7 +30,7 @@
         </Grid.ColumnDefinitions>
         
         <TextBlock x:Name="titleTextBlock" Style="{StaticResource titleTextBlockStyle}"
-                   Grid.ColumnSpan="2" 
+                   Grid.ColumnSpan="3" 
                    Text="PASSWORD LIS" HorizontalAlignment="Center"
                     VerticalAlignment="Top" Margin="10,15,10,10"/>
         <Button Command="{Binding LeaveRoomCommand}"
@@ -98,13 +98,14 @@
                         Text="{utils:Translate playersInTheRoomText}" HorizontalAlignment="Left" TextWrapping="Wrap"
                         VerticalAlignment="Center"/>
                     <Button Style="{StaticResource circleButtonStyle}" VerticalAlignment="Top"
-                            Width="50" Height="50" HorizontalAlignment="Right" Margin="140,5,0,0">
+                            Width="50" Height="50" HorizontalAlignment="Right" Margin="140,5,0,0"
+                            Command="{Binding ReportCommand}">
                         <Image Source="/Resources/ReportIcon.png" Width="30" Height="30" />
                     </Button>
                 </StackPanel>
                 
                 <Border Grid.Row="1"  Margin="0,10,0,0" Padding="5">
-                    <ListBox ItemsSource="{Binding ConnectedPlayers}" BorderThickness="0" Background="Transparent">
+                    <ListBox ItemsSource="{Binding ConnectedPlayers}" SelectedItem="{Binding SelectedPlayer, Mode=TwoWay}" BorderThickness="0" Background="Transparent">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <Grid Margin="5">
@@ -114,8 +115,8 @@
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <Image Grid.Column="0" Source="{Binding PhotoId, Converter={StaticResource AvatarIdToImageConverter}, 
-                                        FallbackValue={StaticResource DefaultAvatarImage}}" Width="90" Height="90" Margin="0,0,10,0" />
-                                    <TextBlock Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="1" Text="{Binding Nickname}" VerticalAlignment="Center"/>
+                                        FallbackValue={StaticResource DefaultAvatarImage}}" Width="110" Height="110" Margin="0,0,10,0" />
+                                    <TextBlock Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="1" Text="{Binding Nickname}" TextWrapping="WrapWithOverflow" VerticalAlignment="Center"/>
                                     
                                     <TextBlock Grid.Column="2" Style="{StaticResource bodyTextBlockStyle}" Text="{Binding Role}" VerticalAlignment="Bottom"/>
                                 </Grid>
@@ -127,7 +128,7 @@
         </Border>
 
 
-        <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource chatBorderStyle}" Margin="10,20,10,10" Padding="15">
+        <Border Grid.Row="0" Grid.Column="2" Style="{StaticResource chatBorderStyle}" Margin="10,90,10,10" Padding="15">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
