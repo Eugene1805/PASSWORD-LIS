@@ -1,5 +1,6 @@
 ﻿using Data.DAL.Implementations;
 using Data.DAL.Interfaces;
+using Data.Model;
 using Services.Contracts;
 using Services.Contracts.DTOs;
 using Services.Wrappers;
@@ -94,31 +95,37 @@ namespace Services.Services
             //Obtener datos de los dos jugadores
             var requesterAccount = accountRepository.GetUserByUserAccountId(requesterUserAccountId);
             var addresseeAccount = accountRepository.GetUserByEmail(addresseeEmail);
-            
-            if (addresseeAccount == null) return Task.FromResult(FriendRequestResult.UserNotFound);
-            if (requesterAccount == null) return Task.FromResult(FriendRequestResult.Failed);
-            if (requesterAccount.Id == addresseeAccount.Id) return Task.FromResult(FriendRequestResult.Failed);
 
-            int requesterPlayerId = requesterAccount.Player.First().Id;
-            int addresseePlayerId = addresseeAccount.Player.First().Id;
-
-            bool success = friendshipRepository.CreateFriendRequest(requesterPlayerId, addresseePlayerId);
-            if (!success) return Task.FromResult(FriendRequestResult.RequestAlreadySent);
-
-            // 5. Notificar al destinatario (si está conectado)
-            if (connectedClients.TryGetValue(addresseeAccount.Id, out var addresseeCallback))
+            if (addresseeAccount == null)
             {
-                var requesterDto = new FriendDTO
-                {
-                    PlayerId = requesterPlayerId,
-                    Nickname = requesterAccount.Nickname,
-                };
-
-                // Esta llamada ahora es segura, porque TryGetValue nos asegura que el canal está "vivo"
-                addresseeCallback.OnFriendRequestReceived(requesterDto);
+                return Task.FromResult(FriendRequestResult.UserNotFound);
+            }
+            
+            if (requesterAccount == null)
+            { 
+                return Task.FromResult(FriendRequestResult.Failed);
+            }
+            if (requesterAccount.Id == addresseeAccount.Id)
+            {
+                return Task.FromResult(FriendRequestResult.Failed);
             }
 
-            return Task.FromResult(FriendRequestResult.Success);
+            var validationResult = ValidateFriendRequest(requesterAccount, addresseeAccount);
+
+            if (validationResult != FriendRequestResult.Success)
+            {
+                return Task.FromResult(validationResult);
+            }
+
+            bool success = CreateAndNotifyFriendRequest(requesterAccount, addresseeAccount);
+            if (success)
+            {
+                return Task.FromResult(FriendRequestResult.Success);
+            }
+            else
+            {
+                return Task.FromResult(FriendRequestResult.Failed);
+            }            
         }
         
         public Task<List<FriendDTO>> GetPendingRequestsAsync()
@@ -205,6 +212,63 @@ namespace Services.Services
             var entry = connectedClients.FirstOrDefault(pair => pair.Value == callback);
             
             return entry.Key;
+        }
+
+        private FriendRequestResult ValidateFriendRequest(UserAccount requesterAccount, UserAccount addresseeAccount)
+        {
+            int requesterPlayerId = requesterAccount.Player.First().Id;
+            int addresseePlayerId = addresseeAccount.Player.First().Id;
+
+            // Comprobar si ya son amigos
+            var friends = friendshipRepository.GetFriendsByUserAccountId(requesterAccount.Id);
+            if (friends.Any(f => f.Player.Any(p => p.Id == addresseePlayerId)))
+            {
+                return FriendRequestResult.AlreadyFriends;
+            }
+
+            // Comprobar si una solicitud (A -> B) ya está pendiente
+            var addresseeRequests = friendshipRepository.GetPendingRequests(addresseeAccount.Id);
+            if (addresseeRequests.Any(req => req.Player1.Id == requesterPlayerId)) // Player1 es quien envía
+            {
+                return FriendRequestResult.RequestAlreadySent;
+            }
+
+            // Comprobar si una solicitud (B -> A) ya fue recibida
+            var requesterRequests = friendshipRepository.GetPendingRequests(requesterAccount.Id);
+            if (requesterRequests.Any(req => req.Player1.Id == addresseePlayerId)) // Player1 es quien envía
+            {
+                return FriendRequestResult.RequestAlreadyReceived;
+            }
+
+            return FriendRequestResult.Success;
+        }
+
+        private bool CreateAndNotifyFriendRequest(UserAccount requesterAccount, UserAccount addresseeAccount)
+        {
+            int requesterPlayerId = requesterAccount.Player.First().Id;
+            int addresseePlayerId = addresseeAccount.Player.First().Id;
+
+            // 1. Crear la solicitud
+            bool success = friendshipRepository.CreateFriendRequest(requesterPlayerId, addresseePlayerId);
+
+            if (!success)
+            {
+                return false; // Error al crear en BD
+            }
+
+            // Notificar al destinatario (si está conectado)
+            if (connectedClients.TryGetValue(addresseeAccount.Id, out var addresseeCallback))
+            {
+                var requesterDto = new FriendDTO
+                {
+                    PlayerId = requesterPlayerId,
+                    Nickname = requesterAccount.Nickname,
+                };
+
+                addresseeCallback.OnFriendRequestReceived(requesterDto);
+            }
+
+            return true;
         }
     }
 }

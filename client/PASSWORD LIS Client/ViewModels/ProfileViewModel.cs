@@ -128,7 +128,6 @@ namespace PASSWORD_LIS_Client.ViewModels
                 XSocialMedia = currentUser.SocialAccounts.ContainsKey("X") ? currentUser.SocialAccounts["X"] : "";
                 Tiktok = currentUser.SocialAccounts.ContainsKey("TikTok") ? currentUser.SocialAccounts["TikTok"] : "";
             }
-            //Cargar Avatar
         }
 
         private void EditProfile(object parameter)
@@ -210,18 +209,6 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             string title = Properties.Langs.Lang.verificationFailedTitleText;
 
-            if (string.IsNullOrWhiteSpace(Nickname))
-            {
-                windowService.ShowPopUp(title, Properties.Langs.Lang.emptyNicknameText, PopUpIcon.Warning);
-                return false;
-            }
-
-            if (Nickname.Length > 50)
-            {
-                windowService.ShowPopUp(title, Properties.Langs.Lang.nicknameTooLongText, PopUpIcon.Warning);
-                return false;
-            }
-
             if (string.IsNullOrWhiteSpace(FirstName))
             {
                 windowService.ShowPopUp(title, Properties.Langs.Lang.emptyFirstNameText, PopUpIcon.Warning);
@@ -263,7 +250,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 PlayerId = SessionManager.CurrentUser.PlayerId,
                 Email = SessionManager.CurrentUser.Email,
                 PhotoId = this.PhotoId,
-                Nickname = this.Nickname,
+                Nickname = SessionManager.CurrentUser.Nickname,
                 FirstName = this.FirstName,
                 LastName = this.LastName,
                 SocialAccounts = new Dictionary<string, string>()
@@ -308,6 +295,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 LastName = profileDto.LastName,
                 PhotoId = profileDto.PhotoId,
                 Email = profileDto.Email,
+                UserAccountId = SessionManager.CurrentUser.UserAccountId,
                 SocialAccounts = new Dictionary<string, string>()
             };
             if (profileDto.SocialAccounts != null)

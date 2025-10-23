@@ -92,6 +92,9 @@ namespace PASSWORD_LIS_Client.FriendsManagerServiceReference {
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
         Failed = 4,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        RequestAlreadyReceived = 5,
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]

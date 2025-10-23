@@ -50,6 +50,7 @@ namespace Services.Contracts
         [EnumMember] UserNotFound,
         [EnumMember] AlreadyFriends,
         [EnumMember] RequestAlreadySent,
-        [EnumMember] Failed
+        [EnumMember] Failed,
+        [EnumMember] RequestAlreadyReceived,
     }
 }

@@ -62,38 +62,42 @@ namespace PASSWORD_LIS_Client.ViewModels
 
     private void HandleFriendRequestResult(FriendRequestResult result)
         {
-            string title = "";
-            string message = "";
-            PopUpIcon icon = PopUpIcon.Information;
-
             switch (result)
             {
                 case FriendRequestResult.Success:
-                    title = "Solicitud Enviada"; // Usar Langs
+                    windowService.CloseWindow(this); // Cerramos solo si es exitoso
+                    windowService.ShowPopUp(Properties.Langs.Lang.requestSentTitleText,
+                        Properties.Langs.Lang.requestSentText, PopUpIcon.Success);
+                    /*title = "Solicitud Enviada"; // Usar Langs
                     message = "Tu solicitud de amistad ha sido enviada."; // Usar Langs
                     icon = PopUpIcon.Success;
-                    windowService.CloseWindow(this); // Cerramos solo si es exitoso
+                    */
                     break;
                 case FriendRequestResult.UserNotFound:
-                    title = "Error"; // Usar Langs
+                    windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.playerNotFoundText, PopUpIcon.Warning);
+                    /*title = "Error"; // Usar Langs
                     message = "No se encontró ningún jugador con ese correo electrónico."; // Usar Langs
-                    icon = PopUpIcon.Warning;
+                    icon = PopUpIcon.Warning;*/
                     break;
                 case FriendRequestResult.AlreadyFriends:
+                    windowService.ShowPopUp("Información",
+                        "Ya tienes una amistad con este jugador", PopUpIcon.Information);
+                    break;
                 case FriendRequestResult.RequestAlreadySent:
-                    title = "Información"; // Usar Langs
-                    message = "Ya existe una solicitud de amistad o ya eres amigo de este jugador."; // Usar Langs
-                    icon = PopUpIcon.Information;
+                    windowService.ShowPopUp("Información",
+                        "Ya has enviado una soicitud a este jugador", PopUpIcon.Information);
+                    break;
+                case FriendRequestResult.RequestAlreadyReceived:
+                    windowService.ShowPopUp("Información",
+                        "Este jugador ya te ha enviado una solicitud de amistad, revisa tu bandeja", PopUpIcon.Information);
                     break;
                 case FriendRequestResult.Failed:
                 default:
-                    title = "Error"; // Usar Langs
-                    message = "No se pudo enviar la solicitud de amistad."; // Usar Langs
-                    icon = PopUpIcon.Error;
+                    windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.couldNotSentRequestText, PopUpIcon.Error);
                     break;
             }
-
-            windowService.ShowPopUp(title, message, icon);
         }
     }
 }

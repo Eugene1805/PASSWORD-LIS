@@ -7,12 +7,14 @@
         xmlns:utils="clr-namespace:PASSWORD_LIS_Client.Utils"
         xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
         mc:Ignorable="d"
-        Title="AddFriendWindow" Height="250" Width="500">
+        Title="AddFriendWindow" Height="250" Width="500"
+        WindowStartupLocation="CenterScreen"
+        Background="#FFFFFF">
    
     <Grid>
-        <Border Style="{StaticResource floatingBorderStyle}">
+        <Border Padding="20">
             <StackPanel>
-                <TextBlock Style="{StaticResource subtitleTextBlockStyle}" Margin="20,20,20,10"
+                <TextBlock Style="{StaticResource subtitleBlackTextBlockStyle}" Margin="20,20,20,10"
                    Text="{utils:Translate enterFriendEmailToAddText}"/>
                 
                 <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"

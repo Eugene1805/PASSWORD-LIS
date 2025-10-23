@@ -20,6 +20,24 @@ namespace PASSWORD_LIS_Client.ViewModels
             set { pendingRequests = value; OnPropertyChanged(); } 
         }
 
+        private bool isLoading;
+        public bool IsLoading
+        {
+            get => isLoading;
+            set {  
+                isLoading = value; 
+                OnPropertyChanged(); 
+                UpdateMessageVisibility(); 
+            }
+        }
+
+        private bool showNoRequestsMessage;
+        public bool ShowNoRequestsMessage
+        {
+            get => showNoRequestsMessage;
+            set { showNoRequestsMessage = value; OnPropertyChanged(); }
+        }
+
         private FriendDTO selectedRequest;
         public FriendDTO SelectedRequest 
         { 
@@ -44,19 +62,45 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private async Task LoadPendingRequestsAsync()
         {
-            var requests = await friendsService.GetPendingRequestsAsync();
-            PendingRequests = new ObservableCollection<FriendDTO>(requests);
+            IsLoading = true;
+            try
+            {
+                
+                var requests = await friendsService.GetPendingRequestsAsync();
+                PendingRequests = new ObservableCollection<FriendDTO>(requests);
+            }
+            catch (Exception)
+            {
+                // Manejar error (ej. con un PopUp)
+            }
+            finally
+            {
+                IsLoading = false;
+            }
         }
 
         private async Task RespondToRequest(bool accepted)
         {
             var requestToRespond = SelectedRequest;
             if (requestToRespond == null) return;
+            try
+            {
+                await friendsService.RespondToFriendRequestAsync(requestToRespond.PlayerId, accepted);
+                PendingRequests.Remove(requestToRespond);
+            }
+            catch (Exception)
+            {
+                //PopUp de error
+            }
+            finally
+            {
+                UpdateMessageVisibility();
+            }
+        }
 
-            await friendsService.RespondToFriendRequestAsync(requestToRespond.PlayerId, accepted);
-
-            // Quitar de la lista local para feedback instantáneo
-            PendingRequests.Remove(requestToRespond);
+        private void UpdateMessageVisibility()
+        {
+            ShowNoRequestsMessage = !IsLoading && !PendingRequests.Any();
         }
     }
 }
