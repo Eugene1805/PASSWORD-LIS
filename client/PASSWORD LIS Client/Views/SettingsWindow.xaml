@@ -8,7 +8,7 @@
         xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="SettingsWindow" Height="280" Width="450"> <!--Cambiar nombre a Internacionalizacion-->
+        Title="{utils:Translate settingsText}" Height="280" Width="450"> <!--Cambiar nombre a Internacionalizacion-->
 
     <Grid Background="#343A40">
         <Border Style="{StaticResource floatingBorderStyle}" Padding="10" Margin="20">
@@ -25,13 +25,13 @@
                         Style="{StaticResource titleTextBlockStyle}"
                         Margin="20,0,20,10"/>
                 <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Cursor="Hand">
-                    <RadioButton Content="en-US"
+                    <RadioButton Content="en-US" FontWeight="Bold"
                  GroupName="Language"
                  Style="{StaticResource SegmentedLeftRadioButton}"
                  IsChecked="{Binding IsEnglishSelected}"
                  Width="70"/>
 
-                    <RadioButton Content="es-MX"
+                    <RadioButton Content="es-MX" FontWeight="Bold"
                  GroupName="Language"
                  Style="{StaticResource SegmentedRightRadioButton}"
                  IsChecked="{Binding IsSpanishSelected}"

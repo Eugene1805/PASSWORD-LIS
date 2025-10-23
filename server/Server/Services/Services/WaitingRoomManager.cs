@@ -128,13 +128,12 @@ namespace Services.Services
                 }
                 catch (Exception ex)
                 {
-                    // Si falla la comunicación, asumimos que el cliente se desconectó
+                    // If there's an error, assume the client is disconnected
                     Console.WriteLine($"Error broadcasting to player ID {player.Key}. Removing. Error: {ex.Message}");
                     disconnectedPlayerIds.Add(player.Key);
                 }
             }
 
-            // Limpiar clientes desconectados
             foreach (var id in disconnectedPlayerIds)
             {
                 await LeaveRoomAsync(id);

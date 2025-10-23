@@ -5,6 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PASSWORD_LIS_Client"
         mc:Ignorable="d"
+        WindowStyle="None"
+        WindowState="Maximized"
         WindowStartupLocation="CenterScreen"
         MinHeight="800" MinWidth="1200"
         Title="PASSWORD LIS" Height="800" Width="1400">
