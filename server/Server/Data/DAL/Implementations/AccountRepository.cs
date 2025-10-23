@@ -116,8 +116,7 @@ namespace Data.DAL.Implementations
                 }
             }
         }
-
-        public bool UpdateUserProfile(int playerId, string nickname, string firstName, string lastName, int photoId, Dictionary<string, string> socialAccounts)
+        public bool UpdateUserProfile(int playerId, UserAccount updatedAccountData, List<SocialAccount> updatedSocialsAccounts)
         {
             using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
@@ -129,58 +128,46 @@ namespace Data.DAL.Implementations
                             .Include(p => p.UserAccount.SocialAccount)
                             .FirstOrDefault(p => p.Id == playerId);
 
-                        if (player == null || player.UserAccount == null)
+                        if (player == null || player.UserAccount == null) return false;
+
+                        var userAccountToUpdate = player.UserAccount;
+
+                        // 1. Actualizar los datos de UserAccount
+                        userAccountToUpdate.FirstName = updatedAccountData.FirstName;
+                        userAccountToUpdate.LastName = updatedAccountData.LastName;
+                        // El Nickname no se cambia
+                        userAccountToUpdate.PhotoId = updatedAccountData.PhotoId;
+
+                        // 2. Sincronizar las redes sociales
+                        // Eliminamos las redes sociales antiguas que ya no están en la nueva lista --PASAR LO DE ELIMINAR Y AGREGAR LAS REDES A OTRO METODO
+                        var socialsToDelete = userAccountToUpdate.SocialAccount
+                            .Where(s => !updatedSocialsAccounts.Any(us => us.Provider == s.Provider)).ToList();
+                        foreach (var social in socialsToDelete)
                         {
-                            return false;
+                            context.SocialAccount.Remove(social);
                         }
 
-                        var userAccount = player.UserAccount;
-
-                        userAccount.Nickname = nickname;
-                        userAccount.FirstName = firstName;
-                        userAccount.LastName = lastName;
-
-                        if (photoId >= 1 && photoId <= 6)
+                        // Actualizamos las existentes y añadimos las nuevas
+                        foreach (var updatedSocial in updatedSocialsAccounts)
                         {
-                            userAccount.PhotoId = (byte?)photoId;
-                        }
-                        else
-                        {
-                            userAccount.PhotoId = null;
-                        }
+                            var existingSocial = userAccountToUpdate.SocialAccount
+                                .FirstOrDefault(s => s.Provider == updatedSocial.Provider);
 
-                            foreach (var socialAcccount in socialAccounts)
+                            if (existingSocial != null)
                             {
-                                var existingAccount = userAccount.SocialAccount
-                                    .FirstOrDefault(sa => sa.Provider == socialAcccount.Key);
-
-                                if (existingAccount != null)
-                                {
-                                    if (string.IsNullOrEmpty(socialAcccount.Value))
-                                    {
-                                        context.SocialAccount.Remove(existingAccount);
-                                    }
-                                    else
-                                    {
-                                        existingAccount.Username = socialAcccount.Value;
-                                    }
-                                }
-                                else if (!string.IsNullOrEmpty(socialAcccount.Value))
-                                {
-                                    userAccount.SocialAccount.Add(new SocialAccount
-                                    {
-                                        Provider = socialAcccount.Key,
-                                        Username = socialAcccount.Value
-                                    });
-                                }
+                                existingSocial.Username = updatedSocial.Username; // Actualizar
                             }
+                            else
+                            {
+                                userAccountToUpdate.SocialAccount.Add(updatedSocial); // Añadir nuevo
+                            }
+                        }
 
                         context.SaveChanges();
                         transaction.Commit();
-
                         return true;
                     }
-                    catch (Exception)
+                    catch (System.Exception)
                     {
                         transaction.Rollback();
                         return false;
