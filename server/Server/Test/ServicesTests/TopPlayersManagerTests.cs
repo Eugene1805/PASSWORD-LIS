@@ -44,11 +44,9 @@ namespace Test.ServicesTests
                 }
             };
 
-            // CAMBIO 1: Usar ReturnsAsync
             mockStatisticsRepository.Setup(repo => repo.GetTopTeamsAsync(numberOfTeams)).ReturnsAsync(teamsFromDb);
 
             // Act
-            // CAMBIO 2: Usar await
             var result = await topPlayersManager.GetTopAsync(numberOfTeams);
 
             // Assert
@@ -62,7 +60,7 @@ namespace Test.ServicesTests
 
             Assert.Equal(90, result[1].Score);
             Assert.Single(result[1].PlayersNicknames);
-            Assert.Equal("Player3", result[1].PlayersNicknames.First());
+            Assert.Equal("Player3", result[1].PlayersNicknames[0]);
         }
 
         [Fact]
@@ -110,14 +108,13 @@ namespace Test.ServicesTests
             // Arrange
             var numberOfTeams = 3;
             mockStatisticsRepository.Setup(repo => repo.GetTopTeamsAsync(numberOfTeams))
-                                     .ThrowsAsync(new System.Exception("Error de base de datos simulado"));
+                                     .ThrowsAsync(new System.Exception("Simulated Database error"));
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => topPlayersManager.GetTopAsync(numberOfTeams)
             );
 
-            // (Opcional) Verificar que el código de error sea el correcto
             Assert.Equal("STATISTICS_ERROR", exception.Detail.ErrorCode);
         }
     }
