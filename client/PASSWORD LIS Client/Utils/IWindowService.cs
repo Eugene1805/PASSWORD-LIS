@@ -90,6 +90,7 @@ namespace PASSWORD_LIS_Client.Utils
             bool? userResponse = popUpWindow.ShowDialog();
 
             return userResponse.HasValue && userResponse.Value;
+        }
 
         public void ShowReportWindow(PlayerDTO reportedPlayer)
         {
