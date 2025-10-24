@@ -1,9 +1,5 @@
 ﻿using PASSWORD_LIS_Client.Properties;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace PASSWORD_LIS_Client.Services
@@ -17,7 +13,19 @@ namespace PASSWORD_LIS_Client.Services
             get => player.Volume;
             set
             {
-                var clamped = value < 0 ? 0 : (value > 1 ? 1 : value);
+                double clamped;
+                if (value < 0)
+                {
+                    clamped = 0;
+                }
+                else if (value > 1)
+                {
+                    clamped = 1;
+                }
+                else
+                {
+                    clamped = value;
+                }
                 player.Volume = clamped;
                 Settings.Default.MusicVolume = clamped;
                 Settings.Default.Save();
