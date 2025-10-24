@@ -43,21 +43,17 @@
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="{utils:Translate musicText}"
+                    <TextBlock Grid.Column="0" Text="{utils:Translate musicText}" Margin="0,20,10,0"
                             Style="{StaticResource subtitleTextBlockStyle}"
                             TextAlignment="Left"/>
-                    <Slider Grid.Column="1" Value="{Binding MusicVolume}" VerticalAlignment="Center" Cursor="Hand"/>
+                    <Slider Grid.Column="1" Value="{Binding MusicVolume}" Margin="0,20,10,0"
+                            VerticalAlignment="Center" Cursor="Hand"/>
                 </Grid>
 
                 <Grid Grid.Row="3" Margin="20,0,20,10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="{utils:Translate soundEffectsText}"
-                          Style="{StaticResource subtitleTextBlockStyle}"
-                          TextAlignment="Left"/>
-                    <Slider Grid.Column="1" Value="{Binding SoundEffectsVolume}" VerticalAlignment="Center" Cursor="Hand"/>
                 </Grid>
 
                 <Button Grid.Row="4" Content="{utils:Translate logOutText}"
