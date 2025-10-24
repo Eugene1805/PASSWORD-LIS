@@ -1,4 +1,5 @@
-﻿using Data.DAL.Interfaces;
+﻿using BCrypt.Net;
+using Data.DAL.Interfaces;
 using Data.Model;
 using Moq;
 using Services.Services;
@@ -22,7 +23,7 @@ namespace Test.ServicesTests
             mockRepo = new Mock<IAccountRepository>();
             loginManager = new LoginManager(mockRepo.Object);
         }
-        /*
+        
         [Fact]
         public void Login_ShouldReturnUserDTO_WhenCredentialsAreValidAndPlayerExists()
         {
@@ -30,7 +31,6 @@ namespace Test.ServicesTests
             var email = "test@example.com";
             var password = "ValidPassword123!";
 
-            // Creamos un hash real que coincida con la contraseña
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
 
             var mockPlayer = new Player { Id = 10 };
@@ -42,10 +42,10 @@ namespace Test.ServicesTests
                 Email = email,
                 FirstName = "Test",
                 LastName = "User",
-                PasswordHash = hashedPassword, // Usamos el hash real
+                PasswordHash = hashedPassword, 
                 PhotoId = 1,
-                Player = new List<Player> { mockPlayer }, // El usuario tiene un jugador
-                SocialAccount = new List<SocialAccount>() // Evita NullReference en ToDictionary
+                Player = new List<Player> { mockPlayer }, 
+                SocialAccount = new List<SocialAccount>() 
             };
 
             mockRepo.Setup(repo => repo.GetUserByEmail(email)).Returns(mockAccount);
@@ -60,7 +60,7 @@ namespace Test.ServicesTests
             Assert.Equal(mockAccount.Nickname, result.Nickname);
             mockRepo.Verify(repo => repo.GetUserByEmail(email), Times.Once);
         }
-        */
+        
         [Fact]
         public void Login_ShouldReturnNull_WhenUserNotFound()
         {
@@ -68,7 +68,6 @@ namespace Test.ServicesTests
             var email = "nonexistent@example.com";
             var password = "password";
 
-            // Configuramos el repo para que devuelva null (usuario no encontrado)
             mockRepo.Setup(repo => repo.GetUserByEmail(email)).Returns((UserAccount)null);
 
             // Act
@@ -78,7 +77,7 @@ namespace Test.ServicesTests
             Assert.Null(result);
             mockRepo.Verify(repo => repo.GetUserByEmail(email), Times.Once);
         }
-        /*
+        
         [Fact]
         public void Login_ShouldReturnNull_WhenPasswordIsInvalid()
         {
@@ -87,7 +86,6 @@ namespace Test.ServicesTests
             var correctPassword = "ValidPassword123!";
             var wrongPassword = "WrongPassword!";
 
-            // Creamos un hash real para la contraseña correcta
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(correctPassword);
 
             var mockAccount = new UserAccount
@@ -103,16 +101,14 @@ namespace Test.ServicesTests
             mockRepo.Setup(repo => repo.GetUserByEmail(email)).Returns(mockAccount);
 
             // Act
-            // Llamamos al Login con la contraseña incorrecta
             var result = loginManager.Login(email, wrongPassword);
 
             // Assert
-            // BCrypt.Verify devolverá false, y el método debe devolver null
             Assert.Null(result);
             mockRepo.Verify(repo => repo.GetUserByEmail(email), Times.Once);
         }
-        */
-        /*
+        
+        
         [Fact]
         public void Login_ShouldReturnNull_WhenUserHasNoPlayerAssociated()
         {
@@ -127,7 +123,7 @@ namespace Test.ServicesTests
                 Nickname = "testuser",
                 Email = email,
                 PasswordHash = hashedPassword,
-                Player = new List<Player>(), // <-- El usuario existe, pero no tiene jugador
+                Player = new List<Player>(),
                 SocialAccount = new List<SocialAccount>()
             };
 
@@ -137,11 +133,10 @@ namespace Test.ServicesTests
             var result = loginManager.Login(email, password);
 
             // Assert
-            // Debería fallar en userAccount.Player.Any() y devolver null
             Assert.Null(result);
             mockRepo.Verify(repo => repo.GetUserByEmail(email), Times.Once);
         }
-        */
+        
         [Fact]
         public void Login_ShouldThrowException_WhenRepositoryFails()
         {
@@ -149,13 +144,10 @@ namespace Test.ServicesTests
             var email = "db_error@example.com";
             var password = "password";
 
-            // Simulamos un error de base de datos, como en tus otros ejemplos
             mockRepo.Setup(repo => repo.GetUserByEmail(email))
                     .Throws(new DbUpdateException("Error de BD simulado"));
 
             // Act & Assert
-            // Probamos que la excepción de BD "burbujea" (ya que tu LoginManager no la maneja)
-            // A diferencia de AccountManager, este servicio no lo envuelve en un FaultException.
             Assert.Throws<DbUpdateException>(
                 () => loginManager.Login(email, password)
             );

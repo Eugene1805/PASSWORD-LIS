@@ -71,7 +71,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             catch (Exception)
             {
-                // Manejar error (ej. con un PopUp)
+                // TODO Manejar error
             }
             finally
             {
@@ -90,7 +90,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             catch (Exception)
             {
-                //PopUp de error
+                //TODO Manejar error
             }
             finally
             {

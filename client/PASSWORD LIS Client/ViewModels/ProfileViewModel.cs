@@ -137,8 +137,6 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void ChooseAnAvatar(object parameter)
         {
-            // Por simplicidad, la mantenemos aquí por ahora, pero también podría abstraerse a través del IWindowService si se vuelve más compleja.
-
             var chooseAvatarWindow = new ChooseAvatarWindow();
             if (chooseAvatarWindow.ShowDialog() == true)
             {

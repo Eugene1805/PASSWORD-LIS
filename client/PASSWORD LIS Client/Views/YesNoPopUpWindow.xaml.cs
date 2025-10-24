@@ -40,10 +40,8 @@ namespace PASSWORD_LIS_Client.Views
 
         private void HandleViewModelCloseRequested(bool? dialogResult)
         {
-            // Establece el DialogResult de la ventana
-            // Esto es lo que ShowDialog() devolverá
             this.DialogResult = dialogResult;
-            this.Close(); // Cierra la ventana
+            this.Close();
         }
 
         protected override void OnClosed(EventArgs e)
