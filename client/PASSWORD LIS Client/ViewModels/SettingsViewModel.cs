@@ -2,6 +2,7 @@
 using PASSWORD_LIS_Client.Properties;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Windows.Input;
@@ -40,25 +41,20 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
         }
         private double musicVolume;
+        private const double DoubleComparisonEpsilon = 0.0001;
+
         public double MusicVolume
         {
-            get => musicVolume; 
+            get => musicVolume;
             set
             {
-                if (musicVolume != value)
+                if (Math.Abs(musicVolume - value) > DoubleComparisonEpsilon)
                 {
                     musicVolume = value;
                     backgroundMusicService.Volume = value;
                     OnPropertyChanged();
                 }
             }
-        }
-
-        private double soundEffectsVolume;
-        public double SoundEffectsVolume 
-        { 
-            get => soundEffectsVolume; 
-            set { soundEffectsVolume = value; OnPropertyChanged(); } 
         }
 
         public ICommand LogoutCommand { get; }
@@ -84,16 +80,12 @@ namespace PASSWORD_LIS_Client.ViewModels
             LogoutCommand = new RelayCommand(Logout);
         }
 
-        private void UpdateLanguage(string cultureName)
+        private static void UpdateLanguage(string cultureName)
         {
             var culture = new CultureInfo(cultureName);
-
-            // 1. Cambia el idioma en tiempo real
             TranslationProvider.Instance.SetLanguage(culture);
-
-            // 2. Guarda la preferencia del usuario
-            Properties.Settings.Default.languageCode = cultureName;
-            Properties.Settings.Default.Save();
+            Settings.Default.languageCode = cultureName;
+            Settings.Default.Save();
         }
         private void Logout(object parameter)
         {
