@@ -128,7 +128,10 @@ namespace Data.DAL.Implementations
                             .Include(p => p.UserAccount.SocialAccount)
                             .FirstOrDefault(p => p.Id == playerId);
 
-                        if (player == null || player.UserAccount == null) return false;
+                        if (player == null || player.UserAccount == null)
+                        {
+                            return false;
+                        }
 
                         var userAccountToUpdate = player.UserAccount;
 

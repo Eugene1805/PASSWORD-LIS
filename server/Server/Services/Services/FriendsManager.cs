@@ -165,8 +165,11 @@ namespace Services.Services
             if (success && accepted)
             {
                 var requesterAccount = accountRepository.GetUserByPlayerId(requesterPlayerId);
-               
-                if (requesterAccount == null) return Task.CompletedTask; 
+
+                if (requesterAccount == null)
+                {
+                    return Task.CompletedTask;
+                }
 
                 var callback = connectedClients[addreseeUserAccountId];
 

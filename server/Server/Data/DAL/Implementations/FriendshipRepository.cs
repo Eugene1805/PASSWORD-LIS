@@ -126,8 +126,10 @@ namespace Data.DAL.Implementations
                 var request = context.Friendship.FirstOrDefault(f =>
                     f.RequesterId == requesterPlayerId && f.AddresseeId == addresseePlayerId && f.Status == 0);
 
-                if (request == null) return false;
-
+                if (request == null)
+                {
+                    return false;
+                }
                 if (accept)
                 {
                     request.Status = 1; 
