@@ -12,7 +12,6 @@ namespace Data.DAL.Interfaces
         bool VerifyEmail(string email);
         bool ResetPassword(string email, string passwordHash);
         bool UpdateUserProfile(int playerId, UserAccount updatedAccountData, List<SocialAccount> updatedSocialsAccounts);
-
         UserAccount GetUserByPlayerId(int playerId);
         UserAccount GetUserByUserAccountId(int userAccountId);
 

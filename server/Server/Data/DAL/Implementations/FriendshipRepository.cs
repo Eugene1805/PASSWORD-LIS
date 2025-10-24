@@ -57,13 +57,13 @@ namespace Data.DAL.Implementations
                     {
                         context.Friendship.Remove(friendship);
                         context.SaveChanges();
-                        return true; // Éxito
+                        return true;
                     }
-                    return false; // No se encontró la amistad
+                    return false; 
                 }
                 catch (Exception)
                 {
-                    return false; // Error en la base de datos
+                    return false; 
                 }
             }
         }
@@ -80,14 +80,14 @@ namespace Data.DAL.Implementations
 
                     if (requestExists)
                     {
-                        return false; // Ya existe una solicitud o amistad
+                        return false; 
                     }
 
                     var newRequest = new Friendship
                     {
                         RequesterId = requesterPlayerId,
                         AddresseeId = addresseePlayerId,
-                        Status = 0, // 0 = Pendiente
+                        Status = 0, 
                         RequestedAt = System.DateTime.UtcNow
                     };
 
@@ -97,7 +97,7 @@ namespace Data.DAL.Implementations
                 }
                 catch (Exception)
                 {
-                    return false; // Error en la base de datos
+                    return false; 
                 }
             }
         }
@@ -113,7 +113,7 @@ namespace Data.DAL.Implementations
                 }
                 // Buscamos todas las solicitudes donde YO soy el destinatario y el estado es Pendiente
                 return context.Friendship
-                    .Include(f => f.Player1.UserAccount) // Incluimos la información del jugador que envió la solicitud
+                    .Include(f => f.Player1.UserAccount)
                     .Where(f => f.AddresseeId == player.Id && f.Status == 0)
                     .ToList();
             }
@@ -130,12 +130,12 @@ namespace Data.DAL.Implementations
 
                 if (accept)
                 {
-                    request.Status = 1; // 1 = Aceptado
+                    request.Status = 1; 
                     request.RespondedAt = System.DateTime.UtcNow;
                 }
                 else
                 {
-                    context.Friendship.Remove(request); // Si rechaza, simplemente borramos la solicitud
+                    context.Friendship.Remove(request); 
                 }
 
                 context.SaveChanges();

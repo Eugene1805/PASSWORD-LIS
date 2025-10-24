@@ -30,14 +30,12 @@ namespace Services.Services
                 .Select(kvp => new SocialAccount { Provider = kvp.Key, Username = kvp.Value })
                 .ToList();
 
-            // 3. Llamar al repositorio con los objetos del Modelo
             bool updateSuccess = repository.UpdateUserProfile(
                 updatedProfileData.PlayerId,
                 accountData,
                 socialData
             );
 
-            // Devolvemos el DTO como confirmación si la operación fue exitosa
             return updateSuccess ? updatedProfileData : null;
 
         }

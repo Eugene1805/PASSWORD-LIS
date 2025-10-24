@@ -46,8 +46,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             try
             {
                 var result = await friendsService.SendFriendRequestAsync(Email);
-                
-                // Mostrar un PopUp basado en el 'result' (Success, UserNotFound, etc.)
                 HandleFriendRequestResult(result);
             }
             catch (System.Exception)
@@ -66,20 +64,13 @@ namespace PASSWORD_LIS_Client.ViewModels
             switch (result)
             {
                 case FriendRequestResult.Success:
-                    windowService.CloseWindow(this); // Cerramos solo si es exitoso
+                    windowService.CloseWindow(this); 
                     windowService.ShowPopUp(Properties.Langs.Lang.requestSentTitleText,
                         Properties.Langs.Lang.requestSentText, PopUpIcon.Success);
-                    /*title = "Solicitud Enviada"; // Usar Langs
-                    message = "Tu solicitud de amistad ha sido enviada."; // Usar Langs
-                    icon = PopUpIcon.Success;
-                    */
                     break;
                 case FriendRequestResult.UserNotFound:
                     windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
                         Properties.Langs.Lang.playerNotFoundText, PopUpIcon.Warning);
-                    /*title = "Error"; // Usar Langs
-                    message = "No se encontró ningún jugador con ese correo electrónico."; // Usar Langs
-                    icon = PopUpIcon.Warning;*/
                     break;
                 case FriendRequestResult.AlreadyFriends:
                     windowService.ShowPopUp("Información",

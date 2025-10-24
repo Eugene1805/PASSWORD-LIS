@@ -18,7 +18,6 @@ namespace PASSWORD_LIS_Client.Utils
         void ShowLoginWindow();
         void CloseWindow(object viewModel);
         void ShowPopUp(string title, string message, PopUpIcon icon);
-
         bool ShowYesNoPopUp(string title, string message);
         void ShowReportWindow(PlayerDTO reportedPlayer);
         void ShowMainWindow();
@@ -91,7 +90,6 @@ namespace PASSWORD_LIS_Client.Utils
             bool? userResponse = popUpWindow.ShowDialog();
 
             return userResponse.HasValue && userResponse.Value;
-        }
 
         public void ShowReportWindow(PlayerDTO reportedPlayer)
         {

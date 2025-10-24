@@ -121,6 +121,12 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private async Task LoadFriendsAsync()
         {
+            /*
+            if (SessionManager.CurrentUser.PlayerId<0)
+            {
+                return;
+            }
+            */
             if (isLoadingFriends)
             {
                 return;
@@ -135,7 +141,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             catch (Exception)
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                            "No se pudo cargar la lista de amigos", PopUpIcon.Error); //
+                            "No se pudo cargar la lista de amigos", PopUpIcon.Error);
             }
             finally
             {
@@ -187,7 +193,6 @@ namespace PASSWORD_LIS_Client.ViewModels
                 {
                     _ = LoadFriendsAsync();
                     windowService.ShowPopUp("Succesful", "friend successfully deleted", PopUpIcon.Success);
-                    // Actualizamos la lista en la UI al instante, sin volver a llamar al servidor
                 }
                 else
                 {

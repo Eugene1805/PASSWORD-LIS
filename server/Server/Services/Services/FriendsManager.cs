@@ -47,17 +47,14 @@ namespace Services.Services
 
             if (success)
             {
-                // Notificar a ambos jugadores por callback
                 var currentUserAccount = accountRepository.GetUserByPlayerId(currentUserId);
                 var friendAccount = accountRepository.GetUserByPlayerId(friendToDeleteId);
 
-                // Notificar al amigo eliminado (si está conectado)
                 if (connectedClients.TryGetValue(friendAccount.Id, out var friendCallback))
                 {
                     friendCallback.OnFriendRemoved(currentUserId);
                 }
 
-                // Notificar al jugador actual (para que su UI se actualice si otro cliente lo hizo)
                 if (connectedClients.TryGetValue(currentUserAccount.Id, out var currentCallback))
                 {
                     currentCallback.OnFriendRemoved(friendToDeleteId);
@@ -71,7 +68,6 @@ namespace Services.Services
             var callbackChannel = operationContext.GetCallbackChannel<IFriendsCallback>();
             connectedClients[userAccountId] = callbackChannel;
 
-            //Logica para limpiar clientes muertos
             var communicationObject = (ICommunicationObject)callbackChannel;
             communicationObject.Faulted += (sender, e) => {
                 connectedClients.TryRemove(userAccountId, out _); 
@@ -92,7 +88,6 @@ namespace Services.Services
 
             }
          
-            //Obtener datos de los dos jugadores
             var requesterAccount = accountRepository.GetUserByUserAccountId(requesterUserAccountId);
             var addresseeAccount = accountRepository.GetUserByEmail(addresseeEmail);
 
@@ -160,7 +155,6 @@ namespace Services.Services
 
             if (addresseeAccount == null || !addresseeAccount.Player.Any())
             {
-                // No se encontró la cuenta o no tiene un jugador asociado, no podemos continuar
                 return Task.CompletedTask;
             }
 
@@ -170,12 +164,9 @@ namespace Services.Services
 
             if (success && accepted)
             {
-                // Notificar a ambos jugadores que ahora son amigos
-
-                // 1. Notificar al que aceptó (Addressee)
                 var requesterAccount = accountRepository.GetUserByPlayerId(requesterPlayerId);
                
-                if (requesterAccount == null) return Task.CompletedTask; // Comprobación de seguridad
+                if (requesterAccount == null) return Task.CompletedTask; 
 
                 var callback = connectedClients[addreseeUserAccountId];
 
@@ -186,7 +177,6 @@ namespace Services.Services
 
                 callback.OnFriendAdded(requesterDto);
 
-                // 2. Notificar al que envió la solicitud (Requester), si está conectado
                 if (connectedClients.TryGetValue(requesterAccount.Id, out var requesterCallback))
                 {
                     var addresseeDto = new FriendDTO { 
@@ -248,15 +238,13 @@ namespace Services.Services
             int requesterPlayerId = requesterAccount.Player.First().Id;
             int addresseePlayerId = addresseeAccount.Player.First().Id;
 
-            // 1. Crear la solicitud
             bool success = friendshipRepository.CreateFriendRequest(requesterPlayerId, addresseePlayerId);
 
             if (!success)
             {
-                return false; // Error al crear en BD
+                return false; 
             }
 
-            // Notificar al destinatario (si está conectado)
             if (connectedClients.TryGetValue(addresseeAccount.Id, out var addresseeCallback))
             {
                 var requesterDto = new FriendDTO
