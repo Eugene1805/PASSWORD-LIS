@@ -128,18 +128,18 @@ namespace Data.DAL.Implementations
                             .Include(p => p.UserAccount.SocialAccount)
                             .FirstOrDefault(p => p.Id == playerId);
 
-                        if (player == null || player.UserAccount == null) return false;
+                        if (player == null || player.UserAccount == null)
+                        {
+                            return false;
+                        }
 
                         var userAccountToUpdate = player.UserAccount;
 
-                        // 1. Actualizar los datos de UserAccount
                         userAccountToUpdate.FirstName = updatedAccountData.FirstName;
                         userAccountToUpdate.LastName = updatedAccountData.LastName;
-                        // El Nickname no se cambia
                         userAccountToUpdate.PhotoId = updatedAccountData.PhotoId;
 
-                        // 2. Sincronizar las redes sociales
-                        // Eliminamos las redes sociales antiguas que ya no están en la nueva lista --PASAR LO DE ELIMINAR Y AGREGAR LAS REDES A OTRO METODO
+                        // TO DO PASAR LO DE ELIMINAR Y AGREGAR LAS REDES A OTRO METODO
                         var socialsToDelete = userAccountToUpdate.SocialAccount
                             .Where(s => !updatedSocialsAccounts.Any(us => us.Provider == s.Provider)).ToList();
                         foreach (var social in socialsToDelete)
@@ -147,7 +147,6 @@ namespace Data.DAL.Implementations
                             context.SocialAccount.Remove(social);
                         }
 
-                        // Actualizamos las existentes y añadimos las nuevas
                         foreach (var updatedSocial in updatedSocialsAccounts)
                         {
                             var existingSocial = userAccountToUpdate.SocialAccount
@@ -155,11 +154,11 @@ namespace Data.DAL.Implementations
 
                             if (existingSocial != null)
                             {
-                                existingSocial.Username = updatedSocial.Username; // Actualizar
+                                existingSocial.Username = updatedSocial.Username; 
                             }
                             else
                             {
-                                userAccountToUpdate.SocialAccount.Add(updatedSocial); // Añadir nuevo
+                                userAccountToUpdate.SocialAccount.Add(updatedSocial);
                             }
                         }
 
