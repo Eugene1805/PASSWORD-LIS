@@ -17,6 +17,7 @@ namespace PASSWORD_LIS_Client.Utils
         void ShowLoginWindow();
         void CloseWindow(object viewModel);
         void ShowPopUp(string title, string message, PopUpIcon icon);
+        bool ShowYesNoPopUp(string title, string message);
         void ShowMainWindow();
         void CloseMainWindow();
 
@@ -77,6 +78,16 @@ namespace PASSWORD_LIS_Client.Utils
         {
             var popUp = new PopUpWindow(title, message, icon);
             popUp.ShowDialog();
+        }
+
+        public bool ShowYesNoPopUp(string title, string message)
+        {
+            var viewModel = new YesNoPopUpViewModel(title, message);
+            var popUpWindow = new YesNoPopUpWindow { DataContext = viewModel };
+
+            bool? userResponse = popUpWindow.ShowDialog();
+
+            return userResponse.HasValue && userResponse.Value;
         }
 
         public void ShowMainWindow()

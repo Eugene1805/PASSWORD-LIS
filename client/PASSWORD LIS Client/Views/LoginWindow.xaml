@@ -30,11 +30,12 @@
 
             <TextBlock Text="{utils:Translate emailText}" Style="{StaticResource subtitleBlackTextBlockStyle}"
                        HorizontalAlignment="Left"/>
-            <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource primaryTextBoxStyle}" Width="230"/>
+            <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" MaxLength="100"
+                     Style="{StaticResource primaryTextBoxStyle}" Width="230"/>
 
             <TextBlock Text="{utils:Translate userPasswordText}" Style="{StaticResource subtitleBlackTextBlockStyle}"
                        HorizontalAlignment="Left"/>
-            <PasswordBox Style="{StaticResource passwordboxStyle}" Width="230"
+            <PasswordBox Style="{StaticResource passwordboxStyle}" Width="230" MaxLength="15"
                          utils:PasswordBoxHelper.BindPassword="True"
                          utils:PasswordBoxHelper.BoundPassword="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 

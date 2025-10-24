@@ -600,4 +600,10 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
   <data name="informationText" xml:space="preserve">
     <value>Información</value>
   </data>
+  <data name="yesButtonText" xml:space="preserve">
+    <value>Sí</value>
+  </data>
+  <data name="noButtonText" xml:space="preserve">
+    <value>No</value>
+  </data>
 </root>

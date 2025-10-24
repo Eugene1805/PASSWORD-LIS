@@ -190,14 +190,11 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             if (IsEditMode)
             {
-                // Aquí usarías el servicio IWindowService si tuvieras un PopUp con Yes/No
-                // Por ahora, mantenemos el MessageBox para la confirmación
-                MessageBoxResult result = MessageBox.Show(
-                    Properties.Langs.Lang.unsavedChangesWarningText,
+                bool userConfirmedExit = windowService.ShowYesNoPopUp(
                     Properties.Langs.Lang.unsavedChangesWarningTitleText,
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Warning);
-                if (result == MessageBoxResult.No)
+                    Properties.Langs.Lang.unsavedChangesWarningText);
+               
+                if (!userConfirmedExit)
                 {
                     return;
                 }

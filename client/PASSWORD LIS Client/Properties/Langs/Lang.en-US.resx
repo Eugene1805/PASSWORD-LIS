@@ -600,4 +600,10 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="informationText" xml:space="preserve">
     <value>Information</value>
   </data>
+  <data name="yesButtonText" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="noButtonText" xml:space="preserve">
+    <value>No</value>
+  </data>
 </root>

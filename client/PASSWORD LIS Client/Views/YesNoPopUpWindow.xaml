@@ -1,0 +1,57 @@
+﻿<Window x:Class="PASSWORD_LIS_Client.Views.YesNoPopUpWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PASSWORD_LIS_Client.Views"
+        xmlns:utils="clr-namespace:PASSWORD_LIS_Client.Utils"
+        xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
+        xmlns:viewModels="clr-namespace:PASSWORD_LIS_Client.ViewModels"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="ToolWindow"
+        mc:Ignorable="d"
+        Title="{Binding Title}" Height="200" Width="300">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Image Grid.Column="0"
+               Source="/Resources/InformationIcon.png" Width="50" Height="50"
+               VerticalAlignment="Center"
+               HorizontalAlignment="Center"
+               Margin="0,0,15,0"/>
+
+            <ScrollViewer Grid.Column="1"
+                      VerticalAlignment="Center"
+                      HorizontalAlignment="Stretch"
+                      MaxHeight="100" VerticalScrollBarVisibility="Auto">
+
+                <TextBlock Text="{Binding Message}"
+                       Style="{StaticResource subtitleBlackTextBlockStyle}" 
+                       TextWrapping="Wrap"/>
+            </ScrollViewer>
+
+        </Grid>
+        <StackPanel Grid.Row="1"
+                Orientation="Horizontal"
+                HorizontalAlignment="Center"
+                Margin="0,0,0,15">
+            <Button Content="{utils:Translate yesButtonText}"
+                    Command="{Binding YesCommand}"
+                    Style="{StaticResource primaryButtonStyle}"
+                    Width="100" Height="30" Margin="10,0"/>
+            <Button Content="{utils:Translate noButtonText}"
+                    Command="{Binding NoCommand}"
+                    Style="{StaticResource logOutButtonStyle}" 
+                    Width="100" Height="30" Margin="10,0"/>
+        </StackPanel>
+    </Grid>
+</Window>
