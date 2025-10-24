@@ -189,7 +189,6 @@ namespace Data.DAL.Implementations
         {
             using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
-                // Buscamos la cuenta directamente por su ID e incluimos las relaciones que necesitaremos
                 return context.UserAccount
                               .Include(u => u.Player)
                               .FirstOrDefault(u => u.Id == userAccountId);
