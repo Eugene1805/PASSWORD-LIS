@@ -79,17 +79,23 @@ namespace PASSWORD_LIS_Client.ViewModels
         private readonly IWaitingRoomManagerService roomManagerClient;
         private readonly IWindowService windowService;
         private readonly IFriendsManagerService friendsManagerService;
-        public WaitingRoomViewModel(IWaitingRoomManagerService roomManagerService, IWindowService windowService)
+        public WaitingRoomViewModel(IWaitingRoomManagerService roomManagerService, IWindowService windowService, IFriendsManagerService friendsManagerService) 
         {
             this.roomManagerClient = roomManagerService;
             this.windowService = windowService;
+            this.friendsManagerService = friendsManagerService;
+
+            friendsManagerService.FriendAdded += OnFriendAdded;
+            friendsManagerService.FriendRemoved += OnFriendRemoved;
 
             ChatMessages = new ObservableCollection<string>();
             ConnectedPlayers = new ObservableCollection<PlayerDTO>();
 
             SendMessageCommand = new RelayCommand(async (_) => await SendMessageAsync(),(_) => CanSendMessage());
             LeaveRoomCommand = new RelayCommand(async (_) => await LeaveRoomAsync());
-            ReportCommand = new RelayCommand( (_) => OpenReportWindow(), (_) => CanReportPlayer());  
+            ReportCommand = new RelayCommand( (_) => OpenReportWindow(), (_) => CanReportPlayer());
+
+            Friends = new ObservableCollection<FriendDTO>();
 
             if (roomManagerClient is WcfWaitingRoomManagerService wcfService)
             {
@@ -97,6 +103,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 wcfService.PlayerJoined += OnPlayerJoined;
                 wcfService.PlayerLeft += OnPlayerLeft;
             }
+
 
         }
 

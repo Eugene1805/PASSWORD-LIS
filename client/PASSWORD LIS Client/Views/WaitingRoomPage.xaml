@@ -13,6 +13,7 @@
     <Page.Resources>
         <converters:BooleanToVisibilityConverter x:Key="BoolToVisConverter" />
         <converters:AvatarIdToImageConverter x:Key="AvatarIdToImageConverter"/>
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
     </Page.Resources>
 
     <Grid>
@@ -67,18 +68,18 @@
                     </Button>
                 </Grid>
 
-                <Border Grid.Row="1" Margin="0,10,0,10" Padding="5">
-                    <ListBox x:Name="friendsListBox" BorderThickness="0" Background="Transparent">
-                        <ListBoxItem Content="Eugenio"/>
-                        <ListBoxItem Content="Uriel"/>
-                        <ListBoxItem Content="Miguel"/>
-                        <ListBoxItem Content="Erickmel"/>
-                        <ListBoxItem Content="Mauricio"/>
-                        <ListBoxItem Content="Raziel"/>
-                        <ListBoxItem Content="Yael"/>
-                        <ListBoxItem Content="Abel"/>
-                        
-                    </ListBox>
+                <Border Grid.Row="1" Style="{StaticResource floatingBorderStyle}" Margin="0,10,0,10" Padding="5"> <!--TODO Todo el border de amigos no debería de verlo un invitado-->
+                    <ListView ItemsSource="{Binding Friends}"
+                              Background="Transparent" BorderThickness="0"
+                              Visibility="{Binding IsLoadingFriends, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Nickname}" Margin="5"
+                                           Style="{StaticResource bodyTextBlockStyle}" TextAlignment="Left"/>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+
+                    </ListView>
                 </Border>
 
                 <Button Grid.Row="2" Style="{StaticResource primaryButtonStyle}"
