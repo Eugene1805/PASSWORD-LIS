@@ -48,7 +48,7 @@ namespace PASSWORD_LIS_Client.Services
             }
             catch (Exception)
             {
-                Console.WriteLine("Error al unirse como invitado");
+                Console.WriteLine("Error at joining as guest");
                 throw;
             }
         }
@@ -61,14 +61,23 @@ namespace PASSWORD_LIS_Client.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error al unirse: {ex.Message}");
+                Console.WriteLine($"Error at joining: {ex.Message}");
                 throw;
             }
         }
 
         public async Task LeaveRoomAsync(int playerId)
         {
-            await proxy.LeaveRoomAsync(playerId);
+            try
+            {
+                await proxy.LeaveRoomAsync(playerId);
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Error at leaving the room");
+                throw;
+            }
+            
         }
         public async Task SendMessageAsync(string message)
         {
@@ -83,7 +92,7 @@ namespace PASSWORD_LIS_Client.Services
             }
             catch (Exception)
             {
-                Console.WriteLine("Error al enviar el mensaje");
+                Console.WriteLine("Error at sending a message");
             }
             
         }

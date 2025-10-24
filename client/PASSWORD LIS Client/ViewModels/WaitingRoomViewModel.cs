@@ -15,8 +15,6 @@ namespace PASSWORD_LIS_Client.ViewModels
 {
     public class WaitingRoomViewModel : BaseViewModel
     {
-        private readonly IWaitingRoomManagerService roomManagerClient;
-        private readonly IWindowService windowService;
         public ObservableCollection<string> ChatMessages { get; }
         public ObservableCollection<PlayerDTO> ConnectedPlayers { get; }
 
@@ -53,6 +51,8 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand SendMessageCommand { get; }
         public ICommand LeaveRoomCommand { get; }
         public ICommand ReportCommand { get; }
+        private readonly IWaitingRoomManagerService roomManagerClient;
+        private readonly IWindowService windowService;
         public WaitingRoomViewModel(IWaitingRoomManagerService roomManagerService, IWindowService windowService)
         {
             this.roomManagerClient = roomManagerService;
@@ -63,10 +63,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             SendMessageCommand = new RelayCommand(async (_) => await SendMessageAsync(),(_) => CanSendMessage());
             LeaveRoomCommand = new RelayCommand(async (_) => await LeaveRoomAsync());
-            ReportCommand = new RelayCommand(
-            execute: (_) => OpenReportWindow(),
-            canExecute: (_) => CanReportPlayer()
-            );  
+            ReportCommand = new RelayCommand( (_) => OpenReportWindow(), (_) => CanReportPlayer());  
 
             if (roomManagerClient is WcfWaitingRoomManagerService wcfService)
             {
@@ -133,9 +130,25 @@ namespace PASSWORD_LIS_Client.ViewModels
                     Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
             }
         }
+        // TODO: Add internacionzation messages
         private bool CanReportPlayer()
         {
-            return SelectedPlayer != null;
+            if (SessionManager.CurrentUser.PlayerId < 0)
+            {
+                Console.WriteLine("Guests can not report players");
+                return false;
+            }
+            if (SelectedPlayer == null)
+            {
+                Console.WriteLine("You need to select a player from the conected ones to generate a report");
+                return false;
+            }
+            if(SelectedPlayer.Id == SessionManager.CurrentUser.PlayerId)
+            {
+                Console.WriteLine("You can not report yourself");
+                return false;
+            }
+            return  true;
         }
 
         private void OpenReportWindow()
