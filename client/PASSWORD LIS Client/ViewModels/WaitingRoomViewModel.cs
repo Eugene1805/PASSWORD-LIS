@@ -1,4 +1,5 @@
 ﻿using PASSWORD_LIS_Client.Commands;
+using PASSWORD_LIS_Client.FriendsManagerServiceReference;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
@@ -47,12 +48,37 @@ namespace PASSWORD_LIS_Client.ViewModels
             get => snackbarMessage;
             set => SetProperty(ref snackbarMessage, value);
         }
+
+        private ObservableCollection<FriendDTO> friends;
+        public ObservableCollection<FriendDTO> Friends
+        {
+            get => friends;
+            set { friends = value; OnPropertyChanged(); }
+        }
+
+        private bool isLoadingFriends;
+        public bool IsLoadingFriends
+        {
+            get => isLoadingFriends;
+            set { isLoadingFriends = value; OnPropertyChanged(); }
+        }
+
+        /* DESCOMENTAR CUANDO SE IMPLEMENTE LO DE INVITAR AMIGOS
+        public FriendDTO selectedFriend;
+        public FriendDTO SelectedFriend 
+        {
+            get => selectedFriend;
+            set { selectedFriend = value; OnPropertyChanged(); }
+        }
+         */
+
         private PlayerDTO currentPlayer;
         public ICommand SendMessageCommand { get; }
         public ICommand LeaveRoomCommand { get; }
         public ICommand ReportCommand { get; }
         private readonly IWaitingRoomManagerService roomManagerClient;
         private readonly IWindowService windowService;
+        private readonly IFriendsManagerService friendsManagerService;
         public WaitingRoomViewModel(IWaitingRoomManagerService roomManagerService, IWindowService windowService)
         {
             this.roomManagerClient = roomManagerService;
