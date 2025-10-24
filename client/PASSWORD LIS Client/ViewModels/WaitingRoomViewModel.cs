@@ -85,12 +85,10 @@ namespace PASSWORD_LIS_Client.ViewModels
 
                 if (isGuest)
                 {
-                    Console.WriteLine($"Intentando unirse como invitado: {username}");
                     joined = await roomManagerClient.JoinAsGuestAsync(username);
                 }
                 else
                 {
-                    Console.WriteLine($"Intentando unirse como jugador registrado: {username}");
                     joined = await roomManagerClient.JoinAsRegisteredPlayerAsync(SessionManager.CurrentUser.Email);
                 }
 
@@ -206,7 +204,8 @@ namespace PASSWORD_LIS_Client.ViewModels
                 if (!ConnectedPlayers.Any(p => p.Id == player.Id))
                 {
                     ConnectedPlayers.Add(player);
-                    _ = ShowSnackbarAsync($"{player.Nickname} joined");
+                    var joinedText = Properties.Langs.Lang.joinedText;
+                    _ = ShowSnackbarAsync($"{player.Nickname} {joinedText}");
                 }
             });
         }
@@ -218,8 +217,9 @@ namespace PASSWORD_LIS_Client.ViewModels
                 var playerToRemove = ConnectedPlayers.FirstOrDefault(p => p.Id == playerId);
                 if (playerToRemove != null)
                 {
+                    var leftText = Properties.Langs.Lang.leftText;
                     ConnectedPlayers.Remove(playerToRemove);
-                    _ = ShowSnackbarAsync($"{playerToRemove.Nickname} left");
+                    _ = ShowSnackbarAsync($"{playerToRemove.Nickname} {leftText}");
                 }
             });
         }

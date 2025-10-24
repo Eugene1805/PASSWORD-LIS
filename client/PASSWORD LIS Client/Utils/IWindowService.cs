@@ -18,11 +18,9 @@ namespace PASSWORD_LIS_Client.Utils
         void ShowLoginWindow();
         void CloseWindow(object viewModel);
         void ShowPopUp(string title, string message, PopUpIcon icon);
-<<<<<<< HEAD
+
         bool ShowYesNoPopUp(string title, string message);
-=======
         void ShowReportWindow(PlayerDTO reportedPlayer);
->>>>>>> 77db55d19af7a6e75718209c2d9c14a753b3ca55
         void ShowMainWindow();
         void CloseMainWindow();
 
@@ -85,7 +83,6 @@ namespace PASSWORD_LIS_Client.Utils
             popUp.ShowDialog();
         }
 
-<<<<<<< HEAD
         public bool ShowYesNoPopUp(string title, string message)
         {
             var viewModel = new YesNoPopUpViewModel(title, message);
@@ -94,7 +91,8 @@ namespace PASSWORD_LIS_Client.Utils
             bool? userResponse = popUpWindow.ShowDialog();
 
             return userResponse.HasValue && userResponse.Value;
-=======
+        }
+
         public void ShowReportWindow(PlayerDTO reportedPlayer)
         {
             var reporter = SessionManager.CurrentUser;
@@ -102,7 +100,6 @@ namespace PASSWORD_LIS_Client.Utils
             var reportViewModel = new ReportViewModel(reporter, reportedPlayer, App.WindowService, App.ReportManagerService);
             var reportWindow = new ReportWindow { DataContext = reportViewModel };
             reportWindow.ShowDialog();
->>>>>>> 77db55d19af7a6e75718209c2d9c14a753b3ca55
         }
 
         public void ShowMainWindow()

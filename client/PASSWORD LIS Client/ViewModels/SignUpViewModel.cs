@@ -199,17 +199,20 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             if (!ValidationUtils.IsValidEmail(Email))
             {
-                MessageBox.Show(Properties.Langs.Lang.invalidEmailErrorText);
+                windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
+                    Properties.Langs.Lang.invalidEmailErrorText, PopUpIcon.Warning);
                 return false;
             }
             if (!ValidationUtils.PasswordsMatch(Password, ConfirmPassword))
             {
-                MessageBox.Show(Properties.Langs.Lang.matchingPasswordErrorText);
+                windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
+                    Properties.Langs.Lang.matchingPasswordErrorText,PopUpIcon.Warning);
                 return false;
             }
             if (!ValidationUtils.ArePasswordRequirementsMet(Password))
             {
-                MessageBox.Show(Properties.Langs.Lang.userPasswordRequirementsText);
+                windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
+                    Properties.Langs.Lang.userPasswordRequirementsText, PopUpIcon.Warning);
                 return false;
             }
             return true;

@@ -46,6 +46,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             try
             {
                 var result = await friendsService.SendFriendRequestAsync(Email);
+                
                 // Mostrar un PopUp basado en el 'result' (Success, UserNotFound, etc.)
                 HandleFriendRequestResult(result);
             }
