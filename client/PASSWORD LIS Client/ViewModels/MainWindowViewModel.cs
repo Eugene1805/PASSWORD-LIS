@@ -51,12 +51,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             windowService.ShowLoginWindow();
             windowService.CloseWindow(this);
         }
-
-        public void OnClosed()
-        {
-            musicService.Dispose();
-        }
-
     }
 
 }

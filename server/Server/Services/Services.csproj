@@ -92,6 +92,7 @@
     <Compile Include="Contracts\DTOs\NewAccountDTO.cs" />
     <Compile Include="Contracts\DTOs\PasswordResetDTO.cs" />
     <Compile Include="Contracts\DTOs\PlayerDTO.cs" />
+    <Compile Include="Contracts\DTOs\ReportDTO.cs" />
     <Compile Include="Contracts\DTOs\ServiceErrorDetailDTO.cs" />
     <Compile Include="Contracts\DTOs\TeamDTO.cs" />
     <Compile Include="Contracts\DTOs\UserDTO.cs" />
@@ -105,6 +106,7 @@
     <Compile Include="Contracts\ILoginManager.cs" />
     <Compile Include="Contracts\IPasswordResetManager.cs" />
     <Compile Include="Contracts\IProfileManager.cs" />
+    <Compile Include="Contracts\IReportManager.cs" />
     <Compile Include="Contracts\IRoundValidationManager.cs" />
     <Compile Include="Contracts\ITopPlayersManager.cs" />
     <Compile Include="Contracts\IWaitingRoomManager.cs" />
@@ -114,6 +116,7 @@
     <Compile Include="Services\LoginManager.cs" />
     <Compile Include="Services\ProfileManager.cs" />
     <Compile Include="Services\PasswordResetManager.cs" />
+    <Compile Include="Services\ReportManager.cs" />
     <Compile Include="Services\TopPlayersManager.cs" />
     <Compile Include="Services\VerificationCodeManager.cs" />
     <Compile Include="Services\WaitingRoomManager.cs" />

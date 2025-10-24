@@ -61,10 +61,12 @@
     <Compile Include="DAL\Implementations\AccountRepository.cs" />
     <Compile Include="DAL\Implementations\FriendshipRepository.cs" />
     <Compile Include="DAL\Implementations\PlayerRepository.cs" />
+    <Compile Include="DAL\Implementations\ReportRepository.cs" />
     <Compile Include="DAL\Implementations\StatisticsRepository.cs" />
     <Compile Include="DAL\Interfaces\IAccountRepository.cs" />
     <Compile Include="DAL\Interfaces\IFriendshipRepository.cs" />
     <Compile Include="DAL\Interfaces\IPlayerRepository.cs" />
+    <Compile Include="DAL\Interfaces\IReportRepository.cs" />
     <Compile Include="DAL\Interfaces\IStatisticsRepository.cs" />
     <Compile Include="Exceptions\DuplicateAccountException.cs" />
     <Compile Include="Model\Ban.cs">

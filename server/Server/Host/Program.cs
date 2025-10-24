@@ -32,6 +32,7 @@ namespace Host
                 var playerRepository = new PlayerRepository();
                 var operationContextWrapper = new OperationContextWrapper();
                 var friendshipRepository = new FriendshipRepository();
+                var reportRepository = new ReportRepository();
                 // --- PASO 2: Crear las INSTANCIAS de cada servicio ---
                 // Se inyectan las dependencias compartidas en cada constructor.
                 var accountManagerInstance = new AccountManager(accountRepository, notificationService, codeService);
@@ -42,6 +43,7 @@ namespace Host
                 var topPlayersManagerInstance = new TopPlayersManager(statisticsRepository);
                 var waitingRoomManagerInstance = new WaitingRoomManager(playerRepository,operationContextWrapper);
                 var friendsManagerInstance = new FriendsManager(friendshipRepository, accountRepository, operationContextWrapper);
+                var reportManagerInstance = new ReportManager(reportRepository);
 
                 // --- PASO 3: Crear un ServiceHost para CADA instancia de servicio ---
                 var accountManagerHost = new ServiceHost(accountManagerInstance);
@@ -52,6 +54,7 @@ namespace Host
                 var topPlayersManagerHost = new ServiceHost(topPlayersManagerInstance);
                 var waitingRoomManagerHost = new ServiceHost(waitingRoomManagerInstance);
                 var friendsManagerHost = new ServiceHost(friendsManagerInstance);
+                var reportManagerHost = new ServiceHost(reportManagerInstance);
 
                 // Agregarlos a la lista para manejarlos fácilmente
                 hosts.Add(accountManagerHost);
@@ -62,6 +65,7 @@ namespace Host
                 hosts.Add(topPlayersManagerHost);
                 hosts.Add(waitingRoomManagerHost);
                 hosts.Add(friendsManagerHost);
+                hosts.Add(reportManagerHost);
 
                 // --- PASO 4: Abrir todos los hosts ---
                 foreach (var host in hosts)
