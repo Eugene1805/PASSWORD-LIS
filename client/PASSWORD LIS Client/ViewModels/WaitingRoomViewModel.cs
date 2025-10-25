@@ -63,6 +63,13 @@ namespace PASSWORD_LIS_Client.ViewModels
             set { isLoadingFriends = value; OnPropertyChanged(); }
         }
 
+        private bool isGuest;
+        public bool IsGuest
+        {
+            get => isGuest;
+            set => SetProperty(ref isGuest, value);
+        }
+
         /* DESCOMENTAR CUANDO SE IMPLEMENTE LO DE INVITAR AMIGOS
         public FriendDTO selectedFriend;
         public FriendDTO SelectedFriend 
