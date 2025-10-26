@@ -179,6 +179,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         // TODO: Add internacionzation messages
         private bool CanReportPlayer()
         {
+            if (SessionManager.CurrentUser == null)
+            {
+                return false;
+            }
             if (SessionManager.CurrentUser.PlayerId < 0)
             {
                 Console.WriteLine("Guests can not report players");
