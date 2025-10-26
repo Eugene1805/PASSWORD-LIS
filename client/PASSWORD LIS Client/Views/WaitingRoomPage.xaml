@@ -41,7 +41,8 @@
             <Image Source="/Resources/GoBackIcon.png" Width="25" Height="25"/>
         </Button>
         
-        <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Style="{StaticResource floatingBorderStyle}" Margin="10,90,10,20" Padding="15">
+        <Border Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Style="{StaticResource floatingBorderStyle}" Margin="10,90,10,20" Padding="15"
+                Visibility="{Binding IsGuest, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -69,17 +70,22 @@
                 </Grid>
 
                 <Border Grid.Row="1" Style="{StaticResource floatingBorderStyle}" Margin="0,10,0,10" Padding="5"> <!--TODO Todo el border de amigos no debería de verlo un invitado-->
-                    <ListView ItemsSource="{Binding Friends}"
-                              Background="Transparent" BorderThickness="0"
-                              Visibility="{Binding IsLoadingFriends, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Nickname}" Margin="5"
-                                           Style="{StaticResource bodyTextBlockStyle}" TextAlignment="Left"/>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
-
-                    </ListView>
+                    <Grid>
+                        <TextBlock Text="Cargando amigos ..." Style="{StaticResource bodyTextBlockStyle}"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   Visibility="{Binding IsLoadingFriends, Converter={StaticResource BoolToVisConverter}}"/>
+                        
+                        <ListView ItemsSource="{Binding Friends}"
+                                  Background="Transparent" BorderThickness="0"
+                                  Visibility="{Binding IsLoadingFriends, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Nickname}" Margin="5"
+                                               Style="{StaticResource bodyTextBlockStyle}" TextAlignment="Left"/>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
                 </Border>
 
                 <Button Grid.Row="2" Style="{StaticResource primaryButtonStyle}"

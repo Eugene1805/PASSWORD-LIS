@@ -116,6 +116,8 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         public async Task LoadInitialDataAsync(string username, bool isGuest)
         {
+            this.IsGuest = isGuest;
+
             try
             {
                 bool joined = false;
@@ -142,6 +144,10 @@ namespace PASSWORD_LIS_Client.ViewModels
                             ConnectedPlayers.Add(player);
                         }
                     });
+                    if (!this.IsGuest)
+                    {
+                        _ = LoadFriendsAsync();
+                    }
                 }
                 else
                 {
@@ -286,5 +292,52 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             IsSnackbarVisible = false;
         }
+
+        private async Task LoadFriendsAsync()
+        {
+            if (isLoadingFriends)
+            {
+                return;
+            }
+            IsLoadingFriends = true;
+            try
+            {
+                var friendsArray = await friendsManagerService.GetFriendsAsync(SessionManager.CurrentUser.UserAccountId);
+                Friends = new ObservableCollection<FriendDTO>(friendsArray);
+            }
+            catch (Exception ex)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+            "No se pudo cargar la lista de amigos", PopUpIcon.Error);
+            }
+            finally
+            {
+                IsLoadingFriends = false;
+            }
+        }
+
+        private void OnFriendAdded(FriendDTO newFriend)
+        {
+            Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                if (!Friends.Any(f => f.PlayerId == newFriend.PlayerId))
+                {
+                    Friends.Add(newFriend);
+                }
+            });
+        }
+
+        private void OnFriendRemoved(int friendPlayerId)
+        {
+            Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                var friendToRemove = Friends.FirstOrDefault(f => f.PlayerId == friendPlayerId);
+                if (friendToRemove != null)
+                {
+                    Friends.Remove(friendToRemove);
+                }
+            });
+        }
+
     }
 }

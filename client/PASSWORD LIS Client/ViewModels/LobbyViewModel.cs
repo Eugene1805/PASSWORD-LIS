@@ -263,7 +263,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             string username = SessionManager.CurrentUser.Nickname;
 
-            var waitingRoomViewModel = new WaitingRoomViewModel(App.WaitRoomManagerService, App.WindowService);
+            var waitingRoomViewModel = new WaitingRoomViewModel(App.WaitRoomManagerService, App.WindowService, App.FriendsManagerService);
 
             var waitingRoomPage = new WaitingRoomPage(username, SessionManager.CurrentUser.PlayerId < 0)
             {
