@@ -147,66 +147,6 @@ namespace Data.DAL.Implementations
                 }
             }
         }
-        /*
-               public bool UpdateUserProfile(int playerId, UserAccount updatedAccountData, List<SocialAccount> updatedSocialsAccounts)
-        {
-            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
-            {
-                using (var transaction = context.Database.BeginTransaction())
-                {
-                    try
-                    {
-                        var player = context.Player
-                            .Include(p => p.UserAccount.SocialAccount)
-                            .FirstOrDefault(p => p.Id == playerId);
-
-                        if (player == null || player.UserAccount == null)
-                        {
-                            return false;
-                        }
-
-                        var userAccountToUpdate = player.UserAccount;
-
-                        userAccountToUpdate.FirstName = updatedAccountData.FirstName;
-                        userAccountToUpdate.LastName = updatedAccountData.LastName;
-                        userAccountToUpdate.PhotoId = updatedAccountData.PhotoId;
-
-                        // TO DO PASAR LO DE ELIMINAR Y AGREGAR LAS REDES A OTRO METODO
-                        var socialsToDelete = userAccountToUpdate.SocialAccount
-                            .Where(s => !updatedSocialsAccounts.Any(us => us.Provider == s.Provider)).ToList();
-                        foreach (var social in socialsToDelete)
-                        {
-                            context.SocialAccount.Remove(social);
-                        }
-
-                        foreach (var updatedSocial in updatedSocialsAccounts)
-                        {
-                            var existingSocial = userAccountToUpdate.SocialAccount
-                                .FirstOrDefault(s => s.Provider == updatedSocial.Provider);
-
-                            if (existingSocial != null)
-                            {
-                                existingSocial.Username = updatedSocial.Username; 
-                            }
-                            else
-                            {
-                                userAccountToUpdate.SocialAccount.Add(updatedSocial);
-                            }
-                        }
-
-                        context.SaveChanges();
-                        transaction.Commit();
-                        return true;
-                    }
-                    catch (System.Exception)
-                    {
-                        transaction.Rollback();
-                        return false;
-                    }
-                }
-            }
-        }
-         */
 
         public UserAccount GetUserByPlayerId(int playerId)
         {

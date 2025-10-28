@@ -107,31 +107,5 @@ namespace Services.Services
                 .Select(kvp => new SocialAccount { Provider = kvp.Key, Username = kvp.Value })
                 .ToList();
         }
-
-        /*
-         * public UserDTO UpdateProfile(UserDTO updatedProfileData)
-        {
-            var accountData = new UserAccount
-            {
-                FirstName = updatedProfileData.FirstName,
-                LastName = updatedProfileData.LastName,
-                PhotoId = (updatedProfileData.PhotoId > 0) ? (byte?)updatedProfileData.PhotoId : null
-            };
-
-            var socialData = updatedProfileData.SocialAccounts
-                .Select(kvp => new SocialAccount { Provider = kvp.Key, Username = kvp.Value })
-                .ToList();
-
-            bool updateSuccess = repository.UpdateUserProfile(
-                updatedProfileData.PlayerId,
-                accountData,
-                socialData
-            );
-
-            return updateSuccess ? updatedProfileData : null;
-
-        }
-        */
-
     }
 }
