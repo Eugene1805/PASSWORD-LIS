@@ -52,18 +52,11 @@ namespace Data.DAL.Implementations
         {
             using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
-                try
-                {
-                    UserAccount userAccount = context.UserAccount
-                        .Include(u => u.Player)
-                        .Include(u => u.SocialAccount)
-                        .FirstOrDefault(u => u.Email == email);
-                    return userAccount;
-                }
-                catch (Exception ex)
-                {
-                    return null;
-                }
+                UserAccount userAccount = context.UserAccount
+                    .Include(u => u.Player)
+                    .Include(u => u.SocialAccount)
+                    .FirstOrDefault(u => u.Email == email);
+                return userAccount;
             }
         }
 

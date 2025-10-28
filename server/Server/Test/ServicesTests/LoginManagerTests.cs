@@ -2,12 +2,15 @@
 using Data.DAL.Interfaces;
 using Data.Model;
 using Moq;
+using Services.Contracts.DTOs;
 using Services.Services;
 using Services.Wrappers;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
+using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -138,22 +141,73 @@ namespace Test.ServicesTests
         }
         
         [Fact]
-        public void Login_ShouldThrowException_WhenRepositoryFails()
+        public void Login_ShouldThrowFaultException_WhenRepositoryThrowsDbException()
         {
             // Arrange
             var email = "db_error@example.com";
             var password = "password";
 
             mockRepo.Setup(repo => repo.GetUserByEmail(email))
-                    .Throws(new DbUpdateException("Error de BD simulado"));
+                    .Throws(new InvalidOperationException("Error de BD simulado"));
 
             // Act & Assert
-            Assert.Throws<DbUpdateException>(
-                () => loginManager.Login(email, password)
-            );
+            var ex = Assert.Throws<FaultException<ServiceErrorDetailDTO>>(
+                 () => loginManager.Login(email, password)
+             );
 
+            Assert.Equal("UNEXPECTED_ERROR", ex.Detail.ErrorCode);
             mockRepo.Verify(repo => repo.GetUserByEmail(email), Times.Once);
         }
 
+        public class MockDbException : DbException { 
+            public MockDbException(string message) : base(message) { } 
+        }
+
+        [Fact]
+        public void Login_ShouldThrowFaultException_WhenRepositoryThrowsDbException_Specific()
+        {
+            // Arrange
+            var email = "db_error@example.com";
+            var password = "password";
+
+            mockRepo.Setup(repo => repo.GetUserByEmail(email))
+                    .Throws(new MockDbException("Error de conexión simulado"));
+
+            // Act & Assert
+            var ex = Assert.Throws<FaultException<ServiceErrorDetailDTO>>(
+                () => loginManager.Login(email, password)
+            );
+
+            // Assert
+            Assert.Equal("DATABASE_ERROR", ex.Detail.ErrorCode);
+            mockRepo.Verify(repo => repo.GetUserByEmail(email), Times.Once);
+        }
+
+        [Fact]
+        public void Login_ShouldThrowFaultException_WhenBcryptFailsOrOtherGeneralException()
+        {
+            // Arrange
+            var email = "test@example.com";
+            var password = "ValidPassword123!";
+            var invalidHash = "formato_invalido_de_hash";
+
+            var mockAccount = new UserAccount
+            {
+                Id = 1,
+                Email = email,
+                PasswordHash = invalidHash,
+                Player = new List<Player> { new Player { Id = 10 } },
+                SocialAccount = new List<SocialAccount>()
+            };
+            mockRepo.Setup(repo => repo.GetUserByEmail(email)).Returns(mockAccount);
+
+            // Act & Assert
+            var ex = Assert.Throws<FaultException<ServiceErrorDetailDTO>>(
+                () => loginManager.Login(email, password)
+            );
+
+            Assert.Equal("UNEXPECTED_ERROR", ex.Detail.ErrorCode);
+            mockRepo.Verify(repo => repo.GetUserByEmail(email), Times.Once);
+        }
     }
 }

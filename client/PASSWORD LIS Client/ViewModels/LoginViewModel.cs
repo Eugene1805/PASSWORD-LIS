@@ -1,9 +1,12 @@
-﻿using PASSWORD_LIS_Client.Commands;
+﻿using PASSWORD_LIS_Client.AccountManagerServiceReference;
+using PASSWORD_LIS_Client.Commands;
+using PASSWORD_LIS_Client.LoginManagerServiceReference;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
 using System;
 using System.Collections.Generic;
+using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -55,7 +58,64 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             return !string.IsNullOrWhiteSpace(Email) && !string.IsNullOrWhiteSpace(Password) && !IsLoggingIn;
         }
+        private async Task LoginAsync()
+        {
+            IsLoggingIn = true;
+            try
+            {
+                var loggedInUser = await loginManagerService.LoginAsync(Email, Password);
+                if (loggedInUser != null) 
+                {
+                    ProcessSuccessfulLogin(loggedInUser);
+                } else
+                {
+                    windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
+                        Properties.Langs.Lang.wrongCredentialsText,
+                        PopUpIcon.Warning);
+                }
 
+            }catch (FaultException<ServiceErrorDetailDTO> ex)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                    ex.Detail.Message, PopUpIcon.Error);
+            }
+            catch (TimeoutException) // Atrapa Timeouts (servidor lento)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
+                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+            }
+            catch (EndpointNotFoundException) // Atrapa (servidor apagado)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
+                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
+            }
+            catch (CommunicationException) // Atrapa error genérico de red
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
+                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
+            }
+            catch (Exception) // Atrapa cualquier otro error inesperado
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
+            } 
+            finally
+            {
+                IsLoggingIn = false;
+            }
+        }
+
+        private void ProcessSuccessfulLogin(UserDTO loggedInUser)
+        {
+            SessionManager.Login(loggedInUser);
+            windowService.ShowPopUp(Properties.Langs.Lang.successfulLoginText,
+                        string.Format(Properties.Langs.Lang.loginWelcomeText, SessionManager.CurrentUser.Nickname),
+                        PopUpIcon.Success);
+
+            windowService.ShowMainWindow();
+            windowService.CloseWindow(this);
+        }
+        /*
         private async Task LoginAsync()
         {
             if (!AreFieldsValid())
@@ -94,24 +154,12 @@ namespace PASSWORD_LIS_Client.ViewModels
                 IsLoggingIn = false;
             }
         }
-
-        private bool AreFieldsValid()
-        {
-            if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
-            {
-                windowService.ShowPopUp(
-                    Properties.Langs.Lang.warningTitleText,
-                    Properties.Langs.Lang.requiredEmailAndPassWordText, // Usando tu clave de recurso existente
-                    PopUpIcon.Warning);
-                return false;
-            }
-            return true;
-        }
+        */
 
         private void PlayAsGuest(object parameter)
         {
             string guestNickname = Properties.Langs.Lang.guestText + new Random().Next(1000, 9999);
-            var guestUser = new LoginManagerServiceReference.UserDTO
+            var guestUser = new UserDTO
             {
                 PlayerId = -1,
                 Nickname = guestNickname,
