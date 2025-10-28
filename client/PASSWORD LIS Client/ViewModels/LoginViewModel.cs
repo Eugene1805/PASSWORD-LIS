@@ -79,22 +79,22 @@ namespace PASSWORD_LIS_Client.ViewModels
                 windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
                     ex.Detail.Message, PopUpIcon.Error);
             }
-            catch (TimeoutException) // Atrapa Timeouts (servidor lento)
+            catch (TimeoutException) 
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
                     Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
             }
-            catch (EndpointNotFoundException) // Atrapa (servidor apagado)
+            catch (EndpointNotFoundException) 
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
                     Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
             }
-            catch (CommunicationException) // Atrapa error genérico de red
+            catch (CommunicationException)
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
                     Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
             }
-            catch (Exception) // Atrapa cualquier otro error inesperado
+            catch (Exception)
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
                     Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
@@ -115,46 +115,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             windowService.ShowMainWindow();
             windowService.CloseWindow(this);
         }
-        /*
-        private async Task LoginAsync()
-        {
-            if (!AreFieldsValid())
-            {
-                return;
-            }
-            IsLoggingIn = true;
-            try
-            {
-                var loggedInUser = await loginManagerService.LoginAsync(Email, Password);
-                if (loggedInUser != null)
-                {
-                    SessionManager.Login(loggedInUser);
-                    windowService.ShowPopUp(Properties.Langs.Lang.successfulLoginText,
-                        string.Format(Properties.Langs.Lang.loginWelcomeText, SessionManager.CurrentUser.Nickname),
-                        PopUpIcon.Success);
-
-                    windowService.ShowMainWindow();
-                    windowService.CloseWindow(this);
-                }
-                else
-                {
-                    windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
-                        Properties.Langs.Lang.wrongCredentialsText,
-                        PopUpIcon.Warning);
-                }
-            }
-            catch (Exception)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText,
-                    PopUpIcon.Error);
-            }
-            finally
-            {
-                IsLoggingIn = false;
-            }
-        }
-        */
 
         private void PlayAsGuest(object parameter)
         {
@@ -194,6 +154,5 @@ namespace PASSWORD_LIS_Client.ViewModels
             var retrievePasswordWindow = new RetrievePasswordWindow { DataContext = retreivePasswordViewModel};
             retrievePasswordWindow.ShowDialog();
         }
-
     }
 }
