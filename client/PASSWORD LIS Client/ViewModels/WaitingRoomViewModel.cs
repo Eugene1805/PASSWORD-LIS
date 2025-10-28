@@ -309,7 +309,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 var friendsArray = await friendsManagerService.GetFriendsAsync(SessionManager.CurrentUser.UserAccountId);
                 Friends = new ObservableCollection<FriendDTO>(friendsArray);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
             "No se pudo cargar la lista de amigos", PopUpIcon.Error);
