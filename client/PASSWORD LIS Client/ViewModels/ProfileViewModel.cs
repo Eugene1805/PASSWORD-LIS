@@ -1,10 +1,12 @@
-﻿using PASSWORD_LIS_Client.Commands;
+﻿using PASSWORD_LIS_Client.AccountManagerServiceReference;
+using PASSWORD_LIS_Client.Commands;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -133,6 +135,17 @@ namespace PASSWORD_LIS_Client.ViewModels
         private void EditProfile(object parameter)
         {
             IsEditMode = !IsEditMode;
+            if (IsEditMode)
+            {
+                windowService.ShowPopUp("Edicion",
+                                        "Edicion Activada", PopUpIcon.Information); //Properties.Langs.Lang.editingModeTitle, Properties.Langs.Lang.editingModeActiveText
+            }
+            /*
+            else
+            {
+                LoadProfileData(); // Preguntar que pasaria si se vuelve a presionar el botóm, deberia de estar desabilitado o que salga un mensaje de que perderá sus cambios
+            }
+            */
         }
 
         private void ChooseAnAvatar(object parameter)
@@ -146,7 +159,9 @@ namespace PASSWORD_LIS_Client.ViewModels
         
         private bool CanSaveChanges()
         {
-            return IsEditMode && !IsSaving;
+            return IsEditMode && !IsSaving &&
+                   !string.IsNullOrWhiteSpace(FirstName) &&
+                   !string.IsNullOrWhiteSpace(LastName);
         }
 
         private async Task SaveChangesAsync()
@@ -164,10 +179,34 @@ namespace PASSWORD_LIS_Client.ViewModels
                 var resultDto = await profileManagerClient.UpdateProfileAsync(updatedDto);
                 ProcessUpdateResponse(resultDto);
             }
+            catch (FaultException<ServiceErrorDetailDTO> ex) 
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                                        ex.Detail.Message, PopUpIcon.Error);
+                IsEditMode = true; 
+            }
+            catch (TimeoutException)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
+                                        Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+                IsEditMode = true;
+            }
+            catch (EndpointNotFoundException) 
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
+                                        Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
+                IsEditMode = true;
+            }
+            catch (CommunicationException)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
+                                        Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
+                IsEditMode = true;
+            }
             catch (Exception)
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText,
+                    Properties.Langs.Lang.unexpectedErrorText,
                     PopUpIcon.Error);
                 IsEditMode = true; 
             }
@@ -203,36 +242,44 @@ namespace PASSWORD_LIS_Client.ViewModels
         private bool AreFieldsValid()
         {
             string title = Properties.Langs.Lang.verificationFailedTitleText;
+            return ValidateFirstName(title) && ValidateLastName(title);
+        }
 
+        private bool ValidateFirstName(string errorTitle)
+        {
             if (string.IsNullOrWhiteSpace(FirstName))
             {
-                windowService.ShowPopUp(title, Properties.Langs.Lang.emptyFirstNameText, PopUpIcon.Warning);
+                windowService.ShowPopUp(errorTitle, Properties.Langs.Lang.emptyFirstNameText, PopUpIcon.Warning);
                 return false;
             }
             if (FirstName.Length > 50)
             {
-                windowService.ShowPopUp(title, Properties.Langs.Lang.firstNameTooLongText, PopUpIcon.Warning);
+                windowService.ShowPopUp(errorTitle, Properties.Langs.Lang.firstNameTooLongText, PopUpIcon.Warning);
                 return false;
             }
             if (!ValidationUtils.ContainsOnlyLetters(FirstName))
             {
-                windowService.ShowPopUp(title, Properties.Langs.Lang.nameInvalidCharsText, PopUpIcon.Warning);
+                windowService.ShowPopUp(errorTitle, Properties.Langs.Lang.nameInvalidCharsText, PopUpIcon.Warning);
                 return false;
             }
+            return true;
+        }
 
+        private bool ValidateLastName(string errorTitle)
+        {
             if (string.IsNullOrWhiteSpace(LastName))
             {
-                windowService.ShowPopUp(title, Properties.Langs.Lang.emptyLastNameText, PopUpIcon.Warning);
+                windowService.ShowPopUp(errorTitle, Properties.Langs.Lang.emptyLastNameText, PopUpIcon.Warning);
                 return false;
             }
             if (LastName.Length > 80)
             {
-                windowService.ShowPopUp(title, Properties.Langs.Lang.lastNameTooLongText, PopUpIcon.Warning);
+                windowService.ShowPopUp(errorTitle, Properties.Langs.Lang.lastNameTooLongText, PopUpIcon.Warning);
                 return false;
             }
             if (!ValidationUtils.ContainsOnlyLetters(LastName))
             {
-                windowService.ShowPopUp(title, Properties.Langs.Lang.lastNameInvalidCharsText, PopUpIcon.Warning);
+                windowService.ShowPopUp(errorTitle, Properties.Langs.Lang.lastNameInvalidCharsText, PopUpIcon.Warning);
                 return false;
             }
             return true;

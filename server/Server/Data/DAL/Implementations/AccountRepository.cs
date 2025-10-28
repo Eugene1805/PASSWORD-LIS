@@ -132,6 +132,45 @@ namespace Data.DAL.Implementations
                         userAccountToUpdate.LastName = updatedAccountData.LastName;
                         userAccountToUpdate.PhotoId = updatedAccountData.PhotoId;
 
+                        UpdateSocialAccounts(context, userAccountToUpdate, updatedSocialsAccounts);
+                     
+                        context.SaveChanges();
+                        transaction.Commit();
+                        return true;
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+
+                    }
+                }
+            }
+        }
+        /*
+               public bool UpdateUserProfile(int playerId, UserAccount updatedAccountData, List<SocialAccount> updatedSocialsAccounts)
+        {
+            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            {
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        var player = context.Player
+                            .Include(p => p.UserAccount.SocialAccount)
+                            .FirstOrDefault(p => p.Id == playerId);
+
+                        if (player == null || player.UserAccount == null)
+                        {
+                            return false;
+                        }
+
+                        var userAccountToUpdate = player.UserAccount;
+
+                        userAccountToUpdate.FirstName = updatedAccountData.FirstName;
+                        userAccountToUpdate.LastName = updatedAccountData.LastName;
+                        userAccountToUpdate.PhotoId = updatedAccountData.PhotoId;
+
                         // TO DO PASAR LO DE ELIMINAR Y AGREGAR LAS REDES A OTRO METODO
                         var socialsToDelete = userAccountToUpdate.SocialAccount
                             .Where(s => !updatedSocialsAccounts.Any(us => us.Provider == s.Provider)).ToList();
@@ -167,6 +206,7 @@ namespace Data.DAL.Implementations
                 }
             }
         }
+         */
 
         public UserAccount GetUserByPlayerId(int playerId)
         {
@@ -184,6 +224,49 @@ namespace Data.DAL.Implementations
                 return context.UserAccount
                               .Include(u => u.Player)
                               .FirstOrDefault(u => u.Id == userAccountId);
+            }
+        }
+
+        private void UpdateSocialAccounts(PasswordLISEntities context, UserAccount userAccountToUpdate, List<SocialAccount> updatedSocialsAccounts)
+        {
+            var existingSocialsLookup = userAccountToUpdate.SocialAccount.ToDictionary(s => s.Provider);
+            var providersToKeep = new HashSet<string>(updatedSocialsAccounts.Select(s => s.Provider));
+           
+            var socialsToDelete = userAccountToUpdate.SocialAccount
+                                    .Where(s => !providersToKeep.Contains(s.Provider))
+                                    .ToList();
+
+            foreach (var social in socialsToDelete)
+            {
+                context.SocialAccount.Remove(social);
+            }
+
+            foreach (var updatedSocial in updatedSocialsAccounts)
+            {
+                if (!string.IsNullOrWhiteSpace(updatedSocial.Username))
+                {
+                    if (existingSocialsLookup.TryGetValue(updatedSocial.Provider, out var existingSocial))
+                    {
+                        if (existingSocial.Username != updatedSocial.Username)
+                        {
+                            existingSocial.Username = updatedSocial.Username.Trim();
+                            context.Entry(existingSocial).State = EntityState.Modified;
+                        }
+                    }
+                    else
+                    {
+                        updatedSocial.UserAccountId = userAccountToUpdate.Id;
+                        updatedSocial.Username = updatedSocial.Username.Trim();
+                        context.SocialAccount.Add(updatedSocial);
+                    }
+                }
+                else
+                {
+                    if (existingSocialsLookup.TryGetValue(updatedSocial.Provider, out var existingSocial))
+                    {
+                        context.SocialAccount.Remove(existingSocial);
+                    }
+                }
             }
         }
     }
