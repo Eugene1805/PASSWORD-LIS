@@ -28,11 +28,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 ((RelayCommand)SubmitReportCommand).RaiseCanExecuteChanged();
             }
         }
-
-        public string TitleMessage()
-        {
-            return $"Reportando a: {reportedPlayer.Nickname}";
-        } 
+        public string TitleMessage { get; private set; }
 
         public ICommand SubmitReportCommand { get; }
 
@@ -42,6 +38,8 @@ namespace PASSWORD_LIS_Client.ViewModels
             this.reportedPlayer = reportedPlayer;
             this.windowService = windowService;
             this.reportManagerService = reportManagerService;
+
+            TitleMessage = $"Reportando a: {reportedPlayer.Nickname}";
 
             SubmitReportCommand = new RelayCommand(
                 execute: async (_) => await SubmitReportAsync(),

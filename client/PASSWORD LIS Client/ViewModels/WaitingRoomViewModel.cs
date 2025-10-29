@@ -158,6 +158,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                     reportManagerService.ReportReceived += OnReportReceived;
                     reportManagerService.ReportCountUpdated += OnReportCountUpdated;
                     reportManagerService.PlayerBanned += OnPlayerBanned;
+                    await reportManagerService.SubscribeToReportUpdatesAsync(SessionManager.CurrentUser.PlayerId);
                 }
                 else
                 {

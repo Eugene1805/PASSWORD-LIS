@@ -26,6 +26,8 @@ namespace Services.Contracts
         Task StartGameAsync(string gameCode);
         [OperationContract]
         Task<List<PlayerDTO>> GetPlayersInGameAsync(string gameCode);
+        [OperationContract]
+        Task HostLeftAsync(string gameCode);
     }
     public interface IWaitingRoomCallback
     {
