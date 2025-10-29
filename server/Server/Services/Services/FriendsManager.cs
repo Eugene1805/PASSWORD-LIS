@@ -75,7 +75,7 @@ namespace Services.Services
             communicationObject.Closed += (sender, e) => {
                 connectedClients.TryRemove(userAccountId, out _); 
             };
-
+                
             return Task.CompletedTask;
         }
 
