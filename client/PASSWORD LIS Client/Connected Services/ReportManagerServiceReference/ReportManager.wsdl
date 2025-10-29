@@ -36,26 +36,136 @@
       <xsd:import schemaLocation="http://localhost:8106/?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" />
     </xsd:schema>
   </wsdl:types>
+  <wsdl:message name="IReportManager_SubscribeToReportUpdates_InputMessage">
+    <wsdl:part name="parameters" element="tns:SubscribeToReportUpdates" />
+  </wsdl:message>
   <wsdl:message name="IReportManager_SubmitReport_InputMessage">
     <wsdl:part name="parameters" element="tns:SubmitReport" />
   </wsdl:message>
   <wsdl:message name="IReportManager_SubmitReport_OutputMessage">
     <wsdl:part name="parameters" element="tns:SubmitReportResponse" />
   </wsdl:message>
+  <wsdl:message name="IReportManager_GetCurrentReportCount_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetCurrentReportCount" />
+  </wsdl:message>
+  <wsdl:message name="IReportManager_GetCurrentReportCount_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetCurrentReportCountResponse" />
+  </wsdl:message>
+  <wsdl:message name="IReportManager_IsPlayerBanned_InputMessage">
+    <wsdl:part name="parameters" element="tns:IsPlayerBanned" />
+  </wsdl:message>
+  <wsdl:message name="IReportManager_IsPlayerBanned_OutputMessage">
+    <wsdl:part name="parameters" element="tns:IsPlayerBannedResponse" />
+  </wsdl:message>
+  <wsdl:message name="IReportManager_UnsubscribeFromReportUpdates_InputMessage">
+    <wsdl:part name="parameters" element="tns:UnsubscribeFromReportUpdates" />
+  </wsdl:message>
+  <wsdl:message name="IReportManager_OnReportReceived_OutputCallbackMessage">
+    <wsdl:part name="parameters" element="tns:OnReportReceived" />
+  </wsdl:message>
+  <wsdl:message name="IReportManager_OnReportCountUpdated_OutputCallbackMessage">
+    <wsdl:part name="parameters" element="tns:OnReportCountUpdated" />
+  </wsdl:message>
+  <wsdl:message name="IReportManager_OnPlayerBanned_OutputCallbackMessage">
+    <wsdl:part name="parameters" element="tns:OnPlayerBanned" />
+  </wsdl:message>
+  <wsdl:message name="IReportManager_OnPlayerUnbanned_OutputCallbackMessage">
+    <wsdl:part name="parameters" element="tns:OnPlayerUnbanned" />
+  </wsdl:message>
   <wsdl:portType name="IReportManager">
+    <wsdl:operation name="SubscribeToReportUpdates">
+      <wsdl:input wsaw:Action="http://tempuri.org/IReportManager/SubscribeToReportUpdates" message="tns:IReportManager_SubscribeToReportUpdates_InputMessage" />
+    </wsdl:operation>
     <wsdl:operation name="SubmitReport">
       <wsdl:input wsaw:Action="http://tempuri.org/IReportManager/SubmitReport" message="tns:IReportManager_SubmitReport_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IReportManager/SubmitReportResponse" message="tns:IReportManager_SubmitReport_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetCurrentReportCount">
+      <wsdl:input wsaw:Action="http://tempuri.org/IReportManager/GetCurrentReportCount" message="tns:IReportManager_GetCurrentReportCount_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IReportManager/GetCurrentReportCountResponse" message="tns:IReportManager_GetCurrentReportCount_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="IsPlayerBanned">
+      <wsdl:input wsaw:Action="http://tempuri.org/IReportManager/IsPlayerBanned" message="tns:IReportManager_IsPlayerBanned_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IReportManager/IsPlayerBannedResponse" message="tns:IReportManager_IsPlayerBanned_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="UnsubscribeFromReportUpdates">
+      <wsdl:input wsaw:Action="http://tempuri.org/IReportManager/UnsubscribeFromReportUpdates" message="tns:IReportManager_UnsubscribeFromReportUpdates_InputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="OnReportReceived">
+      <wsdl:output wsaw:Action="http://tempuri.org/IReportManager/OnReportReceived" message="tns:IReportManager_OnReportReceived_OutputCallbackMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="OnReportCountUpdated">
+      <wsdl:output wsaw:Action="http://tempuri.org/IReportManager/OnReportCountUpdated" message="tns:IReportManager_OnReportCountUpdated_OutputCallbackMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="OnPlayerBanned">
+      <wsdl:output wsaw:Action="http://tempuri.org/IReportManager/OnPlayerBanned" message="tns:IReportManager_OnPlayerBanned_OutputCallbackMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="OnPlayerUnbanned">
+      <wsdl:output wsaw:Action="http://tempuri.org/IReportManager/OnPlayerUnbanned" message="tns:IReportManager_OnPlayerUnbanned_OutputCallbackMessage" />
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="NetTcpBinding_IReportManager" type="tns:IReportManager">
     <wsp:PolicyReference URI="#NetTcpBinding_IReportManager_policy" />
     <soap12:binding transport="http://schemas.microsoft.com/soap/tcp" />
+    <wsdl:operation name="SubscribeToReportUpdates">
+      <soap12:operation soapAction="http://tempuri.org/IReportManager/SubscribeToReportUpdates" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+    </wsdl:operation>
     <wsdl:operation name="SubmitReport">
       <soap12:operation soapAction="http://tempuri.org/IReportManager/SubmitReport" style="document" />
       <wsdl:input>
         <soap12:body use="literal" />
       </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetCurrentReportCount">
+      <soap12:operation soapAction="http://tempuri.org/IReportManager/GetCurrentReportCount" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="IsPlayerBanned">
+      <soap12:operation soapAction="http://tempuri.org/IReportManager/IsPlayerBanned" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UnsubscribeFromReportUpdates">
+      <soap12:operation soapAction="http://tempuri.org/IReportManager/UnsubscribeFromReportUpdates" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+    </wsdl:operation>
+    <wsdl:operation name="OnReportReceived">
+      <soap12:operation soapAction="http://tempuri.org/IReportManager/OnReportReceived" style="document" />
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="OnReportCountUpdated">
+      <soap12:operation soapAction="http://tempuri.org/IReportManager/OnReportCountUpdated" style="document" />
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="OnPlayerBanned">
+      <soap12:operation soapAction="http://tempuri.org/IReportManager/OnPlayerBanned" style="document" />
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="OnPlayerUnbanned">
+      <soap12:operation soapAction="http://tempuri.org/IReportManager/OnPlayerUnbanned" style="document" />
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
@@ -67,7 +177,7 @@
       <wsa10:EndpointReference>
         <wsa10:Address>net.tcp://localhost:8107/ReportManager</wsa10:Address>
         <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
-          <Upn>LAPTOP-LF36UFJ4\artcu</Upn>
+          <Upn>SURFACE\eugen</Upn>
         </Identity>
       </wsa10:EndpointReference>
     </wsdl:port>

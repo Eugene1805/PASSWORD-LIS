@@ -10,7 +10,7 @@ using System.ServiceModel;
 
 namespace Host
 {
-    class Program
+    static class Program
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(Program));
         static void Main(string[] args)
@@ -33,6 +33,7 @@ namespace Host
                 var operationContextWrapper = new OperationContextWrapper();
                 var friendshipRepository = new FriendshipRepository();
                 var reportRepository = new ReportRepository();
+                var banRepository = new BanRepository();
                 // --- PASO 2: Crear las INSTANCIAS de cada servicio ---
                 // Se inyectan las dependencias compartidas en cada constructor.
                 var accountManagerInstance = new AccountManager(accountRepository, notificationService, codeService);
@@ -43,7 +44,7 @@ namespace Host
                 var topPlayersManagerInstance = new TopPlayersManager(statisticsRepository);
                 var waitingRoomManagerInstance = new WaitingRoomManager(playerRepository,operationContextWrapper);
                 var friendsManagerInstance = new FriendsManager(friendshipRepository, accountRepository, operationContextWrapper);
-                var reportManagerInstance = new ReportManager(reportRepository);
+                var reportManagerInstance = new ReportManager(reportRepository, playerRepository,banRepository,operationContextWrapper);
 
                 // --- PASO 3: Crear un ServiceHost para CADA instancia de servicio ---
                 var accountManagerHost = new ServiceHost(accountManagerInstance);

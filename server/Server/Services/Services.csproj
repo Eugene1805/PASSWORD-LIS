@@ -104,7 +104,6 @@
     <Compile Include="Contracts\IEndGameManager.cs" />
     <Compile Include="Contracts\IFriendsManager.cs" />
     <Compile Include="Contracts\IGuesserManager.cs" />
-    <Compile Include="Contracts\IJoinGame.cs" />
     <Compile Include="Contracts\ILoginManager.cs" />
     <Compile Include="Contracts\IPasswordResetManager.cs" />
     <Compile Include="Contracts\IProfileManager.cs" />

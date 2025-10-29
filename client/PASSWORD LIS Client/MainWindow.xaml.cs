@@ -23,7 +23,7 @@ namespace PASSWORD_LIS_Client
         {
             if (SessionManager.IsUserLoggedIn())
             {
-                var lobbyViewModel = new LobbyViewModel(App.WindowService, App.FriendsManagerService, App.WaitRoomManagerService);
+                var lobbyViewModel = new LobbyViewModel(App.WindowService, App.FriendsManagerService, App.WaitRoomManagerService, App.ReportManagerService);
 
                 var lobbyPage = new LobbyPage { DataContext = lobbyViewModel };
 

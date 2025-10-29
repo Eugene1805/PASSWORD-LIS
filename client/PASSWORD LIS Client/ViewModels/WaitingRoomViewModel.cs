@@ -108,12 +108,16 @@ namespace PASSWORD_LIS_Client.ViewModels
         private readonly IWaitingRoomManagerService roomManagerClient;
         private readonly IWindowService windowService;
         private readonly IFriendsManagerService friendsManagerService;
-        public WaitingRoomViewModel(IWaitingRoomManagerService roomManagerService, IWindowService windowService, IFriendsManagerService friendsManagerService) 
+        private readonly IReportManagerService reportManagerService;
+        private const int MaxPlayers = 4;
+        private string lastReportReason;
+        public WaitingRoomViewModel(IWaitingRoomManagerService roomManagerService, IWindowService windowService, IFriendsManagerService friendsManagerService,
+            IReportManagerService reportManagerService) 
         {
             this.roomManagerClient = roomManagerService;
             this.windowService = windowService;
             this.friendsManagerService = friendsManagerService;
-
+            this.reportManagerService = reportManagerService;
             friendsManagerService.FriendAdded += OnFriendAdded;
             friendsManagerService.FriendRemoved += OnFriendRemoved;
 
@@ -151,6 +155,9 @@ namespace PASSWORD_LIS_Client.ViewModels
                 {
                     this.currentPlayer = players.FirstOrDefault(p => p.Id == SessionManager.CurrentUser.PlayerId);
                     _ = LoadFriendsAsync();
+                    reportManagerService.ReportReceived += OnReportReceived;
+                    reportManagerService.ReportCountUpdated += OnReportCountUpdated;
+                    reportManagerService.PlayerBanned += OnPlayerBanned;
                 }
                 else
                 {
@@ -225,9 +232,39 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
         private async Task SendMessageAsync()
         {
-            await roomManagerClient.SendMessageAsync(this.gameCode, new ChatMessageDTO { Message = CurrentMessage,
-                SenderNickname = SessionManager.CurrentUser.Nickname});
-            CurrentMessage = string.Empty;
+            try
+            {
+                await roomManagerClient.SendMessageAsync(this.gameCode, new ChatMessageDTO
+                {
+                    Message = CurrentMessage,
+                    SenderNickname = SessionManager.CurrentUser.Nickname
+                });
+            }
+            catch (TimeoutException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
+                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+            }
+            catch (EndpointNotFoundException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
+                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
+            }
+            catch (CommunicationException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
+                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
+            }
+            catch (Exception)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
+            }
+            finally
+            {
+                CurrentMessage = string.Empty;
+            }
+            
         }
         private async Task LeaveGameAsync()
         {
@@ -236,6 +273,10 @@ namespace PASSWORD_LIS_Client.ViewModels
                 if (this.currentPlayer != null)
                 {
                     await roomManagerClient.LeaveGameAsync(this.gameCode, IsGuest ? currentPlayer.Id : SessionManager.CurrentUser.PlayerId);
+                }
+                if(!IsGuest)
+                {
+                    await CleanupAndUnsubscribeAsync();
                 }
             }
             catch (TimeoutException)
@@ -265,7 +306,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
         private void UpdatePlayerCount()
         {
-            PlayerCountText = $"{ConnectedPlayers.Count}/4";
+            PlayerCountText = $"{ConnectedPlayers.Count}/{MaxPlayers}";
             ((RelayCommand)StartGameCommand).RaiseCanExecuteChanged();
         }
         private async Task StartGameAsync()
@@ -274,21 +315,42 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 await roomManagerClient.StartGameAsync(GameCode);
             }
+            catch (TimeoutException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
+                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+            }
+            catch (EndpointNotFoundException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
+                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
+            }
+            catch (CommunicationException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
+                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
+            }
             catch (Exception)
             {
-                windowService.ShowPopUp("Error", "No se pudo iniciar la partida.", PopUpIcon.Error);
+                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
             }
         }
 
         private bool CanStartGame()
         {
-            return IsHost && ConnectedPlayers.Count == 4;
+            return IsHost && ConnectedPlayers.Count == MaxPlayers;
         }
         private void OnGameStarted()
         {
+            if (!IsGuest)
+            {
+                _ = CleanupAndUnsubscribeAsync();
+            }
             Application.Current.Dispatcher.Invoke(() =>
             {
-                windowService.ShowPopUp("¡Juego iniciado!", "La partida va a comenzar.", PopUpIcon.Success);
+                //Add navigation to game page here based on the player role and team
+                windowService.NavigateTo(new ClueGuyPage());
             });
         }
         private void OnMessageReceived(ChatMessageDTO message)
@@ -389,6 +451,45 @@ namespace PASSWORD_LIS_Client.ViewModels
                 {
                     Friends.Remove(friendToRemove);
                 }
+            });
+        }
+
+        private async Task CleanupAndUnsubscribeAsync()
+        {
+            if (!IsGuest)
+            {
+                // Quitamos los manejadores para evitar fugas de memoria
+                reportManagerService.ReportReceived -= OnReportReceived;
+                reportManagerService.ReportCountUpdated -= OnReportCountUpdated;
+                reportManagerService.PlayerBanned -= OnPlayerBanned;
+                // Notificamos al servidor que ya no necesitamos las actualizaciones
+                await reportManagerService.UnsubscribeFromReportUpdatesAsync(SessionManager.CurrentUser.PlayerId);
+            }
+        }
+
+        private void OnReportReceived(string reporterNickname, string reason)
+        {
+            lastReportReason = $"Has sido reportado por {reporterNickname}. Razón: {reason}";
+        }
+
+        private void OnReportCountUpdated(int newReportCount)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                var message = $"{lastReportReason} | Reportes actuales: {newReportCount}/3";
+                _ = ShowSnackbarAsync(message);
+            });
+        }
+
+        private void OnPlayerBanned(DateTime banLiftTime)
+        {
+            Application.Current.Dispatcher.Invoke(async () =>
+            {
+                windowService.ShowPopUp("Has sido suspendido",
+                    "Has acumulado 3 reportes y tu cuenta ha sido suspendida por 1 hora. Serás expulsado de la sala.",
+                    PopUpIcon.Error);
+
+                await LeaveGameAsync();
             });
         }
 

@@ -6,6 +6,7 @@ using PASSWORD_LIS_Client.Views;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -73,19 +74,22 @@ namespace PASSWORD_LIS_Client.ViewModels
         private readonly IWindowService windowService;
         private readonly IFriendsManagerService friendsManagerService;
         private readonly IWaitingRoomManagerService waitingRoomManagerService;
-
-        public LobbyViewModel(IWindowService windowService, IFriendsManagerService friendsManagerService, IWaitingRoomManagerService waitingRoomManagerService)
+        private readonly IReportManagerService reportManagerService;
+        private const int GameCodeLength = 5;
+        public LobbyViewModel(IWindowService windowService, IFriendsManagerService friendsManagerService, IWaitingRoomManagerService waitingRoomManagerService,
+            IReportManagerService reportManagerService)
         {
             this.windowService = windowService;
             this.friendsManagerService = friendsManagerService;
             this.waitingRoomManagerService = waitingRoomManagerService;
+            this.reportManagerService = reportManagerService;
 
             friendsManagerService.FriendRequestReceived += OnFriendRequestReceived;
             friendsManagerService.FriendAdded += OnFriendAdded;
             friendsManagerService.FriendRemoved += OnFriendRemoved;
 
 
-            NavigateToProfileCommand = new RelayCommand(NavigateToProfile, (_) => !IsGuest); // Solo se puede ejecutar si NO es invitado
+            NavigateToProfileCommand = new RelayCommand(NavigateToProfile, (_) => !IsGuest);
             Friends = new ObservableCollection<FriendDTO>();
             ViewFriendRequestsCommand = new RelayCommand(ViewFriendRequests);
             AddFriendCommand = new RelayCommand(AddFriend);
@@ -249,7 +253,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         private void ShowTopPlayers(object parameter)
         {
             var topPlayersViewModel = new TopPlayersViewModel(App.TopPlayersManagerService, App.WindowService);
-            var topPlayersWindow = new Views.TopPlayersWindow { DataContext = topPlayersViewModel};
+            var topPlayersWindow = new TopPlayersWindow { DataContext = topPlayersViewModel};
             topPlayersWindow.ShowDialog();
         }
         private void ShowHowToPlay(object parameter)
@@ -276,11 +280,18 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             try
             {
+                bool isBanned = await reportManagerService.IsPlayerBannedAsync(SessionManager.CurrentUser.PlayerId);
+                if (isBanned)
+                {
+                    windowService.ShowPopUp("Cuenta Suspendida", "No puedes crear partidas, tu cuenta está suspendida temporalmente.", PopUpIcon.Warning);
+                    return; // Detiene la ejecución
+                }
                 string newGameCode = await waitingRoomManagerService.CreateGameAsync(SessionManager.CurrentUser.Email);
 
                 if (!string.IsNullOrEmpty(newGameCode))
                 {
-                    var waitingRoomViewModel = new WaitingRoomViewModel(App.WaitRoomManagerService, App.WindowService, App.FriendsManagerService);
+                    var waitingRoomViewModel = new WaitingRoomViewModel(App.WaitRoomManagerService, App.WindowService, App.FriendsManagerService,
+                        App.ReportManagerService);
                     await waitingRoomViewModel.InitializeAsync(newGameCode, isHost: true);
 
                     var waitingRoomPage = new WaitingRoomPage { DataContext = waitingRoomViewModel };
@@ -288,49 +299,89 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
                 else
                 {
-                    windowService.ShowPopUp("Error", "No se pudo crear la partida.", PopUpIcon.Error);
+                    // TODO Add lang message
+                    windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, "No se pudo crear la partida.", PopUpIcon.Error);
                 }
+            }
+            catch (TimeoutException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
+                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+            }
+            catch (EndpointNotFoundException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
+                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
+            }
+            catch (CommunicationException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
+                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
             }
             catch (Exception)
             {
-                windowService.ShowPopUp("Error de Conexión", "No se pudo comunicar con el servidor para crear la partida.", PopUpIcon.Error);
+                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
             }
         }
         private bool CanJoinGame()
         {
-            return !string.IsNullOrWhiteSpace(GameCodeToJoin) && GameCodeToJoin.Length == 5;
+            return !string.IsNullOrWhiteSpace(GameCodeToJoin) && GameCodeToJoin.Length == GameCodeLength;
         }
         private async Task JoinGameWithCodeAsync()
         {
-            bool success = false;
             try
             {
+                bool success;
                 if (IsGuest)
                 {
                     success = await waitingRoomManagerService.JoinGameAsGuestAsync(GameCodeToJoin, SessionManager.CurrentUser.Nickname);
                 }
                 else
                 {
+                    bool isBanned = await reportManagerService.IsPlayerBannedAsync(SessionManager.CurrentUser.PlayerId);
+                    if (isBanned)
+                    {
+                        windowService.ShowPopUp("Cuenta Suspendida", "No puedes crear partidas, tu cuenta está suspendida temporalmente.", PopUpIcon.Warning);
+                        return; // Detiene la ejecución
+                    }
                     success = await waitingRoomManagerService.JoinGameAsRegisteredPlayerAsync(GameCodeToJoin, SessionManager.CurrentUser.Email);
                 }
 
                 if (success)
                 {
 
-                    var waitingRoomViewModel = new WaitingRoomViewModel(App.WaitRoomManagerService, App.WindowService, App.FriendsManagerService);
+                    var waitingRoomViewModel = new WaitingRoomViewModel(App.WaitRoomManagerService, App.WindowService, App.FriendsManagerService,
+                        App.ReportManagerService);
                     await waitingRoomViewModel.InitializeAsync(GameCodeToJoin, isHost: false);
 
                     var waitingRoomPage = new WaitingRoomPage { DataContext = waitingRoomViewModel };
                     windowService.NavigateTo(waitingRoomPage);
                 }
                 else
-                {
+                {// TODO ADD lang messages and catch specific errors
                     windowService.ShowPopUp("Unión Fallida", "El código de la partida es incorrecto, la sala está llena o ya estás en la partida.", PopUpIcon.Warning);
                 }
             }
+            catch (TimeoutException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
+                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+            }
+            catch (EndpointNotFoundException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
+                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
+            }
+            catch (CommunicationException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
+                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
+            }
             catch (Exception)
             {
-                windowService.ShowPopUp("Error de Conexión", "No se pudo comunicar con el servidor para unirse a la partida.", PopUpIcon.Error);
+                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
             }
         }
     }

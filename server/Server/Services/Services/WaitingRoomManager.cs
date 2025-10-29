@@ -48,7 +48,7 @@ namespace Services.Services
             await JoinGameAsRegisteredPlayerAsync(gameCode, email);
             return gameCode;
         }
-
+        // TODO ADD fault exceptions
         public async Task<bool> JoinGameAsRegisteredPlayerAsync(string gameCode, string email)
         {
             if (!games.TryGetValue(gameCode, out var game) || game.Players.Count >= MaxPlayersPerGame)
@@ -77,7 +77,7 @@ namespace Services.Services
 
             return await TryAddPlayerAsync(game, playerDto);
         }
-
+        // ADD fault exceptions
         public async Task<bool> JoinGameAsGuestAsync(string gameCode, string nickname)
         {
             if (!games.TryGetValue(gameCode, out var game) || game.Players.Count >= MaxPlayersPerGame)
