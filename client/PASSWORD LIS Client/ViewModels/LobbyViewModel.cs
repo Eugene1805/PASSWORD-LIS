@@ -185,13 +185,11 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
         private async Task DeleteFriendAsync()
         {
-            MessageBoxResult result = MessageBox.Show(
-            string.Format("Are you sure you want to remove {0} from your friends list?", SelectedFriend.Nickname),
-            "Confirm Deletion",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Warning);
+            bool userConfirmed = windowService.ShowYesNoPopUp("Confirm Deletion",
+                string.Format("Are you sure you want to remove {0} from your friends list?", SelectedFriend.Nickname));
+           
 
-            if (result == MessageBoxResult.No)
+            if (!userConfirmed)
             {
                 return; 
             }
@@ -205,7 +203,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
                 if (success)
                 {
-                    _ = LoadFriendsAsync();
+                    //_ = LoadFriendsAsync();
                     windowService.ShowPopUp("Succesful", "friend successfully deleted", PopUpIcon.Success);
                 }
                 else

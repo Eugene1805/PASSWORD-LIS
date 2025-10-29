@@ -52,5 +52,6 @@ namespace Services.Contracts
         [EnumMember] RequestAlreadySent,
         [EnumMember] Failed,
         [EnumMember] RequestAlreadyReceived,
+        [EnumMember] CannotAddSelf
     }
 }

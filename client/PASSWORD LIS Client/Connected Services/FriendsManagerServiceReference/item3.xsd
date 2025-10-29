@@ -8,6 +8,7 @@
       <xs:enumeration value="RequestAlreadySent" />
       <xs:enumeration value="Failed" />
       <xs:enumeration value="RequestAlreadyReceived" />
+      <xs:enumeration value="CannotAddSelf" />
     </xs:restriction>
   </xs:simpleType>
   <xs:element name="FriendRequestResult" nillable="true" type="tns:FriendRequestResult" />
