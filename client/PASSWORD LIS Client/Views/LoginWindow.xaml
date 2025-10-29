@@ -31,12 +31,13 @@
             <TextBlock Text="{utils:Translate emailText}" Style="{StaticResource subtitleBlackTextBlockStyle}"
                        HorizontalAlignment="Left"/>
             <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" MaxLength="100"
+                     AutomationProperties.AutomationId="emailTextBox"
                      Style="{StaticResource primaryTextBoxStyle}" Width="230"/>
 
             <TextBlock Text="{utils:Translate userPasswordText}" Style="{StaticResource subtitleBlackTextBlockStyle}"
                        HorizontalAlignment="Left"/>
             <PasswordBox Style="{StaticResource passwordboxStyle}" Width="230" MaxLength="15"
-                         utils:PasswordBoxHelper.BindPassword="True"
+                         utils:PasswordBoxHelper.BindPassword="True" AutomationProperties.AutomationId="passwordBox"
                          utils:PasswordBoxHelper.BoundPassword="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <TextBlock Style="{StaticResource bodyTextBlockStyle}" TextWrapping="Wrap" Margin="0,10,0,0" HorizontalAlignment="Right">
@@ -48,6 +49,7 @@
             <Button Content="{utils:Translate logInText}" 
                 Style="{StaticResource LoadingButtonStyle}"
                 utils:ButtonProperties.IsBusy="{Binding IsLoggingIn}"
+                AutomationProperties.AutomationId="loginButton"
                 Width="210" 
                 Height="40" 
                 Margin="0,15,0,10" 

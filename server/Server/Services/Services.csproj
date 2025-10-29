@@ -86,7 +86,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Contracts\DTOs\ChatMessage.cs" />
+    <Compile Include="Contracts\DTOs\ChatMessageDTO.cs" />
     <Compile Include="Contracts\DTOs\EmailVerificationDTO.cs" />
     <Compile Include="Contracts\DTOs\FriendDTO.cs" />
     <Compile Include="Contracts\DTOs\NewAccountDTO.cs" />
@@ -96,6 +96,8 @@
     <Compile Include="Contracts\DTOs\ServiceErrorDetailDTO.cs" />
     <Compile Include="Contracts\DTOs\TeamDTO.cs" />
     <Compile Include="Contracts\DTOs\UserDTO.cs" />
+    <Compile Include="Contracts\Enums\PlayerRole.cs" />
+    <Compile Include="Contracts\Enums\MatchTeam.cs" />
     <Compile Include="Contracts\IAccountManager.cs" />
     <Compile Include="Contracts\IAccountVerificationManager.cs" />
     <Compile Include="Contracts\IClueGuyManager.cs" />

@@ -1,13 +1,10 @@
-﻿using System;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
 namespace Services.Contracts.DTOs
 {
     [DataContract]
-    public class ChatMessage
+    public class ChatMessageDTO
     {
-        [DataMember]
-        public int SenderId { get; set; }
         [DataMember]
         public string SenderNickname { get; set; }
 

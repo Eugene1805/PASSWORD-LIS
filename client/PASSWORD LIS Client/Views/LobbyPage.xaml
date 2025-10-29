@@ -148,6 +148,8 @@
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                     <TextBlock Text="PASSWORD LIS" Style="{StaticResource titleTextBlockStyle}"  Margin="0,0,0,20"/>
                     <Button 
+                        Command="{Binding CreateGameCommand}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Page}}"
                         Style="{StaticResource gameButtonStyle}"
                         Height="40">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -163,9 +165,10 @@
                     <TextBlock Text="{utils:Translate enterCodeToJoinText}" 
                            Style="{StaticResource subtitleTextBlockStyle}" 
                            Margin="0,0,0,10"/>
-                    <TextBox x:Name="codeJoinTextBox" 
-                         Style="{StaticResource primaryTextBoxStyle}" 
-                         Height="40" Margin="0,0,0,10"/>
+                    <TextBox x:Name="codeJoinTextBox" MaxLength="5"
+                            Text="{Binding GameCodeToJoin, UpdateSourceTrigger=PropertyChanged}"
+                            Style="{StaticResource primaryTextBoxStyle}" 
+                            Height="40" Margin="0,0,0,10"/>
                     <Button Content="{utils:Translate joingGameText}" 
                         Style="{StaticResource primaryButtonStyle}" 
                         Command="{Binding JoinGameCommand}"
