@@ -80,6 +80,11 @@ namespace PASSWORD_LIS_Client.ViewModels
                     windowService.ShowPopUp("Información",
                         "Ya has enviado una soicitud a este jugador", PopUpIcon.Information);
                     break;
+                case FriendRequestResult.CannotAddSelf:
+                    windowService.ShowPopUp(Properties.Langs.Lang.informationText,
+                        "No puedes enviarte una solicitud de amistas a ti mismo.",
+                        PopUpIcon.Information);
+                    break;
                 case FriendRequestResult.RequestAlreadyReceived:
                     windowService.ShowPopUp("Información",
                         "Este jugador ya te ha enviado una solicitud de amistad, revisa tu bandeja", PopUpIcon.Information);

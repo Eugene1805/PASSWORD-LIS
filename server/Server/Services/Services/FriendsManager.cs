@@ -75,7 +75,7 @@ namespace Services.Services
             communicationObject.Closed += (sender, e) => {
                 connectedClients.TryRemove(userAccountId, out _); 
             };
-
+                
             return Task.CompletedTask;
         }
 
@@ -102,7 +102,7 @@ namespace Services.Services
             }
             if (requesterAccount.Id == addresseeAccount.Id)
             {
-                return Task.FromResult(FriendRequestResult.Failed);
+                return Task.FromResult(FriendRequestResult.CannotAddSelf);
             }
 
             var validationResult = ValidateFriendRequest(requesterAccount, addresseeAccount);
