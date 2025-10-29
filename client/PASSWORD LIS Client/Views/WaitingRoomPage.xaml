@@ -115,18 +115,30 @@
                     <ListBox ItemsSource="{Binding ConnectedPlayers}" SelectedItem="{Binding SelectedPlayer, Mode=TwoWay}" BorderThickness="0" Background="Transparent">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
-                                <Grid Margin="5">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Image Grid.Column="0" Source="{Binding PhotoId, Converter={StaticResource AvatarIdToImageConverter}, 
-                                        FallbackValue={StaticResource DefaultAvatarImage}}" Width="110" Height="110" Margin="0,0,10,0" />
-                                    <TextBlock Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="1" Text="{Binding Nickname}" TextWrapping="WrapWithOverflow" VerticalAlignment="Center"/>
-                                    
-                                    <TextBlock Grid.Column="2" Style="{StaticResource bodyTextBlockStyle}" Text="{Binding Role}" VerticalAlignment="Bottom"/>
-                                </Grid>
+                                <Border Margin="5" Style ="{StaticResource teamsBorderStyle}"
+                                        BorderThickness="3"
+                                        CornerRadius="5"
+                                        Padding="5">    
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Image Grid.Column="0" Source="{Binding PhotoId, Converter={StaticResource AvatarIdToImageConverter}, FallbackValue={StaticResource DefaultAvatarImage}}" 
+                                                Width="110" Height="110" Margin="0,0,10,0" />
+
+                                        <TextBlock Grid.Column="1" Style="{StaticResource subtitleTextBlockStyle}" 
+                                                   Text="{Binding Nickname}" 
+                                                   TextWrapping="WrapWithOverflow" 
+                                                   VerticalAlignment="Center"/>
+
+                                        <TextBlock Grid.Column="2" Style="{StaticResource bodyTextBlockStyle}" 
+                                                   Text="{Binding Role}" 
+                                                   VerticalAlignment="Bottom"/>
+                                    </Grid>
+                                </Border>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
@@ -184,31 +196,38 @@
             </Grid>
         </Border>
         <Border Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" Style="{StaticResource floatingBorderStyle}" Padding="15" Margin="10,10,10,20">
-            <StackPanel HorizontalAlignment="Center">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBlock Style="{StaticResource subtitleTextBlockStyle}" 
+                               Text="{utils:Translate codeWordText}" 
+                               VerticalAlignment="Center" Margin="5"/>
+                <TextBlock x:Name="codeGeneratedTextBlock" Style="{StaticResource titleTextBlockStyle}"
+                               Text="{Binding GameCode}"
+                               VerticalAlignment="Center" Margin="5"/>
+                <Button Style="{StaticResource circleButtonStyle}"
+                            Command="{Binding CopyGameCodeCommand}"
+                            Width="60" Height="60"
+                            VerticalAlignment="Center"
+                            Margin="5,0,15,0"
+                            ToolTip="Copiar Código">
+                    <Image Source="/Resources/CopyIcon.png" Width="40" Height="40"/>
+                </Button>
+                <Ellipse Style="{StaticResource circleTransparentEllipseStyle}">
+                    <Ellipse.Fill>
+                        <ImageBrush ImageSource="/Resources/TeamIcon.png"/>
+                    </Ellipse.Fill>
+                </Ellipse>
+
+                <TextBlock x:Name="playersInWaitingRoomTextBlock" 
+                               Style="{StaticResource subtitleTextBlockStyle}" 
+                               Text="{Binding PlayerCountText}" Margin="5,0,15,0"
+                               VerticalAlignment="Center"/>
                 <Button Style="{StaticResource gameButtonStyle}" 
                         Content="{utils:Translate startGameText}" 
                         HorizontalAlignment="Center"
-                        Width="100"
-                        Height="40"/>
-
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                    <TextBlock Style="{StaticResource subtitleTextBlockStyle}" 
-                               Text="{utils:Translate codeWordText}" 
-                               VerticalAlignment="Center" Margin="5"/>
-                    <TextBlock x:Name="codeGeneratedTextBlock" Style="{StaticResource titleTextBlockStyle}"
-                               Text="EXAMPLE"
-                               VerticalAlignment="Center" Margin="5"/>
-                    <Ellipse Style="{StaticResource circleTransparentEllipseStyle}">
-                        <Ellipse.Fill>
-                            <ImageBrush ImageSource="/Resources/TeamIcon.png"/>
-                        </Ellipse.Fill>
-                    </Ellipse>
-
-                    <TextBlock x:Name="playersInWaitingRoomTextBlock" 
-                               Style="{StaticResource subtitleTextBlockStyle}" 
-                               Text="EXAMPLE"  
-                               VerticalAlignment="Center"/>
-                </StackPanel>
+                        Width="120"
+                        Height="45"
+                        Command="{Binding StartGameCommand}"
+                        Visibility="{Binding IsHost, Converter={StaticResource BoolToVisConverter}}"/>
             </StackPanel>
         </Border>
 

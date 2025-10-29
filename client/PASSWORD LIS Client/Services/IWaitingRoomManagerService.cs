@@ -1,29 +1,36 @@
-﻿using PASSWORD_LIS_Client.Utils;
-using PASSWORD_LIS_Client.WaitingRoomManagerServiceReference;
+﻿using PASSWORD_LIS_Client.WaitingRoomManagerServiceReference;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace PASSWORD_LIS_Client.Services
 {
     public interface IWaitingRoomManagerService
     {
-        Task<bool> JoinAsRegisteredPlayerAsync(string email);
-        Task<bool> JoinAsGuestAsync(string guestNickname);
-        Task LeaveRoomAsync(int playerId);
-        Task<List<PlayerDTO>> GetConnectedPlayersAsync();
-        Task SendMessageAsync(string message);
+        event Action<ChatMessageDTO> MessageReceived;
+        event Action<PlayerDTO> PlayerJoined;
+        event Action<int> PlayerLeft;
+        event Action<string> GameCreated;
+        event Action GameStarted;
+        Task<string> CreateGameAsync(string email);
+        Task<bool> JoinGameAsRegisteredPlayerAsync(string gameCode, string email);
+        Task<bool> JoinGameAsGuestAsync(string gameCode, string guestNickname);
+        Task LeaveGameAsync(string gameCode, int playerId);
+        Task StartGameAsync(string gameCode);
+        Task SendMessageAsync(string gameCode, ChatMessageDTO message);
+        Task<List<PlayerDTO>> GetPlayersInGameAsync(string gameCode);
 
     }
 
     public class WcfWaitingRoomManagerService : IWaitingRoomManagerService, IWaitingRoomManagerCallback
     {
-        public event Action<ChatMessage> MessageReceived;
+        public event Action<ChatMessageDTO> MessageReceived;
         public event Action<PlayerDTO> PlayerJoined;
         public event Action<int> PlayerLeft;
+        public event Action<string> GameCreated;
+        public event Action GameStarted;
 
         private readonly IWaitingRoomManager proxy;
         public WcfWaitingRoomManagerService() 
@@ -33,74 +40,40 @@ namespace PASSWORD_LIS_Client.Services
             proxy = factory.CreateChannel();
         }
 
-        public async Task<List<PlayerDTO>> GetConnectedPlayersAsync()
+        public async Task<string> CreateGameAsync(string email)
         {
-            var playersArray = await proxy.GetConnectedPlayersAsync();
-            return playersArray.ToList();
+            return await proxy.CreateGameAsync(email);
         }
 
-        public async Task<bool> JoinAsGuestAsync(string guestNickname)
+        public async Task<bool> JoinGameAsRegisteredPlayerAsync(string gameCode, string email)
         {
-            try
-            {
-                await proxy.JoinAsGuestAsync(guestNickname);
-                return true;
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("Error at joining as guest");
-                throw;
-            }
+            return await proxy.JoinGameAsRegisteredPlayerAsync(gameCode, email);
         }
 
-        public async Task<bool> JoinAsRegisteredPlayerAsync(string email)
+        public async Task<bool> JoinGameAsGuestAsync(string gameCode, string guestNickname)
         {
-            try
-            {
-                return await proxy.JoinAsRegisteredPlayerAsync(email);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error at joining: {ex.Message}");
-                throw;
-            }
+            return await proxy.JoinGameAsGuestAsync(gameCode, guestNickname);
         }
 
-        public async Task LeaveRoomAsync(int playerId)
+        public async Task LeaveGameAsync(string gameCode, int playerId)
         {
-            try
-            {
-                await proxy.LeaveRoomAsync(playerId);
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("Error at leaving the room");
-                throw;
-            }
-            
-        }
-        public async Task SendMessageAsync(string message)
-        {
-            var chatMessage = new ChatMessage
-            {
-                SenderNickname = SessionManager.CurrentUser.Nickname,
-                Message = message
-            };
-            try
-            {
-                await proxy.SendMessageAsync(chatMessage);
-            }
-            catch (Exception)
-            {
-                Console.WriteLine("Error at sending a message");
-            }
-            
+            await proxy.LeaveGameAsync(gameCode, playerId);
         }
 
-
-        public void OnMessageReceived(ChatMessage message)
+        public async Task StartGameAsync(string gameCode)
         {
-            MessageReceived?.Invoke(message);
+            await proxy.StartGameAsync(gameCode);
+        }
+
+        public async Task SendMessageAsync(string gameCode, ChatMessageDTO message)
+        {
+            await proxy.SendMessageAsync(gameCode, message);
+        }
+
+        public async Task<List<PlayerDTO>> GetPlayersInGameAsync(string gameCode)
+        {
+            var playersArray = await proxy.GetPlayersInGameAsync(gameCode);
+            return playersArray?.ToList() ?? new List<PlayerDTO>();
         }
 
         public void OnPlayerJoined(PlayerDTO player)
@@ -112,5 +85,21 @@ namespace PASSWORD_LIS_Client.Services
         {
             PlayerLeft?.Invoke(playerId);
         }
+
+        public void OnMessageReceived(ChatMessageDTO message)
+        {
+            MessageReceived?.Invoke(message);
+        }
+
+        public void OnGameCreated(string gameCode)
+        {
+            GameCreated?.Invoke(gameCode);
+        }
+
+        public void OnGameStarted()
+        {
+            GameStarted?.Invoke();
+        }
+
     }
 }

@@ -15,6 +15,16 @@ namespace PASSWORD_LIS_Client.ViewModels
 {
     public class LobbyViewModel : BaseViewModel
     {
+        private string gameCodeToJoin;
+        public string GameCodeToJoin
+        {
+            get => gameCodeToJoin;
+            set
+            {
+                SetProperty(ref gameCodeToJoin, value);
+                ((RelayCommand)JoinGameCommand).RaiseCanExecuteChanged();
+            }
+        }
         private int photoId;
         public int PhotoId
         {
@@ -58,14 +68,17 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand HowToPlayCommand { get; }
         public ICommand SettingsCommand { get; }
         public ICommand JoinGameCommand { get; }
+        public ICommand CreateGameCommand { get; }
 
         private readonly IWindowService windowService;
         private readonly IFriendsManagerService friendsManagerService;
+        private readonly IWaitingRoomManagerService waitingRoomManagerService;
 
-        public LobbyViewModel(IWindowService windowService, IFriendsManagerService friendsManagerService)
+        public LobbyViewModel(IWindowService windowService, IFriendsManagerService friendsManagerService, IWaitingRoomManagerService waitingRoomManagerService)
         {
             this.windowService = windowService;
             this.friendsManagerService = friendsManagerService;
+            this.waitingRoomManagerService = waitingRoomManagerService;
 
             friendsManagerService.FriendRequestReceived += OnFriendRequestReceived;
             friendsManagerService.FriendAdded += OnFriendAdded;
@@ -81,7 +94,8 @@ namespace PASSWORD_LIS_Client.ViewModels
             ShowTopPlayersCommand = new RelayCommand(ShowTopPlayers);
             HowToPlayCommand = new RelayCommand(ShowHowToPlay);
             SettingsCommand = new RelayCommand(ShowSettings);
-            JoinGameCommand = new RelayCommand(JoinGame);
+            JoinGameCommand = new RelayCommand(async (param) => await JoinGameWithCodeAsync(), (_) => CanJoinGame());
+            CreateGameCommand = new RelayCommand(async (param) => await CreateGameAsync(), (_) => !IsGuest);
             LoadSessionData();
 
             if (SessionManager.IsUserLoggedIn() && !IsGuest)
@@ -258,19 +272,66 @@ namespace PASSWORD_LIS_Client.ViewModels
                 windowService.CloseMainWindow();
             }
         }
-
-        private void JoinGame(object parameter) 
+        private async Task CreateGameAsync()
         {
-            string username = SessionManager.CurrentUser.Nickname;
-
-            var waitingRoomViewModel = new WaitingRoomViewModel(App.WaitRoomManagerService, App.WindowService, App.FriendsManagerService);
-
-            var waitingRoomPage = new WaitingRoomPage(username, SessionManager.CurrentUser.PlayerId < 0)
+            try
             {
-                DataContext = waitingRoomViewModel
-            };
+                string newGameCode = await waitingRoomManagerService.CreateGameAsync(SessionManager.CurrentUser.Email);
 
-            windowService.NavigateTo(waitingRoomPage);
+                if (!string.IsNullOrEmpty(newGameCode))
+                {
+                    var waitingRoomViewModel = new WaitingRoomViewModel(App.WaitRoomManagerService, App.WindowService, App.FriendsManagerService);
+                    await waitingRoomViewModel.InitializeAsync(newGameCode, isHost: true);
+
+                    var waitingRoomPage = new WaitingRoomPage { DataContext = waitingRoomViewModel };
+                    windowService.NavigateTo(waitingRoomPage);
+                }
+                else
+                {
+                    windowService.ShowPopUp("Error", "No se pudo crear la partida.", PopUpIcon.Error);
+                }
+            }
+            catch (Exception)
+            {
+                windowService.ShowPopUp("Error de Conexión", "No se pudo comunicar con el servidor para crear la partida.", PopUpIcon.Error);
+            }
+        }
+        private bool CanJoinGame()
+        {
+            return !string.IsNullOrWhiteSpace(GameCodeToJoin) && GameCodeToJoin.Length == 5;
+        }
+        private async Task JoinGameWithCodeAsync()
+        {
+            bool success = false;
+            try
+            {
+                if (IsGuest)
+                {
+                    success = await waitingRoomManagerService.JoinGameAsGuestAsync(GameCodeToJoin, SessionManager.CurrentUser.Nickname);
+                }
+                else
+                {
+                    success = await waitingRoomManagerService.JoinGameAsRegisteredPlayerAsync(GameCodeToJoin, SessionManager.CurrentUser.Email);
+                }
+
+                if (success)
+                {
+
+                    var waitingRoomViewModel = new WaitingRoomViewModel(App.WaitRoomManagerService, App.WindowService, App.FriendsManagerService);
+                    await waitingRoomViewModel.InitializeAsync(GameCodeToJoin, isHost: false);
+
+                    var waitingRoomPage = new WaitingRoomPage { DataContext = waitingRoomViewModel };
+                    windowService.NavigateTo(waitingRoomPage);
+                }
+                else
+                {
+                    windowService.ShowPopUp("Unión Fallida", "El código de la partida es incorrecto, la sala está llena o ya estás en la partida.", PopUpIcon.Warning);
+                }
+            }
+            catch (Exception)
+            {
+                windowService.ShowPopUp("Error de Conexión", "No se pudo comunicar con el servidor para unirse a la partida.", PopUpIcon.Error);
+            }
         }
     }
 }

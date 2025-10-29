@@ -19,6 +19,25 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ObservableCollection<string> ChatMessages { get; }
         public ObservableCollection<PlayerDTO> ConnectedPlayers { get; }
 
+        private string gameCode;
+        public string GameCode
+        {
+            get => gameCode;
+            set => SetProperty(ref gameCode, value);
+        }
+        private bool isHost;
+        public bool IsHost
+        {
+            get => isHost;
+            set => SetProperty(ref isHost, value);
+        }
+        private string playerCountText;
+        public string PlayerCountText
+        {
+            get => playerCountText;
+            set => SetProperty(ref playerCountText, value);
+        }
+
         private PlayerDTO selectedPlayer;
         public PlayerDTO SelectedPlayer
         {
@@ -83,6 +102,9 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand SendMessageCommand { get; }
         public ICommand LeaveRoomCommand { get; }
         public ICommand ReportCommand { get; }
+        public ICommand StartGameCommand { get; }
+        public ICommand CopyGameCodeCommand { get; }
+
         private readonly IWaitingRoomManagerService roomManagerClient;
         private readonly IWindowService windowService;
         private readonly IFriendsManagerService friendsManagerService;
@@ -97,63 +119,52 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             ChatMessages = new ObservableCollection<string>();
             ConnectedPlayers = new ObservableCollection<PlayerDTO>();
+            Friends = new ObservableCollection<FriendDTO>();
 
             SendMessageCommand = new RelayCommand(async (_) => await SendMessageAsync(),(_) => CanSendMessage());
-            LeaveRoomCommand = new RelayCommand(async (_) => await LeaveRoomAsync());
-            ReportCommand = new RelayCommand( (_) => OpenReportWindow(), (_) => CanReportPlayer());
-
-            Friends = new ObservableCollection<FriendDTO>();
+            LeaveRoomCommand = new RelayCommand(async (_) => await LeaveGameAsync());
+            ReportCommand = new RelayCommand( (_) => OpenReportWindow());
+            StartGameCommand = new RelayCommand(async (_) => await StartGameAsync(), (_) => CanStartGame());
+            CopyGameCodeCommand = new RelayCommand((_) => CopyGameCodeToClipboard());
 
             if (roomManagerClient is WcfWaitingRoomManagerService wcfService)
             {
                 wcfService.MessageReceived += OnMessageReceived;
                 wcfService.PlayerJoined += OnPlayerJoined;
                 wcfService.PlayerLeft += OnPlayerLeft;
+                wcfService.GameStarted += OnGameStarted;
             }
 
 
         }
 
-        public async Task LoadInitialDataAsync(string username, bool isGuest)
+        public async Task InitializeAsync(string gameCode, bool isHost)
         {
-            this.IsGuest = isGuest;
+            this.GameCode = gameCode;
+            this.IsHost = isHost;
+            this.IsGuest = SessionManager.CurrentUser == null || SessionManager.CurrentUser.PlayerId < 0;
 
             try
             {
-                bool joined = false;
-
-                if (isGuest)
+                var players = await roomManagerClient.GetPlayersInGameAsync(this.GameCode);
+                if (!this.IsGuest)
                 {
-                    joined = await roomManagerClient.JoinAsGuestAsync(username);
+                    this.currentPlayer = players.FirstOrDefault(p => p.Id == SessionManager.CurrentUser.PlayerId);
+                    _ = LoadFriendsAsync();
                 }
                 else
                 {
-                    joined = await roomManagerClient.JoinAsRegisteredPlayerAsync(SessionManager.CurrentUser.Email);
+                    this.currentPlayer = players.FirstOrDefault(p => p.Nickname == SessionManager.CurrentUser.Nickname);
                 }
-
-                if (joined)
+                await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    var players = await roomManagerClient.GetConnectedPlayersAsync();
-                    this.currentPlayer = players.FirstOrDefault(p => p.Nickname == username);
-
-                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    ConnectedPlayers.Clear();
+                    foreach (var player in players)
                     {
-                        ConnectedPlayers.Clear();
-                        foreach (var player in players)
-                        {
-                            ConnectedPlayers.Add(player);
-                        }
-                    });
-                    if (!this.IsGuest)
-                    {
-                        _ = LoadFriendsAsync();
+                        ConnectedPlayers.Add(player);
                     }
-                }
-                else
-                {
-                    windowService.ShowPopUp(Properties.Langs.Lang.couldNotJoinText,
-                        Properties.Langs.Lang.nicknameInUseText, PopUpIcon.Warning);
-                }
+                    UpdatePlayerCount();
+                });              
             }
             catch (TimeoutException)
             {
@@ -203,7 +214,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void OpenReportWindow()
         {
-            if (SelectedPlayer != null)
+            if (CanReportPlayer())
             {
                 windowService.ShowReportWindow(SelectedPlayer);
             }
@@ -214,16 +225,17 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
         private async Task SendMessageAsync()
         {
-            await roomManagerClient.SendMessageAsync(CurrentMessage);
+            await roomManagerClient.SendMessageAsync(this.gameCode, new ChatMessageDTO { Message = CurrentMessage,
+                SenderNickname = SessionManager.CurrentUser.Nickname});
             CurrentMessage = string.Empty;
         }
-        private async Task LeaveRoomAsync()
+        private async Task LeaveGameAsync()
         {
             try
             {
                 if (this.currentPlayer != null)
                 {
-                    await roomManagerClient.LeaveRoomAsync(this.currentPlayer.Id);
+                    await roomManagerClient.LeaveGameAsync(this.gameCode, IsGuest ? currentPlayer.Id : SessionManager.CurrentUser.PlayerId);
                 }
             }
             catch (TimeoutException)
@@ -251,8 +263,35 @@ namespace PASSWORD_LIS_Client.ViewModels
                 windowService.GoBack();
             }
         }
+        private void UpdatePlayerCount()
+        {
+            PlayerCountText = $"{ConnectedPlayers.Count}/4";
+            ((RelayCommand)StartGameCommand).RaiseCanExecuteChanged();
+        }
+        private async Task StartGameAsync()
+        {
+            try
+            {
+                await roomManagerClient.StartGameAsync(GameCode);
+            }
+            catch (Exception)
+            {
+                windowService.ShowPopUp("Error", "No se pudo iniciar la partida.", PopUpIcon.Error);
+            }
+        }
 
-        private void OnMessageReceived(ChatMessage message)
+        private bool CanStartGame()
+        {
+            return IsHost && ConnectedPlayers.Count == 4;
+        }
+        private void OnGameStarted()
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                windowService.ShowPopUp("¡Juego iniciado!", "La partida va a comenzar.", PopUpIcon.Success);
+            });
+        }
+        private void OnMessageReceived(ChatMessageDTO message)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -267,6 +306,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 if (!ConnectedPlayers.Any(p => p.Id == player.Id))
                 {
                     ConnectedPlayers.Add(player);
+                    UpdatePlayerCount();
                     var joinedText = Properties.Langs.Lang.joinedText;
                     _ = ShowSnackbarAsync($"{player.Nickname} {joinedText}");
                 }
@@ -279,9 +319,10 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 var playerToRemove = ConnectedPlayers.FirstOrDefault(p => p.Id == playerId);
                 if (playerToRemove != null)
-                {
-                    var leftText = Properties.Langs.Lang.leftText;
+                {                    
                     ConnectedPlayers.Remove(playerToRemove);
+                    UpdatePlayerCount();
+                    var leftText = Properties.Langs.Lang.leftText;
                     _ = ShowSnackbarAsync($"{playerToRemove.Nickname} {leftText}");
                 }
             });
@@ -296,7 +337,15 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             IsSnackbarVisible = false;
         }
+        private void CopyGameCodeToClipboard()
+        {
+            if (!string.IsNullOrEmpty(GameCode))
+            {
+                Clipboard.SetText(GameCode);
 
+                _ = ShowSnackbarAsync("¡Código copiado al portapapeles!");
+            }
+        }
         private async Task LoadFriendsAsync()
         {
             if (isLoadingFriends)

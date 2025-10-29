@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using Services.Contracts.Enums;
+using System.Runtime.Serialization;
 
 namespace Services.Contracts.DTOs
 {
@@ -13,9 +14,8 @@ namespace Services.Contracts.DTOs
         public int PhotoId { get; set; }
 
         [DataMember]
-        public string Role { get; set; }
-
+        public PlayerRole Role { get; set; }
         [DataMember]
-        public bool IsReady { get; set; }
+        public MatchTeam Team { get; set; }
     }
 }

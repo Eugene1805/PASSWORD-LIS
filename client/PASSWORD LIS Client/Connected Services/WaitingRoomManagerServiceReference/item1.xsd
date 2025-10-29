@@ -1,50 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xs:schema xmlns:tns="http://tempuri.org/" elementFormDefault="qualified" targetNamespace="http://tempuri.org/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:import schemaLocation="http://localhost:8100/?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" />
-  <xs:element name="JoinAsRegisteredPlayer">
+  <xs:element name="CreateGame">
     <xs:complexType>
       <xs:sequence>
         <xs:element minOccurs="0" name="email" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-  <xs:element name="JoinAsRegisteredPlayerResponse">
+  <xs:element name="CreateGameResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element minOccurs="0" name="JoinAsRegisteredPlayerResult" type="xs:boolean" />
+        <xs:element minOccurs="0" name="CreateGameResult" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-  <xs:element name="JoinAsGuest">
+  <xs:element name="JoinGameAsRegisteredPlayer">
     <xs:complexType>
       <xs:sequence>
-        <xs:element minOccurs="0" name="guestNickname" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="gameCode" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="email" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-  <xs:element name="JoinAsGuestResponse">
+  <xs:element name="JoinGameAsRegisteredPlayerResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element minOccurs="0" name="JoinAsGuestResult" type="xs:boolean" />
+        <xs:element minOccurs="0" name="JoinGameAsRegisteredPlayerResult" type="xs:boolean" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-  <xs:element name="LeaveRoom">
+  <xs:element name="JoinGameAsGuest">
     <xs:complexType>
       <xs:sequence>
-        <xs:element minOccurs="0" name="playerId" type="xs:int" />
+        <xs:element minOccurs="0" name="gameCode" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="nickname" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-  <xs:element name="LeaveRoomResponse">
+  <xs:element name="JoinGameAsGuestResponse">
     <xs:complexType>
-      <xs:sequence />
+      <xs:sequence>
+        <xs:element minOccurs="0" name="JoinGameAsGuestResult" type="xs:boolean" />
+      </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="SendMessage">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" minOccurs="0" name="message" nillable="true" type="q1:ChatMessage" />
+        <xs:element minOccurs="0" name="gameCode" nillable="true" type="xs:string" />
+        <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" minOccurs="0" name="message" nillable="true" type="q1:ChatMessageDTO" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -53,15 +58,42 @@
       <xs:sequence />
     </xs:complexType>
   </xs:element>
-  <xs:element name="GetConnectedPlayers">
+  <xs:element name="LeaveGame">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="gameCode" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="playerId" type="xs:int" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="LeaveGameResponse">
     <xs:complexType>
       <xs:sequence />
     </xs:complexType>
   </xs:element>
-  <xs:element name="GetConnectedPlayersResponse">
+  <xs:element name="StartGame">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" minOccurs="0" name="GetConnectedPlayersResult" nillable="true" type="q2:ArrayOfPlayerDTO" />
+        <xs:element minOccurs="0" name="gameCode" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="StartGameResponse">
+    <xs:complexType>
+      <xs:sequence />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetPlayersInGame">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="gameCode" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetPlayersInGameResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" minOccurs="0" name="GetPlayersInGameResult" nillable="true" type="q2:ArrayOfPlayerDTO" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -82,8 +114,20 @@
   <xs:element name="OnMessageReceived">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q4="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" minOccurs="0" name="message" nillable="true" type="q4:ChatMessage" />
+        <xs:element xmlns:q4="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" minOccurs="0" name="message" nillable="true" type="q4:ChatMessageDTO" />
       </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="OnGameCreated">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="gameCode" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="OnGameStarted">
+    <xs:complexType>
+      <xs:sequence />
     </xs:complexType>
   </xs:element>
 </xs:schema>

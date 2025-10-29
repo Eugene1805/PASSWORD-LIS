@@ -9,19 +9,23 @@ namespace Services.Contracts
     public interface IWaitingRoomManager
     {
         [OperationContract]
-        Task<bool> JoinAsRegisteredPlayerAsync(string email);
+        Task<string> CreateGameAsync(string email);
 
         [OperationContract]
-        Task<bool> JoinAsGuestAsync(string guestNickname);
+        Task<bool> JoinGameAsRegisteredPlayerAsync(string gameCode, string email);
+        [OperationContract]
+        Task<bool> JoinGameAsGuestAsync(string gameCode, string nickname);
 
         [OperationContract]
-        Task LeaveRoomAsync(int playerId);
+        Task SendMessageAsync(string gameCode, ChatMessageDTO message);
 
         [OperationContract]
-        Task SendMessageAsync(ChatMessage message);
+        Task LeaveGameAsync(string gameCode, int playerId);
 
         [OperationContract]
-        Task<List<PlayerDTO>> GetConnectedPlayersAsync();
+        Task StartGameAsync(string gameCode);
+        [OperationContract]
+        Task<List<PlayerDTO>> GetPlayersInGameAsync(string gameCode);
     }
     public interface IWaitingRoomCallback
     {
@@ -32,6 +36,12 @@ namespace Services.Contracts
         void OnPlayerLeft(int playerId);
 
         [OperationContract(IsOneWay = true)]
-        void OnMessageReceived(ChatMessage message);
+        void OnMessageReceived(ChatMessageDTO message);
+
+        [OperationContract(IsOneWay = true)]
+        void OnGameCreated(string gameCode);
+
+        [OperationContract(IsOneWay = true)]
+        void OnGameStarted();
     }
 }
