@@ -23,7 +23,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             set
             {
                 SetProperty(ref gameCodeToJoin, value);
-                ((RelayCommand)JoinGameCommand).RaiseCanExecuteChanged();
+                RelayCommand.RaiseCanExecuteChanged();
             }
         }
         private int photoId;

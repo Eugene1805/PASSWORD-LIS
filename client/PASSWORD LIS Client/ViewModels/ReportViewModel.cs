@@ -25,7 +25,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             set
             {
                 SetProperty(ref reportReason, value);
-                ((RelayCommand)SubmitReportCommand).RaiseCanExecuteChanged();
+                RelayCommand.RaiseCanExecuteChanged();
             }
         }
         public string TitleMessage { get; private set; }

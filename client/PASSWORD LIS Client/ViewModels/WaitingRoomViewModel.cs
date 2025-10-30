@@ -45,7 +45,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             set
             {
                 SetProperty(ref selectedPlayer, value);
-                ((RelayCommand)ReportCommand).RaiseCanExecuteChanged();
+                RelayCommand.RaiseCanExecuteChanged();
             }
         }
         private string currentMessage;
@@ -317,7 +317,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         private void UpdatePlayerCount()
         {
             PlayerCountText = $"{ConnectedPlayers.Count}/{MaxPlayers}";
-            ((RelayCommand)StartGameCommand).RaiseCanExecuteChanged();
+            RelayCommand.RaiseCanExecuteChanged();
         }
         private async Task StartGameAsync()
         {

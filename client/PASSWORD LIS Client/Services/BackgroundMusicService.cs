@@ -7,6 +7,7 @@ namespace PASSWORD_LIS_Client.Services
     public class BackgroundMusicService : IDisposable
     {
         private readonly MediaPlayer player;
+        private bool disposed;
 
         public double Volume
         {
@@ -38,13 +39,15 @@ namespace PASSWORD_LIS_Client.Services
         {
             player = new MediaPlayer();
             player.Open(new Uri("Resources/BackgroundMusic.mp3", UriKind.Relative));
-            player.MediaEnded += (s, e) =>
-            {
-                player.Position = TimeSpan.Zero;
-                player.Play();
-            };
+            player.MediaEnded += OnMediaEnded;
 
             player.Volume = Settings.Default.MusicVolume;
+        }
+
+        private void OnMediaEnded(object sender, EventArgs e)
+        {
+            player.Position = TimeSpan.Zero;
+            player.Play();
         }
 
         public void Play()
@@ -71,9 +74,39 @@ namespace PASSWORD_LIS_Client.Services
             IsPlaying = false;
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                // unsubscribe events and release managed resources
+                player.MediaEnded -= OnMediaEnded;
+                try
+                {
+                    if (IsPlaying)
+                    {
+                        player.Stop();
+                        IsPlaying = false;
+                    }
+                }
+                catch
+                {
+                    // Ignore exceptions during shutdown/cleanup
+                }
+                player.Close();
+            }
+
+            disposed = true;
+        }
+
         public void Dispose()
         {
-            player.Close();
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }
