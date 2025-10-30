@@ -343,7 +343,8 @@ namespace PASSWORD_LIS_Client.ViewModels
                         windowService.ShowPopUp("Cuenta Suspendida", "No puedes crear partidas, tu cuenta está suspendida temporalmente.", PopUpIcon.Warning);
                         return; // Detiene la ejecución
                     }
-                    success = await waitingRoomManagerService.JoinGameAsRegisteredPlayerAsync(GameCodeToJoin, SessionManager.CurrentUser.Email);
+                    var playerId = await waitingRoomManagerService.JoinGameAsRegisteredPlayerAsync(GameCodeToJoin, SessionManager.CurrentUser.Email);
+                    success = playerId > 0;
                 }
 
                 if (success)

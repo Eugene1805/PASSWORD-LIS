@@ -19,6 +19,7 @@ namespace Services.Services
         sealed class Game
         {
             public string GameCode { get; set; }
+            public int HostPlayerId { get; set; }
             public ConcurrentDictionary<int, (IWaitingRoomCallback, PlayerDTO)> Players { get; } = new ConcurrentDictionary<int, (IWaitingRoomCallback, PlayerDTO)>();
         }
 
@@ -45,21 +46,29 @@ namespace Services.Services
                 return await CreateGameAsync(email);
             }
 
-            await JoinGameAsRegisteredPlayerAsync(gameCode, email);
-            return gameCode;
+            var playerId = await JoinGameAsRegisteredPlayerAsync(gameCode, email);
+            if (playerId > 0)
+            {
+                newGame.HostPlayerId = playerId;
+                return gameCode;
+            }
+
+            games.TryRemove(gameCode, out _);
+            // ADD personalize exception
+            throw new FaultException("No se pudo crear la partida");
         }
         // TODO ADD fault exceptions
-        public async Task<bool> JoinGameAsRegisteredPlayerAsync(string gameCode, string email)
+        public async Task<int> JoinGameAsRegisteredPlayerAsync(string gameCode, string email)
         {
             if (!games.TryGetValue(gameCode, out var game) || game.Players.Count >= MaxPlayersPerGame)
             {
-                return false;
+                return -1;
             }
 
             var playerEntity = repository.GetPlayerByEmail(email);
             if (playerEntity == null)
             {
-                return false;
+                return -1;
             }
 
             var playerDto = new PlayerDTO
@@ -72,10 +81,11 @@ namespace Services.Services
             AssignTeamAndRole(playerDto, game.Players.Count);
             if (game.Players.ContainsKey(playerDto.Id))
             {
-                return false;
+                return -1;
             }
 
-            return await TryAddPlayerAsync(game, playerDto);
+            var success = await TryAddPlayerAsync(game, playerDto);
+            return success ? playerDto.Id : -1;
         }
         // ADD fault exceptions
         public async Task<bool> JoinGameAsGuestAsync(string gameCode, string nickname)
@@ -107,9 +117,14 @@ namespace Services.Services
         {
             if (games.TryGetValue(gameCode, out var game) && game.Players.TryRemove(playerId, out _))
             {
+                bool wasHost = game.HostPlayerId == playerId;
                 await BroadcastAsync(game, client => client.Item1.OnPlayerLeft(playerId));
 
-                if (game.Players.IsEmpty)
+                if (wasHost)
+                {
+                    await HostLeftAsync(gameCode);
+                }
+                else if (game.Players.IsEmpty)
                 {
                     games.TryRemove(gameCode, out _);
                 }
@@ -142,7 +157,15 @@ namespace Services.Services
 
             return Task.FromResult(new List<PlayerDTO>());
         }
+        public async Task HostLeftAsync(string gameCode)
+        {
+            if (games.TryGetValue(gameCode, out var game))
+            {
+                await BroadcastAsync(game, client => client.Item1.OnHostLeft());
 
+                games.TryRemove(gameCode, out _);
+            }
+        }
         private async Task<bool> TryAddPlayerAsync(Game game, PlayerDTO player)
         {
             var callback = operationContext.GetCallbackChannel<IWaitingRoomCallback>();
@@ -178,7 +201,7 @@ namespace Services.Services
                     break;
             }
         }
-
+        // TODO ADD a better exception handling strategy
         private async Task BroadcastAsync(Game game, Action<(IWaitingRoomCallback, PlayerDTO)> action)
         {
             var tasks = game.Players.Select(async playerEntry =>

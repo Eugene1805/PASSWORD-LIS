@@ -79,6 +79,12 @@
   <wsdl:message name="IWaitingRoomManager_GetPlayersInGame_OutputMessage">
     <wsdl:part name="parameters" element="tns:GetPlayersInGameResponse" />
   </wsdl:message>
+  <wsdl:message name="IWaitingRoomManager_HostLeft_InputMessage">
+    <wsdl:part name="parameters" element="tns:HostLeft" />
+  </wsdl:message>
+  <wsdl:message name="IWaitingRoomManager_HostLeft_OutputMessage">
+    <wsdl:part name="parameters" element="tns:HostLeftResponse" />
+  </wsdl:message>
   <wsdl:message name="IWaitingRoomManager_OnPlayerJoined_OutputCallbackMessage">
     <wsdl:part name="parameters" element="tns:OnPlayerJoined" />
   </wsdl:message>
@@ -93,6 +99,9 @@
   </wsdl:message>
   <wsdl:message name="IWaitingRoomManager_OnGameStarted_OutputCallbackMessage">
     <wsdl:part name="parameters" element="tns:OnGameStarted" />
+  </wsdl:message>
+  <wsdl:message name="IWaitingRoomManager_OnHostLeft_OutputCallbackMessage">
+    <wsdl:part name="parameters" element="tns:OnHostLeft" />
   </wsdl:message>
   <wsdl:portType name="IWaitingRoomManager">
     <wsdl:operation name="CreateGame">
@@ -123,6 +132,10 @@
       <wsdl:input wsaw:Action="http://tempuri.org/IWaitingRoomManager/GetPlayersInGame" message="tns:IWaitingRoomManager_GetPlayersInGame_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IWaitingRoomManager/GetPlayersInGameResponse" message="tns:IWaitingRoomManager_GetPlayersInGame_OutputMessage" />
     </wsdl:operation>
+    <wsdl:operation name="HostLeft">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWaitingRoomManager/HostLeft" message="tns:IWaitingRoomManager_HostLeft_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWaitingRoomManager/HostLeftResponse" message="tns:IWaitingRoomManager_HostLeft_OutputMessage" />
+    </wsdl:operation>
     <wsdl:operation name="OnPlayerJoined">
       <wsdl:output wsaw:Action="http://tempuri.org/IWaitingRoomManager/OnPlayerJoined" message="tns:IWaitingRoomManager_OnPlayerJoined_OutputCallbackMessage" />
     </wsdl:operation>
@@ -137,6 +150,9 @@
     </wsdl:operation>
     <wsdl:operation name="OnGameStarted">
       <wsdl:output wsaw:Action="http://tempuri.org/IWaitingRoomManager/OnGameStarted" message="tns:IWaitingRoomManager_OnGameStarted_OutputCallbackMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="OnHostLeft">
+      <wsdl:output wsaw:Action="http://tempuri.org/IWaitingRoomManager/OnHostLeft" message="tns:IWaitingRoomManager_OnHostLeft_OutputCallbackMessage" />
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="NetTcpBinding_IWaitingRoomManager" type="tns:IWaitingRoomManager">
@@ -205,6 +221,15 @@
         <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="HostLeft">
+      <soap12:operation soapAction="http://tempuri.org/IWaitingRoomManager/HostLeft" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="OnPlayerJoined">
       <soap12:operation soapAction="http://tempuri.org/IWaitingRoomManager/OnPlayerJoined" style="document" />
       <wsdl:output>
@@ -231,6 +256,12 @@
     </wsdl:operation>
     <wsdl:operation name="OnGameStarted">
       <soap12:operation soapAction="http://tempuri.org/IWaitingRoomManager/OnGameStarted" style="document" />
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="OnHostLeft">
+      <soap12:operation soapAction="http://tempuri.org/IWaitingRoomManager/OnHostLeft" style="document" />
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>

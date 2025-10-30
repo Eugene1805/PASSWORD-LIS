@@ -137,6 +137,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 wcfService.PlayerJoined += OnPlayerJoined;
                 wcfService.PlayerLeft += OnPlayerLeft;
                 wcfService.GameStarted += OnGameStarted;
+                wcfService.HostLeft += OnHostLeft;
             }
 
 
@@ -273,7 +274,15 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 if (this.currentPlayer != null)
                 {
-                    await roomManagerClient.LeaveGameAsync(this.gameCode, IsGuest ? currentPlayer.Id : SessionManager.CurrentUser.PlayerId);
+                    if (IsHost)
+                    {
+                        await roomManagerClient.HostLeftAsync(this.gameCode);
+                    }
+                    else
+                    {
+                        await roomManagerClient.LeaveGameAsync(this.gameCode,
+                            IsGuest ? currentPlayer.Id : SessionManager.CurrentUser.PlayerId);
+                    }
                 }
                 if(!IsGuest)
                 {
@@ -491,6 +500,28 @@ namespace PASSWORD_LIS_Client.ViewModels
                     PopUpIcon.Error);
 
                 await LeaveGameAsync();
+            });
+        }
+
+        private void OnHostLeft()
+        {
+            Application.Current.Dispatcher.Invoke(async () =>
+            {
+                if (!isHost)
+                {
+                    windowService.ShowPopUp(
+                    "Host abandonó la partida",
+                    "El host ha abandonado la sala. La partida ha sido cancelada.",
+                    PopUpIcon.Warning
+                );
+                }
+                
+                if (!IsGuest)
+                {
+                    await CleanupAndUnsubscribeAsync();
+                }
+
+                windowService.GoBack();
             });
         }
 

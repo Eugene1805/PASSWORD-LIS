@@ -14,13 +14,15 @@ namespace PASSWORD_LIS_Client.Services
         event Action<int> PlayerLeft;
         event Action<string> GameCreated;
         event Action GameStarted;
+        event Action HostLeft;
         Task<string> CreateGameAsync(string email);
-        Task<bool> JoinGameAsRegisteredPlayerAsync(string gameCode, string email);
+        Task<int> JoinGameAsRegisteredPlayerAsync(string gameCode, string email);
         Task<bool> JoinGameAsGuestAsync(string gameCode, string guestNickname);
         Task LeaveGameAsync(string gameCode, int playerId);
         Task StartGameAsync(string gameCode);
         Task SendMessageAsync(string gameCode, ChatMessageDTO message);
         Task<List<PlayerDTO>> GetPlayersInGameAsync(string gameCode);
+        Task HostLeftAsync(string gameCode);
 
     }
 
@@ -31,6 +33,7 @@ namespace PASSWORD_LIS_Client.Services
         public event Action<int> PlayerLeft;
         public event Action<string> GameCreated;
         public event Action GameStarted;
+        public event Action HostLeft;
 
         private readonly IWaitingRoomManager proxy;
         public WcfWaitingRoomManagerService() 
@@ -45,7 +48,7 @@ namespace PASSWORD_LIS_Client.Services
             return await proxy.CreateGameAsync(email);
         }
 
-        public async Task<bool> JoinGameAsRegisteredPlayerAsync(string gameCode, string email)
+        public async Task<int> JoinGameAsRegisteredPlayerAsync(string gameCode, string email)
         {
             return await proxy.JoinGameAsRegisteredPlayerAsync(gameCode, email);
         }
@@ -75,6 +78,10 @@ namespace PASSWORD_LIS_Client.Services
             var playersArray = await proxy.GetPlayersInGameAsync(gameCode);
             return playersArray?.ToList() ?? new List<PlayerDTO>();
         }
+        public async Task HostLeftAsync(string gameCode)
+        {
+            await proxy.HostLeftAsync(gameCode);
+        }
 
         public void OnPlayerJoined(PlayerDTO player)
         {
@@ -99,6 +106,11 @@ namespace PASSWORD_LIS_Client.Services
         public void OnGameStarted()
         {
             GameStarted?.Invoke();
+        }
+
+        public void OnHostLeft()
+        {
+            HostLeft?.Invoke();
         }
 
     }

@@ -12,7 +12,7 @@ namespace Services.Contracts
         Task<string> CreateGameAsync(string email);
 
         [OperationContract]
-        Task<bool> JoinGameAsRegisteredPlayerAsync(string gameCode, string email);
+        Task<int> JoinGameAsRegisteredPlayerAsync(string gameCode, string email);
         [OperationContract]
         Task<bool> JoinGameAsGuestAsync(string gameCode, string nickname);
 
@@ -45,5 +45,7 @@ namespace Services.Contracts
 
         [OperationContract(IsOneWay = true)]
         void OnGameStarted();
+        [OperationContract(IsOneWay = true)]
+        void OnHostLeft();
     }
 }

@@ -216,10 +216,10 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
         System.Threading.Tasks.Task<string> CreateGameAsync(string email);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/JoinGameAsRegisteredPlayer", ReplyAction="http://tempuri.org/IWaitingRoomManager/JoinGameAsRegisteredPlayerResponse")]
-        bool JoinGameAsRegisteredPlayer(string gameCode, string email);
+        int JoinGameAsRegisteredPlayer(string gameCode, string email);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/JoinGameAsRegisteredPlayer", ReplyAction="http://tempuri.org/IWaitingRoomManager/JoinGameAsRegisteredPlayerResponse")]
-        System.Threading.Tasks.Task<bool> JoinGameAsRegisteredPlayerAsync(string gameCode, string email);
+        System.Threading.Tasks.Task<int> JoinGameAsRegisteredPlayerAsync(string gameCode, string email);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/JoinGameAsGuest", ReplyAction="http://tempuri.org/IWaitingRoomManager/JoinGameAsGuestResponse")]
         bool JoinGameAsGuest(string gameCode, string nickname);
@@ -250,6 +250,12 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/GetPlayersInGame", ReplyAction="http://tempuri.org/IWaitingRoomManager/GetPlayersInGameResponse")]
         System.Threading.Tasks.Task<PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.PlayerDTO[]> GetPlayersInGameAsync(string gameCode);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/HostLeft", ReplyAction="http://tempuri.org/IWaitingRoomManager/HostLeftResponse")]
+        void HostLeft(string gameCode);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/HostLeft", ReplyAction="http://tempuri.org/IWaitingRoomManager/HostLeftResponse")]
+        System.Threading.Tasks.Task HostLeftAsync(string gameCode);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -269,6 +275,9 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
         
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IWaitingRoomManager/OnGameStarted")]
         void OnGameStarted();
+        
+        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IWaitingRoomManager/OnHostLeft")]
+        void OnHostLeft();
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -307,11 +316,11 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
             return base.Channel.CreateGameAsync(email);
         }
         
-        public bool JoinGameAsRegisteredPlayer(string gameCode, string email) {
+        public int JoinGameAsRegisteredPlayer(string gameCode, string email) {
             return base.Channel.JoinGameAsRegisteredPlayer(gameCode, email);
         }
         
-        public System.Threading.Tasks.Task<bool> JoinGameAsRegisteredPlayerAsync(string gameCode, string email) {
+        public System.Threading.Tasks.Task<int> JoinGameAsRegisteredPlayerAsync(string gameCode, string email) {
             return base.Channel.JoinGameAsRegisteredPlayerAsync(gameCode, email);
         }
         
@@ -353,6 +362,14 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
         
         public System.Threading.Tasks.Task<PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.PlayerDTO[]> GetPlayersInGameAsync(string gameCode) {
             return base.Channel.GetPlayersInGameAsync(gameCode);
+        }
+        
+        public void HostLeft(string gameCode) {
+            base.Channel.HostLeft(gameCode);
+        }
+        
+        public System.Threading.Tasks.Task HostLeftAsync(string gameCode) {
+            return base.Channel.HostLeftAsync(gameCode);
         }
     }
 }
