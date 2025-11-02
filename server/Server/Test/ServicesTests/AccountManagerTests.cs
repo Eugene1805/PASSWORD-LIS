@@ -130,5 +130,86 @@ namespace Test.ServicesTests
             mockCodeService.Verify(service => service.GenerateAndStoreCode(It.IsAny<string>(), It.IsAny<CodeType>()), Times.Never);
             mockNotification.Verify(service => service.SendAccountVerificationEmailAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
+
+        // New tests covering missing behaviors
+
+        [Fact]
+        public async Task CreateAccount_ShouldMapFields_AndHashPassword()
+        {
+            // Arrange
+            var dto = new NewAccountDTO
+            {
+                Email = "map@test.com",
+                Password = "Secret#123",
+                Nickname = "Nick",
+                FirstName = "First",
+                LastName = "Last"
+            };
+
+            UserAccount? captured = null;
+            mockRepo.Setup(r => r.CreateAccountAsync(It.IsAny<UserAccount>()))
+                     .Callback<UserAccount>(ua => captured = ua)
+                     .Returns(Task.CompletedTask);
+
+            mockCodeService.Setup(c => c.GenerateAndStoreCode(dto.Email, CodeType.EmailVerification))
+                            .Returns("999999");
+
+            // Act
+            await accountManager.CreateAccountAsync(dto);
+
+            // Assert mapping and hashing
+            Assert.NotNull(captured);
+            Assert.Equal(dto.Email, captured!.Email);
+            Assert.Equal(dto.Nickname, captured.Nickname);
+            Assert.Equal(dto.FirstName, captured.FirstName);
+            Assert.Equal(dto.LastName, captured.LastName);
+            Assert.False(string.IsNullOrWhiteSpace(captured.PasswordHash));
+            Assert.NotEqual(dto.Password, captured.PasswordHash); // hashed, not raw
+        }
+
+        [Fact]
+        public async Task CreateAccount_ShouldReturnUnexpectedFault_WhenCodeGenerationFails()
+        {
+            // Arrange
+            var dto = new NewAccountDTO { Email = "code@fail.com", Password = "P@ssw0rd!" };
+
+            mockRepo.Setup(r => r.CreateAccountAsync(It.IsAny<UserAccount>()))
+                     .Returns(Task.CompletedTask);
+
+            mockCodeService.Setup(c => c.GenerateAndStoreCode(dto.Email, CodeType.EmailVerification))
+                            .Throws(new Exception("code generation failed"));
+
+            // Act
+            var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
+                () => accountManager.CreateAccountAsync(dto)
+            );
+
+            // Assert
+            Assert.Equal("UNEXPECTED_ERROR", ex.Detail.ErrorCode);
+            mockNotification.Verify(n => n.SendAccountVerificationEmailAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task CreateAccount_ShouldNotThrow_WhenNotificationServiceFails()
+        {
+            // Arrange
+            var dto = new NewAccountDTO { Email = "notify@fail.com", Password = "P@ssw0rd!" };
+            mockRepo.Setup(r => r.CreateAccountAsync(It.IsAny<UserAccount>()))
+                     .Returns(Task.CompletedTask);
+            mockCodeService.Setup(c => c.GenerateAndStoreCode(dto.Email, CodeType.EmailVerification))
+                            .Returns("123456");
+
+            // Return a faulted task without throwing synchronously
+            mockNotification.Setup(n => n.SendAccountVerificationEmailAsync(dto.Email, It.IsAny<string>()))
+                              .Returns(Task.FromException(new Exception("smtp error")));
+
+            // Act - should complete without throwing because method does not await the notification task
+            await accountManager.CreateAccountAsync(dto);
+
+            // Assert: repository and code generation still invoked, notification attempted
+            mockRepo.Verify(r => r.CreateAccountAsync(It.IsAny<UserAccount>()), Times.Once);
+            mockCodeService.Verify(c => c.GenerateAndStoreCode(dto.Email, CodeType.EmailVerification), Times.Once);
+            mockNotification.Verify(n => n.SendAccountVerificationEmailAsync(dto.Email, It.IsAny<string>()), Times.Once);
+        }
     }
 }
