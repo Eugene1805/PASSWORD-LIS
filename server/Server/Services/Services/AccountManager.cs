@@ -34,7 +34,7 @@ namespace Services.Services
         {
             try
             {
-                log.InfoFormat("Intentando crear cuenta para el email: {0}", newAccount.Email);
+                log.InfoFormat("Trying to create account for the email: {0}", newAccount.Email);
                 var userAccount = new UserAccount
                 {
                     FirstName = newAccount.FirstName,
@@ -44,13 +44,14 @@ namespace Services.Services
                     Nickname = newAccount.Nickname,
                 };
                 await repository.CreateAccountAsync(userAccount);
-                log.InfoFormat("Cuenta creada exitosamente para: '{0}'", userAccount.Email);
+                log.InfoFormat("Account succesfully created for: '{0}'", userAccount.Email);
                 var code = codeService.GenerateAndStoreCode(newAccount.Email, CodeType.EmailVerification);
                 _ = notification.SendAccountVerificationEmailAsync(newAccount.Email, code);
             }
             catch (DuplicateAccountException ex)
             {
-                log.Warn($"Intento de registro duplicado para el email: {newAccount.Email}", ex);
+                log.WarnFormat("Duplicated registry attempt for the email: {0}", newAccount.Email);
+                log.Warn("DuplicateAccountException thrown while creating account.", ex);
                 var errorDetail = new ServiceErrorDetailDTO
                 {
                     Code = ServiceErrorCode.UserAlreadyExists,
@@ -61,25 +62,25 @@ namespace Services.Services
             }
             catch (DbUpdateException dbEx)
             {
-                log.Error("Error en la base de datos al crear la cuenta.", dbEx);
+                log.Error("Error at the dababase when creating the account.", dbEx);
                 var errorDetail = new ServiceErrorDetailDTO
                 {
                     Code = ServiceErrorCode.DatabaseError,
                     ErrorCode = "DATABASE_ERROR",
-                    Message = "Ocurrió un error al procesar tu solicitud. Por favor, inténtalo más tarde."
+                    Message = "An error occurred while processing your request. Please try again later."
                 };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason("Error en la capa de datos."));
+                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason("Data layer error."));
             }
             catch (Exception ex)
             {
-                log.Fatal("Error fatal inesperado en CreateAccount.", ex);
+                log.Fatal("Unexpected fatal error in CreateAccount.", ex);
                 var errorDetail = new ServiceErrorDetailDTO
                 {
                     Code = ServiceErrorCode.UnexpectedError,
                     ErrorCode = "UNEXPECTED_ERROR",
-                    Message = "Ocurrió un error inesperado en el servidor."
+                    Message = "An unexpected server error occurred."
                 };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason("Error genérico del servidor."));
+                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason("Generic server error."));
             }
 
         }

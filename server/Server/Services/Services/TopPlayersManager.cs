@@ -24,7 +24,7 @@ namespace Services.Services
         {
             try
             {
-                log.InfoFormat("Solicitando top {0} equipos",numberOfTeams);
+                log.InfoFormat("Requesting top {0} teams", numberOfTeams);
                 List<Team> topTeamsFromDb = await repository.GetTopTeamsAsync(numberOfTeams);
 
                 List<TeamDTO> topTeamsDto = topTeamsFromDb.Select(team => new TeamDTO
@@ -36,14 +36,14 @@ namespace Services.Services
                 }).ToList();
                 return topTeamsDto;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                log.ErrorFormat("Error al consultar las estadísticas de los mejores equipos.");
+                log.Error("Error retrieving top teams statistics.", ex);
                 var errorDetail = new ServiceErrorDetailDTO
                 {
                     Code = ServiceErrorCode.StatisticsError,
                     ErrorCode = "STATISTICS_ERROR",
-                    Message = "Ocurrió un error al consultar las estadísticas. Por favor, inténtelo más tarde."
+                    Message = "An error occurred while fetching statistics. Please try again later."
                 };
 
                 throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message)); 
