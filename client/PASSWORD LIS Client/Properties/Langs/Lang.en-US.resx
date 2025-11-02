@@ -606,4 +606,64 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="noButtonText" xml:space="preserve">
     <value>No</value>
   </data>
+  <data name="guestCantReportText" xml:space="preserve">
+    <value>Guests can not report players</value>
+  </data>
+  <data name="noSelectedPlayerToReport" xml:space="preserve">
+    <value>You need to select a player from the connected ones to generate a report</value>
+  </data>
+  <data name="cantReportYourself" xml:space="preserve">
+    <value>You can not report yourself</value>
+  </data>
+  <data name="copiedToClipboardText" xml:space="preserve">
+    <value>Code copied to clipboard!</value>
+  </data>
+  <data name="currentReportsText" xml:space="preserve">
+    <value>Current reports:</value>
+  </data>
+  <data name="bannedText" xml:space="preserve">
+    <value>You have been suspended.</value>
+  </data>
+  <data name="bannedMessageText" xml:space="preserve">
+    <value>You have accumulated 3 reports and your account has been suspended for 1 hour. You will be kicked out of the room. You have been suspended.</value>
+  </data>
+  <data name="youHaveBeenReportedByText" xml:space="preserve">
+    <value>You have been reported by</value>
+  </data>
+  <data name="reasonText" xml:space="preserve">
+    <value>Reason:</value>
+  </data>
+  <data name="hostLeftTitleText" xml:space="preserve">
+    <value>Host left the game</value>
+  </data>
+  <data name="hostLeftText" xml:space="preserve">
+    <value>The host has left the room. The game has been canceled.</value>
+  </data>
+  <data name="joinFailedTitle" xml:space="preserve">
+    <value>Join Failed</value>
+  </data>
+  <data name="incorrectCodeText" xml:space="preserve">
+    <value>The match code is incorrect.</value>
+  </data>
+  <data name="roomFullText" xml:space="preserve">
+    <value>The room is full.</value>
+  </data>
+  <data name="youAreAlreadyInGameText" xml:space="preserve">
+    <value>You're already in the game.</value>
+  </data>
+  <data name="bannedAccountText" xml:space="preserve">
+    <value>Account Suspended</value>
+  </data>
+  <data name="cantCreateMatchText" xml:space="preserve">
+    <value>You cannot create games; your account is temporarily suspended.</value>
+  </data>
+  <data name="cantJoinMatchText" xml:space="preserve">
+    <value>You cannot join games; your account is temporarily suspended.</value>
+  </data>
+  <data name="couldNotCreateMatch" xml:space="preserve">
+    <value>The game could not be created.</value>
+  </data>
+  <data name="copyCodeText" xml:space="preserve">
+    <value>Copy Code</value>
+  </data>
 </root>

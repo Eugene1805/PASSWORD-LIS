@@ -606,4 +606,64 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
   <data name="noButtonText" xml:space="preserve">
     <value>No</value>
   </data>
+  <data name="guestCantReportText" xml:space="preserve">
+    <value>Los invitados no pueden reportar jugadores</value>
+  </data>
+  <data name="noSelectedPlayerToReport" xml:space="preserve">
+    <value>Necesitas seleccionar un jugador conectado para generar un reporte</value>
+  </data>
+  <data name="cantReportYourself" xml:space="preserve">
+    <value>No puedes reportarte a ti mismo</value>
+  </data>
+  <data name="copiedToClipboardText" xml:space="preserve">
+    <value>¡Código copiado al portapapeles!</value>
+  </data>
+  <data name="currentReportsText" xml:space="preserve">
+    <value>Reportes actuales:</value>
+  </data>
+  <data name="bannedText" xml:space="preserve">
+    <value>Has sido suspendido</value>
+  </data>
+  <data name="bannedMessageText" xml:space="preserve">
+    <value>Has acumulado 3 reportes y tu cuenta ha sido suspendida por 1 hora. Serás expulsado de la sala.</value>
+  </data>
+  <data name="youHaveBeenReportedByText" xml:space="preserve">
+    <value>Has sido reportado por</value>
+  </data>
+  <data name="reasonText" xml:space="preserve">
+    <value>Razón:</value>
+  </data>
+  <data name="hostLeftTitleText" xml:space="preserve">
+    <value>El anfitrión abandonó la partida</value>
+  </data>
+  <data name="hostLeftText" xml:space="preserve">
+    <value>El anfitrión ha abandonado la sala. La partida ha sido cancelada.</value>
+  </data>
+  <data name="joinFailedTitle" xml:space="preserve">
+    <value>Unión Fallida</value>
+  </data>
+  <data name="incorrectCodeText" xml:space="preserve">
+    <value>El código de la partida es incorrecto</value>
+  </data>
+  <data name="roomFullText" xml:space="preserve">
+    <value>La sala está llena.</value>
+  </data>
+  <data name="youAreAlreadyInGameText" xml:space="preserve">
+    <value>Ya estás en la partida.</value>
+  </data>
+  <data name="bannedAccountText" xml:space="preserve">
+    <value>Cuenta Suspendida</value>
+  </data>
+  <data name="cantCreateMatchText" xml:space="preserve">
+    <value>No puedes crear partidas, tu cuenta está suspendida temporalmente.</value>
+  </data>
+  <data name="cantJoinMatchText" xml:space="preserve">
+    <value>No puedes unirte a partidas, tu cuenta está suspendida temporalmente.</value>
+  </data>
+  <data name="couldNotCreateMatch" xml:space="preserve">
+    <value>No se pudo crear la partida.</value>
+  </data>
+  <data name="copyCodeText" xml:space="preserve">
+    <value>Copiar Código</value>
+  </data>
 </root>

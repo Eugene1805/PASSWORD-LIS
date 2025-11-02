@@ -40,7 +40,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             set { isGuest = value; OnPropertyChanged(); }
         }
 
-        //Propiedad para la lista de amigos
         private ObservableCollection<FriendDTO> friends;
         public ObservableCollection<FriendDTO> Friends
         {
@@ -139,12 +138,6 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private async Task LoadFriendsAsync()
         {
-            /*
-            if (SessionManager.CurrentUser.PlayerId<0)
-            {
-                return;
-            }
-            */
             if (isLoadingFriends)
             {
                 return;
@@ -281,8 +274,8 @@ namespace PASSWORD_LIS_Client.ViewModels
                 bool isBanned = await reportManagerService.IsPlayerBannedAsync(SessionManager.CurrentUser.PlayerId);
                 if (isBanned)
                 {
-                    windowService.ShowPopUp("Cuenta Suspendida", "No puedes crear partidas, tu cuenta está suspendida temporalmente.", PopUpIcon.Warning);
-                    return; // Detiene la ejecución
+                    windowService.ShowPopUp(Properties.Langs.Lang.bannedAccountText, Properties.Langs.Lang.cantCreateMatchText, PopUpIcon.Warning);
+                    return;
                 }
                 string newGameCode = await waitingRoomManagerService.CreateGameAsync(SessionManager.CurrentUser.Email);
 
@@ -297,8 +290,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
                 else
                 {
-                    // TODO Add lang message
-                    windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, "No se pudo crear la partida.", PopUpIcon.Error);
+                    windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, Properties.Langs.Lang.couldNotCreateMatch, PopUpIcon.Error);
                 }
             }
             catch (TimeoutException)
@@ -341,8 +333,8 @@ namespace PASSWORD_LIS_Client.ViewModels
                     bool isBanned = await reportManagerService.IsPlayerBannedAsync(SessionManager.CurrentUser.PlayerId);
                     if (isBanned)
                     {
-                        windowService.ShowPopUp("Cuenta Suspendida", "No puedes crear partidas, tu cuenta está suspendida temporalmente.", PopUpIcon.Warning);
-                        return; // Detiene la ejecución
+                        windowService.ShowPopUp(Properties.Langs.Lang.bannedAccountText, Properties.Langs.Lang.cantJoinMatchText, PopUpIcon.Warning);
+                        return;
                     }
                     var playerId = await waitingRoomManagerService.JoinGameAsRegisteredPlayerAsync(GameCodeToJoin, SessionManager.CurrentUser.Email);
                     success = playerId > 0;
