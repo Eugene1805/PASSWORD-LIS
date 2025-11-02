@@ -196,7 +196,6 @@ namespace PASSWORD_LIS_Client.ViewModels
                     Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
             }
         }
-        // TODO: Add internacionzation messages
         private bool CanReportPlayer()
         {
             if (SessionManager.CurrentUser == null)

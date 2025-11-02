@@ -331,6 +331,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The report could not be sent..
+        /// </summary>
+        public static string couldNotSummitReportText {
+            get {
+                return ResourceManager.GetString("couldNotSummitReportText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Sign Up for Free.
         /// </summary>
         public static string createAccountText {
@@ -1060,6 +1069,24 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Reporting to:.
+        /// </summary>
+        public static string reportingText {
+            get {
+                return ResourceManager.GetString("reportingText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Report submitted.
+        /// </summary>
+        public static string reportSummitedText {
+            get {
+                return ResourceManager.GetString("reportSummitedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Your friend request has been sent.
         /// </summary>
         public static string requestSentText {
@@ -1410,6 +1437,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         public static string termsLinkUnavailableText {
             get {
                 return ResourceManager.GetString("termsLinkUnavailableText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Thank you for your report!.
+        /// </summary>
+        public static string thanksForReportText {
+            get {
+                return ResourceManager.GetString("thanksForReportText", resourceCulture);
             }
         }
         

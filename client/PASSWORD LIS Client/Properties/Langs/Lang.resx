@@ -666,4 +666,16 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="copyCodeText" xml:space="preserve">
     <value>Copy Code</value>
   </data>
+  <data name="reportingText" xml:space="preserve">
+    <value>Reporting to:</value>
+  </data>
+  <data name="reportSummitedText" xml:space="preserve">
+    <value>Report submitted</value>
+  </data>
+  <data name="thanksForReportText" xml:space="preserve">
+    <value>Thank you for your report!</value>
+  </data>
+  <data name="couldNotSummitReportText" xml:space="preserve">
+    <value>The report could not be sent.</value>
+  </data>
 </root>

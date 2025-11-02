@@ -53,6 +53,7 @@ namespace Services.Services
                 log.Warn($"Intento de registro duplicado para el email: {newAccount.Email}", ex);
                 var errorDetail = new ServiceErrorDetailDTO
                 {
+                    Code = ServiceErrorCode.UserAlreadyExists,
                     ErrorCode = "USER_ALREADY_EXISTS",
                     Message = ex.Message 
                 };
@@ -63,6 +64,7 @@ namespace Services.Services
                 log.Error("Error en la base de datos al crear la cuenta.", dbEx);
                 var errorDetail = new ServiceErrorDetailDTO
                 {
+                    Code = ServiceErrorCode.DatabaseError,
                     ErrorCode = "DATABASE_ERROR",
                     Message = "Ocurrió un error al procesar tu solicitud. Por favor, inténtalo más tarde."
                 };
@@ -73,6 +75,7 @@ namespace Services.Services
                 log.Fatal("Error fatal inesperado en CreateAccount.", ex);
                 var errorDetail = new ServiceErrorDetailDTO
                 {
+                    Code = ServiceErrorCode.UnexpectedError,
                     ErrorCode = "UNEXPECTED_ERROR",
                     Message = "Ocurrió un error inesperado en el servidor."
                 };

@@ -9,11 +9,15 @@ namespace Services.Contracts
     public interface IWaitingRoomManager
     {
         [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
         Task<string> CreateGameAsync(string email);
 
         [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
         Task<int> JoinGameAsRegisteredPlayerAsync(string gameCode, string email);
+
         [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
         Task<bool> JoinGameAsGuestAsync(string gameCode, string nickname);
 
         [OperationContract]

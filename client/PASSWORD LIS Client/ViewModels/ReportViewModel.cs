@@ -6,6 +6,7 @@ using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
 using PASSWORD_LIS_Client.WaitingRoomManagerServiceReference;
 using System;
+using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -39,7 +40,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             this.windowService = windowService;
             this.reportManagerService = reportManagerService;
 
-            TitleMessage = $"Reportando a: {reportedPlayer.Nickname}";
+            TitleMessage = $"{Properties.Langs.Lang.reportingText} {reportedPlayer.Nickname}";
 
             SubmitReportCommand = new RelayCommand(
                 execute: async (_) => await SubmitReportAsync(),
@@ -62,20 +63,35 @@ namespace PASSWORD_LIS_Client.ViewModels
 
                 if (success)
                 {
-                    windowService.ShowPopUp("Reporte Enviado", "Gracias por tu reporte.", PopUpIcon.Success);
+                    windowService.ShowPopUp(Properties.Langs.Lang.reportSummitedText, Properties.Langs.Lang.thanksForReportText, PopUpIcon.Success);
                 }
                 else
                 {
-                    windowService.ShowPopUp("Error", "No se pudo enviar el reporte.", PopUpIcon.Error);
+                    windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, Properties.Langs.Lang.couldNotSummitReportText, PopUpIcon.Error);
                 }
+            }
+            catch (TimeoutException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
+                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+            }
+            catch (EndpointNotFoundException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
+                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
+            }
+            catch (CommunicationException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
+                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
             }
             catch (Exception)
             {
-                windowService.ShowPopUp("Error de Conexión", "Ocurrió un error al contactar al servidor.", PopUpIcon.Error);
+                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
             }
             finally
             {
-                // Cierra la ventana de reporte
                 windowService.CloseWindow(this);
             }
         }

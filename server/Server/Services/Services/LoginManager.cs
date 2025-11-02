@@ -53,6 +53,7 @@ namespace Services.Services
                 log.Error("Error de base de datos (DbException) durante el login.", dbEx);
                 var errorDetail = new ServiceErrorDetailDTO
                 {
+                    Code = ServiceErrorCode.DatabaseError,
                     ErrorCode = "DATABASE_ERROR",
                     Message = "Ocurrió un error al consultar la base de datos. Por favor, inténtalo más tarde."
                 };
@@ -62,6 +63,7 @@ namespace Services.Services
                 log.Fatal("Error fatal inesperado en Login.", ex);
                 var errorDetail = new ServiceErrorDetailDTO
                 {
+                    Code = ServiceErrorCode.UnexpectedError,
                     ErrorCode = "UNEXPECTED_ERROR",
                     Message = "Ocurrió un error inesperado en el servidor."
                 };

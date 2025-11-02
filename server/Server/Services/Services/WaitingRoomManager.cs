@@ -10,6 +10,7 @@ using System.Linq;
 using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
+using log4net;
 
 namespace Services.Services
 {
@@ -23,12 +24,15 @@ namespace Services.Services
             public ConcurrentDictionary<int, (IWaitingRoomCallback, PlayerDTO)> Players { get; } = new ConcurrentDictionary<int, (IWaitingRoomCallback, PlayerDTO)>();
         }
 
+        private static readonly ILog log = LogManager.GetLogger(typeof(WaitingRoomManager));
+
         private readonly ConcurrentDictionary<string, Game> games = new ConcurrentDictionary<string, Game>();
         private readonly IPlayerRepository repository;
         private readonly IOperationContextWrapper operationContext;
         private static int guestIdCounter = 0;
         private const int MaxPlayersPerGame = 4;
         private static readonly Random random = new Random();
+        private static readonly TimeSpan CallbackTimeout = TimeSpan.FromSeconds(5);
 
         public WaitingRoomManager(IPlayerRepository playerRepository, IOperationContextWrapper operationContextWrapper)
         {
@@ -54,21 +58,32 @@ namespace Services.Services
             }
 
             games.TryRemove(gameCode, out _);
-            // ADD personalize exception
-            throw new FaultException("No se pudo crear la partida");
+            var errorDetail = new ServiceErrorDetailDTO
+            {
+                Code = ServiceErrorCode.CouldNotCreateRoom,
+                ErrorCode = "COULD_NOT_CREATE_ROOM",
+                Message = "Could not create room."
+            };
+            throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
         }
-        // TODO ADD fault exceptions
         public async Task<int> JoinGameAsRegisteredPlayerAsync(string gameCode, string email)
         {
-            if (!games.TryGetValue(gameCode, out var game) || game.Players.Count >= MaxPlayersPerGame)
+            if (!games.TryGetValue(gameCode, out var game))
             {
-                return -1;
+                var notFound = new ServiceErrorDetailDTO { Code = ServiceErrorCode.RoomNotFound, ErrorCode = "ROOM_NOT_FOUND", Message = "The room does not exist." };
+                throw new FaultException<ServiceErrorDetailDTO>(notFound, new FaultReason(notFound.Message));
+            }
+            if (game.Players.Count >= MaxPlayersPerGame)
+            {
+                var full = new ServiceErrorDetailDTO { Code = ServiceErrorCode.RoomFull, ErrorCode = "ROOM_FULL", Message = "Could not join room. The room is full." };
+                throw new FaultException<ServiceErrorDetailDTO>(full, new FaultReason(full.Message));
             }
 
             var playerEntity = repository.GetPlayerByEmail(email);
             if (playerEntity == null)
             {
-                return -1;
+                var notFoundPlayer = new ServiceErrorDetailDTO { Code = ServiceErrorCode.PlayerNotFound, ErrorCode = "PLAYER_NOT_FOUND", Message = "The player was not found in the database." };
+                throw new FaultException<ServiceErrorDetailDTO>(notFoundPlayer, new FaultReason(notFoundPlayer.Message));
             }
 
             var playerDto = new PlayerDTO
@@ -81,18 +96,24 @@ namespace Services.Services
             AssignTeamAndRole(playerDto, game.Players.Count);
             if (game.Players.ContainsKey(playerDto.Id))
             {
-                return -1;
+                var alreadyIn = new ServiceErrorDetailDTO { Code = ServiceErrorCode.AlreadyInRoom, ErrorCode = "ALREADY_IN_ROOM", Message = "Player is already in the room." };
+                throw new FaultException<ServiceErrorDetailDTO>(alreadyIn, new FaultReason(alreadyIn.Message));
             }
 
             var success = await TryAddPlayerAsync(game, playerDto);
             return success ? playerDto.Id : -1;
         }
-        // ADD fault exceptions
         public async Task<bool> JoinGameAsGuestAsync(string gameCode, string nickname)
         {
-            if (!games.TryGetValue(gameCode, out var game) || game.Players.Count >= MaxPlayersPerGame)
+            if (!games.TryGetValue(gameCode, out var game))
             {
-                return false;
+                var notFound = new ServiceErrorDetailDTO { Code = ServiceErrorCode.RoomNotFound, ErrorCode = "ROOM_NOT_FOUND", Message = "The room does not exist." };
+                throw new FaultException<ServiceErrorDetailDTO>(notFound, new FaultReason(notFound.Message));
+            }
+            if (game.Players.Count >= MaxPlayersPerGame)
+            {
+                var full = new ServiceErrorDetailDTO { Code = ServiceErrorCode.RoomFull, ErrorCode = "ROOM_FULL", Message = "Could not join room. The room is full." };
+                throw new FaultException<ServiceErrorDetailDTO>(full, new FaultReason(full.Message));
             }
 
             int guestId = Interlocked.Decrement(ref guestIdCounter);
@@ -107,7 +128,8 @@ namespace Services.Services
 
             if (game.Players.ContainsKey(playerDto.Id))
             {
-                return false;
+                var alreadyIn = new ServiceErrorDetailDTO { Code = ServiceErrorCode.AlreadyInRoom, ErrorCode = "ALREADY_IN_ROOM", Message = "Player is already in the room." };
+                throw new FaultException<ServiceErrorDetailDTO>(alreadyIn, new FaultReason(alreadyIn.Message));
             }
 
             return await TryAddPlayerAsync(game, playerDto);
@@ -120,7 +142,6 @@ namespace Services.Services
                 return;
             }
 
-            // If the host is leaving, notify everyone (including the host) and remove the game
             if (game.HostPlayerId == playerId)
             {
                 await HostLeftAsync(gameCode);
@@ -208,17 +229,46 @@ namespace Services.Services
                     break;
             }
         }
-        // TODO ADD a better exception handling strategy
         private async Task BroadcastAsync(Game game, Action<(IWaitingRoomCallback, PlayerDTO)> action)
         {
-            var tasks = game.Players.Select(async playerEntry =>
+            // Snapshot the current players to avoid concurrent modification issues during iteration
+            var snapshot = game.Players.ToArray();
+
+            var tasks = snapshot.Select(async playerEntry =>
             {
                 try
                 {
-                    action(playerEntry.Value);
+                    // Execute the callback with a timeout, so misbehaving clients don't block the broadcast
+                    var callTask = Task.Run(() => action(playerEntry.Value));
+                    var completed = await Task.WhenAny(callTask, Task.Delay(CallbackTimeout));
+                    if (completed != callTask)
+                    {
+                        throw new TimeoutException($"Callback to player {playerEntry.Key} timed out.");
+                    }
                 }
-                catch
+                catch (CommunicationObjectFaultedException ex)
                 {
+                    log.Warn($"Callback channel faulted for player {playerEntry.Key}. Removing from game {game.GameCode}.", ex);
+                    await LeaveGameAsync(game.GameCode, playerEntry.Key);
+                }
+                catch (CommunicationException ex)
+                {
+                    log.Warn($"Communication error when notifying player {playerEntry.Key}. Removing from game {game.GameCode}.", ex);
+                    await LeaveGameAsync(game.GameCode, playerEntry.Key);
+                }
+                catch (ObjectDisposedException ex)
+                {
+                    log.Warn($"Callback disposed for player {playerEntry.Key}. Removing from game {game.GameCode}.", ex);
+                    await LeaveGameAsync(game.GameCode, playerEntry.Key);
+                }
+                catch (TimeoutException ex)
+                {
+                    log.Warn($"Timeout notifying player {playerEntry.Key}. Removing from game {game.GameCode}.", ex);
+                    await LeaveGameAsync(game.GameCode, playerEntry.Key);
+                }
+                catch (Exception ex)
+                {
+                    log.Error($"Unexpected error broadcasting to player {playerEntry.Key} in game {game.GameCode}.", ex);
                     await LeaveGameAsync(game.GameCode, playerEntry.Key);
                 }
             });

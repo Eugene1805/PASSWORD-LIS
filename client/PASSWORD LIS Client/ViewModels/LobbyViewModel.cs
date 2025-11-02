@@ -1,4 +1,5 @@
-﻿using PASSWORD_LIS_Client.Commands;
+﻿using PASSWORD_LIS_Client.AccountManagerServiceReference;
+using PASSWORD_LIS_Client.Commands;
 using PASSWORD_LIS_Client.FriendsManagerServiceReference;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
@@ -293,6 +294,20 @@ namespace PASSWORD_LIS_Client.ViewModels
                     windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, Properties.Langs.Lang.couldNotCreateMatch, PopUpIcon.Error);
                 }
             }
+            catch(FaultException<WaitingRoomManagerServiceReference.ServiceErrorDetailDTO> ex)
+            {
+                switch (ex.Detail.Code)
+                {
+                    case WaitingRoomManagerServiceReference.ServiceErrorCode.COULD_NOT_CREATE_ROOM:
+                        windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
+                        Properties.Langs.Lang.couldNotCreateMatch, PopUpIcon.Warning);
+                        break;
+                    default:
+                        windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.unexpectedServerErrorText, PopUpIcon.Error);
+                        break;
+                }
+            }
             catch (TimeoutException)
             {
                 this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
@@ -350,9 +365,32 @@ namespace PASSWORD_LIS_Client.ViewModels
                     var waitingRoomPage = new WaitingRoomPage { DataContext = waitingRoomViewModel };
                     windowService.NavigateTo(waitingRoomPage);
                 }
-                else
-                {// TODO ADD lang messages and catch specific errors
-                    windowService.ShowPopUp("Unión Fallida", "El código de la partida es incorrecto, la sala está llena o ya estás en la partida.", PopUpIcon.Warning);
+                else 
+                {
+                    windowService.ShowPopUp(Properties.Langs.Lang.joinFailedTitle,
+                        Properties.Langs.Lang.unexpectedServerErrorText, PopUpIcon.Warning);
+                }
+            }
+            catch(FaultException<WaitingRoomManagerServiceReference.ServiceErrorDetailDTO> ex)
+            {
+                switch (ex.Detail.Code)
+                {
+                    case WaitingRoomManagerServiceReference.ServiceErrorCode.ROOM_NOT_FOUND:
+                        windowService.ShowPopUp(Properties.Langs.Lang.joinFailedTitle,
+                        Properties.Langs.Lang.incorrectCodeText, PopUpIcon.Warning);
+                        break;
+                    case WaitingRoomManagerServiceReference.ServiceErrorCode.ROOM_FULL:
+                        windowService.ShowPopUp(Properties.Langs.Lang.joinFailedTitle,
+                        Properties.Langs.Lang.roomFullText, PopUpIcon.Warning);
+                        break;
+                    case WaitingRoomManagerServiceReference.ServiceErrorCode.ALREADY_IN_ROOM:
+                        windowService.ShowPopUp(Properties.Langs.Lang.joinFailedTitle,
+                        Properties.Langs.Lang.youAreAlreadyInGameText, PopUpIcon.Warning);
+                        break;
+                    default:
+                        windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.unexpectedServerErrorText, PopUpIcon.Error);
+                        break;
                 }
             }
             catch (TimeoutException)

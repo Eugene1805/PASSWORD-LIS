@@ -74,7 +74,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                         PopUpIcon.Warning);
                 }
 
-            }catch (FaultException<ServiceErrorDetailDTO> ex)
+            }catch (FaultException<LoginManagerServiceReference.ServiceErrorDetailDTO> ex)
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
                     ex.Detail.Message, PopUpIcon.Error);

@@ -27,7 +27,7 @@ namespace Services.Services
         {
             if (updatedProfileData == null || updatedProfileData.PlayerId <= 0)
             {
-                log.Warn($"UpdateProfile llamado con datos nulos o PlayerId inválido ({updatedProfileData?.PlayerId}).");
+                log.WarnFormat("UpdateProfile llamado con datos nulos o PlayerId inválido {0}" ,updatedProfileData?.PlayerId);
                 return null;
             }
 
@@ -60,6 +60,7 @@ namespace Services.Services
                 log.Error($"Error DbUpdateException al actualizar perfil PlayerId: {updatedProfileData.PlayerId}. Ex: {dbUpEx.Message}", dbUpEx);
                 var errorDetail = new ServiceErrorDetailDTO
                 {
+                    Code = ServiceErrorCode.DatabaseError,
                     ErrorCode = "DATABASE_ERROR",
                     Message = "Ocurrió un error al intentar guardar los cambios en la base de datos."
                 };
@@ -70,6 +71,7 @@ namespace Services.Services
                 log.Error($"Error DbException al actualizar perfil PlayerId: {updatedProfileData.PlayerId}. Ex: {dbEx.Message}", dbEx);
                 var errorDetail = new ServiceErrorDetailDTO
                 {
+                    Code = ServiceErrorCode.DatabaseError,
                     ErrorCode = "DATABASE_ERROR",
                     Message = "Ocurrió un error de comunicación con la base de datos."
                 };
@@ -80,6 +82,7 @@ namespace Services.Services
                 log.Fatal($"Error inesperado en UpdateProfile para PlayerId: {updatedProfileData.PlayerId}. Ex: {ex.Message}", ex);
                 var errorDetail = new ServiceErrorDetailDTO
                 {
+                    Code = ServiceErrorCode.UnexpectedError,
                     ErrorCode = "UNEXPECTED_ERROR",
                     Message = "Ocurrió un error inesperado en el servidor al actualizar el perfil."
                 };

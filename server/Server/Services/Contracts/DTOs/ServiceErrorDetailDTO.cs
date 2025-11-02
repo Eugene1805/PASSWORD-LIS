@@ -6,6 +6,9 @@ namespace Services.Contracts.DTOs
     public class ServiceErrorDetailDTO
     {
         [DataMember]
+        public ServiceErrorCode Code { get; set; }
+
+        [DataMember]
         public string ErrorCode { get; set; }
 
         [DataMember]

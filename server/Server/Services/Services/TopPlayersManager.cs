@@ -41,6 +41,7 @@ namespace Services.Services
                 log.ErrorFormat("Error al consultar las estadísticas de los mejores equipos.");
                 var errorDetail = new ServiceErrorDetailDTO
                 {
+                    Code = ServiceErrorCode.StatisticsError,
                     ErrorCode = "STATISTICS_ERROR",
                     Message = "Ocurrió un error al consultar las estadísticas. Por favor, inténtelo más tarde."
                 };
