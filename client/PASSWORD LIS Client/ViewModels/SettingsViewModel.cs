@@ -3,7 +3,6 @@ using PASSWORD_LIS_Client.Properties;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Windows.Input;
 
@@ -63,7 +62,6 @@ namespace PASSWORD_LIS_Client.ViewModels
         public SettingsViewModel(IWindowService windowService, IFriendsManagerService friendsManagerService,
             BackgroundMusicService backgroundMusicService) {
 
-            // Cargar el idioma guardado al abrir la ventana de configuración
             var currentLang = Properties.Settings.Default.languageCode;
             if (string.IsNullOrEmpty(currentLang) || currentLang == "en-US")
             {

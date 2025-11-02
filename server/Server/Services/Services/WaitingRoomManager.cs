@@ -115,16 +115,23 @@ namespace Services.Services
 
         public async Task LeaveGameAsync(string gameCode, int playerId)
         {
-            if (games.TryGetValue(gameCode, out var game) && game.Players.TryRemove(playerId, out _))
+            if (!games.TryGetValue(gameCode, out var game))
             {
-                bool wasHost = game.HostPlayerId == playerId;
+                return;
+            }
+
+            // If the host is leaving, notify everyone (including the host) and remove the game
+            if (game.HostPlayerId == playerId)
+            {
+                await HostLeftAsync(gameCode);
+                return;
+            }
+
+            if (game.Players.TryRemove(playerId, out _))
+            {
                 await BroadcastAsync(game, client => client.Item1.OnPlayerLeft(playerId));
 
-                if (wasHost)
-                {
-                    await HostLeftAsync(gameCode);
-                }
-                else if (game.Players.IsEmpty)
+                if (game.Players.IsEmpty)
                 {
                     games.TryRemove(gameCode, out _);
                 }

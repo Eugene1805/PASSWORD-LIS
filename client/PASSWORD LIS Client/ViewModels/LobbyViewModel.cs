@@ -311,8 +311,9 @@ namespace PASSWORD_LIS_Client.ViewModels
                 this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
                     Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
             }
-            catch (CommunicationException)
+            catch (CommunicationException ex)
             {
+                Console.WriteLine(ex.StackTrace);
                 this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
                     Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
             }

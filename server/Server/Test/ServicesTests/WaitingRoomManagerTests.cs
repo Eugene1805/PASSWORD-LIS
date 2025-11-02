@@ -1,9 +1,15 @@
-﻿using Data.DAL.Interfaces;
+﻿using System.Collections.Concurrent;
+using System.Linq;
+using System.Threading.Tasks;
+using Data.DAL.Interfaces;
 using Data.Model;
 using Moq;
 using Services.Contracts;
+using Services.Contracts.DTOs;
+using Services.Contracts.Enums;
 using Services.Services;
 using Services.Wrappers;
+using Xunit;
 
 namespace Test.ServicesTests
 {
@@ -11,138 +17,440 @@ namespace Test.ServicesTests
     {
         private readonly Mock<IPlayerRepository> mockPlayerRepo;
         private readonly Mock<IOperationContextWrapper> mockOperationContext;
-        private readonly Mock<IWaitingRoomCallback> mockCallbackChannel;
-        private readonly WaitingRoomManager sut; 
 
         public WaitingRoomManagerTests()
         {
             mockPlayerRepo = new Mock<IPlayerRepository>();
             mockOperationContext = new Mock<IOperationContextWrapper>();
-            mockCallbackChannel = new Mock<IWaitingRoomCallback>();
-
-            mockOperationContext.Setup(o => o.GetCallbackChannel<IWaitingRoomCallback>())
-                                 .Returns(mockCallbackChannel.Object);
-
-            sut = new WaitingRoomManager(mockPlayerRepo.Object, mockOperationContext.Object);
         }
 
-        [Fact]
-        public async Task JoinAsRegisteredPlayer_ShouldSucceed_WhenPlayerExistsAndIsNotConnected()
+        private static (WaitingRoomManager sut, ConcurrentQueue<Mock<IWaitingRoomCallback>> callbacks) CreateSut(Mock<IPlayerRepository> repo, Mock<IOperationContextWrapper> ctx)
         {
-            // Arrange
-            var email = "TestUser@test.com";
-            var playerEntity = new Player
+            var callbackQueue = new ConcurrentQueue<Mock<IWaitingRoomCallback>>();
+
+            // Return a different callback channel on each Join call (dequeue order)
+            ctx.Setup(o => o.GetCallbackChannel<IWaitingRoomCallback>())
+                .Returns(() =>
+                {
+                    if (callbackQueue.TryDequeue(out var cb))
+                    {
+                        return cb.Object;
+                    }
+                    // Fallback callback to avoid nulls in corner cases
+                    var fallback = new Mock<IWaitingRoomCallback>();
+                    return fallback.Object;
+                });
+
+            var sut = new WaitingRoomManager(repo.Object, ctx.Object);
+            return (sut, callbackQueue);
+        }
+
+        private static Player MakePlayer(int id, string email, string nickname)
+        {
+            return new Player
             {
-                Id = 1,
-                UserAccountId = 1,
-                UserAccount = new UserAccount { Email = email , Nickname = "testUser"}
+                Id = id,
+                UserAccountId = id,
+                UserAccount = new UserAccount
+                {
+                    Email = email,
+                    Nickname = nickname,
+                }
             };
-            mockPlayerRepo.Setup(repo => repo.GetPlayerByEmail(email)).Returns(playerEntity);
-
-            // Act
-            var result = await sut.JoinAsRegisteredPlayerAsync(email);
-
-            // Assert
-            Assert.True(result);
-            var connectedPlayers = await sut.GetConnectedPlayersAsync();
-            Assert.Single(connectedPlayers);
-            Assert.Equal("testUser", connectedPlayers[0].Nickname);
         }
 
         [Fact]
-        public async Task JoinAsRegisteredPlayer_ShouldFail_WhenPlayerDoesNotExist()
+        public async Task CreateGame_ShouldCreateGameAndSetHost()
         {
             // Arrange
-            var email = "GhostUser@test.com";
-            mockPlayerRepo.Setup(repo => repo.GetPlayerByEmail(email)).Returns((Player)null);
+            var email = "host@test.com";
+            var hostPlayer = MakePlayer(1, email, "HostUser");
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(email)).Returns(hostPlayer);
+
+            var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
+            var hostCallback = new Mock<IWaitingRoomCallback>();
+            callbacks.Enqueue(hostCallback);
 
             // Act
-            var result = await sut.JoinAsRegisteredPlayerAsync(email);
+            var gameCode = await sut.CreateGameAsync(email);
 
             // Assert
-            Assert.False(result);
-            Assert.Empty(await sut.GetConnectedPlayersAsync());
+            Assert.NotNull(gameCode);
+            Assert.Equal(5, gameCode.Length);
+
+            var players = await sut.GetPlayersInGameAsync(gameCode);
+            Assert.Single(players);
+            var p = players[0];
+            Assert.Equal(1, p.Id);
+            Assert.Equal("HostUser", p.Nickname);
+            Assert.Equal(PlayerRole.ClueGuy, p.Role);
+            Assert.Equal(MatchTeam.RedTeam, p.Team);
+
+            hostCallback.Verify(c => c.OnPlayerJoined(It.IsAny<PlayerDTO>()), Times.Once);
         }
 
         [Fact]
-        public async Task JoinAsGuest_ShouldSucceed_WhenUsernameIsUnique()
+        public async Task JoinGameAsRegisteredPlayer_ShouldSucceed_AndPreventDuplicates()
         {
             // Arrange
-            var guestUsername = "Guest123";
+            var email = "user@test.com";
+            var player = MakePlayer(2, email, "User2");
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(email)).Returns(player);
 
-            // Act
-            var result = await sut.JoinAsGuestAsync(guestUsername);
+            var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
+            // Host setup
+            var host = MakePlayer(1, "host@test.com", "Host");
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+            var hostCb = new Mock<IWaitingRoomCallback>();
+            callbacks.Enqueue(hostCb);
+            var gameCode = await sut.CreateGameAsync(host.UserAccount.Email);
+
+            // Player join
+            var userCb = new Mock<IWaitingRoomCallback>();
+            callbacks.Enqueue(userCb);
+            var id = await sut.JoinGameAsRegisteredPlayerAsync(gameCode, email);
+
+            // Second attempt should fail
+            var id2 = await sut.JoinGameAsRegisteredPlayerAsync(gameCode, email);
 
             // Assert
-            Assert.True(result);
-            var connectedPlayers = await sut.GetConnectedPlayersAsync();
-            Assert.Single(connectedPlayers);
-            Assert.Equal(guestUsername, connectedPlayers[0].Nickname);
-            Assert.True(connectedPlayers[0].Id < 0, "Guest ID should be negative.");
+            Assert.Equal(2, id);
+            Assert.Equal(-1, id2);
+
+            var players = await sut.GetPlayersInGameAsync(gameCode);
+            Assert.Equal(2, players.Count);
+            Assert.Contains(players, x => x.Id ==1);
+            Assert.Contains(players, x => x.Id ==2);
         }
 
         [Fact]
-        public async Task JoinAsGuest_ShouldFail_WhenUsernameIsAlreadyTaken()
+        public async Task JoinGameAsRegisteredPlayer_ShouldFail_WhenPlayerDoesNotExist()
         {
             // Arrange
-            var guestUsername = "Guest123";
-            await sut.JoinAsGuestAsync(guestUsername); 
+            var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
+            var host = MakePlayer(1, "host@test.com", "Host");
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+            callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
+            var gameCode = await sut.CreateGameAsync(host.UserAccount.Email);
+
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmail("ghost@test.com")).Returns((Player)null);
 
             // Act
-            var result = await sut.JoinAsGuestAsync(guestUsername); 
+            var id = await sut.JoinGameAsRegisteredPlayerAsync(gameCode, "ghost@test.com");
 
             // Assert
-            Assert.False(result);
-            Assert.Single(await sut.GetConnectedPlayersAsync()); 
+            Assert.Equal(-1, id);
+            var players = await sut.GetPlayersInGameAsync(gameCode);
+            Assert.Single(players);
         }
 
         [Fact]
-        public async Task AssignRole_ShouldAssignRolesBalancedForTwoTeams()
+        public async Task JoinGameAsRegisteredPlayer_ShouldFail_WhenRoomIsFull()
         {
-            // Arrange
-            var player1 = new Player { Id = 1, UserAccountId = 1, UserAccount = new UserAccount { Nickname = "Player1" } };
-            mockPlayerRepo.Setup(r => r.GetPlayerByEmail("Player1")).Returns(player1);
+            // Arrange: host +3 guests -> room full
+            var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
+            var host = MakePlayer(1, "host@test.com", "Host");
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+            callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
+            var gameCode = await sut.CreateGameAsync(host.UserAccount.Email);
 
-            // Act & Assert
+            callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
+            await sut.JoinGameAsGuestAsync(gameCode, "G1");
+            callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
+            await sut.JoinGameAsGuestAsync(gameCode, "G2");
+            callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
+            await sut.JoinGameAsGuestAsync(gameCode, "G3");
 
-            await sut.JoinAsRegisteredPlayerAsync("Player1");
-            var playersAfter1 = await sut.GetConnectedPlayersAsync();
-            Assert.Single(playersAfter1); 
-            Assert.Equal("ClueGuy", playersAfter1[0].Role); 
+            // Attempt registered join when full
+            var reg = MakePlayer(10, "full@test.com", "FullUser");
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmail("full@test.com")).Returns(reg);
+            callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
 
-            await sut.JoinAsGuestAsync("Guest2");
-            var playersAfter2 = await sut.GetConnectedPlayersAsync();
-            Assert.Equal(2, playersAfter2.Count); 
-            Assert.Equal(2, playersAfter2.Count(p => p.Role == "ClueGuy")); 
+            // Act
+            var result = await sut.JoinGameAsRegisteredPlayerAsync(gameCode, "full@test.com");
 
-            
-            await sut.JoinAsGuestAsync("Guest3");
-            var playersAfter3 = await sut.GetConnectedPlayersAsync();
-            Assert.Equal(3, playersAfter3.Count); 
-            Assert.Equal(2, playersAfter3.Count(p => p.Role == "ClueGuy")); 
-            Assert.Equal(1, playersAfter3.Count(p => p.Role == "Guesser")); 
-
-            await sut.JoinAsGuestAsync("Guest4");
-            var playersAfter4 = await sut.GetConnectedPlayersAsync();
-            Assert.Equal(4, playersAfter4.Count);
-            Assert.Equal(2, playersAfter4.Count(p => p.Role == "ClueGuy"));
-            Assert.Equal(2, playersAfter4.Count(p => p.Role == "Guesser"));
+            // Assert
+            Assert.Equal(-1, result);
+            var players = await sut.GetPlayersInGameAsync(gameCode);
+            Assert.Equal(4, players.Count);
         }
 
         [Fact]
-        public async Task LeaveRoom_ShouldRemovePlayerAndNotifyOthers()
+        public async Task JoinGameAsGuest_ShouldAllowUntilFull_ThenFail()
         {
             // Arrange
-            var guestUsername = "GuestToLeave";
-            await sut.JoinAsGuestAsync(guestUsername);
-            var players = await sut.GetConnectedPlayersAsync();
-            var playerToRemove = players[0];
+            var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
+            var host = MakePlayer(1, "host@test.com", "Host");
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+            callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
+            var gameCode = await sut.CreateGameAsync(host.UserAccount.Email);
 
-            // Act
-            await sut.LeaveRoomAsync(playerToRemove.Id);
+            // Guest1,2,3 (reaching4 total including host)
+            callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
+            var g1 = await sut.JoinGameAsGuestAsync(gameCode, "Guest1");
+            callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
+            var g2 = await sut.JoinGameAsGuestAsync(gameCode, "Guest2");
+            callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
+            var g3 = await sut.JoinGameAsGuestAsync(gameCode, "Guest3");
+
+            //5th player should fail (room full)
+            callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
+            var g4 = await sut.JoinGameAsGuestAsync(gameCode, "Guest4");
 
             // Assert
-            Assert.Empty(await sut.GetConnectedPlayersAsync());
+            Assert.True(g1);
+            Assert.True(g2);
+            Assert.True(g3);
+            Assert.False(g4);
+
+            var players = await sut.GetPlayersInGameAsync(gameCode);
+            Assert.Equal(4, players.Count);
+
+            // Validate team/role assignment order
+            // Order of joins: Host(0), G1(1), G2(2), G3(3)
+            var hostDto = players.First(p => p.Id ==1);
+            Assert.Equal(MatchTeam.RedTeam, hostDto.Team);
+            Assert.Equal(PlayerRole.ClueGuy, hostDto.Role);
+        }
+
+        [Fact]
+        public async Task SendMessage_ShouldBroadcastToAllPlayers()
+        {
+            // Arrange
+            var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
+            var host = MakePlayer(1, "host@test.com", "Host");
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+
+            var hostCb = new Mock<IWaitingRoomCallback>();
+            var g1Cb = new Mock<IWaitingRoomCallback>();
+            var g2Cb = new Mock<IWaitingRoomCallback>();
+            var g3Cb = new Mock<IWaitingRoomCallback>();
+
+            callbacks.Enqueue(hostCb);
+            var gameCode = await sut.CreateGameAsync(host.UserAccount.Email);
+
+            callbacks.Enqueue(g1Cb);
+            await sut.JoinGameAsGuestAsync(gameCode, "Guest1");
+            callbacks.Enqueue(g2Cb);
+            await sut.JoinGameAsGuestAsync(gameCode, "Guest2");
+            callbacks.Enqueue(g3Cb);
+            await sut.JoinGameAsGuestAsync(gameCode, "Guest3");
+
+            var msg = new ChatMessageDTO { SenderNickname = "Host", Message = "hello" };
+
+            // Act
+            await sut.SendMessageAsync(gameCode, msg);
+
+            // Assert
+            hostCb.Verify(c => c.OnMessageReceived(It.Is<ChatMessageDTO>(m => m.Message == "hello")), Times.Once);
+            g1Cb.Verify(c => c.OnMessageReceived(It.IsAny<ChatMessageDTO>()), Times.Once);
+            g2Cb.Verify(c => c.OnMessageReceived(It.IsAny<ChatMessageDTO>()), Times.Once);
+            g3Cb.Verify(c => c.OnMessageReceived(It.IsAny<ChatMessageDTO>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task SendMessage_InvalidGameCode_ShouldNotNotify()
+        {
+            // Arrange
+            var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
+            var cb = new Mock<IWaitingRoomCallback>();
+            callbacks.Enqueue(cb);
+
+            // Act
+            await sut.SendMessageAsync("XXXXX", new ChatMessageDTO { Message = "x" });
+
+            // Assert
+            cb.Verify(c => c.OnMessageReceived(It.IsAny<ChatMessageDTO>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task StartGame_ShouldNotifyAndRemoveGame()
+        {
+            // Arrange
+            var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
+            var host = MakePlayer(1, "host@test.com", "Host");
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+
+            var hostCb = new Mock<IWaitingRoomCallback>();
+            var g1Cb = new Mock<IWaitingRoomCallback>();
+            callbacks.Enqueue(hostCb);
+            var gameCode = await sut.CreateGameAsync(host.UserAccount.Email);
+
+            callbacks.Enqueue(g1Cb);
+            await sut.JoinGameAsGuestAsync(gameCode, "Guest1");
+
+            // Act
+            await sut.StartGameAsync(gameCode);
+
+            // Assert
+            hostCb.Verify(c => c.OnGameStarted(), Times.Once);
+            g1Cb.Verify(c => c.OnGameStarted(), Times.Once);
+
+            var players = await sut.GetPlayersInGameAsync(gameCode);
+            Assert.Empty(players); // game removed
+
+            var joinAfterRemoval = await sut.JoinGameAsGuestAsync(gameCode, "Later");
+            Assert.False(joinAfterRemoval);
+        }
+
+        [Fact]
+        public async Task LeaveGame_HostLeaving_ShouldNotifyAndRemoveGame()
+        {
+            // Arrange
+            var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
+            var host = MakePlayer(1, "host@test.com", "Host");
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+
+            var hostCb = new Mock<IWaitingRoomCallback>();
+            callbacks.Enqueue(hostCb);
+            var gameCode = await sut.CreateGameAsync(host.UserAccount.Email);
+
+            // Act
+            await sut.LeaveGameAsync(gameCode, host.Id);
+
+            // Assert
+            hostCb.Verify(c => c.OnHostLeft(), Times.Once);
+            var players = await sut.GetPlayersInGameAsync(gameCode);
+            Assert.Empty(players);
+        }
+
+        [Fact]
+        public async Task LeaveGame_PlayerLeaving_ShouldRemovePlayerAndNotifyOthers()
+        {
+            // Arrange
+            var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
+            var host = MakePlayer(1, "host@test.com", "Host");
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+            var hostCb = new Mock<IWaitingRoomCallback>();
+            callbacks.Enqueue(hostCb);
+            var gameCode = await sut.CreateGameAsync(host.UserAccount.Email);
+
+            var g1Cb = new Mock<IWaitingRoomCallback>();
+            callbacks.Enqueue(g1Cb);
+            await sut.JoinGameAsGuestAsync(gameCode, "Guest1");
+
+            var playersBefore = await sut.GetPlayersInGameAsync(gameCode);
+            var guestId = playersBefore.First(p => p.Nickname == "Guest1").Id; // negative id
+
+            // Act
+            await sut.LeaveGameAsync(gameCode, guestId);
+
+            // Assert
+            hostCb.Verify(c => c.OnPlayerLeft(It.Is<int>(x => x == guestId)), Times.Once);
+            var playersAfter = await sut.GetPlayersInGameAsync(gameCode);
+            Assert.Single(playersAfter);
+            Assert.Equal(1, playersAfter[0].Id);
+        }
+
+        [Fact]
+        public async Task LeaveGame_InvalidGameCodeOrPlayer_ShouldNoop()
+        {
+            // Arrange
+            var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
+            var host = MakePlayer(1, "host@test.com", "Host");
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+            callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
+            var gameCode = await sut.CreateGameAsync(host.UserAccount.Email);
+
+            var playersBefore = await sut.GetPlayersInGameAsync(gameCode);
+            Assert.Single(playersBefore);
+
+            // Act: wrong code
+            await sut.LeaveGameAsync("WRONG",1);
+            // Act: wrong player in valid game
+            await sut.LeaveGameAsync(gameCode,999);
+
+            // Assert: still single player
+            var playersAfter = await sut.GetPlayersInGameAsync(gameCode);
+            Assert.Single(playersAfter);
+        }
+
+        [Fact]
+        public async Task HostLeftAsync_ShouldNotifyAllAndRemoveGame()
+        {
+            // Arrange
+            var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
+            var host = MakePlayer(1, "host@test.com", "Host");
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+
+            var hostCb = new Mock<IWaitingRoomCallback>();
+            var g1Cb = new Mock<IWaitingRoomCallback>();
+            callbacks.Enqueue(hostCb);
+            var gameCode = await sut.CreateGameAsync(host.UserAccount.Email);
+            callbacks.Enqueue(g1Cb);
+            await sut.JoinGameAsGuestAsync(gameCode, "Guest1");
+
+            // Act
+            await sut.HostLeftAsync(gameCode);
+
+            // Assert
+            hostCb.Verify(c => c.OnHostLeft(), Times.Once);
+            g1Cb.Verify(c => c.OnHostLeft(), Times.Once);
+            var players = await sut.GetPlayersInGameAsync(gameCode);
+            Assert.Empty(players);
+        }
+
+        [Fact]
+        public async Task Broadcast_ShouldRemoveClientThatThrowsDuringMessage()
+        {
+            // Arrange
+            var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
+            var host = MakePlayer(1, "host@test.com", "Host");
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+
+            var hostCb = new Mock<IWaitingRoomCallback>();
+            var g1Cb = new Mock<IWaitingRoomCallback>();
+
+            // Make guest callback throw on message
+            g1Cb.Setup(c => c.OnMessageReceived(It.IsAny<ChatMessageDTO>())).Throws(new System.Exception("client error"));
+
+            callbacks.Enqueue(hostCb);
+            var gameCode = await sut.CreateGameAsync(host.UserAccount.Email);
+            callbacks.Enqueue(g1Cb);
+            await sut.JoinGameAsGuestAsync(gameCode, "Guest1");
+
+            // Act: send message triggers broadcast; guest will be removed
+            await sut.SendMessageAsync(gameCode, new ChatMessageDTO { Message = "hi" });
+
+            // Assert
+            var players = await sut.GetPlayersInGameAsync(gameCode);
+            Assert.Single(players);
+            Assert.Equal(1, players[0].Id);
+
+            // Host receives the message
+            hostCb.Verify(c => c.OnMessageReceived(It.IsAny<ChatMessageDTO>()), Times.Once);
+        }
+
+        [Fact]
+        public async Task TeamAndRole_Assignment_ShouldFollowExpectedOrder()
+        {
+            // Arrange
+            var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
+            var host = MakePlayer(1, "host@test.com", "Host");
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+            callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
+            var gameCode = await sut.CreateGameAsync(host.UserAccount.Email);
+
+            callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
+            await sut.JoinGameAsGuestAsync(gameCode, "Guest1"); // player count1
+            callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
+            await sut.JoinGameAsGuestAsync(gameCode, "Guest2"); // player count2
+            callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
+            await sut.JoinGameAsGuestAsync(gameCode, "Guest3"); // player count3
+
+            var players = await sut.GetPlayersInGameAsync(gameCode);
+            Assert.Equal(4, players.Count);
+
+            // Determine join order by team/role assumptions:
+            var redClue = players.First(p => p.Team == MatchTeam.RedTeam && p.Role == PlayerRole.ClueGuy);
+            var blueClue = players.First(p => p.Team == MatchTeam.BlueTeam && p.Role == PlayerRole.ClueGuy);
+            var redGuess = players.First(p => p.Team == MatchTeam.RedTeam && p.Role == PlayerRole.Guesser);
+            var blueGuess = players.First(p => p.Team == MatchTeam.BlueTeam && p.Role == PlayerRole.Guesser);
+
+            Assert.Equal(1, redClue.Id); // host
+            Assert.NotEqual(0, blueClue.Id);
+            Assert.NotEqual(0, redGuess.Id);
+            Assert.NotEqual(0, blueGuess.Id);
         }
     }
 }
