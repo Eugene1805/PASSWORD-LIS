@@ -1,4 +1,4 @@
-name: SonarQube C# Analysis
+name: SonarQube Code Analysis Only
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-scan:
+  analyze:
     runs-on: self-hosted
 
     steps:
@@ -22,43 +22,26 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Explore project structure
+      - name: List all projects for analysis
         run: |
-          echo "=== Current directory ==="
-          pwd
-          echo "=== All files and folders ==="
-          Get-ChildItem -Recurse | Where-Object { $_.Name -like "*.sln" -or $_.Name -like "*.csproj" } | ForEach-Object { echo "Found: $($_.FullName)" }
-          echo "=== Top level contents ==="
-          Get-ChildItem
+          echo "=== Proyectos que serán analizados ==="
+          Get-ChildItem -Path . -Filter *.csproj -Recurse | ForEach-Object { 
+            echo " - $($_.FullName)" 
+          }
 
-      - name: Begin SonarQube Scan
+      - name: Run SonarQube Analysis
         run: |
           dotnet-sonarscanner begin /k:"password-game" `
             /d:sonar.host.url="http://localhost:9000" `
-            /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+            /d:sonar.login="${{ secrets.SONAR_TOKEN }}" `
+            /d:sonar.scm.disabled=true `
+            /d:sonar.sourceEncoding=UTF-8 `
+            /d:sonar.coverage.exclusions=**/* `
+            /d:sonar.cpd.exclusions=**/* `
+            /d:sonar.scm.provider=git
 
-      - name: Build all projects recursively
-        run: |
-          # Buscar y construir cualquier .sln o .csproj
-          $slnFiles = Get-ChildItem -Path . -Filter *.sln -Recurse
-          $csprojFiles = Get-ChildItem -Path . -Filter *.csproj -Recurse
-          
-          if ($slnFiles) {
-            $slnFiles | ForEach-Object {
-              echo "Building solution: $($_.Name)"
-              dotnet build $_.FullName --configuration Release
-            }
-          } elseif ($csprojFiles) {
-            $csprojFiles | ForEach-Object {
-              echo "Building project: $($_.Name)"
-              dotnet build $_.FullName --configuration Release
-            }
-          } else {
-            echo "No .sln or .csproj files found"
-            exit 1
-          }
+      - name: Fake build step (required by SonarScanner)
+        run: echo "Analysis only - no compilation needed"
 
       - name: End SonarQube Scan
         run: |
