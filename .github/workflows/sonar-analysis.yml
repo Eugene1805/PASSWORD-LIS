@@ -22,6 +22,15 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Explore project structure
+        run: |
+          echo "=== Current directory ==="
+          pwd
+          echo "=== All files and folders ==="
+          Get-ChildItem -Recurse | Where-Object { $_.Name -like "*.sln" -or $_.Name -like "*.csproj" } | ForEach-Object { echo "Found: $($_.FullName)" }
+          echo "=== Top level contents ==="
+          Get-ChildItem
+
       - name: Begin SonarQube Scan
         run: |
           dotnet-sonarscanner begin /k:"password-game" `
@@ -30,8 +39,26 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: Build Project
-        run: dotnet build --configuration Release
+      - name: Build all projects recursively
+        run: |
+          # Buscar y construir cualquier .sln o .csproj
+          $slnFiles = Get-ChildItem -Path . -Filter *.sln -Recurse
+          $csprojFiles = Get-ChildItem -Path . -Filter *.csproj -Recurse
+          
+          if ($slnFiles) {
+            $slnFiles | ForEach-Object {
+              echo "Building solution: $($_.Name)"
+              dotnet build $_.FullName --configuration Release
+            }
+          } elseif ($csprojFiles) {
+            $csprojFiles | ForEach-Object {
+              echo "Building project: $($_.Name)"
+              dotnet build $_.FullName --configuration Release
+            }
+          } else {
+            echo "No .sln or .csproj files found"
+            exit 1
+          }
 
       - name: End SonarQube Scan
         run: |
