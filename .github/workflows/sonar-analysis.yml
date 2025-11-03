@@ -1,4 +1,4 @@
-name: SonarQube Native Analysis
+name: SonarQube Analysis
 
 on:
   push:
@@ -22,31 +22,27 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Download and Setup SonarScanner CLI
+      - name: Download SonarScanner
         run: |
-          # Descargar SonarScanner nativo
-          $scannerUrl = "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006.zip"
-          $scannerZip = "sonar-scanner.zip"
-          Invoke-WebRequest -Uri $scannerUrl -OutFile $scannerZip
-          Expand-Archive -Path $scannerZip -DestinationPath "."
-          
-          # Agregar al PATH
-          $scannerPath = "C:\actions-runner\_work\PASSWORD-LIS\PASSWORD-LIS\sonar-scanner-5.0.1.3006\bin"
-          echo "SONAR_SCANNER_HOME=$scannerPath" | Out-File -FilePath $env:GITHUB_ENV -Append
-          echo "$scannerPath" | Out-File -FilePath $env:GITHUB_PATH -Append
+          Invoke-WebRequest -Uri "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006.zip" -OutFile "sonar-scanner.zip"
+          Expand-Archive -Path "sonar-scanner.zip" -DestinationPath "."
+          echo "C:\actions-runner\_work\PASSWORD-LIS\PASSWORD-LIS\sonar-scanner-5.0.1.3006\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
 
-      - name: Run SonarScanner Analysis
+      - name: Create SonarQube properties file
         run: |
-          sonar-scanner `
-            -Dsonar.projectKey=password-game `
-            -Dsonar.projectName="PASSWORD LIS" `
-            -Dsonar.host.url=http://localhost:9000 `
-            -Dsonar.login="${{ secrets.SONAR_TOKEN }}" `
-            -Dsonar.sources=. `
-            -Dsonar.sourceEncoding=UTF-8 `
-            -Dsonar.exclusions=**/node_modules/**,**/*.min.js,**/packages/**,**/bin/**,**/obj/** `
-            -Dsonar.coverage.exclusions=**/* `
-            -Dsonar.cpd.exclusions=**/* `
-            -Dsonar.scm.disabled=true
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          $propertiesContent = @"
+sonar.projectKey=password-game
+sonar.projectName=PASSWORD LIS
+sonar.host.url=http://localhost:9000
+sonar.login=${{ secrets.SONAR_TOKEN }}
+sonar.sources=.
+sonar.sourceEncoding=UTF-8
+sonar.exclusions=**/node_modules/**,**/*.min.js,**/packages/**,**/bin/**,**/obj/**
+sonar.coverage.exclusions=**/*
+sonar.cpd.exclusions=**/*
+sonar.scm.disabled=true
+"@
+          $propertiesContent | Out-File -FilePath "sonar-project.properties" -Encoding UTF8
+
+      - name: Run SonarScanner
+        run: sonar-scanner
