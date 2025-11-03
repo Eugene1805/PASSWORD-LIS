@@ -22,9 +22,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Verify SonarScanner Installation
-        run: dotnet-sonarscanner --version
-
       - name: Begin SonarQube Scan
         run: |
           dotnet-sonarscanner begin /k:"password-game" `
