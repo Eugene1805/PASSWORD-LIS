@@ -1,4 +1,4 @@
-name: SonarQube C# Analysis
+name: SonarQube Native Analysis
 
 on:
   push:
@@ -7,50 +7,46 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-scan:
+  analyze:
     runs-on: self-hosted
 
     steps:
-      # 1. Descarga el código
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  
+          fetch-depth: 0
 
-      # 2. Verificar .NET instalado
-      - name: Verify .NET Installation
-        run: dotnet --version
-
-      # 3. Configura Java
       - name: Setup Java JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # 4. Inicia el scanner
-      - name: Begin SonarQube Scan
+      - name: Download and Setup SonarScanner CLI
         run: |
-          dotnet-sonarscanner begin /k:"password-game" `
-            /d:sonar.host.url="http://localhost:9000" `
-            /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      
-      # 5. Restaura los paquetes NuGet con dotnet restore
-      - name: Restore NuGet packages
-        run: |
-          dotnet restore "client/PASSWORD LIS Client/PASSWORD LIS Client.sln"
-          dotnet restore "server/Server/Server.sln"
+          # Descargar SonarScanner nativo
+          $scannerUrl = "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006.zip"
+          $scannerZip = "sonar-scanner.zip"
+          Invoke-WebRequest -Uri $scannerUrl -OutFile $scannerZip
+          Expand-Archive -Path $scannerZip -DestinationPath "."
+          
+          # Agregar al PATH
+          $scannerPath = "C:\actions-runner\_work\PASSWORD-LIS\PASSWORD-LIS\sonar-scanner-5.0.1.3006\bin"
+          echo "SONAR_SCANNER_HOME=$scannerPath" | Out-File -FilePath $env:GITHUB_ENV -Append
+          echo "$scannerPath" | Out-File -FilePath $env:GITHUB_PATH -Append
 
-      # 6. Compila los proyectos
-      - name: Build Projects
+      - name: Run SonarScanner Analysis
         run: |
-          dotnet build "client/PASSWORD LIS Client/PASSWORD LIS Client.sln" --configuration Release --no-restore
-          dotnet build "server/Server/Server.sln" --configuration Release --no-restore
-
-      # 7. Finaliza el escaneo
-      - name: End SonarQube Scan
-        run: dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          sonar-scanner `
+            -Dsonar.projectKey=password-game `
+            -Dsonar.projectName="PASSWORD LIS" `
+            -Dsonar.host.url=http://localhost:9000 `
+            -Dsonar.login="${{ secrets.SONAR_TOKEN }}" `
+            -Dsonar.sources=. `
+            -Dsonar.sourceEncoding=UTF-8 `
+            -Dsonar.exclusions=**/node_modules/**,**/*.min.js,**/packages/**,**/bin/**,**/obj/** `
+            -Dsonar.coverage.exclusions=**/* `
+            -Dsonar.cpd.exclusions=**/* `
+            -Dsonar.scm.disabled=true
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
