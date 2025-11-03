@@ -1,5 +1,4 @@
-﻿using PASSWORD_LIS_Client.Services;
-using PASSWORD_LIS_Client.ViewModels;
+﻿using PASSWORD_LIS_Client.ViewModels;
 using PASSWORD_LIS_Client.Views;
 using PASSWORD_LIS_Client.WaitingRoomManagerServiceReference;
 using System.Linq;

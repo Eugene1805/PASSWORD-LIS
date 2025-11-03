@@ -42,9 +42,8 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             TitleMessage = $"{Properties.Langs.Lang.reportingText} {reportedPlayer.Nickname}";
 
-            SubmitReportCommand = new RelayCommand(
-                execute: async (_) => await SubmitReportAsync(),
-                canExecute: (_) => !string.IsNullOrWhiteSpace(ReportReason)
+            SubmitReportCommand = new RelayCommand(async (_) => await SubmitReportAsync(),
+                (_) => !string.IsNullOrWhiteSpace(ReportReason)
             );
         }
 

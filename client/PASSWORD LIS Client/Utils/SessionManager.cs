@@ -1,9 +1,4 @@
 ﻿using UserDTO = PASSWORD_LIS_Client.LoginManagerServiceReference.UserDTO;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PASSWORD_LIS_Client.Utils
 {

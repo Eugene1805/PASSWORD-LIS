@@ -75,7 +75,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                     this.windowService.ShowPopUp(Properties.Langs.Lang.unexpectedErrorText,
                         Properties.Langs.Lang.passwordChangeFailedText, PopUpIcon.Warning);
                 }
-            }
+            }//TODO: ADD exception handling
             catch (Exception)
             {
                 this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
