@@ -17,22 +17,18 @@ jobs:
         with:
           fetch-depth: 0  
 
-      # 2. Verificar .NET instalado (sin instalar)
+      # 2. Verificar .NET instalado
       - name: Verify .NET Installation
         run: dotnet --version
 
-      # 3. Configura Java (requerido por el scanner)
+      # 3. Configura Java
       - name: Setup Java JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # 4. Verificar SonarScanner instalado
-      - name: Verify SonarScanner
-        run: dotnet-sonarscanner --version
-
-      # 5. Inicia el scanner
+      # 4. Inicia el scanner
       - name: Begin SonarQube Scan
         run: |
           dotnet-sonarscanner begin /k:"password-game" `
@@ -41,19 +37,19 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       
-      # 6. Restaura los paquetes NuGet (ambas soluciones)
+      # 5. Restaura los paquetes NuGet
       - name: Restore NuGet packages
         run: |
           nuget restore "client/PASSWORD LIS Client/PASSWORD LIS Client.sln"
           nuget restore "server/Server/Server.sln"
 
-      # 7. Compila los proyectos (ambas soluciones)
+      # 6. Compila los proyectos
       - name: Build Projects
         run: |
           MSBuild.exe "client/PASSWORD LIS Client/PASSWORD LIS Client.sln" /t:Rebuild /p:Configuration=Release
           MSBuild.exe "server/Server/Server.sln" /t:Rebuild /p:Configuration=Release
 
-      # 8. Finaliza el escaneo
+      # 7. Finaliza el escaneo
       - name: End SonarQube Scan
         run: dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
         env:
