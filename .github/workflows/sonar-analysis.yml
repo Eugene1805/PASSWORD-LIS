@@ -31,17 +31,17 @@ jobs:
       - name: Create SonarQube properties file
         run: |
           $propertiesContent = @"
-sonar.projectKey=password-game
-sonar.projectName=PASSWORD LIS
-sonar.host.url=http://localhost:9000
-sonar.login=${{ secrets.SONAR_TOKEN }}
-sonar.sources=.
-sonar.sourceEncoding=UTF-8
-sonar.exclusions=**/node_modules/**,**/*.min.js,**/packages/**,**/bin/**,**/obj/**
-sonar.coverage.exclusions=**/*
-sonar.cpd.exclusions=**/*
-sonar.scm.disabled=true
-"@
+          sonar.projectKey=password-game
+          sonar.projectName=PASSWORD LIS
+          sonar.host.url=http://localhost:9000
+          sonar.login=${{ secrets.SONAR_TOKEN }}
+          sonar.sources=.
+          sonar.sourceEncoding=UTF-8
+          sonar.exclusions=**/node_modules/**,**/*.min.js,**/packages/**,**/bin/**,**/obj/**
+          sonar.coverage.exclusions=**/*
+          sonar.cpd.exclusions=**/*
+          sonar.scm.disabled=true
+          "@
           $propertiesContent | Out-File -FilePath "sonar-project.properties" -Encoding UTF8
 
       - name: Run SonarScanner
