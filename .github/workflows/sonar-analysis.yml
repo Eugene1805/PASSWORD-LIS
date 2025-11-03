@@ -37,17 +37,17 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       
-      # 5. Restaura los paquetes NuGet
+      # 5. Restaura los paquetes NuGet con dotnet restore
       - name: Restore NuGet packages
         run: |
-          nuget restore "client/PASSWORD LIS Client/PASSWORD LIS Client.sln"
-          nuget restore "server/Server/Server.sln"
+          dotnet restore "client/PASSWORD LIS Client/PASSWORD LIS Client.sln"
+          dotnet restore "server/Server/Server.sln"
 
       # 6. Compila los proyectos
       - name: Build Projects
         run: |
-          MSBuild.exe "client/PASSWORD LIS Client/PASSWORD LIS Client.sln" /t:Rebuild /p:Configuration=Release
-          MSBuild.exe "server/Server/Server.sln" /t:Rebuild /p:Configuration=Release
+          dotnet build "client/PASSWORD LIS Client/PASSWORD LIS Client.sln" --configuration Release --no-restore
+          dotnet build "server/Server/Server.sln" --configuration Release --no-restore
 
       # 7. Finaliza el escaneo
       - name: End SonarQube Scan
