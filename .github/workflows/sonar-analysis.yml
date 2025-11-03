@@ -28,15 +28,24 @@ jobs:
           Expand-Archive -Path "sonar-scanner.zip" -DestinationPath "."
           echo "C:\actions-runner\_work\PASSWORD-LIS\PASSWORD-LIS\sonar-scanner-5.0.1.3006\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
 
+      - name: Count code files for verification
+        run: |
+          echo "=== Archivos .cs encontrados ==="
+          Get-ChildItem -Path . -Filter *.cs -Recurse | Measure-Object | ForEach-Object { echo "Total: $($_.Count)" }
+          echo "=== Archivos .sln encontrados ==="
+          Get-ChildItem -Path . -Filter *.sln -Recurse | ForEach-Object { echo "Solución: $($_.FullName)" }
+          echo "=== Archivos .csproj encontrados ==="
+          Get-ChildItem -Path . -Filter *.csproj -Recurse | ForEach-Object { echo "Proyecto: $($_.FullName)" }
       - name: Create SonarQube properties file
         run: |
           $propertiesContent = @"
           sonar.projectKey=password-game
           sonar.projectName=PASSWORD LIS
           sonar.host.url=http://localhost:9000
-          sonar.login=${{ secrets.SONAR_TOKEN }}
+          sonar.token=${{ secrets.SONAR_TOKEN }}
           sonar.sources=.
           sonar.sourceEncoding=UTF-8
+          sonar.inclusions=**/*.cs,**/*.vb,**/*.fs
           sonar.exclusions=**/node_modules/**,**/*.min.js,**/packages/**,**/bin/**,**/obj/**
           sonar.coverage.exclusions=**/*
           sonar.cpd.exclusions=**/*
