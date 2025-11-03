@@ -22,9 +22,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Verify .NET Installation
-        run: dotnet --version
-
       - name: Verify SonarScanner Installation
         run: dotnet-sonarscanner --version
 
