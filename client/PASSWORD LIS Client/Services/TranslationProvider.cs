@@ -12,11 +12,9 @@ namespace PASSWORD_LIS_Client.Services
 {
     public class TranslationProvider : INotifyPropertyChanged
     {
-        // Implementación del Singleton
-        private static readonly TranslationProvider _instance = new TranslationProvider();
-        public static TranslationProvider Instance => _instance;
+        private static readonly TranslationProvider instance = new TranslationProvider();
+        public static TranslationProvider Instance => instance;
 
-        // Propiedad para el indizador que notifica los cambios
         public string this[string key] => Lang.ResourceManager.GetString(key, Lang.Culture);
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -24,8 +22,6 @@ namespace PASSWORD_LIS_Client.Services
         public void SetLanguage(CultureInfo culture)
         {
             Lang.Culture = culture;
-            // Notificamos que "todo" cambió para que la UI se refresque.
-            // El nombre "Item[]" es una convención para el indizador.
             OnPropertyChanged(null);
         }
 

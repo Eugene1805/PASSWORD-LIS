@@ -26,7 +26,7 @@
   <xs:element name="JoinGameAsRegisteredPlayerResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element minOccurs="0" name="JoinGameAsRegisteredPlayerResult" type="xs:boolean" />
+        <xs:element minOccurs="0" name="JoinGameAsRegisteredPlayerResult" type="xs:int" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -97,6 +97,18 @@
       </xs:sequence>
     </xs:complexType>
   </xs:element>
+  <xs:element name="HostLeft">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="gameCode" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="HostLeftResponse">
+    <xs:complexType>
+      <xs:sequence />
+    </xs:complexType>
+  </xs:element>
   <xs:element name="OnPlayerJoined">
     <xs:complexType>
       <xs:sequence>
@@ -126,6 +138,11 @@
     </xs:complexType>
   </xs:element>
   <xs:element name="OnGameStarted">
+    <xs:complexType>
+      <xs:sequence />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="OnHostLeft">
     <xs:complexType>
       <xs:sequence />
     </xs:complexType>

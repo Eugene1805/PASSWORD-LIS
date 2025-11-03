@@ -32,8 +32,8 @@
   <wsdl:types>
     <xsd:schema targetNamespace="http://tempuri.org/Imports">
       <xsd:import schemaLocation="http://localhost:8100/?xsd=xsd0" namespace="http://tempuri.org/" />
-      <xsd:import schemaLocation="http://localhost:8100/?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
       <xsd:import schemaLocation="http://localhost:8100/?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" />
+      <xsd:import schemaLocation="http://localhost:8100/?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
       <xsd:import schemaLocation="http://localhost:8100/?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" />
     </xsd:schema>
   </wsdl:types>
@@ -43,17 +43,26 @@
   <wsdl:message name="IWaitingRoomManager_CreateGame_OutputMessage">
     <wsdl:part name="parameters" element="tns:CreateGameResponse" />
   </wsdl:message>
+  <wsdl:message name="IWaitingRoomManager_CreateGame_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q1="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q1:ServiceErrorDetailDTO" />
+  </wsdl:message>
   <wsdl:message name="IWaitingRoomManager_JoinGameAsRegisteredPlayer_InputMessage">
     <wsdl:part name="parameters" element="tns:JoinGameAsRegisteredPlayer" />
   </wsdl:message>
   <wsdl:message name="IWaitingRoomManager_JoinGameAsRegisteredPlayer_OutputMessage">
     <wsdl:part name="parameters" element="tns:JoinGameAsRegisteredPlayerResponse" />
   </wsdl:message>
+  <wsdl:message name="IWaitingRoomManager_JoinGameAsRegisteredPlayer_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q2="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q2:ServiceErrorDetailDTO" />
+  </wsdl:message>
   <wsdl:message name="IWaitingRoomManager_JoinGameAsGuest_InputMessage">
     <wsdl:part name="parameters" element="tns:JoinGameAsGuest" />
   </wsdl:message>
   <wsdl:message name="IWaitingRoomManager_JoinGameAsGuest_OutputMessage">
     <wsdl:part name="parameters" element="tns:JoinGameAsGuestResponse" />
+  </wsdl:message>
+  <wsdl:message name="IWaitingRoomManager_JoinGameAsGuest_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q3="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q3:ServiceErrorDetailDTO" />
   </wsdl:message>
   <wsdl:message name="IWaitingRoomManager_SendMessage_InputMessage">
     <wsdl:part name="parameters" element="tns:SendMessage" />
@@ -79,6 +88,12 @@
   <wsdl:message name="IWaitingRoomManager_GetPlayersInGame_OutputMessage">
     <wsdl:part name="parameters" element="tns:GetPlayersInGameResponse" />
   </wsdl:message>
+  <wsdl:message name="IWaitingRoomManager_HostLeft_InputMessage">
+    <wsdl:part name="parameters" element="tns:HostLeft" />
+  </wsdl:message>
+  <wsdl:message name="IWaitingRoomManager_HostLeft_OutputMessage">
+    <wsdl:part name="parameters" element="tns:HostLeftResponse" />
+  </wsdl:message>
   <wsdl:message name="IWaitingRoomManager_OnPlayerJoined_OutputCallbackMessage">
     <wsdl:part name="parameters" element="tns:OnPlayerJoined" />
   </wsdl:message>
@@ -94,18 +109,24 @@
   <wsdl:message name="IWaitingRoomManager_OnGameStarted_OutputCallbackMessage">
     <wsdl:part name="parameters" element="tns:OnGameStarted" />
   </wsdl:message>
+  <wsdl:message name="IWaitingRoomManager_OnHostLeft_OutputCallbackMessage">
+    <wsdl:part name="parameters" element="tns:OnHostLeft" />
+  </wsdl:message>
   <wsdl:portType name="IWaitingRoomManager">
     <wsdl:operation name="CreateGame">
       <wsdl:input wsaw:Action="http://tempuri.org/IWaitingRoomManager/CreateGame" message="tns:IWaitingRoomManager_CreateGame_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IWaitingRoomManager/CreateGameResponse" message="tns:IWaitingRoomManager_CreateGame_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IWaitingRoomManager/CreateGameServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IWaitingRoomManager_CreateGame_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
     <wsdl:operation name="JoinGameAsRegisteredPlayer">
       <wsdl:input wsaw:Action="http://tempuri.org/IWaitingRoomManager/JoinGameAsRegisteredPlayer" message="tns:IWaitingRoomManager_JoinGameAsRegisteredPlayer_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IWaitingRoomManager/JoinGameAsRegisteredPlayerResponse" message="tns:IWaitingRoomManager_JoinGameAsRegisteredPlayer_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IWaitingRoomManager/JoinGameAsRegisteredPlayerServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IWaitingRoomManager_JoinGameAsRegisteredPlayer_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
     <wsdl:operation name="JoinGameAsGuest">
       <wsdl:input wsaw:Action="http://tempuri.org/IWaitingRoomManager/JoinGameAsGuest" message="tns:IWaitingRoomManager_JoinGameAsGuest_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IWaitingRoomManager/JoinGameAsGuestResponse" message="tns:IWaitingRoomManager_JoinGameAsGuest_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IWaitingRoomManager/JoinGameAsGuestServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IWaitingRoomManager_JoinGameAsGuest_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
     <wsdl:operation name="SendMessage">
       <wsdl:input wsaw:Action="http://tempuri.org/IWaitingRoomManager/SendMessage" message="tns:IWaitingRoomManager_SendMessage_InputMessage" />
@@ -123,6 +144,10 @@
       <wsdl:input wsaw:Action="http://tempuri.org/IWaitingRoomManager/GetPlayersInGame" message="tns:IWaitingRoomManager_GetPlayersInGame_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IWaitingRoomManager/GetPlayersInGameResponse" message="tns:IWaitingRoomManager_GetPlayersInGame_OutputMessage" />
     </wsdl:operation>
+    <wsdl:operation name="HostLeft">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWaitingRoomManager/HostLeft" message="tns:IWaitingRoomManager_HostLeft_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWaitingRoomManager/HostLeftResponse" message="tns:IWaitingRoomManager_HostLeft_OutputMessage" />
+    </wsdl:operation>
     <wsdl:operation name="OnPlayerJoined">
       <wsdl:output wsaw:Action="http://tempuri.org/IWaitingRoomManager/OnPlayerJoined" message="tns:IWaitingRoomManager_OnPlayerJoined_OutputCallbackMessage" />
     </wsdl:operation>
@@ -138,6 +163,9 @@
     <wsdl:operation name="OnGameStarted">
       <wsdl:output wsaw:Action="http://tempuri.org/IWaitingRoomManager/OnGameStarted" message="tns:IWaitingRoomManager_OnGameStarted_OutputCallbackMessage" />
     </wsdl:operation>
+    <wsdl:operation name="OnHostLeft">
+      <wsdl:output wsaw:Action="http://tempuri.org/IWaitingRoomManager/OnHostLeft" message="tns:IWaitingRoomManager_OnHostLeft_OutputCallbackMessage" />
+    </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="NetTcpBinding_IWaitingRoomManager" type="tns:IWaitingRoomManager">
     <wsp:PolicyReference URI="#NetTcpBinding_IWaitingRoomManager_policy" />
@@ -150,6 +178,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="JoinGameAsRegisteredPlayer">
       <soap12:operation soapAction="http://tempuri.org/IWaitingRoomManager/JoinGameAsRegisteredPlayer" style="document" />
@@ -159,6 +190,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="JoinGameAsGuest">
       <soap12:operation soapAction="http://tempuri.org/IWaitingRoomManager/JoinGameAsGuest" style="document" />
@@ -168,6 +202,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="SendMessage">
       <soap12:operation soapAction="http://tempuri.org/IWaitingRoomManager/SendMessage" style="document" />
@@ -205,6 +242,15 @@
         <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="HostLeft">
+      <soap12:operation soapAction="http://tempuri.org/IWaitingRoomManager/HostLeft" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="OnPlayerJoined">
       <soap12:operation soapAction="http://tempuri.org/IWaitingRoomManager/OnPlayerJoined" style="document" />
       <wsdl:output>
@@ -231,6 +277,12 @@
     </wsdl:operation>
     <wsdl:operation name="OnGameStarted">
       <soap12:operation soapAction="http://tempuri.org/IWaitingRoomManager/OnGameStarted" style="document" />
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="OnHostLeft">
+      <soap12:operation soapAction="http://tempuri.org/IWaitingRoomManager/OnHostLeft" style="document" />
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>

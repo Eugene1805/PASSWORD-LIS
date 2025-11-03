@@ -1,4 +1,5 @@
-﻿using PASSWORD_LIS_Client.Commands;
+﻿using PASSWORD_LIS_Client.AccountManagerServiceReference;
+using PASSWORD_LIS_Client.Commands;
 using PASSWORD_LIS_Client.FriendsManagerServiceReference;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
@@ -23,7 +24,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             set
             {
                 SetProperty(ref gameCodeToJoin, value);
-                ((RelayCommand)JoinGameCommand).RaiseCanExecuteChanged();
+                RelayCommand.RaiseCanExecuteChanged();
             }
         }
         private int photoId;
@@ -40,7 +41,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             set { isGuest = value; OnPropertyChanged(); }
         }
 
-        //Propiedad para la lista de amigos
         private ObservableCollection<FriendDTO> friends;
         public ObservableCollection<FriendDTO> Friends
         {
@@ -139,12 +139,6 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private async Task LoadFriendsAsync()
         {
-            /*
-            if (SessionManager.CurrentUser.PlayerId<0)
-            {
-                return;
-            }
-            */
             if (isLoadingFriends)
             {
                 return;
@@ -281,8 +275,8 @@ namespace PASSWORD_LIS_Client.ViewModels
                 bool isBanned = await reportManagerService.IsPlayerBannedAsync(SessionManager.CurrentUser.PlayerId);
                 if (isBanned)
                 {
-                    windowService.ShowPopUp("Cuenta Suspendida", "No puedes crear partidas, tu cuenta está suspendida temporalmente.", PopUpIcon.Warning);
-                    return; // Detiene la ejecución
+                    windowService.ShowPopUp(Properties.Langs.Lang.bannedAccountText, Properties.Langs.Lang.cantCreateMatchText, PopUpIcon.Warning);
+                    return;
                 }
                 string newGameCode = await waitingRoomManagerService.CreateGameAsync(SessionManager.CurrentUser.Email);
 
@@ -297,8 +291,21 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
                 else
                 {
-                    // TODO Add lang message
-                    windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, "No se pudo crear la partida.", PopUpIcon.Error);
+                    windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, Properties.Langs.Lang.couldNotCreateMatch, PopUpIcon.Error);
+                }
+            }
+            catch(FaultException<WaitingRoomManagerServiceReference.ServiceErrorDetailDTO> ex)
+            {
+                switch (ex.Detail.Code)
+                {
+                    case WaitingRoomManagerServiceReference.ServiceErrorCode.COULD_NOT_CREATE_ROOM:
+                        windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
+                        Properties.Langs.Lang.couldNotCreateMatch, PopUpIcon.Warning);
+                        break;
+                    default:
+                        windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.unexpectedServerErrorText, PopUpIcon.Error);
+                        break;
                 }
             }
             catch (TimeoutException)
@@ -311,8 +318,9 @@ namespace PASSWORD_LIS_Client.ViewModels
                 this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
                     Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
             }
-            catch (CommunicationException)
+            catch (CommunicationException ex)
             {
+                Console.WriteLine(ex.StackTrace);
                 this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
                     Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
             }
@@ -340,10 +348,11 @@ namespace PASSWORD_LIS_Client.ViewModels
                     bool isBanned = await reportManagerService.IsPlayerBannedAsync(SessionManager.CurrentUser.PlayerId);
                     if (isBanned)
                     {
-                        windowService.ShowPopUp("Cuenta Suspendida", "No puedes crear partidas, tu cuenta está suspendida temporalmente.", PopUpIcon.Warning);
-                        return; // Detiene la ejecución
+                        windowService.ShowPopUp(Properties.Langs.Lang.bannedAccountText, Properties.Langs.Lang.cantJoinMatchText, PopUpIcon.Warning);
+                        return;
                     }
-                    success = await waitingRoomManagerService.JoinGameAsRegisteredPlayerAsync(GameCodeToJoin, SessionManager.CurrentUser.Email);
+                    var playerId = await waitingRoomManagerService.JoinGameAsRegisteredPlayerAsync(GameCodeToJoin, SessionManager.CurrentUser.Email);
+                    success = playerId > 0;
                 }
 
                 if (success)
@@ -356,9 +365,32 @@ namespace PASSWORD_LIS_Client.ViewModels
                     var waitingRoomPage = new WaitingRoomPage { DataContext = waitingRoomViewModel };
                     windowService.NavigateTo(waitingRoomPage);
                 }
-                else
-                {// TODO ADD lang messages and catch specific errors
-                    windowService.ShowPopUp("Unión Fallida", "El código de la partida es incorrecto, la sala está llena o ya estás en la partida.", PopUpIcon.Warning);
+                else 
+                {
+                    windowService.ShowPopUp(Properties.Langs.Lang.joinFailedTitle,
+                        Properties.Langs.Lang.unexpectedServerErrorText, PopUpIcon.Warning);
+                }
+            }
+            catch(FaultException<WaitingRoomManagerServiceReference.ServiceErrorDetailDTO> ex)
+            {
+                switch (ex.Detail.Code)
+                {
+                    case WaitingRoomManagerServiceReference.ServiceErrorCode.ROOM_NOT_FOUND:
+                        windowService.ShowPopUp(Properties.Langs.Lang.joinFailedTitle,
+                        Properties.Langs.Lang.incorrectCodeText, PopUpIcon.Warning);
+                        break;
+                    case WaitingRoomManagerServiceReference.ServiceErrorCode.ROOM_FULL:
+                        windowService.ShowPopUp(Properties.Langs.Lang.joinFailedTitle,
+                        Properties.Langs.Lang.roomFullText, PopUpIcon.Warning);
+                        break;
+                    case WaitingRoomManagerServiceReference.ServiceErrorCode.ALREADY_IN_ROOM:
+                        windowService.ShowPopUp(Properties.Langs.Lang.joinFailedTitle,
+                        Properties.Langs.Lang.youAreAlreadyInGameText, PopUpIcon.Warning);
+                        break;
+                    default:
+                        windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.unexpectedServerErrorText, PopUpIcon.Error);
+                        break;
                 }
             }
             catch (TimeoutException)

@@ -89,7 +89,6 @@ namespace PASSWORD_LIS_Client.ViewModels
                     windowService.ShowPopUp("Información",
                         "Este jugador ya te ha enviado una solicitud de amistad, revisa tu bandeja", PopUpIcon.Information);
                     break;
-                case FriendRequestResult.Failed:
                 default:
                     windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
                         Properties.Langs.Lang.couldNotSentRequestText, PopUpIcon.Error);

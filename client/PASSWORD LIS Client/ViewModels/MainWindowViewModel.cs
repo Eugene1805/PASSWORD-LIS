@@ -1,6 +1,7 @@
 ﻿using PASSWORD_LIS_Client.Commands;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
@@ -22,7 +23,9 @@ namespace PASSWORD_LIS_Client.ViewModels
             get => volume;
             set
             {
-                if (volume != value)
+                // Use a tolerance for floating point comparison to avoid S1244
+                const double Tolerance = 0.0001;
+                if (Math.Abs(volume - value) > Tolerance)
                 {
                     volume = value;
                     musicService.Volume = volume;

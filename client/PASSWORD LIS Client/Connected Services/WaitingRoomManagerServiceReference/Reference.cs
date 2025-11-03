@@ -15,6 +15,115 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
+    [System.SerializableAttribute()]
+    public partial class ServiceErrorDetailDTO : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ServiceErrorCode CodeField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ErrorCodeField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string MessageField;
+        
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ServiceErrorCode Code {
+            get {
+                return this.CodeField;
+            }
+            set {
+                if ((this.CodeField.Equals(value) != true)) {
+                    this.CodeField = value;
+                    this.RaisePropertyChanged("Code");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string ErrorCode {
+            get {
+                return this.ErrorCodeField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ErrorCodeField, value) != true)) {
+                    this.ErrorCodeField = value;
+                    this.RaisePropertyChanged("ErrorCode");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Message {
+            get {
+                return this.MessageField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.MessageField, value) != true)) {
+                    this.MessageField = value;
+                    this.RaisePropertyChanged("Message");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="ServiceErrorCode", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
+    public enum ServiceErrorCode : int {
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        USER_ALREADY_EXISTS = 0,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        DATABASE_ERROR = 1,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        UNEXPECTED_ERROR = 2,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        STATISTICS_ERROR = 3,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        COULD_NOT_CREATE_ROOM = 4,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ROOM_NOT_FOUND = 5,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ROOM_FULL = 6,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        PLAYER_NOT_FOUND = 7,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ALREADY_IN_ROOM = 8,
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="ChatMessageDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
     [System.SerializableAttribute()]
     public partial class ChatMessageDTO : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
@@ -210,18 +319,22 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
     public interface IWaitingRoomManager {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/CreateGame", ReplyAction="http://tempuri.org/IWaitingRoomManager/CreateGameResponse")]
+        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IWaitingRoomManager/CreateGameServiceErrorDetailDTOFault", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
         string CreateGame(string email);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/CreateGame", ReplyAction="http://tempuri.org/IWaitingRoomManager/CreateGameResponse")]
         System.Threading.Tasks.Task<string> CreateGameAsync(string email);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/JoinGameAsRegisteredPlayer", ReplyAction="http://tempuri.org/IWaitingRoomManager/JoinGameAsRegisteredPlayerResponse")]
-        bool JoinGameAsRegisteredPlayer(string gameCode, string email);
+        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IWaitingRoomManager/JoinGameAsRegisteredPlayerServiceErrorDeta" +
+            "ilDTOFault", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
+        int JoinGameAsRegisteredPlayer(string gameCode, string email);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/JoinGameAsRegisteredPlayer", ReplyAction="http://tempuri.org/IWaitingRoomManager/JoinGameAsRegisteredPlayerResponse")]
-        System.Threading.Tasks.Task<bool> JoinGameAsRegisteredPlayerAsync(string gameCode, string email);
+        System.Threading.Tasks.Task<int> JoinGameAsRegisteredPlayerAsync(string gameCode, string email);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/JoinGameAsGuest", ReplyAction="http://tempuri.org/IWaitingRoomManager/JoinGameAsGuestResponse")]
+        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IWaitingRoomManager/JoinGameAsGuestServiceErrorDetailDTOFault", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
         bool JoinGameAsGuest(string gameCode, string nickname);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/JoinGameAsGuest", ReplyAction="http://tempuri.org/IWaitingRoomManager/JoinGameAsGuestResponse")]
@@ -250,6 +363,12 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/GetPlayersInGame", ReplyAction="http://tempuri.org/IWaitingRoomManager/GetPlayersInGameResponse")]
         System.Threading.Tasks.Task<PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.PlayerDTO[]> GetPlayersInGameAsync(string gameCode);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/HostLeft", ReplyAction="http://tempuri.org/IWaitingRoomManager/HostLeftResponse")]
+        void HostLeft(string gameCode);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/HostLeft", ReplyAction="http://tempuri.org/IWaitingRoomManager/HostLeftResponse")]
+        System.Threading.Tasks.Task HostLeftAsync(string gameCode);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -269,6 +388,9 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
         
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IWaitingRoomManager/OnGameStarted")]
         void OnGameStarted();
+        
+        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IWaitingRoomManager/OnHostLeft")]
+        void OnHostLeft();
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -307,11 +429,11 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
             return base.Channel.CreateGameAsync(email);
         }
         
-        public bool JoinGameAsRegisteredPlayer(string gameCode, string email) {
+        public int JoinGameAsRegisteredPlayer(string gameCode, string email) {
             return base.Channel.JoinGameAsRegisteredPlayer(gameCode, email);
         }
         
-        public System.Threading.Tasks.Task<bool> JoinGameAsRegisteredPlayerAsync(string gameCode, string email) {
+        public System.Threading.Tasks.Task<int> JoinGameAsRegisteredPlayerAsync(string gameCode, string email) {
             return base.Channel.JoinGameAsRegisteredPlayerAsync(gameCode, email);
         }
         
@@ -353,6 +475,14 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
         
         public System.Threading.Tasks.Task<PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.PlayerDTO[]> GetPlayersInGameAsync(string gameCode) {
             return base.Channel.GetPlayersInGameAsync(gameCode);
+        }
+        
+        public void HostLeft(string gameCode) {
+            base.Channel.HostLeft(gameCode);
+        }
+        
+        public System.Threading.Tasks.Task HostLeftAsync(string gameCode) {
+            return base.Channel.HostLeftAsync(gameCode);
         }
     }
 }

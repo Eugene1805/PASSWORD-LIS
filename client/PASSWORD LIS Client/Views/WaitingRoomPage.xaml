@@ -208,7 +208,7 @@
                             Width="60" Height="60"
                             VerticalAlignment="Center"
                             Margin="5,0,15,0"
-                            ToolTip="Copiar Código">
+                            ToolTip="{utils:Translate copyCodeText}">
                     <Image Source="/Resources/CopyIcon.png" Width="40" Height="40"/>
                 </Button>
                 <Ellipse Style="{StaticResource circleTransparentEllipseStyle}">

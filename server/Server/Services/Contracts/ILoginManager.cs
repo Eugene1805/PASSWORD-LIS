@@ -7,6 +7,7 @@ namespace Services.Contracts
     public interface ILoginManager
     {
         [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
         UserDTO Login(string email, string password);
 
     }

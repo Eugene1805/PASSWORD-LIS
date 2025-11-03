@@ -8,6 +8,7 @@ using System.Collections.Concurrent;
 using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
+using log4net;
 
 namespace Services.Services
 {
@@ -22,6 +23,7 @@ namespace Services.Services
         private readonly IPlayerRepository playerRepository;
         private readonly IBanRepository banRepository;
         private readonly IOperationContextWrapper operationContext;
+        private static readonly ILog log = LogManager.GetLogger(typeof(ReportManager));
 
         public ReportManager(IReportRepository reportRepository, IPlayerRepository playerRepository, IBanRepository banRepository,
             IOperationContextWrapper operationContext)
@@ -50,8 +52,10 @@ namespace Services.Services
                     Reason = reportDTO.Reason
                 };
                 await reportRepository.AddReportAsync(newReport);
+                log.InfoFormat("Report submitted: reporter={0}, reported={1}.", reportDTO.ReporterPlayerId, reportDTO.ReportedPlayerId);
 
                 var totalReports = await reportRepository.GetReportCountForPlayerAsync(reportDTO.ReportedPlayerId);
+                log.InfoFormat("Reported player {0} now has {1} report(s).", reportDTO.ReportedPlayerId, totalReports);
 
                 if (connectedClients.TryGetValue(reportDTO.ReportedPlayerId, out var client))
                 {
@@ -67,8 +71,9 @@ namespace Services.Services
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                log.Error("Error while submitting report.", ex);
                 return false;
             }
         }
@@ -85,6 +90,7 @@ namespace Services.Services
                 EndTime = endTime
             };
             await banRepository.AddBanAsync(newBan);
+            log.InfoFormat("Player {0} banned until {1:O}.", playerId, endTime);
 
             if (connectedClients.TryGetValue(playerId, out var client))
             {
@@ -102,6 +108,7 @@ namespace Services.Services
                 client.Callback.OnPlayerUnbanned();
                 client.BanTimer?.Dispose();
                 connectedClients[playerId] = (client.Callback, null);
+                log.InfoFormat("Player {0} unbanned and timer disposed.", playerId);
             }
         }
 
@@ -109,6 +116,7 @@ namespace Services.Services
         {
             var callbackChannel = operationContext.GetCallbackChannel<IReportManagerCallback>();
             connectedClients[playerId] = (callbackChannel, null);
+            log.InfoFormat("Player {0} subscribed to report updates.", playerId);
 
             var commObject = (ICommunicationObject)callbackChannel;
             commObject.Faulted += (s, e) => UnsubscribeFromReportUpdatesAsync(playerId);
@@ -121,6 +129,7 @@ namespace Services.Services
             if (connectedClients.TryRemove(playerId, out var client))
             {
                 client.BanTimer?.Dispose();
+                log.InfoFormat("Player {0} unsubscribed from report updates.", playerId);
             }
             return Task.CompletedTask;
         }

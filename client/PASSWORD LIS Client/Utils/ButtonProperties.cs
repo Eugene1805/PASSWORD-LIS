@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 
 namespace PASSWORD_LIS_Client.Utils
 {
     public static class ButtonProperties
     {
-        // Esta propiedad nos permitirá enlazar el estado 'IsBusy' de cualquier ViewModel a nuestro estilo.
         public static readonly DependencyProperty IsBusyProperty =
             DependencyProperty.RegisterAttached(
                 "IsBusy",

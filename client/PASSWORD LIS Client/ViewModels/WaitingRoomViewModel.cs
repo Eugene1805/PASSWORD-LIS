@@ -45,7 +45,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             set
             {
                 SetProperty(ref selectedPlayer, value);
-                ((RelayCommand)ReportCommand).RaiseCanExecuteChanged();
+                RelayCommand.RaiseCanExecuteChanged();
             }
         }
         private string currentMessage;
@@ -137,6 +137,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 wcfService.PlayerJoined += OnPlayerJoined;
                 wcfService.PlayerLeft += OnPlayerLeft;
                 wcfService.GameStarted += OnGameStarted;
+                wcfService.HostLeft += OnHostLeft;
             }
 
 
@@ -158,6 +159,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                     reportManagerService.ReportReceived += OnReportReceived;
                     reportManagerService.ReportCountUpdated += OnReportCountUpdated;
                     reportManagerService.PlayerBanned += OnPlayerBanned;
+                    await reportManagerService.SubscribeToReportUpdatesAsync(SessionManager.CurrentUser.PlayerId);
                 }
                 else
                 {
@@ -194,7 +196,6 @@ namespace PASSWORD_LIS_Client.ViewModels
                     Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
             }
         }
-        // TODO: Add internacionzation messages
         private bool CanReportPlayer()
         {
             if (SessionManager.CurrentUser == null)
@@ -203,17 +204,20 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             if (SessionManager.CurrentUser.PlayerId < 0)
             {
-                Console.WriteLine("Guests can not report players");
+                windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
+                    Properties.Langs.Lang.guestCantReportText, PopUpIcon.Warning);
                 return false;
             }
             if (SelectedPlayer == null)
             {
-                Console.WriteLine("You need to select a player from the conected ones to generate a report");
+                windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
+                    Properties.Langs.Lang.noSelectedPlayerToReport, PopUpIcon.Warning);
                 return false;
             }
             if(SelectedPlayer.Id == SessionManager.CurrentUser.PlayerId)
             {
-                Console.WriteLine("You can not report yourself");
+                windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
+                    Properties.Langs.Lang.cantReportYourself, PopUpIcon.Warning);
                 return false;
             }
             return  true;
@@ -272,7 +276,15 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 if (this.currentPlayer != null)
                 {
-                    await roomManagerClient.LeaveGameAsync(this.gameCode, IsGuest ? currentPlayer.Id : SessionManager.CurrentUser.PlayerId);
+                    if (IsHost)
+                    {
+                        await roomManagerClient.HostLeftAsync(this.gameCode);
+                    }
+                    else
+                    {
+                        await roomManagerClient.LeaveGameAsync(this.gameCode,
+                            IsGuest ? currentPlayer.Id : SessionManager.CurrentUser.PlayerId);
+                    }
                 }
                 if(!IsGuest)
                 {
@@ -307,7 +319,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         private void UpdatePlayerCount()
         {
             PlayerCountText = $"{ConnectedPlayers.Count}/{MaxPlayers}";
-            ((RelayCommand)StartGameCommand).RaiseCanExecuteChanged();
+            RelayCommand.RaiseCanExecuteChanged();
         }
         private async Task StartGameAsync()
         {
@@ -349,7 +361,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             Application.Current.Dispatcher.Invoke(() =>
             {
-                //Add navigation to game page here based on the player role and team
+                // TODO: Add navigation to game page here based on the player role and team
                 windowService.NavigateTo(new ClueGuyPage());
             });
         }
@@ -404,8 +416,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             if (!string.IsNullOrEmpty(GameCode))
             {
                 Clipboard.SetText(GameCode);
-
-                _ = ShowSnackbarAsync("¡Código copiado al portapapeles!");
+                _ = ShowSnackbarAsync(Properties.Langs.Lang.copiedToClipboardText);
             }
         }
         private async Task LoadFriendsAsync()
@@ -458,25 +469,23 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             if (!IsGuest)
             {
-                // Quitamos los manejadores para evitar fugas de memoria
                 reportManagerService.ReportReceived -= OnReportReceived;
                 reportManagerService.ReportCountUpdated -= OnReportCountUpdated;
                 reportManagerService.PlayerBanned -= OnPlayerBanned;
-                // Notificamos al servidor que ya no necesitamos las actualizaciones
                 await reportManagerService.UnsubscribeFromReportUpdatesAsync(SessionManager.CurrentUser.PlayerId);
             }
         }
 
         private void OnReportReceived(string reporterNickname, string reason)
         {
-            lastReportReason = $"Has sido reportado por {reporterNickname}. Razón: {reason}";
+            lastReportReason = $"{Properties.Langs.Lang.youHaveBeenReportedByText} {reporterNickname}. {Properties.Langs.Lang.reasonText} {reason}";
         }
 
         private void OnReportCountUpdated(int newReportCount)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                var message = $"{lastReportReason} | Reportes actuales: {newReportCount}/3";
+                var message = $"{lastReportReason} | {Properties.Langs.Lang.currentReportsText}: {newReportCount}/3";
                 _ = ShowSnackbarAsync(message);
             });
         }
@@ -485,11 +494,33 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(async () =>
             {
-                windowService.ShowPopUp("Has sido suspendido",
-                    "Has acumulado 3 reportes y tu cuenta ha sido suspendida por 1 hora. Serás expulsado de la sala.",
+                windowService.ShowPopUp(Properties.Langs.Lang.bannedText,
+                    Properties.Langs.Lang.bannedMessageText,
                     PopUpIcon.Error);
 
                 await LeaveGameAsync();
+            });
+        }
+
+        private void OnHostLeft()
+        {
+            Application.Current.Dispatcher.Invoke(async () =>
+            {
+                if (!isHost)
+                {
+                    windowService.ShowPopUp(
+                    Properties.Langs.Lang.hostLeftTitleText,
+                    Properties.Langs.Lang.hostLeftText,
+                    PopUpIcon.Warning
+                );
+                }
+                
+                if (!IsGuest)
+                {
+                    await CleanupAndUnsubscribeAsync();
+                }
+
+                windowService.GoBack();
             });
         }
 

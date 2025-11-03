@@ -3,7 +3,7 @@ using System.Windows.Controls;
 
 namespace PASSWORD_LIS_Client.Utils
 {
-    public class PasswordBoxHelper
+    public static class PasswordBoxHelper
     {
         public static readonly DependencyProperty BoundPasswordProperty =
             DependencyProperty.RegisterAttached("BoundPassword", typeof(string), typeof(PasswordBoxHelper), new PropertyMetadata(string.Empty, OnBoundPasswordChanged));

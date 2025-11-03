@@ -7,6 +7,7 @@ namespace Services.Contracts
     public interface IProfileManager
     {
         [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
         UserDTO UpdateProfile(UserDTO updatedProfileData);
     }
 }

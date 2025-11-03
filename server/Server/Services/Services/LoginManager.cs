@@ -25,12 +25,12 @@ namespace Services.Services
         {
             try
             {
-                log.InfoFormat("Intento de Login para el email: {0}", email);
+                log.InfoFormat("Login attempt for email: {0}", email);
                 var userAccount = repository.GetUserByEmail(email);
 
                 if (userAccount == null)
                 {
-                    log.WarnFormat("Login fallido (usuario no encontrado) para : {0}", email);
+                    log.WarnFormat("Login failed (user not found) for: {0}", email);
                     return null;
                 }
 
@@ -41,29 +41,31 @@ namespace Services.Services
                     var player = userAccount.Player.FirstOrDefault();
                     if (player != null)
                     {
-                        log.InfoFormat("Login exitoso para: {0}, PlayerId: {1}", email, player.Id);
+                        log.InfoFormat("Login succeeded for: {0}, PlayerId: {1}", email, player.Id);
                         return MapUserToDTO(userAccount, player);
                     }
                 }
-                log.WarnFormat("Login fallido (contraseña incorrecta o sin player) para: {0}", email);
+                log.WarnFormat("Login failed (wrong password or no player) for: {0}", email);
                 return null;
             }
             catch (DbException dbEx)
             {
-                log.Error("Error de base de datos (DbException) durante el login.", dbEx);
+                log.Error("Database error (DbException) during login.", dbEx);
                 var errorDetail = new ServiceErrorDetailDTO
                 {
+                    Code = ServiceErrorCode.DatabaseError,
                     ErrorCode = "DATABASE_ERROR",
-                    Message = "Ocurrió un error al consultar la base de datos. Por favor, inténtalo más tarde."
+                    Message = "An error occurred while querying the database. Please try again later."
                 };
                 throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
             } catch (Exception ex)
             {
-                log.Fatal("Error fatal inesperado en Login.", ex);
+                log.Fatal("Unexpected fatal error in Login.", ex);
                 var errorDetail = new ServiceErrorDetailDTO
                 {
+                    Code = ServiceErrorCode.UnexpectedError,
                     ErrorCode = "UNEXPECTED_ERROR",
-                    Message = "Ocurrió un error inesperado en el servidor."
+                    Message = "An unexpected server error occurred."
                 };
                 throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
             }

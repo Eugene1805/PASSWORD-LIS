@@ -99,5 +99,118 @@ namespace Test.ServicesTests
             mockCodeService.Verify(s => s.GenerateAndStoreCode(It.IsAny<string>(), It.IsAny<CodeType>()), Times.Never);
             mockNotificationService.Verify(n => n.SendAccountVerificationEmailAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
+
+        // Additional tests for fatal/edge cases
+
+        [Fact]
+        public void VerifyEmail_WhenValidationThrows_ShouldBubbleExceptionAndNotCallRepository()
+        {
+            // Arrange
+            var dto = new EmailVerificationDTO { Email = "e@x.com", VerificationCode = "X" };
+            mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.VerificationCode, CodeType.EmailVerification, true))
+                            .Throws(new System.Exception("validation failure"));
+
+            // Act + Assert
+            Assert.Throws<System.Exception>(() => verificationCodeManager.VerifyEmail(dto));
+            mockAccountRepository.Verify(r => r.VerifyEmail(It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
+        public void VerifyEmail_WhenRepositoryThrows_ShouldBubbleException()
+        {
+            // Arrange
+            var dto = new EmailVerificationDTO { Email = "e@x.com", VerificationCode = "OK" };
+            mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.VerificationCode, CodeType.EmailVerification, true))
+                            .Returns(true);
+            mockAccountRepository.Setup(r => r.VerifyEmail(dto.Email))
+                                 .Throws(new System.Exception("db failure"));
+
+            // Act + Assert
+            Assert.Throws<System.Exception>(() => verificationCodeManager.VerifyEmail(dto));
+        }
+
+        [Fact]
+        public void VerifyEmail_WhenRepositoryReturnsFalse_ShouldReturnFalse()
+        {
+            // Arrange
+            var dto = new EmailVerificationDTO { Email = "e@x.com", VerificationCode = "OK" };
+            mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.VerificationCode, CodeType.EmailVerification, true))
+                            .Returns(true);
+            mockAccountRepository.Setup(r => r.VerifyEmail(dto.Email))
+                                 .Returns(false);
+
+            // Act
+            var result = verificationCodeManager.VerifyEmail(dto);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void ResendVerificationCode_WhenGenerationFails_ShouldBubbleException()
+        {
+            // Arrange
+            var email = "user@example.com";
+            mockCodeService.Setup(s => s.CanRequestCode(email, CodeType.EmailVerification)).Returns(true);
+            mockCodeService.Setup(s => s.GenerateAndStoreCode(email, CodeType.EmailVerification))
+                            .Throws(new System.Exception("storage down"));
+
+            // Act + Assert
+            Assert.Throws<System.Exception>(() => verificationCodeManager.ResendVerificationCode(email));
+            mockNotificationService.Verify(n => n.SendAccountVerificationEmailAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [Fact]
+        public void ResendVerificationCode_WhenNotificationTaskFaults_ShouldReturnTrue()
+        {
+            // Arrange
+            var email = "user@example.com";
+            mockCodeService.Setup(s => s.CanRequestCode(email, CodeType.EmailVerification)).Returns(true);
+            mockCodeService.Setup(s => s.GenerateAndStoreCode(email, CodeType.EmailVerification)).Returns("C0DE");
+            mockNotificationService.Setup(n => n.SendAccountVerificationEmailAsync(email, It.IsAny<string>()))
+                                   .Returns(Task.FromException(new System.Exception("smtp failure")));
+
+            // Act
+            var result = verificationCodeManager.ResendVerificationCode(email);
+
+            // Assert
+            Assert.True(result);
+            mockNotificationService.Verify(n => n.SendAccountVerificationEmailAsync(email, It.IsAny<string>()), Times.Once);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void ResendVerificationCode_WithNullOrEmptyEmail_ShouldReturnFalse_WhenCannotRequest(string? email)
+        {
+            // Arrange
+            mockCodeService.Setup(s => s.CanRequestCode(email!, CodeType.EmailVerification)).Returns(false);
+
+            // Act
+            var result = verificationCodeManager.ResendVerificationCode(email!);
+
+            // Assert
+            Assert.False(result);
+            mockCodeService.Verify(s => s.GenerateAndStoreCode(It.IsAny<string>(), It.IsAny<CodeType>()), Times.Never);
+            mockNotificationService.Verify(n => n.SendAccountVerificationEmailAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void VerifyEmail_WithNullOrEmptyCode_ShouldReturnFalse(string? code)
+        {
+            // Arrange
+            var dto = new EmailVerificationDTO { Email = "user@example.com", VerificationCode = code! };
+            mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.VerificationCode, CodeType.EmailVerification, true))
+                            .Returns(false);
+
+            // Act
+            var result = verificationCodeManager.VerifyEmail(dto);
+
+            // Assert
+            Assert.False(result);
+            mockAccountRepository.Verify(r => r.VerifyEmail(It.IsAny<string>()), Times.Never);
+        }
     }
 }
