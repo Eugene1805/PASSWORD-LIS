@@ -1,0 +1,50 @@
+# Nombre del flujo de trabajo
+name: SonarQube C# Analysis
+
+# Cuándo se debe ejecutar este flujo
+on:
+  # Ejecutar en cada push a la rama 'main'
+  push:
+    branches:
+      - main
+  # También permite ejecutarlo manualmente desde la pestaña Actions
+  workflow_dispatch:
+
+jobs:
+  build-and-scan:
+    # Le dice a GitHub que use tu runner local (el que corre como servicio)
+    runs-on: self-hosted
+
+    steps:
+      # 1. Descarga el código de tu repositorio al runner
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # Necesario para que SonarQube pueda analizar el historial de Git
+          fetch-depth: 0  
+
+      # 2. Configura Java (el scanner de .NET lo usa)
+      - name: Setup Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # 3. Inicia el análisis de SonarQube
+      - name: Begin SonarQube Scan
+        run: |
+          dotnet sonarscanner begin /k:"password-game" `
+            /d:sonar.host.url="http://localhost:9000" `
+            /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      # 4. Compila el proyecto
+      - name: Build Project
+        run: dotnet build
+
+      # 5. Finaliza el análisis y lo envía al servidor
+      - name: End SonarQube Scan
+        run: dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
