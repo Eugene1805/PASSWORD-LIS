@@ -1,8 +1,11 @@
-﻿using PASSWORD_LIS_Client.Commands;
+﻿using PASSWORD_LIS_Client.AccountManagerServiceReference;
+using PASSWORD_LIS_Client.Commands;
 using PASSWORD_LIS_Client.FriendsManagerServiceReference;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
+using System;
+using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -44,7 +47,23 @@ namespace PASSWORD_LIS_Client.ViewModels
                 var result = await friendsService.SendFriendRequestAsync(Email);
                 HandleFriendRequestResult(result);
             }
-            catch (System.Exception)
+            catch (FaultException<ServiceErrorDetailDTO> ex)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, ex.Detail.Message, PopUpIcon.Error);
+            }
+            catch (TimeoutException)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText, Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+            }
+            catch (EndpointNotFoundException)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText, Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
+            }
+            catch (CommunicationException)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText, Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
+            }
+            catch (Exception) 
             {
                 windowService.ShowPopUp("Error", "Error de conexión", PopUpIcon.Error);
             }
@@ -53,14 +72,13 @@ namespace PASSWORD_LIS_Client.ViewModels
                 IsSending = false;
             }
         }
-    
 
-    private void HandleFriendRequestResult(FriendRequestResult result)
+        private void HandleFriendRequestResult(FriendRequestResult result)
         {
             switch (result)
             {
                 case FriendRequestResult.Success:
-                    windowService.CloseWindow(this); 
+                    windowService.CloseWindow(this);
                     windowService.ShowPopUp(Properties.Langs.Lang.requestSentTitleText,
                         Properties.Langs.Lang.requestSentText, PopUpIcon.Success);
                     break;
@@ -85,6 +103,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                     windowService.ShowPopUp("Información",
                         "Este jugador ya te ha enviado una solicitud de amistad, revisa tu bandeja", PopUpIcon.Information);
                     break;
+                case FriendRequestResult.Failed:
                 default:
                     windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
                         Properties.Langs.Lang.couldNotSentRequestText, PopUpIcon.Error);

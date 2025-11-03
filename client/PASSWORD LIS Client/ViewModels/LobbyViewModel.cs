@@ -91,8 +91,8 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             NavigateToProfileCommand = new RelayCommand(NavigateToProfile, (_) => !IsGuest);
             Friends = new ObservableCollection<FriendDTO>();
-            ViewFriendRequestsCommand = new RelayCommand(ViewFriendRequests);
-            AddFriendCommand = new RelayCommand(AddFriend);
+            ViewFriendRequestsCommand = new RelayCommand(ViewFriendRequests, (_) => !IsGuest);
+            AddFriendCommand = new RelayCommand(AddFriend, (_) => !IsGuest);
             DeleteFriendCommand = new RelayCommand(async (_) => await DeleteFriendAsync(),
                 (_) => CanDeleteFriend()); 
             ShowTopPlayersCommand = new RelayCommand(ShowTopPlayers);
@@ -139,7 +139,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private async Task LoadFriendsAsync()
         {
-            if (isLoadingFriends)
+            if (IsGuest || isLoadingFriends)
             {
                 return;
             }
@@ -148,12 +148,38 @@ namespace PASSWORD_LIS_Client.ViewModels
             try
             {
                 var friendsArray = await friendsManagerService.GetFriendsAsync(SessionManager.CurrentUser.UserAccountId);
-                Friends = new ObservableCollection<FriendDTO>(friendsArray);
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Friends.Clear();
+                    if (friendsArray != null)
+                    {
+                        foreach (var friend in friendsArray)
+                        {
+                            Friends.Add(friend);
+                        }
+                    }
+                });
             }
-            catch (Exception)
+            catch (FaultException<ServiceErrorDetailDTO> ex)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, ex.Detail.Message, PopUpIcon.Error);
+            }
+            catch (TimeoutException)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText, Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+            }
+            catch (EndpointNotFoundException)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText, Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
+            }
+            catch (CommunicationException)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText, Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
+            }
+            catch (Exception) // Error genérico
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                            "No se pudo cargar la lista de amigos", PopUpIcon.Error);
+                                        "No se pudo cargar la lista de amigos", PopUpIcon.Error); // Mensaje original
             }
             finally
             {
@@ -163,7 +189,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void ViewFriendRequests(object parameter)
         {
-            var friendRequestsViewModel = new FriendRequestsViewModel(App.FriendsManagerService);
+            var friendRequestsViewModel = new FriendRequestsViewModel(App.FriendsManagerService, App.WindowService);
             var friendRequestsWindow = new FriendRequestsWindow { DataContext = friendRequestsViewModel };
             friendRequestsWindow.ShowDialog();
 
@@ -183,37 +209,57 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
         private async Task DeleteFriendAsync()
         {
-            bool userConfirmed = windowService.ShowYesNoPopUp("Confirm Deletion",
+            if (SelectedFriend == null) return;
+
+            bool userConfirmed = windowService.ShowYesNoPopUp("Confirm Deletion", // Usar claves de recursos
                 string.Format("Are you sure you want to remove {0} from your friends list?", SelectedFriend.Nickname));
-           
 
-            if (!userConfirmed)
-            {
-                return; 
-            }
+            if (!userConfirmed) return;
 
+            IsLoadingFriends = true; 
             try
             {
                 bool success = await friendsManagerService.DeleteFriendAsync(
-                    SessionManager.CurrentUser.PlayerId,
+                    SessionManager.CurrentUser.PlayerId, 
                     SelectedFriend.PlayerId
                 );
 
                 if (success)
                 {
-                    //_ = LoadFriendsAsync();
-                    windowService.ShowPopUp("Succesful", "friend successfully deleted", PopUpIcon.Success);
+                    windowService.ShowPopUp("Successful", "Friend successfully deleted", PopUpIcon.Success); // Usar claves
                 }
                 else
                 {
-                    windowService.ShowPopUp("Error", "No se pudo eliminar al amigo.", PopUpIcon.Error);
+                    windowService.ShowPopUp("Error", "No se pudo eliminar al amigo.", PopUpIcon.Error); // Usar claves
                 }
             }
-            catch (Exception)
+            catch (FaultException<ServiceErrorDetailDTO> ex)
             {
-                windowService.ShowPopUp("Error", "Error de conexión al intentar eliminar al amigo.", PopUpIcon.Error);
+                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, ex.Detail.Message, PopUpIcon.Error);
+            }
+            catch (TimeoutException)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText, Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+            }
+            catch (EndpointNotFoundException)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText, Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
+            }
+            catch (CommunicationException)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText, Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
+            }
+            catch (Exception) 
+            {
+                windowService.ShowPopUp("Error", "Error de conexión al intentar eliminar al amigo.", PopUpIcon.Error); // Mensaje original
+            }
+            finally
+            {
+                IsLoadingFriends = false;
+                SelectedFriend = null;
             }
         }
+
 
         private void OnFriendRequestReceived(FriendDTO requester)
         {
