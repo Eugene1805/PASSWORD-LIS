@@ -1,6 +1,7 @@
 ﻿using Data.DAL.Interfaces;
 using Data.Model;
 using Data.Util;
+using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -8,7 +9,7 @@ namespace Data.DAL.Implementations
 {
     public class PlayerRepository : IPlayerRepository
     {
-        public Player GetPlayerByEmail(string email)
+        public async Task<Player> GetPlayerByEmailAsync(string email)
         {
             using(var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
@@ -16,11 +17,11 @@ namespace Data.DAL.Implementations
                 u.Email.Equals(email));
                 if (userAccount == null)
                 {
-                    return null;
+                    return new Player { Id = -1 };
                 }
-                return context.Player
+                return await context.Player
                            .Include("UserAccount")
-                           .FirstOrDefault(p => p.UserAccountId == userAccount.Id);
+                           .FirstOrDefaultAsync(p => p.UserAccountId == userAccount.Id);
             }
         }
 
@@ -28,11 +29,15 @@ namespace Data.DAL.Implementations
         {
             using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
-                return await Task.Run(() =>
-                    context.Player
+                var userAccount = context.UserAccount.FirstOrDefault(u =>
+                u.Email.Equals(playerId));
+                if (userAccount == null)
+                {
+                    return new Player { Id = -1 };
+                }
+                return await context.Player
                         .Include("UserAccount")
-                        .FirstOrDefault(p => p.Id == playerId)
-                );
+                        .FirstOrDefaultAsync(p => p.Id == playerId);
             }
         }
     }

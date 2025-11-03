@@ -4,6 +4,8 @@ namespace Data.Exceptions
 {
     public class DuplicateAccountException : Exception
     {
-        public DuplicateAccountException(string message) : base(message) { }
+        public DuplicateAccountException(string message) : base(message) 
+        {
+        }
     }
 }

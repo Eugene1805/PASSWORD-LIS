@@ -4,6 +4,7 @@ using Data.Model;
 using log4net;
 using Services.Contracts;
 using Services.Contracts.DTOs;
+using Services.Contracts.Enums;
 using Services.Util;
 using System;
 using System.Data.Entity.Infrastructure;

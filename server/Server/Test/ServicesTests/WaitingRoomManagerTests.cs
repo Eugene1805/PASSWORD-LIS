@@ -1,6 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System.Linq;
-using System.Threading.Tasks;
 using Data.DAL.Interfaces;
 using Data.Model;
 using Moq;
@@ -9,7 +7,6 @@ using Services.Contracts.DTOs;
 using Services.Contracts.Enums;
 using Services.Services;
 using Services.Wrappers;
-using Xunit;
 
 namespace Test.ServicesTests
 {
@@ -65,7 +62,7 @@ namespace Test.ServicesTests
             // Arrange
             var email = "host@test.com";
             var hostPlayer = MakePlayer(1, email, "HostUser");
-            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(email)).Returns(hostPlayer);
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync(email)).ReturnsAsync(hostPlayer);
 
             var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
             var hostCallback = new Mock<IWaitingRoomCallback>();
@@ -95,12 +92,12 @@ namespace Test.ServicesTests
             // Arrange
             var email = "user@test.com";
             var player = MakePlayer(2, email, "User2");
-            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(email)).Returns(player);
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync(email)).ReturnsAsync(player);
 
             var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
             // Host setup
             var host = MakePlayer(1, "host@test.com", "Host");
-            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync(host.UserAccount.Email)).ReturnsAsync(host);
             var hostCb = new Mock<IWaitingRoomCallback>();
             callbacks.Enqueue(hostCb);
             var gameCode = await sut.CreateGameAsync(host.UserAccount.Email);
@@ -129,11 +126,11 @@ namespace Test.ServicesTests
             // Arrange
             var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
             var host = MakePlayer(1, "host@test.com", "Host");
-            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync(host.UserAccount.Email)).ReturnsAsync(host);
             callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
             var gameCode = await sut.CreateGameAsync(host.UserAccount.Email);
 
-            mockPlayerRepo.Setup(r => r.GetPlayerByEmail("ghost@test.com")).Returns((Player)null);
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync("ghost@test.com")).ReturnsAsync((Player)null);
 
             // Act
             var id = await sut.JoinGameAsRegisteredPlayerAsync(gameCode, "ghost@test.com");
@@ -150,7 +147,7 @@ namespace Test.ServicesTests
             // Arrange: host +3 guests -> room full
             var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
             var host = MakePlayer(1, "host@test.com", "Host");
-            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync(host.UserAccount.Email)).ReturnsAsync(host);
             callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
             var gameCode = await sut.CreateGameAsync(host.UserAccount.Email);
 
@@ -163,7 +160,7 @@ namespace Test.ServicesTests
 
             // Attempt registered join when full
             var reg = MakePlayer(10, "full@test.com", "FullUser");
-            mockPlayerRepo.Setup(r => r.GetPlayerByEmail("full@test.com")).Returns(reg);
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync("full@test.com")).ReturnsAsync(reg);
             callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
 
             // Act
@@ -181,7 +178,7 @@ namespace Test.ServicesTests
             // Arrange
             var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
             var host = MakePlayer(1, "host@test.com", "Host");
-            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync(host.UserAccount.Email)).ReturnsAsync(host);
             callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
             var gameCode = await sut.CreateGameAsync(host.UserAccount.Email);
 
@@ -219,7 +216,7 @@ namespace Test.ServicesTests
             // Arrange
             var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
             var host = MakePlayer(1, "host@test.com", "Host");
-            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync(host.UserAccount.Email)).ReturnsAsync(host);
 
             var hostCb = new Mock<IWaitingRoomCallback>();
             var g1Cb = new Mock<IWaitingRoomCallback>();
@@ -269,7 +266,7 @@ namespace Test.ServicesTests
             // Arrange
             var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
             var host = MakePlayer(1, "host@test.com", "Host");
-            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync(host.UserAccount.Email)).ReturnsAsync(host);
 
             var hostCb = new Mock<IWaitingRoomCallback>();
             var g1Cb = new Mock<IWaitingRoomCallback>();
@@ -299,7 +296,7 @@ namespace Test.ServicesTests
             // Arrange
             var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
             var host = MakePlayer(1, "host@test.com", "Host");
-            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync(host.UserAccount.Email)).ReturnsAsync(host);
 
             var hostCb = new Mock<IWaitingRoomCallback>();
             callbacks.Enqueue(hostCb);
@@ -320,7 +317,7 @@ namespace Test.ServicesTests
             // Arrange
             var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
             var host = MakePlayer(1, "host@test.com", "Host");
-            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync(host.UserAccount.Email)).ReturnsAsync(host);
             var hostCb = new Mock<IWaitingRoomCallback>();
             callbacks.Enqueue(hostCb);
             var gameCode = await sut.CreateGameAsync(host.UserAccount.Email);
@@ -348,7 +345,7 @@ namespace Test.ServicesTests
             // Arrange
             var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
             var host = MakePlayer(1, "host@test.com", "Host");
-            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync(host.UserAccount.Email)).ReturnsAsync(host);
             callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
             var gameCode = await sut.CreateGameAsync(host.UserAccount.Email);
 
@@ -371,7 +368,7 @@ namespace Test.ServicesTests
             // Arrange
             var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
             var host = MakePlayer(1, "host@test.com", "Host");
-            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync(host.UserAccount.Email)).ReturnsAsync(host);
 
             var hostCb = new Mock<IWaitingRoomCallback>();
             var g1Cb = new Mock<IWaitingRoomCallback>();
@@ -396,7 +393,7 @@ namespace Test.ServicesTests
             // Arrange
             var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
             var host = MakePlayer(1, "host@test.com", "Host");
-            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync(host.UserAccount.Email)).ReturnsAsync(host);
 
             var hostCb = new Mock<IWaitingRoomCallback>();
             var g1Cb = new Mock<IWaitingRoomCallback>();
@@ -427,7 +424,7 @@ namespace Test.ServicesTests
             // Arrange
             var (sut, callbacks) = CreateSut(mockPlayerRepo, mockOperationContext);
             var host = MakePlayer(1, "host@test.com", "Host");
-            mockPlayerRepo.Setup(r => r.GetPlayerByEmail(host.UserAccount.Email)).Returns(host);
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync(host.UserAccount.Email)).ReturnsAsync(host);
             callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
             var gameCode = await sut.CreateGameAsync(host.UserAccount.Email);
 

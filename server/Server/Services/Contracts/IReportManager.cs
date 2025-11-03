@@ -11,6 +11,7 @@ namespace Services.Contracts
         [OperationContract(IsOneWay = true)]
         Task SubscribeToReportUpdatesAsync(int playerId);
         [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
         Task<bool> SubmitReportAsync(ReportDTO reportDTO);
         [OperationContract]
         Task<int> GetCurrentReportCountAsync(int playerId);

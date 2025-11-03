@@ -60,6 +60,11 @@ namespace Services.Services
                 if (connectedClients.TryGetValue(reportDTO.ReportedPlayerId, out var client))
                 {
                     var reporter = await playerRepository.GetPlayerByIdAsync(reportDTO.ReporterPlayerId);
+                    if (reporter == null || reporter.Id < 0)
+                    {
+                        // TODO: ADD Fault Exception and log the error 
+                        return false;
+                    }
                     client.Callback.OnReportReceived(reporter.UserAccount.Nickname, reportDTO.Reason);
                     client.Callback.OnReportCountUpdated(totalReports);
                 }

@@ -18,12 +18,11 @@ namespace Data.DAL.Implementations
             {
                 if ( await context.UserAccount.AnyAsync(a => a.Email == account.Email))
                 {
-                    throw new DuplicateAccountException($"Una cuenta con el email '{account.Email}' ya existe.");
+                    throw new DuplicateAccountException($"An account with the email '{account.Email}' already exists.");
                 }
                     context.UserAccount.Add(account);
                     context.Player.Add(new Player { UserAccount = account });
                     await context.SaveChangesAsync();
-                
             }
 
         }
@@ -36,14 +35,7 @@ namespace Data.DAL.Implementations
             }
             using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
-                try
-                {
-                    return context.UserAccount.Any(a => a.Email == email);
-                }
-                catch (Exception ex)
-                {
-                    return false;
-                }
+                return context.UserAccount.Any(a => a.Email == email);
             }
 
         }
@@ -64,23 +56,15 @@ namespace Data.DAL.Implementations
         {
             using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
-                try
-                {
-                    UserAccount user = context.UserAccount.FirstOrDefault(u => u.Email == email);
+                UserAccount user = context.UserAccount.FirstOrDefault(u => u.Email == email);
 
-                    if (user == null)
-                    {
-                        return false;
-                    }
-                    user.EmailVerified = true;
-                    context.SaveChanges();
-                    return true;
-                }
-                catch (Exception ex)
+                if (user == null)
                 {
-                    Console.WriteLine(ex.Message);
                     return false;
                 }
+                user.EmailVerified = true;
+                context.SaveChanges();
+                return true;
             }
         }
 
@@ -88,25 +72,17 @@ namespace Data.DAL.Implementations
         {
             using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
-                try
+                UserAccount user = context.UserAccount.FirstOrDefault(u => u.Email == email);
+
+                if (user == null)
                 {
-                    UserAccount user = context.UserAccount.FirstOrDefault(u => u.Email == email);
-
-                    if (user == null)
-                    {
-                        return false;
-                    }
-
-                    user.PasswordHash = passwordHash;
-                    context.SaveChanges();
-
-                    return true;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
                     return false;
                 }
+
+                user.PasswordHash = passwordHash;
+                context.SaveChanges();
+
+                return true;
             }
         }
         public bool UpdateUserProfile(int playerId, UserAccount updatedAccountData, List<SocialAccount> updatedSocialsAccounts)
@@ -167,7 +143,7 @@ namespace Data.DAL.Implementations
             }
         }
 
-        private void UpdateSocialAccounts(PasswordLISEntities context, UserAccount userAccountToUpdate, List<SocialAccount> updatedSocialsAccounts)
+        private static void UpdateSocialAccounts(PasswordLISEntities context, UserAccount userAccountToUpdate, List<SocialAccount> updatedSocialsAccounts)
         {
             var existingSocialsLookup = userAccountToUpdate.SocialAccount.ToDictionary(s => s.Provider);
             var providersToKeep = new HashSet<string>(updatedSocialsAccounts.Select(s => s.Provider));

@@ -3,7 +3,11 @@ using System.Collections.Generic;
 
 namespace Services.Util
 {
-    public enum CodeType { EmailVerification, PasswordReset }
+    public enum CodeType 
+    { 
+        EmailVerification, 
+        PasswordReset 
+    }
 
     public interface IVerificationCodeService
     {
