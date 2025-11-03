@@ -1,13 +1,10 @@
 # Nombre del flujo de trabajo
 name: SonarQube C# Analysis
 
-# Cuándo se debe ejecutar este flujo
 on:
-  # Ejecutar en cada push a la rama 'main'
   push:
     branches:
       - main
-  # También permite ejecutarlo manualmente desde la pestaña Actions
   workflow_dispatch:
 
 jobs:
@@ -29,25 +26,28 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # 3. ¡NUEVO PASO! Instala el scanner
-      - name: Install SonarScanner for .NET
-        run: dotnet tool install --global dotnet-sonarscanner
+      # 3. ¡CAMBIO! Instala el scanner localmente
+      # Esto crea una carpeta ./.dotnet-tools y guarda el scanner ahí
+      - name: Install SonarScanner for .NET locally
+        run: dotnet tool install dotnet-sonarscanner --tool-path .\.dotnet-tools
 
-      # 4. Inicia el análisis de SonarQube
+      # 4. ¡CAMBIO! Inicia el análisis usando la ruta local
+      # Nota que ahora llamamos al scanner desde su carpeta
       - name: Begin SonarQube Scan
         run: |
-          dotnet sonarscanner begin /k:"password-game" `
+          .\.dotnet-tools\dotnet sonarscanner begin /k:"password-game" `
             /d:sonar.host.url="http://localhost:9000" `
             /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      # 5. Compila el proyecto
+      # 5. Compila el proyecto (este no cambia)
       - name: Build Project
         run: dotnet build
 
-      # 6. Finaliza el análisis y lo envía al servidor
+      # 6. ¡CAMBIO! Finaliza el análisis usando la ruta local
       - name: End SonarQube Scan
-        run: dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+        run: |
+          .\.dotnet-tools\dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
