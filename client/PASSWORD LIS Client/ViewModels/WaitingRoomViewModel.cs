@@ -11,6 +11,7 @@ using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Collections.Generic;
 
 namespace PASSWORD_LIS_Client.ViewModels
 {//TODO ADD a constant for the isGuest
@@ -149,7 +150,12 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             try
             {
-                var players = await roomManagerClient.GetPlayersInGameAsync(this.GameCode);
+                var players = await roomManagerClient.GetPlayersInGameAsync(this.GameCode).ConfigureAwait(false);
+                if (players == null)
+                {
+                    players = new List<PlayerDTO>();
+                }
+
                 if (!this.IsGuest)
                 {
                     this.currentPlayer = players.FirstOrDefault(p => p.Id == SessionManager.CurrentUser.PlayerId);
@@ -157,13 +163,14 @@ namespace PASSWORD_LIS_Client.ViewModels
                     reportManagerService.ReportReceived += OnReportReceived;
                     reportManagerService.ReportCountUpdated += OnReportCountUpdated;
                     reportManagerService.PlayerBanned += OnPlayerBanned;
-                    await reportManagerService.SubscribeToReportUpdatesAsync(SessionManager.CurrentUser.PlayerId);
+                    await reportManagerService.SubscribeToReportUpdatesAsync(SessionManager.CurrentUser.PlayerId).ConfigureAwait(false);
                 }
                 else
                 {
                     this.currentPlayer = players.FirstOrDefault(p => p.Nickname == SessionManager.CurrentUser.Nickname);
                 }
-                await Application.Current.Dispatcher.InvokeAsync(() =>
+
+                Action update = () =>
                 {
                     ConnectedPlayers.Clear();
                     foreach (var player in players)
@@ -171,7 +178,17 @@ namespace PASSWORD_LIS_Client.ViewModels
                         ConnectedPlayers.Add(player);
                     }
                     UpdatePlayerCount();
-                });              
+                };
+
+                var dispatcher = Application.Current?.Dispatcher;
+                if (dispatcher != null)
+                {
+                    await dispatcher.InvokeAsync(update);
+                }
+                else
+                {
+                    update();
+                }
             }
             catch (TimeoutException)
             {

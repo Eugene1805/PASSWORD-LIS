@@ -143,7 +143,14 @@
     <Compile Include="UI\LoginWindowTests.cs" />
     <Compile Include="UI\SignUpWindowTests.cs" />
     <Compile Include="UI\UITestBase.cs" />
+    <Compile Include="ViewModelsTests\ChangePasswordViewModelTests.cs" />
+    <Compile Include="ViewModelsTests\LobbyViewModelTests.cs" />
+    <Compile Include="ViewModelsTests\ReportViewModelTests.cs" />
+    <Compile Include="ViewModelsTests\RetrievePasswordViewModelTests.cs" />
+    <Compile Include="ViewModelsTests\SettingsViewModelTests.cs" />
     <Compile Include="ViewModelsTests\SignUpViewModelTests.cs" />
+    <Compile Include="ViewModelsTests\TopPlayersViewModelTests.cs" />
+    <Compile Include="ViewModelsTests\VerifyCodeViewModelTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

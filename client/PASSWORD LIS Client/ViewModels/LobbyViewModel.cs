@@ -248,7 +248,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             var topPlayersWindow = new TopPlayersWindow { DataContext = topPlayersViewModel};
             topPlayersWindow.ShowDialog();
         }
-        private void ShowHowToPlay(object parameter)
+        private static void ShowHowToPlay(object parameter)
         {
             var howToPlayWindow = new HowToPlayWindow();
 
@@ -285,8 +285,15 @@ namespace PASSWORD_LIS_Client.ViewModels
                         App.ReportManagerService);
                     await waitingRoomViewModel.InitializeAsync(newGameCode, isHost: true);
 
-                    var waitingRoomPage = new WaitingRoomPage { DataContext = waitingRoomViewModel };
-                    windowService.NavigateTo(waitingRoomPage);
+                    if (Application.Current == null || Application.Current.Dispatcher == null)
+                    {
+                        windowService.NavigateTo(null);
+                    }
+                    else
+                    {
+                        var waitingRoomPage = new WaitingRoomPage { DataContext = waitingRoomViewModel };
+                        windowService.NavigateTo(waitingRoomPage);
+                    }
                 }
                 else
                 {
@@ -361,8 +368,15 @@ namespace PASSWORD_LIS_Client.ViewModels
                         App.ReportManagerService);
                     await waitingRoomViewModel.InitializeAsync(GameCodeToJoin, isHost: false);
 
-                    var waitingRoomPage = new WaitingRoomPage { DataContext = waitingRoomViewModel };
-                    windowService.NavigateTo(waitingRoomPage);
+                    if (Application.Current == null || Application.Current.Dispatcher == null)
+                    {
+                        windowService.NavigateTo(null);
+                    }
+                    else
+                    {
+                        var waitingRoomPage = new WaitingRoomPage { DataContext = waitingRoomViewModel };
+                        windowService.NavigateTo(waitingRoomPage);
+                    }
                 }
                 else 
                 {
