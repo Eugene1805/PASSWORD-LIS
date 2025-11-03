@@ -1,4 +1,5 @@
-name: SonarQube Code Analysis Only
+# Nombre del flujo de trabajo
+name: SonarQube C# Analysis
 
 on:
   push:
@@ -7,44 +8,64 @@ on:
   workflow_dispatch:
 
 jobs:
-  analyze:
+  build-and-scan:
+    # Usar tu runner local
     runs-on: self-hosted
 
     steps:
+      # 1. Descarga el código
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 0  
 
+      # 2. Configura el SDK de .NET
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          # Asegúrate que la versión coincida con la que tienes
+          dotnet-version: '9.0.306' 
+
+      # 3. Configura MSBuild y NuGet
+      - name: Setup MSBuild and NuGet
+        uses: microsoft/setup-msbuild@v2
+
+      # 4. Configura Java (requerido por el scanner)
       - name: Setup Java JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: List all projects for analysis
-        run: |
-          echo "=== Proyectos que serán analizados ==="
-          Get-ChildItem -Path . -Filter *.csproj -Recurse | ForEach-Object { 
-            echo " - $($_.FullName)" 
-          }
+      # 5. Instala el SonarScanner
+      - name: Install SonarScanner for .NET
+        run: dotnet tool install --global dotnet-sonarscanner
 
-      - name: Run SonarQube Analysis
+      # 6. ¡CAMBIO! Inicia el scanner
+      # Quitamos el /s:"..." para que el scanner analice todo
+      # el repositorio desde la raíz.
+      - name: Begin SonarQube Scan
         run: |
-          dotnet-sonarscanner begin /k:"password-game" `
+          dotnet sonarscanner begin /k:"password-game" `
             /d:sonar.host.url="http://localhost:9000" `
-            /d:sonar.login="${{ secrets.SONAR_TOKEN }}" `
-            /d:sonar.scm.disabled=true `
-            /d:sonar.sourceEncoding=UTF-8 `
-            /d:sonar.coverage.exclusions=**/* `
-            /d:sonar.cpd.exclusions=**/* `
-            /d:sonar.scm.provider=git
-
-      - name: Fake build step (required by SonarScanner)
-        run: echo "Analysis only - no compilation needed"
-
-      - name: End SonarQube Scan
+            /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      
+      # 7. ¡CAMBIO! Restaura los paquetes NuGet (ambas soluciones)
+      - name: Restore NuGet packages
         run: |
-          dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          nuget restore "client/PASSWORD LIS Client/PASSWORD LIS Client.sln"
+          nuget restore "server/Server/Server.sln"
+
+      # 8. ¡CAMBIO! Compila los proyectos (ambas soluciones)
+      - name: Build Projects with MSBuild
+        run: |
+          MSBuild.exe "client/PASSWORD LIS Client/PASSWORD LIS Client.sln" /t:Rebuild /p:Configuration=Release
+          MSBuild.exe "server/Server/Server.sln" /t:Rebuild /p:Configuration=Release
+
+      # 9. Finaliza el escaneo
+      - name: End SonarQube Scan
+        run: dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
