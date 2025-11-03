@@ -47,24 +47,30 @@ namespace Data.DAL.Implementations
         {
             using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
-                try
+                using (var transaction = context.Database.BeginTransaction())
                 {
-                    var friendship = context.Friendship.FirstOrDefault(f =>
-                        (f.RequesterId == currentUserId && f.AddresseeId == friendToDeleteId) ||
-                        (f.RequesterId == friendToDeleteId && f.AddresseeId == currentUserId));
-
-                    if (friendship != null)
+                    try
                     {
-                        context.Friendship.Remove(friendship);
-                        context.SaveChanges();
-                        return true;
+                        var friendship = context.Friendship.FirstOrDefault(f =>
+                            (f.RequesterId == currentUserId && f.AddresseeId == friendToDeleteId) ||
+                            (f.RequesterId == friendToDeleteId && f.AddresseeId == currentUserId));
+
+                        if (friendship != null)
+                        {
+                            context.Friendship.Remove(friendship);
+                            context.SaveChanges();
+                            transaction.Commit();
+                            return true;
+                        }
+                        transaction.Rollback();
+                        return false;
                     }
-                    return false; 
-                }
-                catch (Exception)
-                {
-                    return false; 
-                }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }  
             }
         }
 
@@ -72,32 +78,38 @@ namespace Data.DAL.Implementations
         {
             using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
-                try
+                using(var transaction = context.Database.BeginTransaction())
                 {
-                    bool requestExists = context.Friendship.Any(f =>
-                    (f.RequesterId == requesterPlayerId && f.AddresseeId == addresseePlayerId) ||
-                    (f.RequesterId == addresseePlayerId && f.AddresseeId == requesterPlayerId));
-
-                    if (requestExists)
+                    try
                     {
-                        return false; 
+                        bool requestExists = context.Friendship.Any(f =>
+                        (f.RequesterId == requesterPlayerId && f.AddresseeId == addresseePlayerId) ||
+                        (f.RequesterId == addresseePlayerId && f.AddresseeId == requesterPlayerId));
+
+                        if (requestExists)
+                        {
+                            transaction.Rollback();
+                            return false;
+                        }
+
+                        var newRequest = new Friendship
+                        {
+                            RequesterId = requesterPlayerId,
+                            AddresseeId = addresseePlayerId,
+                            Status = 0,
+                            RequestedAt = DateTime.UtcNow
+                        };
+
+                        context.Friendship.Add(newRequest);
+                        context.SaveChanges();
+                        transaction.Commit();
+                        return true;
                     }
-
-                    var newRequest = new Friendship
+                    catch (Exception)
                     {
-                        RequesterId = requesterPlayerId,
-                        AddresseeId = addresseePlayerId,
-                        Status = 0, 
-                        RequestedAt = System.DateTime.UtcNow
-                    };
-
-                    context.Friendship.Add(newRequest);
-                    context.SaveChanges();
-                    return true;
-                }
-                catch (Exception)
-                {
-                    return false; 
+                        transaction.Rollback();
+                        throw;
+                    }
                 }
             }
         }
@@ -111,7 +123,7 @@ namespace Data.DAL.Implementations
                 {
                     return new List<Friendship>();
                 }
-                // Buscamos todas las solicitudes donde YO soy el destinatario y el estado es Pendiente
+
                 return context.Friendship
                     .Include(f => f.Player1.UserAccount)
                     .Where(f => f.AddresseeId == player.Id && f.Status == 0)
@@ -123,25 +135,39 @@ namespace Data.DAL.Implementations
         {
             using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
             {
-                var request = context.Friendship.FirstOrDefault(f =>
-                    f.RequesterId == requesterPlayerId && f.AddresseeId == addresseePlayerId && f.Status == 0);
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        var request = context.Friendship.FirstOrDefault(f =>
+                        f.RequesterId == requesterPlayerId && f.AddresseeId == addresseePlayerId && f.Status == 0);
 
-                if (request == null)
-                {
-                    return false;
-                }
-                if (accept)
-                {
-                    request.Status = 1; 
-                    request.RespondedAt = System.DateTime.UtcNow;
-                }
-                else
-                {
-                    context.Friendship.Remove(request); 
-                }
+                        if (request == null)
+                        {
+                            transaction.Rollback();
+                            return false;
+                        }
+                        if (accept)
+                        {
+                            request.Status = 1;
+                            request.RespondedAt = DateTime.UtcNow;
+                            context.Entry(request).State = EntityState.Modified; //
+                        }
+                        else
+                        {
+                            context.Friendship.Remove(request);
+                        }
 
-                context.SaveChanges();
-                return true;
+                        context.SaveChanges();
+                        transaction.Commit();
+                        return true;
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
             }
         }
     }

@@ -1,6 +1,7 @@
 ﻿using Data.DAL.Implementations;
 using Data.DAL.Interfaces;
 using Data.Model;
+using log4net;
 using Services.Contracts;
 using Services.Contracts.DTOs;
 using Services.Wrappers;
@@ -20,6 +21,7 @@ namespace Services.Services
         private readonly IFriendshipRepository friendshipRepository;
         private readonly IAccountRepository accountRepository;
         private readonly IOperationContextWrapper operationContext;
+        private static readonly ILog log = LogManager.GetLogger(typeof(FriendsManager));
         public FriendsManager(IFriendshipRepository friendshipRepository, IAccountRepository accountRepository, IOperationContextWrapper operationContext)
         {
             connectedClients = new ConcurrentDictionary<int, IFriendsCallback>();
