@@ -12,7 +12,7 @@ on:
 
 jobs:
   build-and-scan:
-    # Le dice a GitHub que use tu runner local (el que corre como servicio)
+    # Le dice a GitHub que use tu runner local
     runs-on: self-hosted
 
     steps:
@@ -20,7 +20,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          # Necesario para que SonarQube pueda analizar el historial de Git
           fetch-depth: 0  
 
       # 2. Configura Java (el scanner de .NET lo usa)
@@ -30,7 +29,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      # 3. Inicia el análisis de SonarQube
+      # 3. ¡NUEVO PASO! Instala el scanner
+      - name: Install SonarScanner for .NET
+        run: dotnet tool install --global dotnet-sonarscanner
+
+      # 4. Inicia el análisis de SonarQube
       - name: Begin SonarQube Scan
         run: |
           dotnet sonarscanner begin /k:"password-game" `
@@ -39,11 +42,11 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      # 4. Compila el proyecto
+      # 5. Compila el proyecto
       - name: Build Project
         run: dotnet build
 
-      # 5. Finaliza el análisis y lo envía al servidor
+      # 6. Finaliza el análisis y lo envía al servidor
       - name: End SonarQube Scan
         run: dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
         env:
