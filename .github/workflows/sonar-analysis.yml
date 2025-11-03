@@ -22,17 +22,15 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
+      - name: Verify .NET Installation
+        run: dotnet --version
 
-      - name: Install SonarScanner as global tool
-        run: dotnet tool install --global dotnet-sonarscanner
+      - name: Verify SonarScanner Installation
+        run: dotnet-sonarscanner --version
 
       - name: Begin SonarQube Scan
         run: |
-          dotnet sonarscanner begin /k:"password-game" `
+          dotnet-sonarscanner begin /k:"password-game" `
             /d:sonar.host.url="http://localhost:9000" `
             /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
         env:
@@ -43,6 +41,6 @@ jobs:
 
       - name: End SonarQube Scan
         run: |
-          dotnet sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
