@@ -3,6 +3,7 @@ using Data.Model;
 using log4net;
 using Services.Contracts;
 using Services.Contracts.DTOs;
+using Services.Contracts.Enums;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;

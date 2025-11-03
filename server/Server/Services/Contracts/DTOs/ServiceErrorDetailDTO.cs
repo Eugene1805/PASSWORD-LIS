@@ -1,4 +1,5 @@
 ﻿using System.Runtime.Serialization;
+using Services.Contracts.Enums;
 
 namespace Services.Contracts.DTOs
 {

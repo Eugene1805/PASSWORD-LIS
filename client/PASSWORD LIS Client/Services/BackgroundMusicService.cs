@@ -83,7 +83,6 @@ namespace PASSWORD_LIS_Client.Services
 
             if (disposing)
             {
-                // unsubscribe events and release managed resources
                 player.MediaEnded -= OnMediaEnded;
                 try
                 {
@@ -93,11 +92,11 @@ namespace PASSWORD_LIS_Client.Services
                         IsPlaying = false;
                     }
                 }
-                catch
+                finally
                 {
-                    // Ignore exceptions during shutdown/cleanup
+                    player.Close();
                 }
-                player.Close();
+                
             }
 
             disposed = true;

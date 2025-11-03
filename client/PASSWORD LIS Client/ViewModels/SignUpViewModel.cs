@@ -8,7 +8,6 @@ using System.Configuration;
 using System.Diagnostics;
 using System.ServiceModel;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 using PASSWORD_LIS_Client.Services;
 
@@ -196,7 +195,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
 
         private bool IsInputValid()
-        {
+        {// TODO validate no duplicate nicknames
             if (!ValidationUtils.IsValidEmail(Email))
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,

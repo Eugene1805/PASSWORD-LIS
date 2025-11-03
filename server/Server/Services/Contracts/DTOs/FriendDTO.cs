@@ -10,7 +10,7 @@ namespace Services.Contracts.DTOs
         [DataMember]
         public string Nickname { get; set; }
         
-        //Pensar si agregar la foto.
+        // TBD: ADD picture field
 
     }
 }

@@ -4,11 +4,14 @@ using PASSWORD_LIS_Client.FriendsManagerServiceReference;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
+<<<<<<< HEAD
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
 using System.Text;
+=======
+>>>>>>> f328f7cfcf47b0aaa98e2c3f2696e424021d8e5f
 using System.Threading.Tasks;
 using System.Windows.Input;
 

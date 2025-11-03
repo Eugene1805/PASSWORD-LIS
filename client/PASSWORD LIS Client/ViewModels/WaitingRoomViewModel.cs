@@ -13,7 +13,7 @@ using System.Windows;
 using System.Windows.Input;
 
 namespace PASSWORD_LIS_Client.ViewModels
-{
+{//TODO ADD a constant for the isGuest
     public class WaitingRoomViewModel : BaseViewModel
     {
         public ObservableCollection<string> ChatMessages { get; }
@@ -139,8 +139,6 @@ namespace PASSWORD_LIS_Client.ViewModels
                 wcfService.GameStarted += OnGameStarted;
                 wcfService.HostLeft += OnHostLeft;
             }
-
-
         }
 
         public async Task InitializeAsync(string gameCode, bool isHost)

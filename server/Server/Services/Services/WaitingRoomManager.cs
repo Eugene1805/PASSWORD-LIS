@@ -85,8 +85,8 @@ namespace Services.Services
                 throw new FaultException<ServiceErrorDetailDTO>(full, new FaultReason(full.Message));
             }
 
-            var playerEntity = repository.GetPlayerByEmail(email);
-            if (playerEntity == null)
+            var playerEntity = await repository.GetPlayerByEmailAsync(email);
+            if (playerEntity == null || playerEntity.Id < 0)
             {
                 var notFoundPlayer = new ServiceErrorDetailDTO { Code = ServiceErrorCode.PlayerNotFound, ErrorCode = "PLAYER_NOT_FOUND", Message = "The player was not found in the database." };
                 log.WarnFormat("Join as registered failed: player not found for email '{0}' in game '{1}'.", email, gameCode);

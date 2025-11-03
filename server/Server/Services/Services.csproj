@@ -93,7 +93,7 @@
     <Compile Include="Contracts\DTOs\PasswordResetDTO.cs" />
     <Compile Include="Contracts\DTOs\PlayerDTO.cs" />
     <Compile Include="Contracts\DTOs\ReportDTO.cs" />
-    <Compile Include="Contracts\DTOs\ServiceErrorCode.cs" />
+    <Compile Include="Contracts\Enums\ServiceErrorCode.cs" />
     <Compile Include="Contracts\DTOs\ServiceErrorDetailDTO.cs" />
     <Compile Include="Contracts\DTOs\TeamDTO.cs" />
     <Compile Include="Contracts\DTOs\UserDTO.cs" />

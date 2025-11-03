@@ -2,8 +2,6 @@
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using System;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Windows.Input;
 
 namespace PASSWORD_LIS_Client.ViewModels

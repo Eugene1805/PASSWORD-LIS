@@ -5,11 +5,13 @@ using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+<<<<<<< HEAD
 using System.ServiceModel;
 using System.Text;
+=======
+>>>>>>> f328f7cfcf47b0aaa98e2c3f2696e424021d8e5f
 using System.Threading.Tasks;
 using System.Windows.Input;
 

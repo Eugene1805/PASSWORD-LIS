@@ -2,9 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Remoting.Contexts;
 using System.ServiceModel;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace PASSWORD_LIS_Client.Services

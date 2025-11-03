@@ -357,8 +357,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
         private void ShowHowToPlay(object parameter)
         {
-            var howToPlayViewModel = new HowToPlayViewModel();
-            var howToPlayWindow = new HowToPlayWindow { DataContext = howToPlayViewModel };
+            var howToPlayWindow = new HowToPlayWindow();
 
             howToPlayWindow.ShowDialog();
         }
