@@ -186,31 +186,6 @@ namespace PASSWORD_LIS_Client.ViewModels
                 IsLoadingFriends = false;
             }
         }
-        /*
-        private async Task LoadFriendsAsync()
-        {
-            if (isLoadingFriends)
-            {
-                return;
-            }
-
-            IsLoadingFriends = true;
-            try
-            {
-                var friendsArray = await friendsManagerService.GetFriendsAsync(SessionManager.CurrentUser.UserAccountId);
-                Friends = new ObservableCollection<FriendDTO>(friendsArray);
-            }
-            catch (Exception)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                            "No se pudo cargar la lista de amigos", PopUpIcon.Error);
-            }
-            finally
-            {
-                IsLoadingFriends = false;
-            }
-        }
-        */
 
         private void ViewFriendRequests(object parameter)
         {
@@ -241,17 +216,16 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             if (!userConfirmed) return;
 
-            IsLoadingFriends = true; // Indicar carga
+            IsLoadingFriends = true; 
             try
             {
                 bool success = await friendsManagerService.DeleteFriendAsync(
-                    SessionManager.CurrentUser.PlayerId, // Tu lógica usa PlayerId aquí
+                    SessionManager.CurrentUser.PlayerId, 
                     SelectedFriend.PlayerId
                 );
 
                 if (success)
                 {
-                    // El callback OnFriendRemoved se encarga de actualizar la lista
                     windowService.ShowPopUp("Successful", "Friend successfully deleted", PopUpIcon.Success); // Usar claves
                 }
                 else
@@ -259,7 +233,6 @@ namespace PASSWORD_LIS_Client.ViewModels
                     windowService.ShowPopUp("Error", "No se pudo eliminar al amigo.", PopUpIcon.Error); // Usar claves
                 }
             }
-            // --- CAMBIO: Manejo de Excepciones WCF (Inline) ---
             catch (FaultException<ServiceErrorDetailDTO> ex)
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, ex.Detail.Message, PopUpIcon.Error);
@@ -276,51 +249,17 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText, Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
             }
-            catch (Exception) // Error genérico
+            catch (Exception) 
             {
                 windowService.ShowPopUp("Error", "Error de conexión al intentar eliminar al amigo.", PopUpIcon.Error); // Mensaje original
             }
             finally
             {
                 IsLoadingFriends = false;
-                SelectedFriend = null; // Deseleccionar
+                SelectedFriend = null;
             }
         }
-        /*
-        private async Task DeleteFriendAsync()
-        {
-            bool userConfirmed = windowService.ShowYesNoPopUp("Confirm Deletion",
-                string.Format("Are you sure you want to remove {0} from your friends list?", SelectedFriend.Nickname));
-           
 
-            if (!userConfirmed)
-            {
-                return; 
-            }
-
-            try
-            {
-                bool success = await friendsManagerService.DeleteFriendAsync(
-                    SessionManager.CurrentUser.PlayerId,
-                    SelectedFriend.PlayerId
-                );
-
-                if (success)
-                {
-                    //_ = LoadFriendsAsync();
-                    windowService.ShowPopUp("Succesful", "friend successfully deleted", PopUpIcon.Success);
-                }
-                else
-                {
-                    windowService.ShowPopUp("Error", "No se pudo eliminar al amigo.", PopUpIcon.Error);
-                }
-            }
-            catch (Exception)
-            {
-                windowService.ShowPopUp("Error", "Error de conexión al intentar eliminar al amigo.", PopUpIcon.Error);
-            }
-        }       
-        */
 
         private void OnFriendRequestReceived(FriendDTO requester)
         {

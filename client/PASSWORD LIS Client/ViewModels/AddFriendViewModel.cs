@@ -4,14 +4,8 @@ using PASSWORD_LIS_Client.FriendsManagerServiceReference;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
-<<<<<<< HEAD
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.ServiceModel;
-using System.Text;
-=======
->>>>>>> f328f7cfcf47b0aaa98e2c3f2696e424021d8e5f
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -69,26 +63,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText, Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
             }
-            catch (System.Exception) // Captura genérica original
-            {
-                windowService.ShowPopUp("Error", "Error de conexión", PopUpIcon.Error); // Mensaje original
-            }
-            finally
-            {
-                IsSending = false;
-            }
-        }
-
-        /*
-        private async Task SendRequestAsync()
-        {
-            IsSending = true;
-            try
-            {
-                var result = await friendsService.SendFriendRequestAsync(Email);
-                HandleFriendRequestResult(result);
-            }
-            catch (System.Exception)
+            catch (Exception) 
             {
                 windowService.ShowPopUp("Error", "Error de conexión", PopUpIcon.Error);
             }
@@ -96,9 +71,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 IsSending = false;
             }
-        }        
-         */
-
+        }
 
         private void HandleFriendRequestResult(FriendRequestResult result)
         {

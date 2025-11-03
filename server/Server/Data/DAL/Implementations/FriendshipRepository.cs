@@ -151,7 +151,7 @@ namespace Data.DAL.Implementations
                         {
                             request.Status = 1;
                             request.RespondedAt = DateTime.UtcNow;
-                            context.Entry(request).State = EntityState.Modified; //
+                            context.Entry(request).State = EntityState.Modified;
                         }
                         else
                         {

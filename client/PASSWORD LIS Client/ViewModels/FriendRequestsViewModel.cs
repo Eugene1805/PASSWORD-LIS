@@ -7,11 +7,8 @@ using PASSWORD_LIS_Client.Views;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-<<<<<<< HEAD
 using System.ServiceModel;
 using System.Text;
-=======
->>>>>>> f328f7cfcf47b0aaa98e2c3f2696e424021d8e5f
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -83,7 +80,6 @@ namespace PASSWORD_LIS_Client.ViewModels
                 var requests = await friendsService.GetPendingRequestsAsync();
                 PendingRequests = new ObservableCollection<FriendDTO>(requests);
             }
-            // --- CAMBIO: Manejo de Excepciones WCF (Inline) ---
             catch (FaultException<ServiceErrorDetailDTO> ex)
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, ex.Detail.Message, PopUpIcon.Error);
@@ -103,7 +99,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             catch (Exception)
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                                        "No se pudieron cargar las solicitudes de amistad", PopUpIcon.Error); // Necesitas esta clave de recurso Properties.Langs.Lang.friendRequestsLoadErrorText
+                                        "No se pudieron cargar las solicitudes de amistad", PopUpIcon.Error); // Properties.Langs.Lang.friendRequestsLoadErrorText
             }
             finally
             {
@@ -111,44 +107,21 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
         }
 
-
-        /*
-        private async Task LoadPendingRequestsAsync()
-        {
-            IsLoading = true;
-            try
-            {
-                
-                var requests = await friendsService.GetPendingRequestsAsync();
-                PendingRequests = new ObservableCollection<FriendDTO>(requests);
-            }
-            catch (Exception)
-            {
-                // TODO Manejar error
-            }
-            finally
-            {
-                IsLoading = false;
-            }
-        }         
-         */
         private async Task RespondToRequest(bool accepted)
         {
             var requestToRespond = SelectedRequest;
             if (requestToRespond == null) return;
 
-            IsLoading = true; // Prevenir doble clic
+            IsLoading = true; 
             try
             {
                 await friendsService.RespondToFriendRequestAsync(requestToRespond.PlayerId, accepted);
 
-                // Éxito: actualizar UI
                 PendingRequests.Remove(requestToRespond);
-                SelectedRequest = null; // Limpiar selección
+                SelectedRequest = null; 
 
 
             }
-            // --- CAMBIO: Manejo de Excepciones WCF (Inline) ---
             catch (FaultException<ServiceErrorDetailDTO> ex)
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, ex.Detail.Message, PopUpIcon.Error);
@@ -167,38 +140,14 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             catch (Exception)
             {
-                // Rellenar el TODO original
                 windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                                        "Error al cargar la lista de solicitudes", PopUpIcon.Error); // Necesitarás esta clave Properties.Langs.Lang.friendRequestRespondErrorText
+                                        "Error al cargar la lista de solicitudes", PopUpIcon.Error); // Properties.Langs.Lang.friendRequestRespondErrorText
             }
             finally
             {
                 IsLoading = false;
             }
         }
-        /*
-         private async Task RespondToRequest(bool accepted)
-        {
-            var requestToRespond = SelectedRequest;
-            if (requestToRespond == null)
-            {
-                return;
-            }
-            try
-            {
-                await friendsService.RespondToFriendRequestAsync(requestToRespond.PlayerId, accepted);
-                PendingRequests.Remove(requestToRespond);
-            }
-            catch (Exception)
-            {
-                //TODO Manejar error
-            }
-            finally
-            {
-                UpdateMessageVisibility();
-            }
-        }       
-        */
 
         private void UpdateMessageVisibility()
         {
