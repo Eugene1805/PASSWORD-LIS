@@ -95,7 +95,7 @@ namespace Test.ViewModelsTests
             SetAppSingleton("ReportManagerService", mockReport.Object);
 
             mockReport.Setup(r => r.IsPlayerBannedAsync(It.IsAny<int>())).ReturnsAsync(false);
-            mockWaiting.Setup(w => w.CreateGameAsync(It.IsAny<string>())).ReturnsAsync("ABCDE");
+            mockWaiting.Setup(w => w.CreateRoomAsync(It.IsAny<string>())).ReturnsAsync("ABCDE");
 
             var vm = new LobbyViewModel(mockWindow.Object, mockFriends.Object, mockWaiting.Object, mockReport.Object);
 
@@ -120,7 +120,7 @@ namespace Test.ViewModelsTests
             SetAppSingleton("WaitRoomManagerService", mockWaiting.Object);
             SetAppSingleton("ReportManagerService", mockReport.Object);
 
-            mockWaiting.Setup(w => w.JoinGameAsGuestAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
+            mockWaiting.Setup(w => w.JoinRoomAsGuestAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(true);
 
             var vm = new LobbyViewModel(mockWindow.Object, mockFriends.Object, mockWaiting.Object, mockReport.Object)
             {

@@ -3,26 +3,12 @@
   <xs:import schemaLocation="http://localhost:8100/?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" />
   <xs:complexType name="ServiceErrorDetailDTO">
     <xs:sequence>
-      <xs:element minOccurs="0" name="Code" type="tns:ServiceErrorCode" />
+      <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" minOccurs="0" name="Code" type="q1:ServiceErrorCode" />
       <xs:element minOccurs="0" name="ErrorCode" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="Message" nillable="true" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="ServiceErrorDetailDTO" nillable="true" type="tns:ServiceErrorDetailDTO" />
-  <xs:simpleType name="ServiceErrorCode">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="USER_ALREADY_EXISTS" />
-      <xs:enumeration value="DATABASE_ERROR" />
-      <xs:enumeration value="UNEXPECTED_ERROR" />
-      <xs:enumeration value="STATISTICS_ERROR" />
-      <xs:enumeration value="COULD_NOT_CREATE_ROOM" />
-      <xs:enumeration value="ROOM_NOT_FOUND" />
-      <xs:enumeration value="ROOM_FULL" />
-      <xs:enumeration value="PLAYER_NOT_FOUND" />
-      <xs:enumeration value="ALREADY_IN_ROOM" />
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:element name="ServiceErrorCode" nillable="true" type="tns:ServiceErrorCode" />
   <xs:complexType name="ChatMessageDTO">
     <xs:sequence>
       <xs:element minOccurs="0" name="Message" nillable="true" type="xs:string" />
@@ -41,8 +27,8 @@
       <xs:element minOccurs="0" name="Id" type="xs:int" />
       <xs:element minOccurs="0" name="Nickname" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="PhotoId" type="xs:int" />
-      <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" minOccurs="0" name="Role" type="q1:PlayerRole" />
-      <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" minOccurs="0" name="Team" type="q2:MatchTeam" />
+      <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" minOccurs="0" name="Role" type="q2:PlayerRole" />
+      <xs:element xmlns:q3="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" minOccurs="0" name="Team" type="q3:MatchTeam" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="PlayerDTO" nillable="true" type="tns:PlayerDTO" />

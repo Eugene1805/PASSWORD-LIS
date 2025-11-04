@@ -6,6 +6,7 @@ using Services.Util;
 using Services.Wrappers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.ServiceModel;
 
 namespace Host
@@ -16,14 +17,12 @@ namespace Host
         static void Main(string[] args)
         {
             XmlConfigurator.Configure();
-            // Lista para manejar todos los hosts de manera ordenada
             var hosts = new List<ServiceHost>();
 
             try
             {
                 log.Info("La aplicación ha iniciado.");
-                // --- PASO 1: Crear las dependencias UNA SOLA VEZ ---
-                // Estas instancias se compartirán entre todos los servicios que las necesiten.
+                // We create the dependencies first so they can be used in every service
                 var accountRepository = new AccountRepository();
                 var emailSender = new EmailSender();
                 var codeService = new VerificationCodeService();
@@ -34,63 +33,132 @@ namespace Host
                 var friendshipRepository = new FriendshipRepository();
                 var reportRepository = new ReportRepository();
                 var banRepository = new BanRepository();
-                // --- PASO 2: Crear las INSTANCIAS de cada servicio ---
-                // Se inyectan las dependencias compartidas en cada constructor.
+                var wordRepository = new WordRepository();
+                
+
                 var accountManagerInstance = new AccountManager(accountRepository, notificationService, codeService);
-                var loginManagerInstance = new LoginManager(accountRepository); // Asumiendo que LoginManager necesita el repositorio
-                var verificationManagerInstance = new VerificationCodeManager(accountRepository, notificationService, codeService); // Asumiendo que VerificationCodeManager necesita el repositorio
+                var loginManagerInstance = new LoginManager(accountRepository);
+                var verificationManagerInstance = new VerificationCodeManager(accountRepository, notificationService, codeService);
                 var passwordResetManagerInstance = new PasswordResetManager(accountRepository, notificationService, codeService);
                 var profileManagerInstance = new ProfileManager(accountRepository);
                 var topPlayersManagerInstance = new TopPlayersManager(statisticsRepository);
-                var waitingRoomManagerInstance = new WaitingRoomManager(playerRepository,operationContextWrapper);
+                var gameManagerInstance = new GameManager(operationContextWrapper, wordRepository);
+                var waitingRoomManagerInstance = new WaitingRoomManager(playerRepository,operationContextWrapper,gameManagerInstance);
                 var friendsManagerInstance = new FriendsManager(friendshipRepository, accountRepository, operationContextWrapper);
                 var reportManagerInstance = new ReportManager(reportRepository, playerRepository,banRepository,operationContextWrapper);
 
-                // --- PASO 3: Crear un ServiceHost para CADA instancia de servicio ---
+                
                 var accountManagerHost = new ServiceHost(accountManagerInstance);
                 var loginManagerHost = new ServiceHost(loginManagerInstance);
                 var verificationManagerHost = new ServiceHost(verificationManagerInstance);
                 var passwordResetManagerHost = new ServiceHost(passwordResetManagerInstance);
                 var profileManagerHost = new ServiceHost(profileManagerInstance);
                 var topPlayersManagerHost = new ServiceHost(topPlayersManagerInstance);
-                var waitingRoomManagerHost = new ServiceHost(waitingRoomManagerInstance);
                 var friendsManagerHost = new ServiceHost(friendsManagerInstance);
                 var reportManagerHost = new ServiceHost(reportManagerInstance);
+                var gameManagerHost = new ServiceHost(gameManagerInstance);
+                var waitingRoomManagerHost = new ServiceHost(waitingRoomManagerInstance);
+                
 
-                // Agregarlos a la lista para manejarlos fácilmente
                 hosts.Add(accountManagerHost);
                 hosts.Add(loginManagerHost);
                 hosts.Add(verificationManagerHost);
                 hosts.Add(passwordResetManagerHost);
                 hosts.Add(profileManagerHost);
                 hosts.Add(topPlayersManagerHost);
-                hosts.Add(waitingRoomManagerHost);
                 hosts.Add(friendsManagerHost);
                 hosts.Add(reportManagerHost);
+                hosts.Add(gameManagerHost);
+                hosts.Add(waitingRoomManagerHost);
 
-                // --- PASO 4: Abrir todos los hosts ---
+                
                 foreach (var host in hosts)
                 {
-                    host.Open();
-                    // Imprime la dirección de cada endpoint para saber que está escuchando
-                    foreach (var endpoint in host.Description.Endpoints)
+                    var serviceName = host.Description != null && host.Description.ServiceType != null
+                        ? host.Description.ServiceType.Name
+                        : host.GetType().Name;
+
+                    try
                     {
-                        Console.WriteLine($"-> Servicio escuchando en: {endpoint.Address}");
+                        host.Open();
+
+                        foreach (var endpoint in host.Description.Endpoints)
+                        {
+                            Console.WriteLine($"-> Service listening in: {endpoint.Address}");
+                        }
+                    }
+                    catch (AddressAccessDeniedException ex)
+                    {
+                        log.Error($"Failed to open service '{serviceName}'. The process lacks permissions to listen on the specified address/port. Try running as Administrator or reserving the URL with netsh. Details: {ex.Message}", ex);
+                        SafeAbort(host);
+                    }
+                    catch (AddressAlreadyInUseException ex)
+                    {
+                        log.Error($"Failed to open service '{serviceName}'. The address/port is already in use. Ensure no other service is using the same base address. Details: {ex.Message}", ex);
+                        SafeAbort(host);
+                    }
+                    catch (ObjectDisposedException ex)
+                    {
+                        log.Error($"Failed to open service '{serviceName}'. The host or one of its dependencies was disposed. Details: {ex.Message}", ex);
+                        SafeAbort(host);
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        log.Error($"Failed to open service '{serviceName}'. Invalid configuration or state. Verify endpoints, bindings, and behaviors. Details: {ex.Message}", ex);
+                        SafeAbort(host);
+                    }
+                    catch (CommunicationObjectFaultedException ex)
+                    {
+                        log.Error($"Failed to open service '{serviceName}'. The communication object is faulted. Details: {ex.Message}", ex);
+                        SafeAbort(host);
+                    }
+                    catch (CommunicationException ex)
+                    {
+                        log.Error($"Failed to open service '{serviceName}'. A communication error occurred while opening the listener. Details: {ex.Message}", ex);
+                        SafeAbort(host);
+                    }
+                    catch (TimeoutException ex)
+                    {
+                        log.Error($"Failed to open service '{serviceName}' due to timeout. Consider increasing open timeouts. Details: {ex.Message}", ex);
+                        SafeAbort(host);
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Error($"Failed to open service '{serviceName}' due to an unexpected error. Details: {ex.Message}", ex);
+                        SafeAbort(host);
                     }
                 }
 
-                Console.WriteLine("\n Todos los servicios están en ejecución.");
-                Console.WriteLine("Presiona <Enter> para detenerlos.");
+                Console.WriteLine("\n All services are running");
+                Console.WriteLine("Press <Enter> to stop them.");
                 Console.ReadLine();
+            }
+            catch (ObjectDisposedException ex)
+            {
+                log.Error("A disposal-related error occurred during service startup.", ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                log.Error("An invalid operation occurred during service startup.", ex);
+            }
+            catch(CommunicationObjectFaultedException ex) { 
+                log.Error("A communication object fault occurred during service startup.", ex);
+            } 
+            catch(CommunicationException ex)
+            {
+                log.Error("A communication error occurred during service startup.", ex);
+            }
+            catch(TimeoutException ex)
+            {
+                log.Error("A timeout occurred during service startup.", ex);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($" Ocurrió un error al iniciar los servicios: {ex.ToString()}");
+                log.Error(ex.ToString(), ex);
                 Console.ReadLine();
             }
             finally
             {
-                // --- PASO 5: Cerrar todos los hosts de forma segura ---
                 foreach (var host in hosts)
                 {
                     if (host != null)
@@ -101,10 +169,29 @@ namespace Host
                         }
                         else
                         {
-                            host.Close();
+                            try
+                            {
+                                host.Close();
+                            }
+                            catch
+                            {
+                                host.Abort();
+                            }
                         }
                     }
                 }
+            }
+        }
+
+        private static void SafeAbort(ServiceHost host)
+        {
+            try
+            {
+                host?.Abort();
+            }
+            catch
+            {
+                // Swallow any abort exceptions to avoid crashing the process during cleanup.
             }
         }
     }

@@ -10,26 +10,26 @@ namespace Services.Contracts
     {
         [OperationContract]
         [FaultContract(typeof(ServiceErrorDetailDTO))]
-        Task<string> CreateGameAsync(string email);
+        Task<string> CreateRoomAsync(string email);
 
         [OperationContract]
         [FaultContract(typeof(ServiceErrorDetailDTO))]
-        Task<int> JoinGameAsRegisteredPlayerAsync(string gameCode, string email);
+        Task<int> JoinRoomAsRegisteredPlayerAsync(string gameCode, string email);
 
         [OperationContract]
         [FaultContract(typeof(ServiceErrorDetailDTO))]
-        Task<bool> JoinGameAsGuestAsync(string gameCode, string nickname);
+        Task<bool> JoinRoomAsGuestAsync(string gameCode, string nickname);
 
         [OperationContract]
         Task SendMessageAsync(string gameCode, ChatMessageDTO message);
 
         [OperationContract]
-        Task LeaveGameAsync(string gameCode, int playerId);
+        Task LeaveRoomAsync(string gameCode, int playerId);
 
         [OperationContract]
         Task StartGameAsync(string gameCode);
         [OperationContract]
-        Task<List<PlayerDTO>> GetPlayersInGameAsync(string gameCode);
+        Task<List<PlayerDTO>> GetPlayersInRoomAsync(string gameCode);
         [OperationContract]
         Task HostLeftAsync(string gameCode);
     }
@@ -43,9 +43,6 @@ namespace Services.Contracts
 
         [OperationContract(IsOneWay = true)]
         void OnMessageReceived(ChatMessageDTO message);
-
-        [OperationContract(IsOneWay = true)]
-        void OnGameCreated(string gameCode);
 
         [OperationContract(IsOneWay = true)]
         void OnGameStarted();

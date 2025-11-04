@@ -150,7 +150,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             try
             {
-                var players = await roomManagerClient.GetPlayersInGameAsync(this.GameCode).ConfigureAwait(false);
+                var players = await roomManagerClient.GetPlayersInRoomAsync(this.GameCode).ConfigureAwait(false);
                 if (players == null)
                 {
                     players = new List<PlayerDTO>();
@@ -297,7 +297,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                     }
                     else
                     {
-                        await roomManagerClient.LeaveGameAsync(this.gameCode,
+                        await roomManagerClient.LeaveRoomAsync(this.gameCode,
                             IsGuest ? currentPlayer.Id : SessionManager.CurrentUser.PlayerId);
                     }
                 }
