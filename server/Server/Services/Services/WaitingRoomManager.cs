@@ -88,6 +88,9 @@ namespace Services.Services
                 throw new FaultException<ServiceErrorDetailDTO>(full, new FaultReason(full.Message));
             }
 
+            // Capture the callback channel before any awaits to avoid losing OperationContext
+            var callback = operationContext.GetCallbackChannel<IWaitingRoomCallback>();
+
             var playerEntity = await repository.GetPlayerByEmailAsync(email);
             if (playerEntity == null || playerEntity.Id < 0)
             {
@@ -111,7 +114,7 @@ namespace Services.Services
                 throw new FaultException<ServiceErrorDetailDTO>(alreadyIn, new FaultReason(alreadyIn.Message));
             }
 
-            var success = await TryAddPlayerAsync(game, playerDto);
+            var success = await TryAddPlayerAsync(game, playerDto, callback);
             if (!success)
             {
                 log.WarnFormat("Join as registered failed to add player {0} to room '{1}'.", playerDto.Id, gameCode);
@@ -137,6 +140,9 @@ namespace Services.Services
                 throw new FaultException<ServiceErrorDetailDTO>(full, new FaultReason(full.Message));
             }
 
+            // Capture the callback channel at the start of the operation
+            var callback = operationContext.GetCallbackChannel<IWaitingRoomCallback>();
+
             int guestId = Interlocked.Decrement(ref guestIdCounter);
 
             var playerDto = new PlayerDTO
@@ -154,7 +160,7 @@ namespace Services.Services
                 throw new FaultException<ServiceErrorDetailDTO>(alreadyIn, new FaultReason(alreadyIn.Message));
             }
 
-            var added = await TryAddPlayerAsync(game, playerDto);
+            var added = await TryAddPlayerAsync(game, playerDto, callback);
             if (added)
             {
                 log.InfoFormat("Guest '{0}' (id {1}) joined room '{2}'.", nickname, playerDto.Id, gameCode);
@@ -262,9 +268,14 @@ namespace Services.Services
                 log.DebugFormat("HostLeft ignored: room '{0}' not found.", gameCode);
             }
         }
-        private async Task<bool> TryAddPlayerAsync(Room game, PlayerDTO player)
+        // TODO: ADD Fault exception for the nullable callback
+        private async Task<bool> TryAddPlayerAsync(Room game, PlayerDTO player, IWaitingRoomCallback callback)
         {
-            var callback = operationContext.GetCallbackChannel<IWaitingRoomCallback>();
+            if (callback == null)
+            {
+                log.WarnFormat("TryAddPlayer failed: no callback channel for player {0} in room '{1}'.", player.Id, game.GameCode);
+                return false;
+            }
 
             if (!game.Players.TryAdd(player.Id, (callback, player)))
             {
