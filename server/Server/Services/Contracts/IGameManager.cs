@@ -34,7 +34,7 @@ namespace Services.Contracts
         void OnTimerTick(int secondsLeft);
 
         [OperationContract(IsOneWay = true)]
-        void OnNewPassword(string password); // For the clue guy
+        void OnNewPassword(PasswordWordDTO password); // For the clue guy
 
         [OperationContract(IsOneWay = true)]
         void OnClueReceived(string clue); // For the guesser

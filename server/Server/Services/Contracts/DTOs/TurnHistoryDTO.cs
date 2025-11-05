@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using Data.Model;
+using System.Runtime.Serialization;
 
 namespace Services.Contracts.DTOs
 {
@@ -8,7 +9,7 @@ namespace Services.Contracts.DTOs
         [DataMember]
         public int TurnId { get; set; } // Temp ID for the votes
         [DataMember]
-        public string Password { get; set; }
+        public PasswordWordDTO Password { get; set; }
         [DataMember]
         public string ClueUsed { get; set; }
     }

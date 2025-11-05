@@ -35,7 +35,7 @@ namespace Services.Services
             public int SecondsLeft; // Managed with Interlocked
             public int CurrentRound { get; set; }
             public MatchTeam CurrentTurnTeam { get; set; } // Team currently taking the turn
-            public List<string> CurrentRoundWords { get; set; } // The5 words for the round
+            public List<PasswordWord> CurrentRoundWords { get; set; } // The 5 words for the round
             public int CurrentWordIndex { get; set; }
             public List<TurnHistoryDTO> CurrentTurnHistory { get; set; }
 
@@ -45,14 +45,14 @@ namespace Services.Services
                 ExpectedPlayers = expectedPlayers;
                 Status = MatchStatus.WaitingForPlayers;
                 ActivePlayers = new ConcurrentDictionary<int, (IGameManagerCallback, PlayerDTO)>();
-                CurrentRoundWords = new List<string>();
+                CurrentRoundWords = new List<PasswordWord>();
                 CurrentTurnHistory = new List<TurnHistoryDTO>();
-                RedTeamScore =0;
-                BlueTeamScore =0;
-                CurrentRound =1;
+                RedTeamScore = 0;
+                BlueTeamScore = 0;
+                CurrentRound = 1;
                 CurrentTurnTeam = MatchTeam.RedTeam;
             }
-            public string GetCurrentPassword()
+            public PasswordWord GetCurrentPassword()
             {
                 if (CurrentWordIndex < CurrentRoundWords.Count)
                     return CurrentRoundWords[CurrentWordIndex];
@@ -67,8 +67,8 @@ namespace Services.Services
         private readonly ConcurrentDictionary<string, MatchState> matches = new ConcurrentDictionary<string, MatchState>();
         private readonly IOperationContextWrapper operationContext;
         private readonly IWordRepository wordRepository;
-        private const int ROUND_DURATION_SECONDS =60;
-        private const int WORDS_PER_ROUND =5;
+        private const int ROUND_DURATION_SECONDS = 60;
+        private const int WORDS_PER_ROUND = 5;
 
         public GameManager(IOperationContextWrapper contextWrapper, IWordRepository wordRepository)
         {
@@ -79,13 +79,12 @@ namespace Services.Services
         {
             if (playersFromWaitingRoom == null || playersFromWaitingRoom.Count !=4)
             {
-                // Cannot create the match because there are not exactly4 players
+                // Cannot create the match because there are not exactly 4 players
                 return false;
             }
 
             var matchState = new MatchState(gameCode, playersFromWaitingRoom);
 
-            // Add the new match to the dictionary in the "WaitingForPlayers" state
             return matches.TryAdd(gameCode, matchState);
         }
         public Task PassTurnAsync(string gameCode, int senderPlayerId)
@@ -109,11 +108,11 @@ namespace Services.Services
             }
 
             // Save the clue for later validation
-            var currentPassword = matchState.GetCurrentPassword() ?? "N/A";
+            var currentPassword = matchState.GetCurrentPassword();
             matchState.CurrentTurnHistory.Add(new TurnHistoryDTO
             {
                 TurnId = matchState.CurrentWordIndex,
-                Password = (string)currentPassword,
+                Password = ToDTO(currentPassword),
                 ClueUsed = clue
             });
 
@@ -149,22 +148,23 @@ namespace Services.Services
             int currentScore = (team == MatchTeam.RedTeam) ? matchState.RedTeamScore : matchState.BlueTeamScore;
 
             // Compare the guess
-            if (currentPassword != null && guess.Equals((string)currentPassword, StringComparison.OrdinalIgnoreCase))
+            if (currentPassword != null && (guess.Equals(currentPassword.EnglishWord, StringComparison.OrdinalIgnoreCase)) 
+                || guess.Equals(currentPassword.SpanishWord, StringComparison.OrdinalIgnoreCase))
             {
                 // --- SUCCESS CASE ---
                 int newScore;
-                if (team == MatchTeam.RedTeam)
+                lock (matchState)
                 {
-                    // Use a local variable to hold the field reference
-                    var redScore = matchState.RedTeamScore;
-                    newScore = Interlocked.Increment(ref redScore);
-                    matchState.RedTeamScore = redScore;
-                }
-                else
-                {
-                    var blueScore = matchState.BlueTeamScore;
-                    newScore = Interlocked.Increment(ref blueScore);
-                    matchState.BlueTeamScore = blueScore;
+                    if (team == MatchTeam.RedTeam)
+                    {
+                        matchState.RedTeamScore++;
+                        newScore = matchState.RedTeamScore;
+                    }
+                    else
+                    {
+                        matchState.BlueTeamScore++;
+                        newScore = matchState.BlueTeamScore;
+                    }
                 }
 
                 var resultDto = new GuessResultDTO { IsCorrect = true, Team = team, NewScore = newScore };
@@ -174,7 +174,7 @@ namespace Services.Services
 
                 if (matchState.CurrentWordIndex >= matchState.CurrentRoundWords.Count)
                 {
-                    // The5 words are done. End the round.
+                    // The 5 words are done. End the round.
                     matchState.RoundTimer?.Dispose();
                     matchState.RoundTimer = null;
                     await StartValidationPhaseAsync(matchState);
@@ -187,8 +187,8 @@ namespace Services.Services
                     {
                         try
                         {
-                            var nextWord = (string) matchState.GetCurrentPassword();
-                            pistero.Callback.OnNewPassword(nextWord);
+                            var nextWord = matchState.GetCurrentPassword();
+                            pistero.Callback.OnNewPassword(ToDTO(nextWord));
                         }
                         catch { await HandlePlayerDisconnectionAsync(matchState, pistero.Player.Id); }
                     }
@@ -201,10 +201,18 @@ namespace Services.Services
 
                 // Notify only the active team
                 var pistero = GetPlayerByRole(matchState, team, PlayerRole.ClueGuy);
-                try { sender.Callback.OnGuessResult(resultDto); } // Guesser
-                catch { await HandlePlayerDisconnectionAsync(matchState, sender.Player.Id); }
-                try { if (pistero.Callback != null) pistero.Callback.OnGuessResult(resultDto); } // ClueGuy
-                catch { await HandlePlayerDisconnectionAsync(matchState, pistero.Player.Id); }
+                try { 
+                    sender.Callback.OnGuessResult(resultDto); 
+                } // Guesser
+                catch { 
+                    await HandlePlayerDisconnectionAsync(matchState, sender.Player.Id); 
+                }
+                try {
+                    pistero.Callback?.OnGuessResult(resultDto);
+                } // ClueGuy
+                catch { 
+                    await HandlePlayerDisconnectionAsync(matchState, pistero.Player.Id); 
+                }
             }
         }
 
@@ -256,7 +264,7 @@ namespace Services.Services
             try
             {
                 matchState.Status = MatchStatus.InProgress;
-                matchState.CurrentRound =1;
+                matchState.CurrentRound = 1;
 
                 var initState = new MatchInitStateDTO
                 {
@@ -296,21 +304,17 @@ namespace Services.Services
         private async Task StartRoundAsync(MatchState matchState)
         {
             matchState.Status = MatchStatus.InProgress;
-
-            // TASK3.1.1: Load5 words
             matchState.CurrentRoundWords = await wordRepository.GetRandomWordsAsync(WORDS_PER_ROUND);
-            matchState.CurrentWordIndex =0;
+            matchState.CurrentWordIndex = 0;
             matchState.CurrentTurnHistory = new List<TurnHistoryDTO>();
 
-            if (matchState.CurrentRoundWords.Count ==0)
+            if (matchState.CurrentRoundWords.Count == 0)
             {
                 await BroadcastAsync(matchState, cb => cb.OnMatchCancelled("Error: No se encontraron palabras en la base de datos."));
                 return;
             }
 
-            // TASK3.1.3: Start timer
             matchState.SecondsLeft = ROUND_DURATION_SECONDS;
-            // Start the timer. Calls TimerTickCallback for the first time after1s, then every1s.
             matchState.RoundTimer = new Timer(TimerTickCallback, matchState,1000,1000);
 
             // TASK3.1.4: Send the first word to the current team's ClueGuy
@@ -319,8 +323,8 @@ namespace Services.Services
             {
                 try
                 {
-                    var firstWord = (string)matchState.GetCurrentPassword();
-                    pistero.Callback.OnNewPassword(firstWord);
+                    var firstWordEntity = matchState.GetCurrentPassword();
+                    pistero.Callback.OnNewPassword(ToDTO(firstWordEntity));
                 }
                 catch
                 {
@@ -341,7 +345,6 @@ namespace Services.Services
             {
                 matchState.RoundTimer?.Dispose();
                 matchState.RoundTimer = null;
-                // Time is up. Start the validation phase
                 await StartValidationPhaseAsync(matchState);
             }
         }
@@ -380,6 +383,18 @@ namespace Services.Services
         {
             // Access the Player property from the tuple parameter correctly
             return state.ActivePlayers.Values.FirstOrDefault(p => p.Player.Team == player.Player.Team && p.Player.Id != player.Player.Id);
+        }
+        private PasswordWordDTO ToDTO(PasswordWord entity)
+        {
+            if (entity == null) return new PasswordWordDTO();
+
+            return new PasswordWordDTO
+            {
+                EnglishWord = entity.EnglishWord,
+                SpanishWord = entity.SpanishWord,
+                EnglishDescription = entity.EnglishDescription,
+                SpanishDescription = entity.SpanishDescription
+            };
         }
     }
 }

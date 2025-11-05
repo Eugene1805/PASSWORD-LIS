@@ -98,6 +98,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>PasswordLISModel.edmx</DependentUpon>
     </Compile>
+    <Compile Include="Model\PasswordWord.cs">
+      <DependentUpon>PasswordLISModel.tt</DependentUpon>
+    </Compile>
     <Compile Include="Model\Player.cs">
       <DependentUpon>PasswordLISModel.tt</DependentUpon>
     </Compile>
