@@ -61,7 +61,22 @@ namespace PASSWORD_LIS_Client.ViewModels
                     this.windowService.ShowPopUp(Properties.Langs.Lang.sendFailedTitleText,
                         Properties.Langs.Lang.codeSendFailedText, PopUpIcon.Error);
                 }
-            }// TODO: Add excetion handling
+            }
+            catch (TimeoutException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
+                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);;
+            }
+            catch (EndpointNotFoundException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
+                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Warning);
+            }
+            catch (CommunicationException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
+                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Warning);
+            }
             catch (Exception)
             {
                 this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,

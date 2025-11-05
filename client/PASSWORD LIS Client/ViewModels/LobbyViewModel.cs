@@ -139,7 +139,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
 
         private void NavigateToProfile(object parameter)
-        {
+        {// TODO Change from navigation service to window service
             var profileViewModel = new ProfileViewModel(App.ProfileManagerService, App.WindowService);
 
 
@@ -327,7 +327,6 @@ namespace PASSWORD_LIS_Client.ViewModels
         private static void ShowHowToPlay(object parameter)
         {
             var howToPlayWindow = new HowToPlayWindow();
-
             howToPlayWindow.ShowDialog();
         }
 
@@ -353,7 +352,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                     windowService.ShowPopUp(Properties.Langs.Lang.bannedAccountText, Properties.Langs.Lang.cantCreateMatchText, PopUpIcon.Warning);
                     return;
                 }
-                string newGameCode = await waitingRoomManagerService.CreateGameAsync(SessionManager.CurrentUser.Email);
+                string newGameCode = await waitingRoomManagerService.CreateRoomAsync(SessionManager.CurrentUser.Email);
 
                 if (!string.IsNullOrEmpty(newGameCode))
                 {
@@ -423,7 +422,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 bool success;
                 if (IsGuest)
                 {
-                    success = await waitingRoomManagerService.JoinGameAsGuestAsync(GameCodeToJoin, SessionManager.CurrentUser.Nickname);
+                    success = await waitingRoomManagerService.JoinRoomAsGuestAsync(GameCodeToJoin, SessionManager.CurrentUser.Nickname);
                 }
                 else
                 {
@@ -433,7 +432,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                         windowService.ShowPopUp(Properties.Langs.Lang.bannedAccountText, Properties.Langs.Lang.cantJoinMatchText, PopUpIcon.Warning);
                         return;
                     }
-                    var playerId = await waitingRoomManagerService.JoinGameAsRegisteredPlayerAsync(GameCodeToJoin, SessionManager.CurrentUser.Email);
+                    var playerId = await waitingRoomManagerService.JoinRoomAsRegisteredPlayerAsync(GameCodeToJoin, SessionManager.CurrentUser.Email);
                     success = playerId > 0;
                 }
 

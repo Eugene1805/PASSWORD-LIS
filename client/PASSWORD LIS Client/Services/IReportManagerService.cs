@@ -17,7 +17,7 @@ namespace PASSWORD_LIS_Client.Services
         Task<bool> IsPlayerBannedAsync(int playerId);
         Task UnsubscribeFromReportUpdatesAsync(int playerId);
     }
-    // TODO Add exception handling and abort channel on failure
+
     public class WcfReportManagerService : IReportManagerService, IReportManagerCallback
     {
         public event Action<string, string> ReportReceived;
@@ -36,7 +36,7 @@ namespace PASSWORD_LIS_Client.Services
 
         public Task<int> GetCurrentReportCountAsync(int playerId)
         {
-            return proxy.GetCurrentReportCountAsync(playerId);
+            return proxy.GetCurrentReportCountAsync(playerId);           
         }
 
         public Task<bool> IsPlayerBannedAsync(int playerId)

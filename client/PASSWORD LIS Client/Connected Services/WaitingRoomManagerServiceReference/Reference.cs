@@ -91,7 +91,7 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="ServiceErrorCode", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="ServiceErrorCode", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums")]
     public enum ServiceErrorCode : int {
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
@@ -318,27 +318,27 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
     [System.ServiceModel.ServiceContractAttribute(ConfigurationName="WaitingRoomManagerServiceReference.IWaitingRoomManager", CallbackContract=typeof(PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.IWaitingRoomManagerCallback))]
     public interface IWaitingRoomManager {
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/CreateGame", ReplyAction="http://tempuri.org/IWaitingRoomManager/CreateGameResponse")]
-        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IWaitingRoomManager/CreateGameServiceErrorDetailDTOFault", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
-        string CreateGame(string email);
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/CreateRoom", ReplyAction="http://tempuri.org/IWaitingRoomManager/CreateRoomResponse")]
+        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IWaitingRoomManager/CreateRoomServiceErrorDetailDTOFault", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
+        string CreateRoom(string email);
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/CreateGame", ReplyAction="http://tempuri.org/IWaitingRoomManager/CreateGameResponse")]
-        System.Threading.Tasks.Task<string> CreateGameAsync(string email);
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/CreateRoom", ReplyAction="http://tempuri.org/IWaitingRoomManager/CreateRoomResponse")]
+        System.Threading.Tasks.Task<string> CreateRoomAsync(string email);
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/JoinGameAsRegisteredPlayer", ReplyAction="http://tempuri.org/IWaitingRoomManager/JoinGameAsRegisteredPlayerResponse")]
-        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IWaitingRoomManager/JoinGameAsRegisteredPlayerServiceErrorDeta" +
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/JoinRoomAsRegisteredPlayer", ReplyAction="http://tempuri.org/IWaitingRoomManager/JoinRoomAsRegisteredPlayerResponse")]
+        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IWaitingRoomManager/JoinRoomAsRegisteredPlayerServiceErrorDeta" +
             "ilDTOFault", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
-        int JoinGameAsRegisteredPlayer(string gameCode, string email);
+        int JoinRoomAsRegisteredPlayer(string gameCode, string email);
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/JoinGameAsRegisteredPlayer", ReplyAction="http://tempuri.org/IWaitingRoomManager/JoinGameAsRegisteredPlayerResponse")]
-        System.Threading.Tasks.Task<int> JoinGameAsRegisteredPlayerAsync(string gameCode, string email);
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/JoinRoomAsRegisteredPlayer", ReplyAction="http://tempuri.org/IWaitingRoomManager/JoinRoomAsRegisteredPlayerResponse")]
+        System.Threading.Tasks.Task<int> JoinRoomAsRegisteredPlayerAsync(string gameCode, string email);
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/JoinGameAsGuest", ReplyAction="http://tempuri.org/IWaitingRoomManager/JoinGameAsGuestResponse")]
-        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IWaitingRoomManager/JoinGameAsGuestServiceErrorDetailDTOFault", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
-        bool JoinGameAsGuest(string gameCode, string nickname);
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/JoinRoomAsGuest", ReplyAction="http://tempuri.org/IWaitingRoomManager/JoinRoomAsGuestResponse")]
+        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IWaitingRoomManager/JoinRoomAsGuestServiceErrorDetailDTOFault", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
+        bool JoinRoomAsGuest(string gameCode, string nickname);
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/JoinGameAsGuest", ReplyAction="http://tempuri.org/IWaitingRoomManager/JoinGameAsGuestResponse")]
-        System.Threading.Tasks.Task<bool> JoinGameAsGuestAsync(string gameCode, string nickname);
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/JoinRoomAsGuest", ReplyAction="http://tempuri.org/IWaitingRoomManager/JoinRoomAsGuestResponse")]
+        System.Threading.Tasks.Task<bool> JoinRoomAsGuestAsync(string gameCode, string nickname);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/SendMessage", ReplyAction="http://tempuri.org/IWaitingRoomManager/SendMessageResponse")]
         void SendMessage(string gameCode, PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ChatMessageDTO message);
@@ -346,11 +346,11 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/SendMessage", ReplyAction="http://tempuri.org/IWaitingRoomManager/SendMessageResponse")]
         System.Threading.Tasks.Task SendMessageAsync(string gameCode, PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ChatMessageDTO message);
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/LeaveGame", ReplyAction="http://tempuri.org/IWaitingRoomManager/LeaveGameResponse")]
-        void LeaveGame(string gameCode, int playerId);
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/LeaveRoom", ReplyAction="http://tempuri.org/IWaitingRoomManager/LeaveRoomResponse")]
+        void LeaveRoom(string gameCode, int playerId);
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/LeaveGame", ReplyAction="http://tempuri.org/IWaitingRoomManager/LeaveGameResponse")]
-        System.Threading.Tasks.Task LeaveGameAsync(string gameCode, int playerId);
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/LeaveRoom", ReplyAction="http://tempuri.org/IWaitingRoomManager/LeaveRoomResponse")]
+        System.Threading.Tasks.Task LeaveRoomAsync(string gameCode, int playerId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/StartGame", ReplyAction="http://tempuri.org/IWaitingRoomManager/StartGameResponse")]
         void StartGame(string gameCode);
@@ -358,11 +358,11 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/StartGame", ReplyAction="http://tempuri.org/IWaitingRoomManager/StartGameResponse")]
         System.Threading.Tasks.Task StartGameAsync(string gameCode);
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/GetPlayersInGame", ReplyAction="http://tempuri.org/IWaitingRoomManager/GetPlayersInGameResponse")]
-        PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.PlayerDTO[] GetPlayersInGame(string gameCode);
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/GetPlayersInRoom", ReplyAction="http://tempuri.org/IWaitingRoomManager/GetPlayersInRoomResponse")]
+        PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.PlayerDTO[] GetPlayersInRoom(string gameCode);
         
-        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/GetPlayersInGame", ReplyAction="http://tempuri.org/IWaitingRoomManager/GetPlayersInGameResponse")]
-        System.Threading.Tasks.Task<PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.PlayerDTO[]> GetPlayersInGameAsync(string gameCode);
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/GetPlayersInRoom", ReplyAction="http://tempuri.org/IWaitingRoomManager/GetPlayersInRoomResponse")]
+        System.Threading.Tasks.Task<PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.PlayerDTO[]> GetPlayersInRoomAsync(string gameCode);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/HostLeft", ReplyAction="http://tempuri.org/IWaitingRoomManager/HostLeftResponse")]
         void HostLeft(string gameCode);
@@ -382,9 +382,6 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
         
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IWaitingRoomManager/OnMessageReceived")]
         void OnMessageReceived(PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ChatMessageDTO message);
-        
-        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IWaitingRoomManager/OnGameCreated")]
-        void OnGameCreated(string gameCode);
         
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IWaitingRoomManager/OnGameStarted")]
         void OnGameStarted();
@@ -421,28 +418,28 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
                 base(callbackInstance, binding, remoteAddress) {
         }
         
-        public string CreateGame(string email) {
-            return base.Channel.CreateGame(email);
+        public string CreateRoom(string email) {
+            return base.Channel.CreateRoom(email);
         }
         
-        public System.Threading.Tasks.Task<string> CreateGameAsync(string email) {
-            return base.Channel.CreateGameAsync(email);
+        public System.Threading.Tasks.Task<string> CreateRoomAsync(string email) {
+            return base.Channel.CreateRoomAsync(email);
         }
         
-        public int JoinGameAsRegisteredPlayer(string gameCode, string email) {
-            return base.Channel.JoinGameAsRegisteredPlayer(gameCode, email);
+        public int JoinRoomAsRegisteredPlayer(string gameCode, string email) {
+            return base.Channel.JoinRoomAsRegisteredPlayer(gameCode, email);
         }
         
-        public System.Threading.Tasks.Task<int> JoinGameAsRegisteredPlayerAsync(string gameCode, string email) {
-            return base.Channel.JoinGameAsRegisteredPlayerAsync(gameCode, email);
+        public System.Threading.Tasks.Task<int> JoinRoomAsRegisteredPlayerAsync(string gameCode, string email) {
+            return base.Channel.JoinRoomAsRegisteredPlayerAsync(gameCode, email);
         }
         
-        public bool JoinGameAsGuest(string gameCode, string nickname) {
-            return base.Channel.JoinGameAsGuest(gameCode, nickname);
+        public bool JoinRoomAsGuest(string gameCode, string nickname) {
+            return base.Channel.JoinRoomAsGuest(gameCode, nickname);
         }
         
-        public System.Threading.Tasks.Task<bool> JoinGameAsGuestAsync(string gameCode, string nickname) {
-            return base.Channel.JoinGameAsGuestAsync(gameCode, nickname);
+        public System.Threading.Tasks.Task<bool> JoinRoomAsGuestAsync(string gameCode, string nickname) {
+            return base.Channel.JoinRoomAsGuestAsync(gameCode, nickname);
         }
         
         public void SendMessage(string gameCode, PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ChatMessageDTO message) {
@@ -453,12 +450,12 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
             return base.Channel.SendMessageAsync(gameCode, message);
         }
         
-        public void LeaveGame(string gameCode, int playerId) {
-            base.Channel.LeaveGame(gameCode, playerId);
+        public void LeaveRoom(string gameCode, int playerId) {
+            base.Channel.LeaveRoom(gameCode, playerId);
         }
         
-        public System.Threading.Tasks.Task LeaveGameAsync(string gameCode, int playerId) {
-            return base.Channel.LeaveGameAsync(gameCode, playerId);
+        public System.Threading.Tasks.Task LeaveRoomAsync(string gameCode, int playerId) {
+            return base.Channel.LeaveRoomAsync(gameCode, playerId);
         }
         
         public void StartGame(string gameCode) {
@@ -469,12 +466,12 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
             return base.Channel.StartGameAsync(gameCode);
         }
         
-        public PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.PlayerDTO[] GetPlayersInGame(string gameCode) {
-            return base.Channel.GetPlayersInGame(gameCode);
+        public PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.PlayerDTO[] GetPlayersInRoom(string gameCode) {
+            return base.Channel.GetPlayersInRoom(gameCode);
         }
         
-        public System.Threading.Tasks.Task<PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.PlayerDTO[]> GetPlayersInGameAsync(string gameCode) {
-            return base.Channel.GetPlayersInGameAsync(gameCode);
+        public System.Threading.Tasks.Task<PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.PlayerDTO[]> GetPlayersInRoomAsync(string gameCode) {
+            return base.Channel.GetPlayersInRoomAsync(gameCode);
         }
         
         public void HostLeft(string gameCode) {

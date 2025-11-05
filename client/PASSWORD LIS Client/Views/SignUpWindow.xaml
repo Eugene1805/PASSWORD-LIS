@@ -11,7 +11,7 @@
         WindowStartupLocation="CenterScreen"
         MinHeight="700" MinWidth="700"
         Title="{utils:Translate signUpText}" Height="700" Width="700">
-   
+
     <Grid>
         <Grid.Background>
             <ImageBrush ImageSource="/Resources/BackgroudImage.png"/>
@@ -55,9 +55,9 @@
                          utils:PasswordBoxHelper.BoundPassword="{Binding ConfirmPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
             <TextBlock Style="{StaticResource bodyTextBlockStyle}" TextWrapping="Wrap" Margin="0,10,0,0">
-        <Hyperlink Command="{Binding OpenTermsAndConditionsCommand}"> 
-            <Run Text="{utils:Translate termsAndConditionsText}"/>
-        </Hyperlink>
+                <Hyperlink Command="{Binding OpenTermsAndConditionsCommand}"> 
+                    <Run Text="{utils:Translate termsAndConditionsText}"/>
+                </Hyperlink>
             </TextBlock>
 
             <Button x:Name="signUpButton"
@@ -85,5 +85,4 @@
             </TextBlock>
         </StackPanel>
     </Grid>
-    
 </Window>

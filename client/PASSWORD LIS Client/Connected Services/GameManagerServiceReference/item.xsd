@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:simpleType name="PlayerRole">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ClueGuy" />
+      <xs:enumeration value="Guesser" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="PlayerRole" nillable="true" type="tns:PlayerRole" />
+  <xs:simpleType name="MatchTeam">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="BlueTeam" />
+      <xs:enumeration value="RedTeam" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="MatchTeam" nillable="true" type="tns:MatchTeam" />
+</xs:schema>

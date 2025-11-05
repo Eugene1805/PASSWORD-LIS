@@ -64,12 +64,14 @@
     <Compile Include="DAL\Implementations\PlayerRepository.cs" />
     <Compile Include="DAL\Implementations\ReportRepository.cs" />
     <Compile Include="DAL\Implementations\StatisticsRepository.cs" />
+    <Compile Include="DAL\Implementations\WordRepository.cs" />
     <Compile Include="DAL\Interfaces\IAccountRepository.cs" />
     <Compile Include="DAL\Interfaces\IBanRepository.cs" />
     <Compile Include="DAL\Interfaces\IFriendshipRepository.cs" />
     <Compile Include="DAL\Interfaces\IPlayerRepository.cs" />
     <Compile Include="DAL\Interfaces\IReportRepository.cs" />
     <Compile Include="DAL\Interfaces\IStatisticsRepository.cs" />
+    <Compile Include="DAL\Interfaces\IWordRepository.cs" />
     <Compile Include="Exceptions\DuplicateAccountException.cs" />
     <Compile Include="Model\Ban.cs">
       <DependentUpon>PasswordLISModel.tt</DependentUpon>
@@ -95,6 +97,9 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>PasswordLISModel.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Model\PasswordWord.cs">
+      <DependentUpon>PasswordLISModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Model\Player.cs">
       <DependentUpon>PasswordLISModel.tt</DependentUpon>

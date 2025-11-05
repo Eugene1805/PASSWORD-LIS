@@ -14,6 +14,7 @@ namespace Data.DAL.Interfaces
         bool UpdateUserProfile(int playerId, UserAccount updatedAccountData, List<SocialAccount> updatedSocialsAccounts);
         UserAccount GetUserByPlayerId(int playerId);
         UserAccount GetUserByUserAccountId(int userAccountId);
+        Task<bool> IsNicknameInUse(string nickname);
 
     }
 }

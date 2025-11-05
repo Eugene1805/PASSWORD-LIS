@@ -1,4 +1,5 @@
 ﻿using Data.DAL.Interfaces;
+using log4net;
 using Services.Contracts;
 using Services.Contracts.DTOs;
 using Services.Contracts.Enums;
@@ -7,17 +8,17 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
-using log4net;
 
 namespace Services.Services
 {
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Multiple)]
     public class WaitingRoomManager : IWaitingRoomManager
     {
-        sealed class Game
+        sealed class Room
         {
             public string GameCode { get; set; }
             public int HostPlayerId { get; set; }
@@ -26,33 +27,35 @@ namespace Services.Services
 
         private static readonly ILog log = LogManager.GetLogger(typeof(WaitingRoomManager));
 
-        private readonly ConcurrentDictionary<string, Game> games = new ConcurrentDictionary<string, Game>();
+        private readonly ConcurrentDictionary<string, Room> rooms = new ConcurrentDictionary<string, Room>();
         private readonly IPlayerRepository repository;
         private readonly IOperationContextWrapper operationContext;
-        private static int guestIdCounter =0;
-        private const int MaxPlayersPerGame =4;
+        private readonly IGameManager gameManager;
+        private static int guestIdCounter = 0;
+        private const int MaxPlayersPerGame = 4;
         private static readonly Random random = new Random();
         private static readonly TimeSpan CallbackTimeout = TimeSpan.FromSeconds(5);
 
-        public WaitingRoomManager(IPlayerRepository playerRepository, IOperationContextWrapper operationContextWrapper)
+        public WaitingRoomManager(IPlayerRepository playerRepository, IOperationContextWrapper operationContextWrapper, IGameManager gameManager)
         {
             repository = playerRepository;
             operationContext = operationContextWrapper;
+            this.gameManager = gameManager;
         }
 
-        public async Task<string> CreateGameAsync(string email)
+        public async Task<string> CreateRoomAsync(string email)
         {
             var gameCode = GenerateGameCode();
-            var newGame = new Game { GameCode = gameCode };
+            var newGame = new Room { GameCode = gameCode };
 
-            if (!games.TryAdd(gameCode, newGame))
+            if (!rooms.TryAdd(gameCode, newGame))
             {
                 // Rare collision, try again
                 log.WarnFormat("Game code collision for '{0}', retrying game creation for email '{1}'.", gameCode, email);
-                return await CreateGameAsync(email);
+                return await CreateRoomAsync(email);
             }
 
-            var playerId = await JoinGameAsRegisteredPlayerAsync(gameCode, email);
+            var playerId = await JoinRoomAsRegisteredPlayerAsync(gameCode, email);
             if (playerId >0)
             {
                 newGame.HostPlayerId = playerId;
@@ -60,7 +63,7 @@ namespace Services.Services
                 return gameCode;
             }
 
-            games.TryRemove(gameCode, out _);
+            rooms.TryRemove(gameCode, out _);
             var errorDetail = new ServiceErrorDetailDTO
             {
                 Code = ServiceErrorCode.CouldNotCreateRoom,
@@ -70,9 +73,9 @@ namespace Services.Services
             log.ErrorFormat("Failed to create game for email '{0}'. Returning fault COULD_NOT_CREATE_ROOM.", email);
             throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
         }
-        public async Task<int> JoinGameAsRegisteredPlayerAsync(string gameCode, string email)
+        public async Task<int> JoinRoomAsRegisteredPlayerAsync(string gameCode, string email)
         {
-            if (!games.TryGetValue(gameCode, out var game))
+            if (!rooms.TryGetValue(gameCode, out var game))
             {
                 var notFound = new ServiceErrorDetailDTO { Code = ServiceErrorCode.RoomNotFound, ErrorCode = "ROOM_NOT_FOUND", Message = "The room does not exist." };
                 log.WarnFormat("Join as registered failed: game '{0}' not found for email '{1}'.", gameCode, email);
@@ -84,6 +87,9 @@ namespace Services.Services
                 log.WarnFormat("Join as registered failed: room '{0}' is full for email '{1}'.", gameCode, email);
                 throw new FaultException<ServiceErrorDetailDTO>(full, new FaultReason(full.Message));
             }
+
+            // Capture the callback channel before any awaits to avoid losing OperationContext
+            var callback = operationContext.GetCallbackChannel<IWaitingRoomCallback>();
 
             var playerEntity = await repository.GetPlayerByEmailAsync(email);
             if (playerEntity == null || playerEntity.Id < 0)
@@ -108,7 +114,7 @@ namespace Services.Services
                 throw new FaultException<ServiceErrorDetailDTO>(alreadyIn, new FaultReason(alreadyIn.Message));
             }
 
-            var success = await TryAddPlayerAsync(game, playerDto);
+            var success = await TryAddPlayerAsync(game, playerDto, callback);
             if (!success)
             {
                 log.WarnFormat("Join as registered failed to add player {0} to room '{1}'.", playerDto.Id, gameCode);
@@ -119,9 +125,9 @@ namespace Services.Services
             }
             return success ? playerDto.Id : -1;
         }
-        public async Task<bool> JoinGameAsGuestAsync(string gameCode, string nickname)
+        public async Task<bool> JoinRoomAsGuestAsync(string gameCode, string nickname)
         {
-            if (!games.TryGetValue(gameCode, out var game))
+            if (!rooms.TryGetValue(gameCode, out var game))
             {
                 var notFound = new ServiceErrorDetailDTO { Code = ServiceErrorCode.RoomNotFound, ErrorCode = "ROOM_NOT_FOUND", Message = "The room does not exist." };
                 log.WarnFormat("Join as guest failed: game '{0}' not found for nickname '{1}'.", gameCode, nickname);
@@ -133,6 +139,9 @@ namespace Services.Services
                 log.WarnFormat("Join as guest failed: room '{0}' is full for nickname '{1}'.", gameCode, nickname);
                 throw new FaultException<ServiceErrorDetailDTO>(full, new FaultReason(full.Message));
             }
+
+            // Capture the callback channel at the start of the operation
+            var callback = operationContext.GetCallbackChannel<IWaitingRoomCallback>();
 
             int guestId = Interlocked.Decrement(ref guestIdCounter);
 
@@ -151,7 +160,7 @@ namespace Services.Services
                 throw new FaultException<ServiceErrorDetailDTO>(alreadyIn, new FaultReason(alreadyIn.Message));
             }
 
-            var added = await TryAddPlayerAsync(game, playerDto);
+            var added = await TryAddPlayerAsync(game, playerDto, callback);
             if (added)
             {
                 log.InfoFormat("Guest '{0}' (id {1}) joined room '{2}'.", nickname, playerDto.Id, gameCode);
@@ -163,9 +172,9 @@ namespace Services.Services
             return added;
         }
 
-        public async Task LeaveGameAsync(string gameCode, int playerId)
+        public async Task LeaveRoomAsync(string gameCode, int playerId)
         {
-            if (!games.TryGetValue(gameCode, out var game))
+            if (!rooms.TryGetValue(gameCode, out var game))
             {
                 log.DebugFormat("LeaveGame ignored: game '{0}' not found for player {1}.", gameCode, playerId);
                 return;
@@ -185,7 +194,7 @@ namespace Services.Services
 
                 if (game.Players.IsEmpty)
                 {
-                    games.TryRemove(gameCode, out _);
+                    rooms.TryRemove(gameCode, out _);
                     log.InfoFormat("Room '{0}' removed after last player left.", gameCode);
                 }
             }
@@ -197,7 +206,7 @@ namespace Services.Services
 
         public async Task SendMessageAsync(string gameCode, ChatMessageDTO message)
         {
-            if (games.TryGetValue(gameCode, out var game))
+            if (rooms.TryGetValue(gameCode, out var game))
             {
                 await BroadcastAsync(game, client => client.Item1.OnMessageReceived(message));
             }
@@ -206,23 +215,35 @@ namespace Services.Services
                 log.DebugFormat("SendMessage ignored: game '{0}' not found.", gameCode);
             }
         }
-
+        // TODO ADD fault exception for game not found or not enough players
         public async Task StartGameAsync(string gameCode)
         {
-            if (games.TryRemove(gameCode, out var game))
+            if (!rooms.TryGetValue(gameCode, out var game))
             {
-                log.InfoFormat("Starting game for room '{0}'. Notifying clients and removing room.", gameCode);
-                await BroadcastAsync(game, client => client.Item1.OnGameStarted());
+                throw new FaultException("Waiting room not found");
             }
-            else
+
+            if (game.Players.Count != MaxPlayersPerGame)
             {
-                log.DebugFormat("StartGame ignored: room '{0}' not found.", gameCode);
+                throw new FaultException("4 players are required in order to start a game.");
             }
+            var playerList = game.Players.Values.Select(p => p.Item2).ToList();
+            bool matchCreated = gameManager.CreateMatch(gameCode, playerList);
+
+            if (!matchCreated)
+            {
+                throw new FaultException("Could not create the game.");
+            }
+
+            log.InfoFormat("Starting game for room '{0}'. Notifying clients and removing room.", gameCode);
+            await BroadcastAsync(game, client => client.Item1.OnGameStarted());
+
+            rooms.TryRemove(gameCode, out _);
         }
 
-        public Task<List<PlayerDTO>> GetPlayersInGameAsync(string gameCode)
+        public Task<List<PlayerDTO>> GetPlayersInRoomAsync(string gameCode)
         {
-            if (games.TryGetValue(gameCode, out var game))
+            if (rooms.TryGetValue(gameCode, out var game))
             {
                 var players = game.Players.Values.Select(p => p.Item2).ToList();
                 return Task.FromResult(players);
@@ -232,21 +253,26 @@ namespace Services.Services
         }
         public async Task HostLeftAsync(string gameCode)
         {
-            if (games.TryGetValue(gameCode, out var game))
+            if (rooms.TryGetValue(gameCode, out var game))
             {
                 log.InfoFormat("HostLeft for room '{0}'. Notifying clients and removing room.", gameCode);
                 await BroadcastAsync(game, client => client.Item1.OnHostLeft());
 
-                games.TryRemove(gameCode, out _);
+                rooms.TryRemove(gameCode, out _);
             }
             else
             {
                 log.DebugFormat("HostLeft ignored: room '{0}' not found.", gameCode);
             }
         }
-        private async Task<bool> TryAddPlayerAsync(Game game, PlayerDTO player)
+        // TODO: ADD Fault exception for the nullable callback
+        private async Task<bool> TryAddPlayerAsync(Room game, PlayerDTO player, IWaitingRoomCallback callback)
         {
-            var callback = operationContext.GetCallbackChannel<IWaitingRoomCallback>();
+            if (callback == null)
+            {
+                log.WarnFormat("TryAddPlayer failed: no callback channel for player {0} in room '{1}'.", player.Id, game.GameCode);
+                return false;
+            }
 
             if (!game.Players.TryAdd(player.Id, (callback, player)))
             {
@@ -280,7 +306,7 @@ namespace Services.Services
                     break;
             }
         }
-        private async Task BroadcastAsync(Game game, Action<(IWaitingRoomCallback, PlayerDTO)> action)
+        private async Task BroadcastAsync(Room game, Action<(IWaitingRoomCallback, PlayerDTO)> action)
         {
             // Snapshot the current players to avoid concurrent modification issues during iteration
             var snapshot = game.Players.ToArray();
@@ -296,36 +322,39 @@ namespace Services.Services
                     {
                         throw new TimeoutException("Callback to player timed out.");
                     }
+
+                    // Ensure any exceptions from the callback are observed and handled by the catch blocks
+                    await callTask;
                 }
                 catch (CommunicationObjectFaultedException ex)
                 {
                     log.WarnFormat("Callback channel faulted for player {0}. Removing from game {1}.", playerEntry.Key, game.GameCode);
                     log.Warn("Callback channel faulted exception.", ex);
-                    await LeaveGameAsync(game.GameCode, playerEntry.Key);
+                    await LeaveRoomAsync(game.GameCode, playerEntry.Key);
                 }
                 catch (CommunicationException ex)
                 {
                     log.WarnFormat("Communication error when notifying player {0}. Removing from game {1}.", playerEntry.Key, game.GameCode);
                     log.Warn("Communication exception.", ex);
-                    await LeaveGameAsync(game.GameCode, playerEntry.Key);
+                    await LeaveRoomAsync(game.GameCode, playerEntry.Key);
                 }
                 catch (ObjectDisposedException ex)
                 {
                     log.WarnFormat("Callback disposed for player {0}. Removing from game {1}.", playerEntry.Key, game.GameCode);
                     log.Warn("Callback disposed exception.", ex);
-                    await LeaveGameAsync(game.GameCode, playerEntry.Key);
+                    await LeaveRoomAsync(game.GameCode, playerEntry.Key);
                 }
                 catch (TimeoutException ex)
                 {
                     log.WarnFormat("Timeout notifying player {0}. Removing from game {1}.", playerEntry.Key, game.GameCode);
                     log.Warn("Callback timeout exception.", ex);
-                    await LeaveGameAsync(game.GameCode, playerEntry.Key);
+                    await LeaveRoomAsync(game.GameCode, playerEntry.Key);
                 }
                 catch (Exception ex)
                 {
                     log.ErrorFormat("Unexpected error broadcasting to player {0} in game {1}.", playerEntry.Key, game.GameCode);
                     log.Error("Unexpected broadcast exception.", ex);
-                    await LeaveGameAsync(game.GameCode, playerEntry.Key);
+                    await LeaveRoomAsync(game.GameCode, playerEntry.Key);
                 }
             });
 

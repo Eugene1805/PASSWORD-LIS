@@ -185,5 +185,13 @@ namespace Data.DAL.Implementations
                 }
             }
         }
+
+        public async Task<bool> IsNicknameInUse(string nickname)
+        {
+            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            {
+                return await context.UserAccount.AnyAsync(p => p.Nickname == nickname);
+            }
+        }
     }
 }
