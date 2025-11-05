@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace PASSWORD_LIS_Client.Utils
 {
@@ -33,6 +35,11 @@ namespace PASSWORD_LIS_Client.Utils
         public static bool PasswordsMatch(string password, string confirmPassword)
         {
             return password == confirmPassword;
+        }
+
+        public static async Task<bool> IsNicknameInUseAsync(string nickname)
+        {
+            return await App.AccountManagerService.IsNicknameInUseAsync(nickname);
         }
     }
 }

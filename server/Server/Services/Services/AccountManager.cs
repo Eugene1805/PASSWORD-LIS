@@ -85,5 +85,47 @@ namespace Services.Services
             }
 
         }
+
+        public async Task<bool> IsNicknameInUse(string nickname)
+        {
+            try
+            {
+                return await repository.IsNicknameInUse(nickname);
+            }
+            catch(ArgumentNullException ex) 
+            {
+                log.Error("Argument null error in IsNickNameInUse.", ex);
+                var errorDetail = new ServiceErrorDetailDTO
+                {
+                    Code = ServiceErrorCode.DatabaseError,
+                    ErrorCode = "DATABASE_ERROR",
+                    Message = "An error occurred while querying the database. Please try again later."
+                };
+                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+            }
+            catch(InvalidOperationException ex)
+            {
+                log.Error("Invalid operation error in IsNickNameInUse.", ex);
+                var errorDetail = new ServiceErrorDetailDTO
+                {
+                    Code = ServiceErrorCode.DatabaseError,
+                    ErrorCode = "DATABASE_ERROR",
+                    Message = "An error occurred while querying the database. Please try again later."
+                };
+                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+            }
+            catch (Exception ex)
+            {
+                log.Fatal("Unexpected fatal error in IsNickNameInUse.", ex);
+                var errorDetail = new ServiceErrorDetailDTO
+                {
+                    Code = ServiceErrorCode.UnexpectedError,
+                    ErrorCode = "UNEXPECTED_ERROR",
+                    Message = "An unexpected server error occurred."
+                };
+                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason("Generic server error."));
+            }
+            
+        }
     }
 }

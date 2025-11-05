@@ -10,5 +10,7 @@ namespace Services.Contracts
         [OperationContract]
         [FaultContract(typeof(ServiceErrorDetailDTO))]
         Task CreateAccountAsync(NewAccountDTO newAccount);
+        [OperationContract]
+        Task<bool> IsNicknameInUse(string nickname);
     }
 }

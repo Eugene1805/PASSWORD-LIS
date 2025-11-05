@@ -34,6 +34,7 @@
       <xsd:import schemaLocation="http://localhost:8090/?xsd=xsd0" namespace="http://tempuri.org/" />
       <xsd:import schemaLocation="http://localhost:8090/?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" />
       <xsd:import schemaLocation="http://localhost:8090/?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+      <xsd:import schemaLocation="http://localhost:8090/?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" />
     </xsd:schema>
   </wsdl:types>
   <wsdl:message name="IAccountManager_CreateAccount_InputMessage">
@@ -45,11 +46,21 @@
   <wsdl:message name="IAccountManager_CreateAccount_ServiceErrorDetailDTOFault_FaultMessage">
     <wsdl:part xmlns:q1="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q1:ServiceErrorDetailDTO" />
   </wsdl:message>
+  <wsdl:message name="IAccountManager_IsNicknameInUse_InputMessage">
+    <wsdl:part name="parameters" element="tns:IsNicknameInUse" />
+  </wsdl:message>
+  <wsdl:message name="IAccountManager_IsNicknameInUse_OutputMessage">
+    <wsdl:part name="parameters" element="tns:IsNicknameInUseResponse" />
+  </wsdl:message>
   <wsdl:portType name="IAccountManager">
     <wsdl:operation name="CreateAccount">
       <wsdl:input wsaw:Action="http://tempuri.org/IAccountManager/CreateAccount" message="tns:IAccountManager_CreateAccount_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IAccountManager/CreateAccountResponse" message="tns:IAccountManager_CreateAccount_OutputMessage" />
       <wsdl:fault wsaw:Action="http://tempuri.org/IAccountManager/CreateAccountServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IAccountManager_CreateAccount_ServiceErrorDetailDTOFault_FaultMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="IsNicknameInUse">
+      <wsdl:input wsaw:Action="http://tempuri.org/IAccountManager/IsNicknameInUse" message="tns:IAccountManager_IsNicknameInUse_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IAccountManager/IsNicknameInUseResponse" message="tns:IAccountManager_IsNicknameInUse_OutputMessage" />
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="NetTcpBinding_IAccountManager" type="tns:IAccountManager">
@@ -66,6 +77,15 @@
       <wsdl:fault name="ServiceErrorDetailDTOFault">
         <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
       </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="IsNicknameInUse">
+      <soap12:operation soapAction="http://tempuri.org/IAccountManager/IsNicknameInUse" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
     </wsdl:operation>
   </wsdl:binding>
   <wsdl:service name="AccountManager">

@@ -126,7 +126,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
 
         private void NavigateToProfile(object parameter)
-        {
+        {// TODO Change from navigation service to window service
             var profileViewModel = new ProfileViewModel(App.ProfileManagerService, App.WindowService);
 
 
@@ -297,7 +297,6 @@ namespace PASSWORD_LIS_Client.ViewModels
         private static void ShowHowToPlay(object parameter)
         {
             var howToPlayWindow = new HowToPlayWindow();
-
             howToPlayWindow.ShowDialog();
         }
 

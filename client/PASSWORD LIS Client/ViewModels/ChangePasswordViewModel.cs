@@ -47,7 +47,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             this.passwordResetClient = passwordResetService;
             this.ChangePasswordCommand = new RelayCommand(async (_) => await ChangePasswordAsync(), (_) => CanChangePassword());
         }
-        public ChangePasswordViewModel() { }
         private bool CanChangePassword()
         {
             return !this.IsBusy && !string.IsNullOrWhiteSpace(this.NewPassword) && 
@@ -75,7 +74,22 @@ namespace PASSWORD_LIS_Client.ViewModels
                     this.windowService.ShowPopUp(Properties.Langs.Lang.unexpectedErrorText,
                         Properties.Langs.Lang.passwordChangeFailedText, PopUpIcon.Warning);
                 }
-            }//TODO: ADD exception handling
+            }
+            catch (TimeoutException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
+                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+            }
+            catch (EndpointNotFoundException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
+                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Warning);
+            }
+            catch (CommunicationException)
+            {
+                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
+                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Warning);
+            }
             catch (Exception)
             {
                 this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,

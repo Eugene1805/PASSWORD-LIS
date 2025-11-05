@@ -150,16 +150,13 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             try
             {
-                var players = await roomManagerClient.GetPlayersInRoomAsync(this.GameCode).ConfigureAwait(false);
-                if (players == null)
-                {
-                    players = new List<PlayerDTO>();
-                }
-
+                var players = await roomManagerClient.GetPlayersInRoomAsync(this.GameCode).ConfigureAwait(false) ?? new List<PlayerDTO>();
                 if (!this.IsGuest)
                 {
                     this.currentPlayer = players.FirstOrDefault(p => p.Id == SessionManager.CurrentUser.PlayerId);
+
                     _ = LoadFriendsAsync();
+
                     reportManagerService.ReportReceived += OnReportReceived;
                     reportManagerService.ReportCountUpdated += OnReportCountUpdated;
                     reportManagerService.PlayerBanned += OnPlayerBanned;
@@ -526,8 +523,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                     windowService.ShowPopUp(
                     Properties.Langs.Lang.hostLeftTitleText,
                     Properties.Langs.Lang.hostLeftText,
-                    PopUpIcon.Warning
-                );
+                    PopUpIcon.Warning);
                 }
                 
                 if (!IsGuest)

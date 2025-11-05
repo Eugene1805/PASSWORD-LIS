@@ -62,7 +62,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         public SettingsViewModel(IWindowService windowService, IFriendsManagerService friendsManagerService,
             BackgroundMusicService backgroundMusicService) {
 
-            var currentLang = Properties.Settings.Default.languageCode;
+            var currentLang = Settings.Default.languageCode;
             if (string.IsNullOrEmpty(currentLang) || currentLang == "en-US")
             {
                 isEnglishSelected = true;

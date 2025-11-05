@@ -85,8 +85,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private async Task SignUpAsync()
         {
-
-            if (!IsInputValid())
+            if (!await IsInputValid())
             {
                 return;
             }
@@ -194,8 +193,24 @@ namespace PASSWORD_LIS_Client.ViewModels
             this.windowService.CloseWindow(this);
         }
 
-        private bool IsInputValid()
-        {// TODO validate no duplicate nicknames
+        private async Task<bool> IsInputValid()
+        {
+            try
+            {
+                if (!await ValidationUtils.IsNicknameInUseAsync(nickname))
+                {
+                    windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
+                        Properties.Langs.Lang.nicknameInUseText, PopUpIcon.Warning);
+                    return false;
+                }
+            }
+            catch
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
+                    Properties.Langs.Lang.networkErrorTitleText, PopUpIcon.Error);
+                return false;
+            }
+            
             if (!ValidationUtils.IsValidEmail(Email))
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,

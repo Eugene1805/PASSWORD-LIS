@@ -200,7 +200,7 @@ namespace PASSWORD_LIS_Client.AccountManagerServiceReference {
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
-    [System.Runtime.Serialization.DataContractAttribute(Name="ServiceErrorCode", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="ServiceErrorCode", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums")]
     public enum ServiceErrorCode : int {
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
@@ -241,6 +241,12 @@ namespace PASSWORD_LIS_Client.AccountManagerServiceReference {
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IAccountManager/CreateAccount", ReplyAction="http://tempuri.org/IAccountManager/CreateAccountResponse")]
         System.Threading.Tasks.Task CreateAccountAsync(PASSWORD_LIS_Client.AccountManagerServiceReference.NewAccountDTO newAccount);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IAccountManager/IsNicknameInUse", ReplyAction="http://tempuri.org/IAccountManager/IsNicknameInUseResponse")]
+        bool IsNicknameInUse(string nickname);
+        
+        [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IAccountManager/IsNicknameInUse", ReplyAction="http://tempuri.org/IAccountManager/IsNicknameInUseResponse")]
+        System.Threading.Tasks.Task<bool> IsNicknameInUseAsync(string nickname);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -276,6 +282,14 @@ namespace PASSWORD_LIS_Client.AccountManagerServiceReference {
         
         public System.Threading.Tasks.Task CreateAccountAsync(PASSWORD_LIS_Client.AccountManagerServiceReference.NewAccountDTO newAccount) {
             return base.Channel.CreateAccountAsync(newAccount);
+        }
+        
+        public bool IsNicknameInUse(string nickname) {
+            return base.Channel.IsNicknameInUse(nickname);
+        }
+        
+        public System.Threading.Tasks.Task<bool> IsNicknameInUseAsync(string nickname) {
+            return base.Channel.IsNicknameInUseAsync(nickname);
         }
     }
 }
