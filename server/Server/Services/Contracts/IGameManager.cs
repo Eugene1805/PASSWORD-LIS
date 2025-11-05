@@ -13,16 +13,16 @@ namespace Services.Contracts
         Task SubscribeToMatchAsync(string gameCode, int playerId);
 
         [OperationContract]
-        Task SubmitClueAsync(string gameCode, string clue);
+        Task SubmitClueAsync(string gameCode, int senderPlayerId, string clue);
 
         [OperationContract]
-        Task SubmitGuessAsync(string gameCode, string guess);
+        Task SubmitGuessAsync(string gameCode, int senderPlayerId, string guess);
 
         [OperationContract]
-        Task PassTurnAsync(string gameCode);
+        Task PassTurnAsync(string gameCode, int senderPlayerId);
 
         [OperationContract]
-        Task SubmitValidationVotesAsync(string gameCode, List<ValidationVoteDTO> votes);
+        Task SubmitValidationVotesAsync(string gameCode, int senderPlayerId, List<ValidationVoteDTO> votes);
     }
 
     public interface IGameManagerCallback

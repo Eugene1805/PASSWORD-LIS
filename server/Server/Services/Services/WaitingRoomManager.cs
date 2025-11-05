@@ -215,27 +215,24 @@ namespace Services.Services
                 log.DebugFormat("SendMessage ignored: game '{0}' not found.", gameCode);
             }
         }
-
+        // TODO ADD fault exception for game not found or not enough players
         public async Task StartGameAsync(string gameCode)
         {
             if (!rooms.TryGetValue(gameCode, out var game))
             {
-                throw new FaultException("La sala de espera no fue encontrada.");
+                throw new FaultException("Waiting room not found");
             }
 
             if (game.Players.Count != MaxPlayersPerGame)
             {
-                // Esta validación ya debería estar en el CanStartGame del cliente, pero la duplicamos por seguridad.
-                throw new FaultException("Se requieren 4 jugadores para iniciar.");
+                throw new FaultException("4 players are required in order to start a game.");
             }
             var playerList = game.Players.Values.Select(p => p.Item2).ToList();
             bool matchCreated = gameManager.CreateMatch(gameCode, playerList);
 
             if (!matchCreated)
             {
-                // Esto podría pasar si, por ej., ya existe una partida con ese código (muy improbable)
-                // O si la lista de jugadores no es válida.
-                throw new FaultException("No se pudo crear la partida en el servidor del juego.");
+                throw new FaultException("Could not create the game.");
             }
 
             log.InfoFormat("Starting game for room '{0}'. Notifying clients and removing room.", gameCode);
@@ -325,6 +322,9 @@ namespace Services.Services
                     {
                         throw new TimeoutException("Callback to player timed out.");
                     }
+
+                    // Ensure any exceptions from the callback are observed and handled by the catch blocks
+                    await callTask;
                 }
                 catch (CommunicationObjectFaultedException ex)
                 {
