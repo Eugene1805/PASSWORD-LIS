@@ -37,6 +37,15 @@
     </xs:sequence>
   </xs:complexType>
   <xs:element name="PlayerDTO" nillable="true" type="tns:PlayerDTO" />
+  <xs:complexType name="PasswordWordDTO">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="EnglishDescription" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="EnglishWord" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="SpanishDescription" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="SpanishWord" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="PasswordWordDTO" nillable="true" type="tns:PasswordWordDTO" />
   <xs:complexType name="GuessResultDTO">
     <xs:sequence>
       <xs:element minOccurs="0" name="IsCorrect" type="xs:boolean" />
@@ -54,7 +63,7 @@
   <xs:complexType name="TurnHistoryDTO">
     <xs:sequence>
       <xs:element minOccurs="0" name="ClueUsed" nillable="true" type="xs:string" />
-      <xs:element minOccurs="0" name="Password" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Password" nillable="true" type="tns:PasswordWordDTO" />
       <xs:element minOccurs="0" name="TurnId" type="xs:int" />
     </xs:sequence>
   </xs:complexType>

@@ -268,6 +268,99 @@ namespace PASSWORD_LIS_Client.GameManagerServiceReference {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="PasswordWordDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
+    [System.SerializableAttribute()]
+    public partial class PasswordWordDTO : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string EnglishDescriptionField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string EnglishWordField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string SpanishDescriptionField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string SpanishWordField;
+        
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string EnglishDescription {
+            get {
+                return this.EnglishDescriptionField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.EnglishDescriptionField, value) != true)) {
+                    this.EnglishDescriptionField = value;
+                    this.RaisePropertyChanged("EnglishDescription");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string EnglishWord {
+            get {
+                return this.EnglishWordField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.EnglishWordField, value) != true)) {
+                    this.EnglishWordField = value;
+                    this.RaisePropertyChanged("EnglishWord");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string SpanishDescription {
+            get {
+                return this.SpanishDescriptionField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.SpanishDescriptionField, value) != true)) {
+                    this.SpanishDescriptionField = value;
+                    this.RaisePropertyChanged("SpanishDescription");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string SpanishWord {
+            get {
+                return this.SpanishWordField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.SpanishWordField, value) != true)) {
+                    this.SpanishWordField = value;
+                    this.RaisePropertyChanged("SpanishWord");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="GuessResultDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
     [System.SerializableAttribute()]
     public partial class GuessResultDTO : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
@@ -356,7 +449,7 @@ namespace PASSWORD_LIS_Client.GameManagerServiceReference {
         private string ClueUsedField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string PasswordField;
+        private PASSWORD_LIS_Client.GameManagerServiceReference.PasswordWordDTO PasswordField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
         private int TurnIdField;
@@ -385,7 +478,7 @@ namespace PASSWORD_LIS_Client.GameManagerServiceReference {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public string Password {
+        public PASSWORD_LIS_Client.GameManagerServiceReference.PasswordWordDTO Password {
             get {
                 return this.PasswordField;
             }
@@ -508,28 +601,28 @@ namespace PASSWORD_LIS_Client.GameManagerServiceReference {
         System.Threading.Tasks.Task SubscribeToMatchAsync(string gameCode, int playerId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameManager/SubmitClue", ReplyAction="http://tempuri.org/IGameManager/SubmitClueResponse")]
-        void SubmitClue(string gameCode, string clue);
+        void SubmitClue(string gameCode, int senderPlayerId, string clue);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameManager/SubmitClue", ReplyAction="http://tempuri.org/IGameManager/SubmitClueResponse")]
-        System.Threading.Tasks.Task SubmitClueAsync(string gameCode, string clue);
+        System.Threading.Tasks.Task SubmitClueAsync(string gameCode, int senderPlayerId, string clue);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameManager/SubmitGuess", ReplyAction="http://tempuri.org/IGameManager/SubmitGuessResponse")]
-        void SubmitGuess(string gameCode, string guess);
+        void SubmitGuess(string gameCode, int senderPlayerId, string guess);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameManager/SubmitGuess", ReplyAction="http://tempuri.org/IGameManager/SubmitGuessResponse")]
-        System.Threading.Tasks.Task SubmitGuessAsync(string gameCode, string guess);
+        System.Threading.Tasks.Task SubmitGuessAsync(string gameCode, int senderPlayerId, string guess);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameManager/PassTurn", ReplyAction="http://tempuri.org/IGameManager/PassTurnResponse")]
-        void PassTurn(string gameCode);
+        void PassTurn(string gameCode, int senderPlayerId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameManager/PassTurn", ReplyAction="http://tempuri.org/IGameManager/PassTurnResponse")]
-        System.Threading.Tasks.Task PassTurnAsync(string gameCode);
+        System.Threading.Tasks.Task PassTurnAsync(string gameCode, int senderPlayerId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameManager/SubmitValidationVotes", ReplyAction="http://tempuri.org/IGameManager/SubmitValidationVotesResponse")]
-        void SubmitValidationVotes(string gameCode, PASSWORD_LIS_Client.GameManagerServiceReference.ValidationVoteDTO[] votes);
+        void SubmitValidationVotes(string gameCode, int senderPlayerId, PASSWORD_LIS_Client.GameManagerServiceReference.ValidationVoteDTO[] votes);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IGameManager/SubmitValidationVotes", ReplyAction="http://tempuri.org/IGameManager/SubmitValidationVotesResponse")]
-        System.Threading.Tasks.Task SubmitValidationVotesAsync(string gameCode, PASSWORD_LIS_Client.GameManagerServiceReference.ValidationVoteDTO[] votes);
+        System.Threading.Tasks.Task SubmitValidationVotesAsync(string gameCode, int senderPlayerId, PASSWORD_LIS_Client.GameManagerServiceReference.ValidationVoteDTO[] votes);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -542,7 +635,7 @@ namespace PASSWORD_LIS_Client.GameManagerServiceReference {
         void OnTimerTick(int secondsLeft);
         
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IGameManager/OnNewPassword")]
-        void OnNewPassword(string password);
+        void OnNewPassword(PASSWORD_LIS_Client.GameManagerServiceReference.PasswordWordDTO password);
         
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IGameManager/OnClueReceived")]
         void OnClueReceived(string clue);
@@ -596,36 +689,36 @@ namespace PASSWORD_LIS_Client.GameManagerServiceReference {
             return base.Channel.SubscribeToMatchAsync(gameCode, playerId);
         }
         
-        public void SubmitClue(string gameCode, string clue) {
-            base.Channel.SubmitClue(gameCode, clue);
+        public void SubmitClue(string gameCode, int senderPlayerId, string clue) {
+            base.Channel.SubmitClue(gameCode, senderPlayerId, clue);
         }
         
-        public System.Threading.Tasks.Task SubmitClueAsync(string gameCode, string clue) {
-            return base.Channel.SubmitClueAsync(gameCode, clue);
+        public System.Threading.Tasks.Task SubmitClueAsync(string gameCode, int senderPlayerId, string clue) {
+            return base.Channel.SubmitClueAsync(gameCode, senderPlayerId, clue);
         }
         
-        public void SubmitGuess(string gameCode, string guess) {
-            base.Channel.SubmitGuess(gameCode, guess);
+        public void SubmitGuess(string gameCode, int senderPlayerId, string guess) {
+            base.Channel.SubmitGuess(gameCode, senderPlayerId, guess);
         }
         
-        public System.Threading.Tasks.Task SubmitGuessAsync(string gameCode, string guess) {
-            return base.Channel.SubmitGuessAsync(gameCode, guess);
+        public System.Threading.Tasks.Task SubmitGuessAsync(string gameCode, int senderPlayerId, string guess) {
+            return base.Channel.SubmitGuessAsync(gameCode, senderPlayerId, guess);
         }
         
-        public void PassTurn(string gameCode) {
-            base.Channel.PassTurn(gameCode);
+        public void PassTurn(string gameCode, int senderPlayerId) {
+            base.Channel.PassTurn(gameCode, senderPlayerId);
         }
         
-        public System.Threading.Tasks.Task PassTurnAsync(string gameCode) {
-            return base.Channel.PassTurnAsync(gameCode);
+        public System.Threading.Tasks.Task PassTurnAsync(string gameCode, int senderPlayerId) {
+            return base.Channel.PassTurnAsync(gameCode, senderPlayerId);
         }
         
-        public void SubmitValidationVotes(string gameCode, PASSWORD_LIS_Client.GameManagerServiceReference.ValidationVoteDTO[] votes) {
-            base.Channel.SubmitValidationVotes(gameCode, votes);
+        public void SubmitValidationVotes(string gameCode, int senderPlayerId, PASSWORD_LIS_Client.GameManagerServiceReference.ValidationVoteDTO[] votes) {
+            base.Channel.SubmitValidationVotes(gameCode, senderPlayerId, votes);
         }
         
-        public System.Threading.Tasks.Task SubmitValidationVotesAsync(string gameCode, PASSWORD_LIS_Client.GameManagerServiceReference.ValidationVoteDTO[] votes) {
-            return base.Channel.SubmitValidationVotesAsync(gameCode, votes);
+        public System.Threading.Tasks.Task SubmitValidationVotesAsync(string gameCode, int senderPlayerId, PASSWORD_LIS_Client.GameManagerServiceReference.ValidationVoteDTO[] votes) {
+            return base.Channel.SubmitValidationVotesAsync(gameCode, senderPlayerId, votes);
         }
     }
 }

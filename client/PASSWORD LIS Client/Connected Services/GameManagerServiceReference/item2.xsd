@@ -18,6 +18,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element minOccurs="0" name="gameCode" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="senderPlayerId" type="xs:int" />
         <xs:element minOccurs="0" name="clue" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
@@ -31,6 +32,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element minOccurs="0" name="gameCode" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="senderPlayerId" type="xs:int" />
         <xs:element minOccurs="0" name="guess" nillable="true" type="xs:string" />
       </xs:sequence>
     </xs:complexType>
@@ -44,6 +46,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element minOccurs="0" name="gameCode" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="senderPlayerId" type="xs:int" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -56,6 +59,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element minOccurs="0" name="gameCode" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="senderPlayerId" type="xs:int" />
         <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" minOccurs="0" name="votes" nillable="true" type="q1:ArrayOfValidationVoteDTO" />
       </xs:sequence>
     </xs:complexType>
@@ -82,7 +86,7 @@
   <xs:element name="OnNewPassword">
     <xs:complexType>
       <xs:sequence>
-        <xs:element minOccurs="0" name="password" nillable="true" type="xs:string" />
+        <xs:element xmlns:q3="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" minOccurs="0" name="password" nillable="true" type="q3:PasswordWordDTO" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -96,21 +100,21 @@
   <xs:element name="OnGuessResult">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q3="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" minOccurs="0" name="result" nillable="true" type="q3:GuessResultDTO" />
+        <xs:element xmlns:q4="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" minOccurs="0" name="result" nillable="true" type="q4:GuessResultDTO" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="OnBeginRoundValidation">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q4="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" minOccurs="0" name="turns" nillable="true" type="q4:ArrayOfTurnHistoryDTO" />
+        <xs:element xmlns:q5="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" minOccurs="0" name="turns" nillable="true" type="q5:ArrayOfTurnHistoryDTO" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
   <xs:element name="OnMatchOver">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q5="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" minOccurs="0" name="summary" nillable="true" type="q5:MatchSummaryDTO" />
+        <xs:element xmlns:q6="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" minOccurs="0" name="summary" nillable="true" type="q6:MatchSummaryDTO" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
