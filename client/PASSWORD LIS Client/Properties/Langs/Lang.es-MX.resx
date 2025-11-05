@@ -678,4 +678,31 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
   <data name="couldNotSummitReportText" xml:space="preserve">
     <value>No se pudo enviar el reporte.</value>
   </data>
+  <data name="existingFriendshipText" xml:space="preserve">
+    <value>No se pudo enviar la solicitud de amistad porque ya tienes una amistad con ese jugador</value>
+  </data>
+  <data name="existingFriendRequestText" xml:space="preserve">
+    <value>No se pudo enviar la solicitud de amistad porque ya has enviado una solicitud a ese jugador</value>
+  </data>
+  <data name="friendRequestToYourselfText" xml:space="preserve">
+    <value>No puedes enviarte una solicitud de amistad a ti mismo</value>
+  </data>
+  <data name="friendRequestInboxText" xml:space="preserve">
+    <value>Este jugador ya te ha enviado una solicitud de amistad, revisa tu bandeja</value>
+  </data>
+  <data name="friendRequestsTitleText" xml:space="preserve">
+    <value>Solicitudes de Amistad</value>
+  </data>
+  <data name="acceptText" xml:space="preserve">
+    <value>Aceptar</value>
+  </data>
+  <data name="rejectText" xml:space="preserve">
+    <value>Rechazar</value>
+  </data>
+  <data name="noPendingRequestsText" xml:space="preserve">
+    <value>No tienes solicitudes pendientes</value>
+  </data>
+  <data name="noFriendsAddOneText" xml:space="preserve">
+    <value>No tienes amigos, trata de agregar uno</value>
+  </data>
 </root>

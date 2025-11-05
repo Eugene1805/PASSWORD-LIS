@@ -4,9 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PASSWORD_LIS_Client.Views"
+        xmlns:utils="clr-namespace:PASSWORD_LIS_Client.Utils"
         xmlns:converters="clr-namespace:PASSWORD_LIS_Client.Converters"
         mc:Ignorable="d"
-        Title="FriendRequestsWindow" Height="400" Width="350"
+        Title="{utils:Translate friendRequestsTitleText}" Height="400" Width="350"
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
@@ -14,58 +15,64 @@
         <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisibility"/>
     </Window.Resources>
     
-    <Grid>
+    <Grid Background="Black">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        
-        <TextBlock Grid.Row="0" Text="Solicitudes de amistad" Style="{StaticResource subtitleBlackTextBlockStyle}"/>
+
+        <TextBlock Grid.Row="0" Text="{utils:Translate friendRequestsTitleText}" Style="{StaticResource subtitleTextBlockStyle}"/>
 
         <Grid Grid.Row="1" Margin="10">
+            <Border Style="{StaticResource floatingBorderStyle}">
+                <Grid>
+                    <ListView ItemsSource="{Binding PendingRequests}" 
+                              SelectedItem="{Binding SelectedRequest}"
+                              Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibility}}"
+                              Background="Transparent"
+                              BorderThickness="0">
 
-            <ListView ItemsSource="{Binding PendingRequests}" 
-                      SelectedItem="{Binding SelectedRequest}"
-                      Visibility="{Binding IsLoading, Converter={StaticResource InverseBoolToVisibility}}">
+                        <ListView.Style>
+                            <Style TargetType="ListView">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ShowNoRequestsMessage}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ListView.Style>
 
-                <ListView.Style>
-                    <Style TargetType="ListView">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ShowNoRequestsMessage}" Value="True">
-                                <Setter Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </ListView.Style>
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Nickname}"
+                                           Style="{StaticResource bodyTextBlockStyle}"/>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
 
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Nickname}"/>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+                    <TextBlock Text="{utils:Translate noPendingRequestsText}"
+                               Style="{StaticResource subtitleTextBlockStyle}"
+                               Opacity="0.6"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding ShowNoRequestsMessage, Converter={StaticResource BoolToVisibility}}"/>
 
-            <TextBlock Text="No tienes solicitudes pendientes."
-                       Style="{StaticResource subtitleBlackTextBlockStyle}"
-                       Opacity="0.6"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center"
-                       Visibility="{Binding ShowNoRequestsMessage, Converter={StaticResource BoolToVisibility}}"/>
-
-            <ProgressBar IsIndeterminate="True" 
-                         Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"
-                         HorizontalAlignment="Center"
-                         VerticalAlignment="Center"
-                         Width="150" Height="15"/>
-    </Grid>
+                    <ProgressBar IsIndeterminate="True"
+                                 Style="{StaticResource circularProgressBar}"
+                                 Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+        </Grid>
 
     <StackPanel Grid.Row="2" Orientation="Horizontal" 
                     VerticalAlignment="Bottom" HorizontalAlignment="Center" 
                     Margin="10">
-        <Button Content="Aceptar" Style="{StaticResource primaryButtonStyle}" Height="40" 
+        <Button Content="{utils:Translate acceptText}" Style="{StaticResource primaryButtonStyle}" Height="40" 
                     Margin="10" Command="{Binding AcceptRequestCommand}" Width="90"/>
-        <Button Content="Rechazar" Style="{StaticResource logOutButtonStyle}" Height="40"
+        <Button Content="{utils:Translate rejectText}" Style="{StaticResource logOutButtonStyle}" Height="40"
                     Margin="10" Command="{Binding RejectRequestCommand}" Width="90"/>
     </StackPanel>
     </Grid>

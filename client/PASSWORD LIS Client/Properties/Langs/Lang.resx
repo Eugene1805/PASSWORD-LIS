@@ -678,4 +678,31 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="couldNotSummitReportText" xml:space="preserve">
     <value>The report could not be sent.</value>
   </data>
+  <data name="existingFriendshipText" xml:space="preserve">
+    <value>The friend request could not be sent because you are already friends with that player</value>
+  </data>
+  <data name="existingFriendRequestText" xml:space="preserve">
+    <value>The friend request could not be sent because you have already sent a request to that player</value>
+  </data>
+  <data name="friendRequestToYourselfText" xml:space="preserve">
+    <value>You cannot send a friend request to yourself</value>
+  </data>
+  <data name="friendRequestInboxText" xml:space="preserve">
+    <value>This player has already sent you a friend request, check your inbox</value>
+  </data>
+  <data name="friendRequestsTitleText" xml:space="preserve">
+    <value>Friend Requests</value>
+  </data>
+  <data name="acceptText" xml:space="preserve">
+    <value>Accept</value>
+  </data>
+  <data name="rejectText" xml:space="preserve">
+    <value>Reject</value>
+  </data>
+  <data name="noPendingRequestsText" xml:space="preserve">
+    <value>You have no pending requests</value>
+  </data>
+  <data name="noFriendsAddOneText" xml:space="preserve">
+    <value>You have no friends, try to add one</value>
+  </data>
 </root>

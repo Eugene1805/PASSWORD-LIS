@@ -79,27 +79,32 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 var requests = await friendsService.GetPendingRequestsAsync();
                 PendingRequests = new ObservableCollection<FriendDTO>(requests);
+
             }
             catch (FaultException<ServiceErrorDetailDTO> ex)
             {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, ex.Detail.Message, PopUpIcon.Error);
+                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, 
+                    ex.Detail.Message, PopUpIcon.Error);
             }
             catch (TimeoutException)
             {
-                windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText, Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+                windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText, 
+                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
             }
             catch (EndpointNotFoundException)
             {
-                windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText, Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
+                windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText, 
+                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
             }
             catch (CommunicationException)
             {
-                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText, Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
+                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText, 
+                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
             }
             catch (Exception)
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                                        "No se pudieron cargar las solicitudes de amistad", PopUpIcon.Error); // Properties.Langs.Lang.friendRequestsLoadErrorText
+                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error); 
             }
             finally
             {
@@ -124,24 +129,28 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             catch (FaultException<ServiceErrorDetailDTO> ex)
             {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, ex.Detail.Message, PopUpIcon.Error);
+                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, 
+                    ex.Detail.Message, PopUpIcon.Error);
             }
             catch (TimeoutException)
             {
-                windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText, Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+                windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText, 
+                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
             }
             catch (EndpointNotFoundException)
             {
-                windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText, Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
+                windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText, 
+                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
             }
             catch (CommunicationException)
             {
-                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText, Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
+                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText, 
+                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
             }
             catch (Exception)
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                                        "Error al cargar la lista de solicitudes", PopUpIcon.Error); // Properties.Langs.Lang.friendRequestRespondErrorText
+                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
             }
             finally
             {

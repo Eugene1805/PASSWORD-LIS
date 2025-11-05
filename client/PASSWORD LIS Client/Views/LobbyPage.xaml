@@ -13,7 +13,7 @@
       MinHeight="450" MinWidth="800"
       Loaded="LobbyPageLoaded"
       KeepAlive="True"
-      Title="LobbyPage"> <!--Cambiar titulo a internalizacion-->
+      Title="Lobby"> 
      
     <Page.Resources>
         <converters:AvatarIdToImageConverter x:Key="AvatarIdToImageConverter"/>
@@ -86,21 +86,40 @@
                 <Border Grid.Row="2" Style ="{StaticResource floatingBorderStyle}" Margin="0,5,0,5"
                     Visibility="{Binding IsGuest, Converter={StaticResource InverseBooleanToVisibility}}">
                     <Grid>
-                        <TextBlock Text="Cargando amigos ..." Style="{StaticResource bodyTextBlockStyle}"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   Visibility="{Binding IsLoadingFriends, Converter= {StaticResource BooleanToVisibilityConverter}}"/>
+                        <ProgressBar IsIndeterminate="True"
+                                     Style="{StaticResource circularProgressBar}"
+                                     Visibility="{Binding IsLoadingFriends, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
+                        <TextBlock Text="{utils:Translate noFriendsAddOneText}"
+                                   Style="{StaticResource subtitleTextBlockStyle}" Opacity="0.6"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   TextWrapping="Wrap" TextAlignment="Center"
+                                   Visibility="{Binding ShowNoFriendsMessage, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        
                         <ListView ItemsSource="{Binding Friends}"
                                   Background="Transparent" BorderThickness="0"
                                   Visibility="{Binding IsLoadingFriends, Converter={StaticResource InverseBooleanToVisibility}}"
                                   SelectedItem="{Binding SelectedFriend, Mode=TwoWay}">
+                            
+                            <ListView.Style>
+                                <Style TargetType="ListView">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ShowNoFriendsMessage}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListView.Style>
+
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Nickname}" Margin="5"
-                                               Style="{StaticResource bodyTextBlockStyle}" TextAlignment="Left"/>
+                               Style="{StaticResource bodyTextBlockStyle}" TextAlignment="Left"/>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
+
                     </Grid>
                 </Border>
 

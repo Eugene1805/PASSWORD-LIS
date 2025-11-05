@@ -70,7 +70,26 @@ namespace PASSWORD_LIS_Client.Services
 
         public Task UnsubscribeFromFriendUpdatesAsync(int userAccountId)
         {
-            return proxy.UnsubscribeFromFriendUpdatesAsync(userAccountId);
+            var channel = proxy as ICommunicationObject;
+            try
+            {
+                if (channel == null || channel.State == CommunicationState.Faulted)
+                {
+                    channel?.Abort();
+                    return Task.CompletedTask;
+                }
+                return proxy.UnsubscribeFromFriendUpdatesAsync(userAccountId);
+            }
+            catch (CommunicationException)
+            {
+                channel?.Abort();
+                return Task.CompletedTask; 
+            } 
+            catch (Exception)
+            {
+                channel?.Abort();
+                return Task.CompletedTask;
+            }
         }
 
         public void OnFriendRequestReceived(FriendDTO requester)

@@ -49,23 +49,28 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             catch (FaultException<ServiceErrorDetailDTO> ex)
             {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, ex.Detail.Message, PopUpIcon.Error);
+                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, 
+                    ex.Detail.Message, PopUpIcon.Error);
             }
             catch (TimeoutException)
             {
-                windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText, Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+                windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText, 
+                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
             }
             catch (EndpointNotFoundException)
             {
-                windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText, Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
+                windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText, 
+                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
             }
             catch (CommunicationException)
             {
-                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText, Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
+                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText, 
+                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
             }
             catch (Exception) 
             {
-                windowService.ShowPopUp("Error", "Error de conexión", PopUpIcon.Error);
+                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
             }
             finally
             {
@@ -87,21 +92,20 @@ namespace PASSWORD_LIS_Client.ViewModels
                         Properties.Langs.Lang.playerNotFoundText, PopUpIcon.Warning);
                     break;
                 case FriendRequestResult.AlreadyFriends:
-                    windowService.ShowPopUp("Información",
-                        "Ya tienes una amistad con este jugador", PopUpIcon.Information);
+                    windowService.ShowPopUp(Properties.Langs.Lang.informationText,
+                        Properties.Langs.Lang.existingFriendshipText, PopUpIcon.Information);
                     break;
                 case FriendRequestResult.RequestAlreadySent:
-                    windowService.ShowPopUp("Información",
-                        "Ya has enviado una soicitud a este jugador", PopUpIcon.Information);
+                    windowService.ShowPopUp(Properties.Langs.Lang.informationText, 
+                        Properties.Langs.Lang.existingFriendRequestText, PopUpIcon.Information);
                     break;
                 case FriendRequestResult.CannotAddSelf:
                     windowService.ShowPopUp(Properties.Langs.Lang.informationText,
-                        "No puedes enviarte una solicitud de amistas a ti mismo.",
-                        PopUpIcon.Information);
+                        Properties.Langs.Lang.friendRequestToYourselfText, PopUpIcon.Information);
                     break;
                 case FriendRequestResult.RequestAlreadyReceived:
-                    windowService.ShowPopUp("Información",
-                        "Este jugador ya te ha enviado una solicitud de amistad, revisa tu bandeja", PopUpIcon.Information);
+                    windowService.ShowPopUp(Properties.Langs.Lang.informationText,
+                        Properties.Langs.Lang.friendRequestInboxText, PopUpIcon.Information);
                     break;
                 case FriendRequestResult.Failed:
                 default:
