@@ -34,5 +34,6 @@ namespace Data.Model
         public virtual DbSet<sysdiagrams> sysdiagrams { get; set; }
         public virtual DbSet<Team> Team { get; set; }
         public virtual DbSet<UserAccount> UserAccount { get; set; }
+        public virtual DbSet<PasswordWord> PasswordWord { get; set; }
     }
 }

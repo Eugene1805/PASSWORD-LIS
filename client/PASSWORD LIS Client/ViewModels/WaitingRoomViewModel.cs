@@ -14,7 +14,7 @@ using System.Windows.Input;
 using System.Collections.Generic;
 
 namespace PASSWORD_LIS_Client.ViewModels
-{//TODO ADD a constant for the isGuest
+{
     public class WaitingRoomViewModel : BaseViewModel
     {
         public ObservableCollection<string> ChatMessages { get; }

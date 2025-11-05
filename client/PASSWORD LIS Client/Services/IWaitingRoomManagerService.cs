@@ -24,7 +24,7 @@ namespace PASSWORD_LIS_Client.Services
         Task HostLeftAsync(string gameCode);
 
     }
-    // TODO: Add exception handling and abort the resources
+    
     public class WcfWaitingRoomManagerService : IWaitingRoomManagerService, IWaitingRoomManagerCallback
     {
         public event Action<ChatMessageDTO> MessageReceived;
