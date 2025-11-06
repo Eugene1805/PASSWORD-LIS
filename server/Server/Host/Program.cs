@@ -21,7 +21,7 @@ namespace Host
 
             try
             {
-                log.Info("La aplicación ha iniciado.");
+                log.Info("The server started.");
                 // We create the dependencies first so they can be used in every service
                 var accountRepository = new AccountRepository();
                 var emailSender = new EmailSender();
