@@ -38,6 +38,8 @@ namespace Services.Services
             public List<PasswordWord> CurrentRoundWords { get; set; } // The 5 words for the round
             public int CurrentWordIndex { get; set; }
             public List<TurnHistoryDTO> CurrentTurnHistory { get; set; }
+            public List<List<ValidationVoteDTO>> ReceivedVotes { get; }
+            public HashSet<int> PlayersWhoVoted { get; }
 
             public MatchState(string gameCode, List<PlayerDTO> expectedPlayers)
             {
@@ -51,6 +53,8 @@ namespace Services.Services
                 BlueTeamScore = 0;
                 CurrentRound = 1;
                 CurrentTurnTeam = MatchTeam.RedTeam;
+                ReceivedVotes = new List<List<ValidationVoteDTO>>();
+                PlayersWhoVoted = new HashSet<int>();
             }
             public PasswordWord GetCurrentPassword()
             {
@@ -69,6 +73,7 @@ namespace Services.Services
         private readonly IWordRepository wordRepository;
         private const int ROUND_DURATION_SECONDS = 60;
         private const int WORDS_PER_ROUND = 5;
+        private const int TOTAL_ROUNDS = 5;
 
         public GameManager(IOperationContextWrapper contextWrapper, IWordRepository wordRepository)
         {
@@ -216,9 +221,42 @@ namespace Services.Services
             }
         }
 
-        public Task SubmitValidationVotesAsync(string gameCode, int senderPlayerId, List<ValidationVoteDTO> votes)
+        public async Task SubmitValidationVotesAsync(string gameCode, int senderPlayerId, List<ValidationVoteDTO> votes)
         {
-            return Task.CompletedTask;
+            if (!matches.TryGetValue(gameCode, out var matchState) || matchState.Status != MatchStatus.Validating)
+                return; // No es tiempo de votar
+
+            if (!matchState.ActivePlayers.TryGetValue(senderPlayerId, out var sender))
+                return; // Jugador no existe
+
+            var teamThatPlayed = matchState.CurrentTurnTeam;
+            var validatingTeam = (teamThatPlayed == MatchTeam.RedTeam) ? MatchTeam.BlueTeam : MatchTeam.RedTeam;
+
+            if (sender.Player.Team != validatingTeam)
+                return; // El equipo incorrecto está intentando votar
+
+            // Tarea 4.3.2: Sincronización
+            lock (matchState.ReceivedVotes)
+            {
+                if (matchState.PlayersWhoVoted.Contains(senderPlayerId))
+                    return; // Ya votó
+
+                matchState.PlayersWhoVoted.Add(senderPlayerId);
+                matchState.ReceivedVotes.Add(votes);
+
+                // Comprueba si ya han votado los 2 jugadores
+                var validators = GetPlayersByTeam(matchState, validatingTeam);
+                if (matchState.PlayersWhoVoted.Count < validators.Count())
+                {
+                    return; // Faltan votos
+                }
+
+                // ¡Tenemos todos los votos!
+            }
+
+            // Tarea 4.3.3: Procesar los votos
+            // (Lo llamamos fuera del lock para evitar mantenerlo bloqueado durante operaciones async)
+            await ProcessVotesAsync(matchState, teamThatPlayed);
         }
 
         public async Task SubscribeToMatchAsync(string gameCode, int playerId)
@@ -272,7 +310,7 @@ namespace Services.Services
                 };
 
                 await BroadcastAsync(matchState, callback => callback.OnMatchInitialized(initState));
-                await StartRoundAsync(matchState);
+                await StartRoundTurnAsync(matchState);
             }
             catch (Exception ex)
             {
@@ -301,14 +339,21 @@ namespace Services.Services
             });
             await Task.WhenAll(tasks);
         }
-        private async Task StartRoundAsync(MatchState matchState)
+        private async Task StartRoundTurnAsync(MatchState matchState)
         {
             matchState.Status = MatchStatus.InProgress;
             matchState.CurrentRoundWords = await wordRepository.GetRandomWordsAsync(WORDS_PER_ROUND);
             matchState.CurrentWordIndex = 0;
             matchState.CurrentTurnHistory = new List<TurnHistoryDTO>();
+            if (matchState.CurrentTurnTeam == MatchTeam.RedTeam)
+            {
+                matchState.CurrentRoundWords = await wordRepository.GetRandomWordsAsync(WORDS_PER_ROUND);
+            }
 
-            if (matchState.CurrentRoundWords.Count == 0)
+            matchState.CurrentWordIndex = 0;
+            matchState.CurrentTurnHistory = new List<TurnHistoryDTO>();
+
+            if (matchState.CurrentRoundWords == null || matchState.CurrentRoundWords.Count == 0)
             {
                 await BroadcastAsync(matchState, cb => cb.OnMatchCancelled("Error: No se encontraron palabras en la base de datos."));
                 return;
@@ -353,15 +398,35 @@ namespace Services.Services
         
         private async Task StartValidationPhaseAsync(MatchState matchState)
         {
-            // TODO: Level4.1
-            // This function will be called when time runs out or the5 words are completed.
-            // It will stop the game and notify the opposing team to validate.
             matchState.Status = MatchStatus.Validating;
-            // await BroadcastAsync(...);
+            var teamThatPlayed = matchState.CurrentTurnTeam;
+            var validatingTeam = (teamThatPlayed == MatchTeam.RedTeam) ? MatchTeam.BlueTeam : MatchTeam.RedTeam;
+
+            // Limpia los votos de la validación anterior
+            matchState.ReceivedVotes.Clear();
+            matchState.PlayersWhoVoted.Clear();
+
+            // Tarea 4.1.2: Obtener historial
+            var historyToValidate = matchState.CurrentTurnHistory;
+            if (historyToValidate.Count == 0)
+            {
+                // No hay nada que validar (ej. se acabó el tiempo en la primera palabra sin pistas)
+                // Pasa directamente a procesar los "votos" (que están vacíos)
+                await ProcessVotesAsync(matchState, teamThatPlayed);
+                return;
+            }
+
+            // Tarea 4.1.3: Enviar historial al equipo validador
+            var validators = GetPlayersByTeam(matchState, validatingTeam);
+            await BroadcastToPlayersAsync(validators, cb => cb.OnBeginRoundValidation(historyToValidate));
+
+            // Opcional: Iniciar un timer de votación (ej. 30 segundos)
+            // Si el timer expira, llama a ProcessVotesAsync forzosamente.
         }
 
         private async Task HandlePlayerDisconnectionAsync(MatchState matchState, int disconnectedPlayerId)
         {
+            if (matchState.Status == MatchStatus.Finished) return;
             // TODO: Level5+ (Disconnection handling)
             if (matchState.ActivePlayers.TryRemove(disconnectedPlayerId, out var disconnectedPlayer))
             {
@@ -374,6 +439,10 @@ namespace Services.Services
         }
 
         // --- Helpers ---
+        private IEnumerable<(IGameManagerCallback Callback, PlayerDTO Player)> GetPlayersByTeam(MatchState state, MatchTeam team)
+        {
+            return state.ActivePlayers.Values.Where(p => p.Player.Team == team);
+        }
         private (IGameManagerCallback Callback, PlayerDTO Player) GetPlayerByRole(MatchState state, MatchTeam team, PlayerRole role)
         {
             return state.ActivePlayers.Values.FirstOrDefault(p => p.Player.Team == team && p.Player.Role == role);
@@ -383,6 +452,105 @@ namespace Services.Services
         {
             // Access the Player property from the tuple parameter correctly
             return state.ActivePlayers.Values.FirstOrDefault(p => p.Player.Team == player.Player.Team && p.Player.Id != player.Player.Id);
+        }
+        private async Task ProcessVotesAsync(MatchState matchState, MatchTeam teamThatPlayed)
+        {
+            int totalPenalty = 0;
+            // (Regla: 2 puntos por sinónimo, 1 punto por multi-palabra, como definimos)
+            // (Regla: Se aplica la penalización si *CUALQUIER* validador la marca)
+
+            var penalizedTurns = new HashSet<int>();
+
+            // NOTA: Como no usas sinónimos, quitamos esa lógica, 
+            // pero mantenemos la de "multi-palabra" (más de una palabra por pista).
+            // Tu regla dice: "El 'Pistero' no tiene permitido decir más de una palabra por turno,
+            // sino el equipo será sancionado con un punto menos"
+
+            // Simplificamos la lógica de votación ya que no hay sinónimos:
+            // El DTO 'ValidationVoteDTO' solo necesita un bool 'PenalizeMultiword'
+            var turnsToPenalize = new HashSet<int>();
+
+            foreach (var voteList in matchState.ReceivedVotes)
+            {
+                foreach (var vote in voteList.Where(v => v.PenalizeMultiword)) // Asumiendo que ValidationVoteDTO tiene 'PenalizeMultiword'
+                {
+                    turnsToPenalize.Add(vote.TurnId);
+                }
+            }
+
+            totalPenalty = turnsToPenalize.Count; // 1 punto por cada turno penalizado
+
+            // Tarea 4.3.3: Aplicar penalización
+            lock (matchState)
+            {
+                if (teamThatPlayed == MatchTeam.RedTeam)
+                {
+                    matchState.RedTeamScore = Math.Max(0, matchState.RedTeamScore - totalPenalty);
+                }
+                else
+                {
+                    matchState.BlueTeamScore = Math.Max(0, matchState.BlueTeamScore - totalPenalty);
+                }
+            }
+
+            // Notificar a todos el resultado de la validación
+            var validationResult = new ValidationResultDTO
+            {
+                TeamThatWasValidated = teamThatPlayed,
+                TotalPenaltyApplied = totalPenalty,
+                NewRedTeamScore = matchState.RedTeamScore,
+                NewBlueTeamScore = matchState.BlueTeamScore,
+                Message = $"Penalización de {totalPenalty} puntos al Equipo {teamThatPlayed}"
+            };
+            await BroadcastAsync(matchState, cb => cb.OnValidationComplete(validationResult));
+
+            // Tarea 4.3.4: Continuar el flujo del juego
+            if (teamThatPlayed == MatchTeam.RedTeam)
+            {
+                // El Equipo Rojo acaba de jugar. Ahora es turno del Equipo Azul.
+                matchState.CurrentTurnTeam = MatchTeam.BlueTeam;
+                await StartRoundTurnAsync(matchState); // Inicia el turno del Azul
+            }
+            else
+            {
+                // El Equipo Azul acaba de jugar. La ronda completa ha terminado.
+                matchState.CurrentRound++;
+
+                if (matchState.CurrentRound > TOTAL_ROUNDS)
+                {
+                    // --- TAREA 5.1 (STUB) ---
+                    await EndGameAsync(matchState);
+                }
+                else
+                {
+                    // Iniciar la siguiente ronda, volviendo al Equipo Rojo
+                    matchState.CurrentTurnTeam = MatchTeam.RedTeam;
+                    await StartRoundTurnAsync(matchState);
+                }
+            }
+        }
+        private async Task BroadcastToPlayersAsync(IEnumerable<(IGameManagerCallback Callback, PlayerDTO Player)> players, Action<IGameManagerCallback> action)
+        {
+            // Envía solo a un subconjunto de jugadores (ej. los validadores)
+            var tasks = players.Select(async playerEntry =>
+            {
+                try { action(playerEntry.Callback); }
+                catch { /* (Opcional) Manejar desconexión aquí también */ }
+            });
+            await Task.WhenAll(tasks);
+        }
+        // --- TAREA 5.1 (STUB) ---
+        private async Task EndGameAsync(MatchState matchState)
+        {
+            matchState.Status = MatchStatus.Finished;
+            // TODO: Implementar Nivel 5
+            // 1. Comparar matchState.RedTeamScore vs BlueTeamScore
+            // 2. Manejar lógica de Muerte Súbita (empate)
+            // 3. Crear MatchSummaryDTO
+            // 4. Broadcast OnMatchOver
+            // 5. Persistir en BD (solo IDs > 0)
+            // 6. Limpiar (matches.TryRemove)
+            await Task.CompletedTask;
         }
         private PasswordWordDTO ToDTO(PasswordWord entity)
         {

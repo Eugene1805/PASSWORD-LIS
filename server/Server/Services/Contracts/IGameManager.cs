@@ -46,6 +46,8 @@ namespace Services.Contracts
         void OnBeginRoundValidation(List<TurnHistoryDTO> turns); // FOr the validators
 
         [OperationContract(IsOneWay = true)]
+        void OnValidationComplete(ValidationResultDTO result);
+        [OperationContract(IsOneWay = true)]
         void OnMatchOver(MatchSummaryDTO summary);
 
         [OperationContract(IsOneWay = true)]
