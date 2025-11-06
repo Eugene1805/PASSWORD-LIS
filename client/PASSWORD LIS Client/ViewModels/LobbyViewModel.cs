@@ -45,7 +45,8 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ObservableCollection<FriendDTO> Friends
         {
             get => friends;
-            set {
+            set 
+            {
                 SetProperty(ref friends, value);
                 UpdateFriendsMessageVisibility();
             }

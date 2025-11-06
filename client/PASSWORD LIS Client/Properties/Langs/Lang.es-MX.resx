@@ -705,4 +705,7 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
   <data name="noFriendsAddOneText" xml:space="preserve">
     <value>No tienes amigos, trata de agregar uno</value>
   </data>
+  <data name="addFriendTitleText" xml:space="preserve">
+    <value>Agregar Amigo</value>
+  </data>
 </root>

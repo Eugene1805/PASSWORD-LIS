@@ -70,6 +70,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a Add Friend.
+        /// </summary>
+        public static string addFriendTitleText {
+            get {
+                return ResourceManager.GetString("addFriendTitleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a There is already a friend request, or you are already friends with this player.
         /// </summary>
         public static string alreadyFriendsText {

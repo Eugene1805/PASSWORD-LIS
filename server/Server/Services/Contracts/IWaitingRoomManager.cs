@@ -32,6 +32,14 @@ namespace Services.Contracts
         Task<List<PlayerDTO>> GetPlayersInRoomAsync(string gameCode);
         [OperationContract]
         Task HostLeftAsync(string gameCode);
+
+        [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
+        Task SendGameInvitationByEmailAsync(string email, string gameCode, string inviterNickname);
+
+        [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
+        Task SendGameInvitationToFriendAsync(int friendPlayerId, string gameCode, string inviterNickname);
     }
     public interface IWaitingRoomCallback
     {

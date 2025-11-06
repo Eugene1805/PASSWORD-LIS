@@ -3,11 +3,13 @@ using log4net;
 using Services.Contracts;
 using Services.Contracts.DTOs;
 using Services.Contracts.Enums;
+using Services.Util;
 using Services.Wrappers;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using System.Security.Cryptography;
 using System.ServiceModel;
 using System.Threading;
@@ -31,16 +33,20 @@ namespace Services.Services
         private readonly IPlayerRepository repository;
         private readonly IOperationContextWrapper operationContext;
         private readonly IGameManager gameManager;
+        private readonly IAccountRepository accountRepository;
+        private readonly INotificationService notificationService;
         private static int guestIdCounter = 0;
         private const int MaxPlayersPerGame = 4;
         private static readonly Random random = new Random();
         private static readonly TimeSpan CallbackTimeout = TimeSpan.FromSeconds(5);
 
-        public WaitingRoomManager(IPlayerRepository playerRepository, IOperationContextWrapper operationContextWrapper, IGameManager gameManager)
+        public WaitingRoomManager(IPlayerRepository playerRepository, IOperationContextWrapper operationContextWrapper, IGameManager gameManager, IAccountRepository accountRepository, INotificationService notificationService)
         {
             repository = playerRepository;
             operationContext = operationContextWrapper;
             this.gameManager = gameManager;
+            this.accountRepository = accountRepository;
+            this.notificationService = notificationService;
         }
 
         public async Task<string> CreateRoomAsync(string email)
@@ -56,7 +62,7 @@ namespace Services.Services
             }
 
             var playerId = await JoinRoomAsRegisteredPlayerAsync(gameCode, email);
-            if (playerId >0)
+            if (playerId > 0)
             {
                 newGame.HostPlayerId = playerId;
                 log.InfoFormat("Game '{0}' created. Host player id: {1}.", gameCode, playerId);
@@ -102,7 +108,7 @@ namespace Services.Services
             var playerDto = new PlayerDTO
             {
                 Id = playerEntity.Id,
-                PhotoId = playerEntity.UserAccount.PhotoId ??0,
+                PhotoId = playerEntity.UserAccount.PhotoId ?? 0,
                 Nickname = playerEntity.UserAccount.Nickname
             };
 
@@ -366,8 +372,63 @@ namespace Services.Services
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             lock (random)
             {
-                return new string(Enumerable.Repeat(chars,5)
+                return new string(Enumerable.Repeat(chars, 5)
                     .Select(s => chars[random.Next(chars.Length)]).ToArray());
+            }
+        }
+
+        public async Task SendGameInvitationByEmailAsync(string email, string gameCode, string inviterNickname)
+        {
+            try
+            {
+                await notificationService.SendGameInvitationEmailAsync(email, gameCode, inviterNickname);
+                log.InfoFormat("Invitación por correo enviada a {0} para la sala {1} por {2}", email, gameCode, inviterNickname);
+            }
+            catch (SmtpException ex)
+            {
+                log.Error($"Error de SMTP al enviar invitación a {email}", ex);
+                throw new FaultException<ServiceErrorDetailDTO>(
+                    new ServiceErrorDetailDTO { Message = "No se pudo enviar el correo de invitación. Revisa la dirección.", ErrorCode = "EMAIL_SEND_FAILED" },
+                    new FaultReason("Error del servidor al enviar correo."));
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Error inesperado en SendGameInvitationByEmailAsync a {email}", ex);
+                throw new FaultException<ServiceErrorDetailDTO>(
+                    new ServiceErrorDetailDTO { Message = "Error inesperado en el servidor.", ErrorCode = "UNEXPECTED_ERROR" },
+                    new FaultReason("Error inesperado."));
+            }
+        }
+
+        public async Task SendGameInvitationToFriendAsync(int friendPlayerId, string gameCode, string inviterNickname)
+        {
+            try
+            {
+                var userAccount = await Task.Run(() => accountRepository.GetUserByPlayerId(friendPlayerId));
+                if (userAccount == null || string.IsNullOrEmpty(userAccount.Email))
+                {
+                    log.WarnFormat("SendGameInvitationToFriendAsync falló: No se pudo encontrar el correo para el PlayerId {0}", friendPlayerId);
+                    throw new FaultException<ServiceErrorDetailDTO>(
+                        new ServiceErrorDetailDTO { Message = "No se pudo encontrar al amigo o su correo.", ErrorCode = "FRIEND_NOT_FOUND" },
+                        new FaultReason("Amigo no encontrado."));
+                }
+
+                await notificationService.SendGameInvitationEmailAsync(userAccount.Email, gameCode, inviterNickname);
+                log.InfoFormat("Invitación a amigo enviada a {0} (PlayerId {1}) para la sala {2}", userAccount.Email, friendPlayerId, gameCode);
+            }
+            catch (SmtpException ex)
+            {
+                log.Error($"Error de SMTP al enviar invitación a amigo {friendPlayerId}", ex);
+                throw new FaultException<ServiceErrorDetailDTO>(
+                    new ServiceErrorDetailDTO { Message = "No se pudo enviar el correo de invitación al amigo.", ErrorCode = "EMAIL_SEND_FAILED" },
+                    new FaultReason("Error del servidor al enviar correo."));
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Error inesperado en SendGameInvitationToFriendAsync a {friendPlayerId}", ex);
+                throw new FaultException<ServiceErrorDetailDTO>(
+                    new ServiceErrorDetailDTO { Message = "Error inesperado en el servidor.", ErrorCode = "UNEXPECTED_ERROR" },
+                    new FaultReason("Error inesperado."));
             }
         }
     }

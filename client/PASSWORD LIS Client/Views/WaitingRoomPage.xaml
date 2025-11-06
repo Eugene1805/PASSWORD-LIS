@@ -63,21 +63,39 @@
                        HorizontalAlignment="Left"/>
 
                     <Button Grid.Column="1" Style="{StaticResource circleButtonStyle}"
-                    Width="45" Height="45" VerticalAlignment="Center"
-                        HorizontalAlignment="Right">
+                            Width="45" Height="45" VerticalAlignment="Center" HorizontalAlignment="Right"
+                            Command="{Binding InviteFriendCommand}">
                         <Image Source="/Resources/invitationIcon.png" Width="20" Height="20"/>
                     </Button>
                 </Grid>
 
-                <Border Grid.Row="1" Style="{StaticResource floatingBorderStyle}" Margin="0,10,0,10" Padding="5"> <!--TODO Todo el border de amigos no debería de verlo un invitado-->
+                <Border Grid.Row="1" Style="{StaticResource floatingBorderStyle}" Margin="0,10,0,10" Padding="5"> 
                     <Grid>
-                        <TextBlock Text="Cargando amigos ..." Style="{StaticResource bodyTextBlockStyle}"
+                        <ProgressBar IsIndeterminate="True"
+                                     Style="{StaticResource circularProgressBar}"
+                                     Visibility="{Binding IsLoadingFriends, Converter={StaticResource BoolToVisConverter}}"
+                                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                        <TextBlock Text="{utils:Translate noFriendsAddOneText}"
+                                   Style="{StaticResource subtitleTextBlockStyle}" Opacity="0.6"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   Visibility="{Binding IsLoadingFriends, Converter={StaticResource BoolToVisConverter}}"/>
-                        
+                                   TextWrapping="Wrap" TextAlignment="Center"
+                                   Visibility="{Binding ShowNoFriendsMessage, Converter={StaticResource BoolToVisConverter}}"/>
+
                         <ListView ItemsSource="{Binding Friends}"
+                                  SelectedItem="{Binding SelectedFriend, Mode=TwoWay}"
                                   Background="Transparent" BorderThickness="0"
                                   Visibility="{Binding IsLoadingFriends, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                            <ListView.Style>
+                                <Style TargetType="ListView">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ShowNoFriendsMessage}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListView.Style>
+
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Nickname}" Margin="5"
@@ -89,8 +107,8 @@
                 </Border>
 
                 <Button Grid.Row="2" Style="{StaticResource primaryButtonStyle}"
-                Content="{utils:Translate invitationMailText}" 
-                Height="40" />
+                        Content="{utils:Translate invitationMailText}"
+                        Command="{Binding InviteByMailCommand}" Height="40" />
             </Grid>
         </Border>
 

@@ -23,6 +23,7 @@
   </MetadataSources>
   <Metadata>
     <MetadataFile FileName="item.disco" MetadataType="Disco" ID="ba20a735-71f6-45cc-b041-ad5787d2e3f3" SourceId="1" SourceUrl="http://localhost:8092/?disco" />
+    <MetadataFile FileName="item4.xsd" MetadataType="Schema" ID="ed1d138c-bee1-4217-ab35-b4a5564218d4" SourceId="1" SourceUrl="http://localhost:8092/?xsd=xsd4" />
     <MetadataFile FileName="LoginManager.wsdl" MetadataType="Wsdl" ID="67cbb2f0-a7c5-4a11-a48e-07ba879c5e15" SourceId="1" SourceUrl="http://localhost:8092/?wsdl" />
     <MetadataFile FileName="item.xsd" MetadataType="Schema" ID="cf762bf2-3121-411f-95d6-6098ee5fc603" SourceId="1" SourceUrl="http://localhost:8092/?xsd=xsd0" />
     <MetadataFile FileName="item2.xsd" MetadataType="Schema" ID="0aa84533-6e60-43c7-a09b-debbae6ece16" SourceId="1" SourceUrl="http://localhost:8092/?xsd=xsd1" />

@@ -73,14 +73,29 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ObservableCollection<FriendDTO> Friends
         {
             get => friends;
-            set { friends = value; OnPropertyChanged(); }
+            set 
+            {
+                SetProperty(ref friends, value);
+                UpdateFriendsMessageVisibility();
+            }
         }
 
         private bool isLoadingFriends;
         public bool IsLoadingFriends
         {
             get => isLoadingFriends;
-            set { isLoadingFriends = value; OnPropertyChanged(); }
+            set
+            {
+                SetProperty(ref isLoadingFriends, value);
+                UpdateFriendsMessageVisibility();
+            }
+        }
+
+        private bool showNoFriendsMessage;
+        public bool ShowNoFriendsMessage
+        {
+            get => showNoFriendsMessage;
+            set => SetProperty(ref showNoFriendsMessage, value);
         }
 
         private bool isGuest;
@@ -90,14 +105,17 @@ namespace PASSWORD_LIS_Client.ViewModels
             set => SetProperty(ref isGuest, value);
         }
 
-        /* DESCOMENTAR CUANDO SE IMPLEMENTE LO DE INVITAR AMIGOS
+        
         public FriendDTO selectedFriend;
         public FriendDTO SelectedFriend 
         {
             get => selectedFriend;
-            set { selectedFriend = value; OnPropertyChanged(); }
+            set 
+            {
+                SetProperty(ref selectedFriend, value);
+                RelayCommand.RaiseCanExecuteChanged();
+            }
         }
-         */
 
         private PlayerDTO currentPlayer;
         public ICommand SendMessageCommand { get; }
@@ -105,6 +123,8 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand ReportCommand { get; }
         public ICommand StartGameCommand { get; }
         public ICommand CopyGameCodeCommand { get; }
+        public ICommand InviteFriendCommand { get; }
+        public ICommand InviteByMailCommand { get; }
 
         private readonly IWaitingRoomManagerService roomManagerClient;
         private readonly IWindowService windowService;
@@ -131,6 +151,8 @@ namespace PASSWORD_LIS_Client.ViewModels
             ReportCommand = new RelayCommand( (_) => OpenReportWindow());
             StartGameCommand = new RelayCommand(async (_) => await StartGameAsync(), (_) => CanStartGame());
             CopyGameCodeCommand = new RelayCommand((_) => CopyGameCodeToClipboard());
+            InviteFriendCommand = new RelayCommand(async (_) => await InviteFriendAsync(), (_) => CanInviteFriend());
+            InviteByMailCommand = new RelayCommand((_) => ShowInvitationByMail());
 
             if (roomManagerClient is WcfWaitingRoomManagerService wcfService)
             {
@@ -431,22 +453,104 @@ namespace PASSWORD_LIS_Client.ViewModels
                 _ = ShowSnackbarAsync(Properties.Langs.Lang.copiedToClipboardText);
             }
         }
-        private async Task LoadFriendsAsync()
+        
+        private async Task InviteFriendAsync()
         {
-            if (isLoadingFriends)
+            var friendToInvite = SelectedFriend;
+            if (friendToInvite == null)
             {
                 return;
             }
+
+            bool confirmed = windowService.ShowYesNoPopUp("Confirmar Invitación",
+                string.Format("Estás seguro de enviar una invitación a {0}?", friendToInvite.Nickname));
+
+            if (!confirmed)
+            {
+                return;
+            }
+
+            try
+            {
+                await roomManagerClient.SendGameInvitationToFriendAsync(friendToInvite.PlayerId, gameCode, SessionManager.CurrentUser.Nickname);
+                windowService.ShowPopUp(Properties.Langs.Lang.successTitleText,
+                    "Invitación Enviada", PopUpIcon.Success);
+            } 
+            catch (FaultException<ServiceErrorDetailDTO> ex)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                    ex.Detail.Message, PopUpIcon.Error);
+            } 
+            catch (CommunicationException)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
+                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
+            } 
+            catch (Exception)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
+            }
+        }
+        
+        private bool CanInviteFriend()
+        {
+            return SelectedFriend != null && !IsGuest;
+        }
+
+        private void ShowInvitationByMail()
+        {
+            var showInvitationMailViewModel = new InvitationByMailViewModel(App.WaitRoomManagerService, App.WindowService, this.GameCode, SessionManager.CurrentUser.Nickname);
+            var invitationWindow = new InvitationByMailWindow { DataContext = showInvitationMailViewModel };
+            invitationWindow.ShowDialog();
+        }
+        private async Task LoadFriendsAsync()
+        {
+            if (IsGuest || isLoadingFriends)
+            {
+                return;
+            }
+
             IsLoadingFriends = true;
             try
             {
                 var friendsArray = await friendsManagerService.GetFriendsAsync(SessionManager.CurrentUser.UserAccountId);
-                Friends = new ObservableCollection<FriendDTO>(friendsArray);
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Friends.Clear();
+                    if (friendsArray != null)
+                    {
+                        foreach (var friend in friendsArray)
+                        {
+                            Friends.Add(friend);
+                        }
+                    }
+                }); 
+            }
+            catch (FaultException<ServiceErrorDetailDTO> ex)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                    ex.Detail.Message, PopUpIcon.Error);
+            }
+            catch (TimeoutException)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
+                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+            }
+            catch (EndpointNotFoundException)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
+                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
+            }
+            catch (CommunicationException)
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
+                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
             }
             catch (Exception)
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-            "No se pudo cargar la lista de amigos", PopUpIcon.Error);
+                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
             }
             finally
             {
@@ -461,6 +565,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 if (!Friends.Any(f => f.PlayerId == newFriend.PlayerId))
                 {
                     Friends.Add(newFriend);
+                    UpdateFriendsMessageVisibility();
                 }
             });
         }
@@ -473,10 +578,14 @@ namespace PASSWORD_LIS_Client.ViewModels
                 if (friendToRemove != null)
                 {
                     Friends.Remove(friendToRemove);
+                    UpdateFriendsMessageVisibility();
                 }
             });
         }
-
+        private void UpdateFriendsMessageVisibility()
+        {
+            ShowNoFriendsMessage = !IsLoadingFriends && !Friends.Any();
+        }
         private async Task CleanupAndUnsubscribeAsync()
         {
             if (!IsGuest)

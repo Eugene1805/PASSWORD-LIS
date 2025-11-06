@@ -43,7 +43,7 @@ namespace Host
                 var profileManagerInstance = new ProfileManager(accountRepository);
                 var topPlayersManagerInstance = new TopPlayersManager(statisticsRepository);
                 var gameManagerInstance = new GameManager(operationContextWrapper, wordRepository);
-                var waitingRoomManagerInstance = new WaitingRoomManager(playerRepository,operationContextWrapper,gameManagerInstance);
+                var waitingRoomManagerInstance = new WaitingRoomManager(playerRepository,operationContextWrapper,gameManagerInstance, accountRepository, notificationService);
                 var friendsManagerInstance = new FriendsManager(friendshipRepository, accountRepository, operationContextWrapper);
                 var reportManagerInstance = new ReportManager(reportRepository, playerRepository,banRepository,operationContextWrapper);
 

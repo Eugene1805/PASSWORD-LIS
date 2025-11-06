@@ -34,6 +34,7 @@
       <xsd:import schemaLocation="http://localhost:8106/?xsd=xsd0" namespace="http://tempuri.org/" />
       <xsd:import schemaLocation="http://localhost:8106/?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
       <xsd:import schemaLocation="http://localhost:8106/?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" />
+      <xsd:import schemaLocation="http://localhost:8106/?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" />
     </xsd:schema>
   </wsdl:types>
   <wsdl:message name="IReportManager_SubscribeToReportUpdates_InputMessage">
@@ -44,6 +45,9 @@
   </wsdl:message>
   <wsdl:message name="IReportManager_SubmitReport_OutputMessage">
     <wsdl:part name="parameters" element="tns:SubmitReportResponse" />
+  </wsdl:message>
+  <wsdl:message name="IReportManager_SubmitReport_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q1="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q1:ServiceErrorDetailDTO" />
   </wsdl:message>
   <wsdl:message name="IReportManager_GetCurrentReportCount_InputMessage">
     <wsdl:part name="parameters" element="tns:GetCurrentReportCount" />
@@ -79,6 +83,7 @@
     <wsdl:operation name="SubmitReport">
       <wsdl:input wsaw:Action="http://tempuri.org/IReportManager/SubmitReport" message="tns:IReportManager_SubmitReport_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IReportManager/SubmitReportResponse" message="tns:IReportManager_SubmitReport_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IReportManager/SubmitReportServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IReportManager_SubmitReport_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
     <wsdl:operation name="GetCurrentReportCount">
       <wsdl:input wsaw:Action="http://tempuri.org/IReportManager/GetCurrentReportCount" message="tns:IReportManager_GetCurrentReportCount_InputMessage" />
@@ -121,6 +126,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="GetCurrentReportCount">
       <soap12:operation soapAction="http://tempuri.org/IReportManager/GetCurrentReportCount" style="document" />
@@ -177,7 +185,7 @@
       <wsa10:EndpointReference>
         <wsa10:Address>net.tcp://localhost:8107/ReportManager</wsa10:Address>
         <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
-          <Upn>SURFACE\eugen</Upn>
+          <Upn>LAPTOP-LF36UFJ4\artcu</Upn>
         </Identity>
       </wsa10:EndpointReference>
     </wsdl:port>

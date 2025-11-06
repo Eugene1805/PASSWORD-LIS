@@ -705,4 +705,7 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="noFriendsAddOneText" xml:space="preserve">
     <value>You have no friends, try to add one</value>
   </data>
+  <data name="addFriendTitleText" xml:space="preserve">
+    <value>Add Friend</value>
+  </data>
 </root>

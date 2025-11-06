@@ -7,21 +7,30 @@
         xmlns:utils="clr-namespace:PASSWORD_LIS_Client.Utils"
         xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
         mc:Ignorable="d"
-        Title="InvitationByMailWindow" Height="225" Width="500">
-    <!--
+        xmlns:converters="clr-namespace:PASSWORD_LIS_Client.Converters"
+        Title="{utils:Translate invitationMailText}" Height="250" Width="500"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Resources>
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+    </Window.Resources>
+    
     <Grid>
 
-        <Border Style="{StaticResource floatingBorderStyle}">
+        <Border Padding="20">
             <StackPanel>
-                <TextBlock Style="{StaticResource subtitleTextBlockStyle}" Margin="20,20,20,10"
+                <TextBlock Style="{StaticResource subtitleBlackTextBlockStyle}" Margin="20,20,20,10"
                            Text="{utils:Translate writeEmailToInviteText}"/>
-                <TextBox x:Name="emailTextBox"
+                <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" 
+                         IsEnabled="{Binding IsSending, Converter={StaticResource InverseBooleanConverter}}"
                          Style="{StaticResource primaryTextBoxStyle}" Margin="20,10,20,10"/>
                 <Button Style="{StaticResource primaryButtonStyle}" Margin="20,15,20,20" Height="30"
+                        Command="{Binding SendInvitationCommand}"
+                        IsEnabled="{Binding IsSending, Converter={StaticResource InverseBooleanConverter}}"
                         Content="{utils:Translate sendInvitationText}"/>
             </StackPanel>
         </Border>
        
     </Grid>
-    -->
+  
 </Window>

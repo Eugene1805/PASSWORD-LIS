@@ -94,6 +94,24 @@
   <wsdl:message name="IWaitingRoomManager_HostLeft_OutputMessage">
     <wsdl:part name="parameters" element="tns:HostLeftResponse" />
   </wsdl:message>
+  <wsdl:message name="IWaitingRoomManager_SendGameInvitationByEmail_InputMessage">
+    <wsdl:part name="parameters" element="tns:SendGameInvitationByEmail" />
+  </wsdl:message>
+  <wsdl:message name="IWaitingRoomManager_SendGameInvitationByEmail_OutputMessage">
+    <wsdl:part name="parameters" element="tns:SendGameInvitationByEmailResponse" />
+  </wsdl:message>
+  <wsdl:message name="IWaitingRoomManager_SendGameInvitationByEmail_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q4="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q4:ServiceErrorDetailDTO" />
+  </wsdl:message>
+  <wsdl:message name="IWaitingRoomManager_SendGameInvitationToFriend_InputMessage">
+    <wsdl:part name="parameters" element="tns:SendGameInvitationToFriend" />
+  </wsdl:message>
+  <wsdl:message name="IWaitingRoomManager_SendGameInvitationToFriend_OutputMessage">
+    <wsdl:part name="parameters" element="tns:SendGameInvitationToFriendResponse" />
+  </wsdl:message>
+  <wsdl:message name="IWaitingRoomManager_SendGameInvitationToFriend_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q5="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q5:ServiceErrorDetailDTO" />
+  </wsdl:message>
   <wsdl:message name="IWaitingRoomManager_OnPlayerJoined_OutputCallbackMessage">
     <wsdl:part name="parameters" element="tns:OnPlayerJoined" />
   </wsdl:message>
@@ -144,6 +162,16 @@
     <wsdl:operation name="HostLeft">
       <wsdl:input wsaw:Action="http://tempuri.org/IWaitingRoomManager/HostLeft" message="tns:IWaitingRoomManager_HostLeft_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IWaitingRoomManager/HostLeftResponse" message="tns:IWaitingRoomManager_HostLeft_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="SendGameInvitationByEmail">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWaitingRoomManager/SendGameInvitationByEmail" message="tns:IWaitingRoomManager_SendGameInvitationByEmail_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWaitingRoomManager/SendGameInvitationByEmailResponse" message="tns:IWaitingRoomManager_SendGameInvitationByEmail_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IWaitingRoomManager/SendGameInvitationByEmailServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IWaitingRoomManager_SendGameInvitationByEmail_ServiceErrorDetailDTOFault_FaultMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="SendGameInvitationToFriend">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWaitingRoomManager/SendGameInvitationToFriend" message="tns:IWaitingRoomManager_SendGameInvitationToFriend_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWaitingRoomManager/SendGameInvitationToFriendResponse" message="tns:IWaitingRoomManager_SendGameInvitationToFriend_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IWaitingRoomManager/SendGameInvitationToFriendServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IWaitingRoomManager_SendGameInvitationToFriend_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
     <wsdl:operation name="OnPlayerJoined">
       <wsdl:output wsaw:Action="http://tempuri.org/IWaitingRoomManager/OnPlayerJoined" message="tns:IWaitingRoomManager_OnPlayerJoined_OutputCallbackMessage" />
@@ -245,6 +273,30 @@
         <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="SendGameInvitationByEmail">
+      <soap12:operation soapAction="http://tempuri.org/IWaitingRoomManager/SendGameInvitationByEmail" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="SendGameInvitationToFriend">
+      <soap12:operation soapAction="http://tempuri.org/IWaitingRoomManager/SendGameInvitationToFriend" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
     <wsdl:operation name="OnPlayerJoined">
       <soap12:operation soapAction="http://tempuri.org/IWaitingRoomManager/OnPlayerJoined" style="document" />
       <wsdl:output>
@@ -282,7 +334,7 @@
       <wsa10:EndpointReference>
         <wsa10:Address>net.tcp://localhost:8101/WaitingRoomManager</wsa10:Address>
         <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
-          <Upn>SURFACE\eugen</Upn>
+          <Upn>LAPTOP-LF36UFJ4\artcu</Upn>
         </Identity>
       </wsa10:EndpointReference>
     </wsdl:port>

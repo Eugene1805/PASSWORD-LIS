@@ -22,6 +22,8 @@ namespace PASSWORD_LIS_Client.Services
         Task SendMessageAsync(string gameCode, ChatMessageDTO message);
         Task<List<PlayerDTO>> GetPlayersInRoomAsync(string gameCode);
         Task HostLeftAsync(string gameCode);
+        Task SendGameInvitationByEmailAsync(string email, string gameCode, string inviterNickname);
+        Task SendGameInvitationToFriendAsync(int friendPlayerId, string gameCode, string inviterNickname);
 
     }
     
@@ -79,6 +81,16 @@ namespace PASSWORD_LIS_Client.Services
         public async Task HostLeftAsync(string gameCode)
         {
             await proxy.HostLeftAsync(gameCode);
+        }
+
+        public Task SendGameInvitationByEmailAsync(string email, string gameCode, string inviterNickname)
+        {
+            return proxy.SendGameInvitationByEmailAsync(email, gameCode, inviterNickname);
+        }
+
+        public Task SendGameInvitationToFriendAsync(int friendPlayerId, string gameCode, string inviterNickname)
+        {
+            return proxy.SendGameInvitationToFriendAsync(friendPlayerId, gameCode, inviterNickname);
         }
 
         public void OnPlayerJoined(PlayerDTO player)

@@ -35,6 +35,7 @@
       <xsd:import schemaLocation="http://localhost:8096/?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" />
       <xsd:import schemaLocation="http://localhost:8096/?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
       <xsd:import schemaLocation="http://localhost:8096/?xsd=xsd3" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+      <xsd:import schemaLocation="http://localhost:8096/?xsd=xsd4" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" />
     </xsd:schema>
   </wsdl:types>
   <wsdl:message name="IProfileManager_UpdateProfile_InputMessage">
@@ -75,7 +76,7 @@
       <wsa10:EndpointReference>
         <wsa10:Address>net.tcp://localhost:8097/ProfileManager</wsa10:Address>
         <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
-          <Upn>SURFACE\eugen</Upn>
+          <Upn>LAPTOP-LF36UFJ4\artcu</Upn>
         </Identity>
       </wsa10:EndpointReference>
     </wsdl:port>
