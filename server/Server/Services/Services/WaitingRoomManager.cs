@@ -40,7 +40,8 @@ namespace Services.Services
         private static readonly Random random = new Random();
         private static readonly TimeSpan CallbackTimeout = TimeSpan.FromSeconds(5);
 
-        public WaitingRoomManager(IPlayerRepository playerRepository, IOperationContextWrapper operationContextWrapper, IGameManager gameManager, IAccountRepository accountRepository, INotificationService notificationService)
+        public WaitingRoomManager(IPlayerRepository playerRepository, IOperationContextWrapper operationContextWrapper, IGameManager gameManager,
+            IAccountRepository accountRepository, INotificationService notificationService)
         {
             repository = playerRepository;
             operationContext = operationContextWrapper;

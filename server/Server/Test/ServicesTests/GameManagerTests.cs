@@ -17,270 +17,386 @@ using Xunit;
 namespace Test.ServicesTests
 {
     public class GameManagerTests
-    {/*
-        private class SutContext
+    {
+        private readonly Mock<IOperationContextWrapper> mockOperationContext;
+        private readonly Mock<IWordRepository> mockWordRepository;
+        private readonly Mock<IMatchRepository> mockMatchRepository;
+        private readonly Mock<IPlayerRepository> mockPlayerRepository;
+
+        public GameManagerTests()
         {
-            public GameManager SUT { get; set; }
-            public Mock<IOperationContextWrapper> OperationContext { get; set; }
-            public Mock<IWordRepository> WordRepository { get; set; }
-            public ConcurrentQueue<Mock<IGameManagerCallback>> CallbackQueue { get; set; }
-            public Dictionary<int, Mock<IGameManagerCallback>> CallbackByPlayerId { get; set; }
-            public string GameCode { get; set; } = "ABCDE";
-            public List<PlayerDTO> Players { get; set; }
+            mockOperationContext = new Mock<IOperationContextWrapper>();
+            mockWordRepository = new Mock<IWordRepository>();
+            mockMatchRepository = new Mock<IMatchRepository>();
+            mockPlayerRepository = new Mock<IPlayerRepository>();
         }
 
-        private static SutContext CreateSut()
+        private static List<PlayerDTO> MakePlayers()
         {
-            var ctx = new SutContext
+            return new List<PlayerDTO>
             {
-                OperationContext = new Mock<IOperationContextWrapper>(MockBehavior.Strict),
-                WordRepository = new Mock<IWordRepository>(MockBehavior.Strict),
-                CallbackQueue = new ConcurrentQueue<Mock<IGameManagerCallback>>(),
-                CallbackByPlayerId = new Dictionary<int, Mock<IGameManagerCallback>>()
+                new PlayerDTO{ Id =1, Nickname = "RedClue", Team = MatchTeam.RedTeam, Role = PlayerRole.ClueGuy },
+                new PlayerDTO{ Id =2, Nickname = "BlueClue", Team = MatchTeam.BlueTeam, Role = PlayerRole.ClueGuy },
+                new PlayerDTO{ Id =3, Nickname = "RedGuess", Team = MatchTeam.RedTeam, Role = PlayerRole.Guesser },
+                new PlayerDTO{ Id =4, Nickname = "BlueGuess", Team = MatchTeam.BlueTeam, Role = PlayerRole.Guesser }
             };
+        }
 
-            // Players: Red(Clue, Guesser) then Blue(Clue, Guesser)
-            ctx.Players = new List<PlayerDTO>
+        private static List<PasswordWord> MakeWords(int count =5)
+        {
+            var list = new List<PasswordWord>();
+            for (int i =0; i < count; i++)
             {
-                new PlayerDTO { Id =1, Nickname = "RedClue", Role = PlayerRole.ClueGuy, Team = MatchTeam.RedTeam },
-                new PlayerDTO { Id =2, Nickname = "RedGuess", Role = PlayerRole.Guesser, Team = MatchTeam.RedTeam },
-                new PlayerDTO { Id =3, Nickname = "BlueClue", Role = PlayerRole.ClueGuy, Team = MatchTeam.BlueTeam },
-                new PlayerDTO { Id =4, Nickname = "BlueGuess", Role = PlayerRole.Guesser, Team = MatchTeam.BlueTeam }
-            };
-
-            // Words for the round
-            ctx.WordRepository.Setup(r => r.GetRandomWordsAsync(It.IsAny<int>()))
-            .ReturnsAsync(new List<PasswordWord> { "alpha", "bravo", "charlie", "delta", "echo" });
-
-            // OperationContext returns one callback per subscription in enqueue order
-            ctx.OperationContext.Setup(o => o.GetCallbackChannel<IGameManagerCallback>())
-            .Returns(() =>
-            {
-                if (ctx.CallbackQueue.TryDequeue(out var cb))
+                list.Add(new PasswordWord
                 {
-                    return cb.Object;
-                }
-                // fallback mock to avoid nulls if out of order
-                return new Mock<IGameManagerCallback>().Object;
-            });
-
-            ctx.SUT = new GameManager(ctx.OperationContext.Object, ctx.WordRepository.Object);
-            return ctx;
+                    EnglishWord = $"WORD{i+1}",
+                    SpanishWord = $"PALABRA{i+1}",
+                    EnglishDescription = $"ED{i+1}",
+                    SpanishDescription = $"SD{i+1}"
+                });
+            }
+            return list;
         }
 
-        private static async Task SubscribeAllAsync(SutContext ctx)
+        private (GameManager sut, ConcurrentQueue<Mock<IGameManagerCallback>> callbacks) CreateSut()
         {
-            // enqueue callbacks matching players in same order
-            foreach (var p in ctx.Players)
-            {
-                var cb = new Mock<IGameManagerCallback>(MockBehavior.Loose);
-                ctx.CallbackByPlayerId[p.Id] = cb;
-                ctx.CallbackQueue.Enqueue(cb);
-            }
+            var cbQueue = new ConcurrentQueue<Mock<IGameManagerCallback>>();
+            mockOperationContext
+                .Setup(o => o.GetCallbackChannel<IGameManagerCallback>())
+                .Returns(() =>
+                {
+                    if (cbQueue.TryDequeue(out var cb)) return cb.Object;
+                    return new Mock<IGameManagerCallback>().Object;
+                });
 
-            // create match with the4 expected players
-            Assert.True(ctx.SUT.CreateMatch(ctx.GameCode, ctx.Players));
-
-            // subscribe all players
-            foreach (var p in ctx.Players)
-            {
-                await ctx.SUT.SubscribeToMatchAsync(ctx.GameCode, p.Id);
-            }
+            var sut = new GameManager(mockOperationContext.Object, mockWordRepository.Object, mockMatchRepository.Object, mockPlayerRepository.Object);
+            return (sut, cbQueue);
         }
 
         [Fact]
-        public void CreateMatch_ShouldRequireExactlyFourPlayers_AndUniqueCode()
+        public void CreateMatch_ShouldSucceed_WithFourPlayers_AndFailOnDuplicate()
         {
-            var ctx = CreateSut();
+            // Arrange
+            var (sut, _) = CreateSut();
+            var players = MakePlayers();
 
-            // wrong counts
-            Assert.False(ctx.SUT.CreateMatch("A1", null));
-            Assert.False(ctx.SUT.CreateMatch("A2", new List<PlayerDTO>()));
-            Assert.False(ctx.SUT.CreateMatch("A3", new List<PlayerDTO> { new PlayerDTO(), new PlayerDTO(), new PlayerDTO() }));
-            Assert.False(ctx.SUT.CreateMatch("A4", new List<PlayerDTO> { new PlayerDTO(), new PlayerDTO(), new PlayerDTO(), new PlayerDTO(), new PlayerDTO() }));
+            // Act
+            var ok = sut.CreateMatch("ABCDE", players);
+            var dup = sut.CreateMatch("ABCDE", players);
 
-            // ok with4
-            var ok = ctx.SUT.CreateMatch("A5", new List<PlayerDTO> { new PlayerDTO(), new PlayerDTO(), new PlayerDTO(), new PlayerDTO() });
+            // Assert
             Assert.True(ok);
-
-            // duplicate code should fail
-            var dup = ctx.SUT.CreateMatch("A5", new List<PlayerDTO> { new PlayerDTO(), new PlayerDTO(), new PlayerDTO(), new PlayerDTO() });
             Assert.False(dup);
         }
 
         [Fact]
-        public async Task SubscribeToMatch_ShouldStartGame_BroadcastInit_AndSendFirstPasswordToRedClue()
+        public void CreateMatch_ShouldFail_WithInvalidPlayersCount()
         {
-            var ctx = CreateSut();
+            // Arrange
+            var (sut, _) = CreateSut();
 
-            // expectations: all receive OnMatchInitialized once
-            foreach (var p in ctx.Players)
-            {
-                var cb = new Mock<IGameManagerCallback>(MockBehavior.Loose);
-                ctx.CallbackByPlayerId[p.Id] = cb;
-                ctx.CallbackQueue.Enqueue(cb);
-                cb.Setup(c => c.OnMatchInitialized(It.IsAny<MatchInitStateDTO>()))
-                .Verifiable();
-            }
+            // Act
+            var nullList = sut.CreateMatch("CODE1", null);
+            var less = sut.CreateMatch("CODE2", new List<PlayerDTO> { new PlayerDTO() });
+            var more = sut.CreateMatch("CODE3", new List<PlayerDTO> { new PlayerDTO(), new PlayerDTO(), new PlayerDTO(), new PlayerDTO(), new PlayerDTO() });
 
-            // create and subscribe all (Match starts after last subscribe)
-            Assert.True(ctx.SUT.CreateMatch(ctx.GameCode, ctx.Players));
-            foreach (var p in ctx.Players)
-            {
-                await ctx.SUT.SubscribeToMatchAsync(ctx.GameCode, p.Id);
-            }
-
-            // verify init notifications
-            foreach (var p in ctx.Players)
-            {
-                ctx.CallbackByPlayerId[p.Id].Verify(c => c.OnMatchInitialized(It.IsAny<MatchInitStateDTO>()), Times.Once);
-            }
-
-            // First password sent only to Red Clue
-            ctx.CallbackByPlayerId[1].Verify(c => c.OnNewPassword("alpha"), Times.Once);
-            ctx.CallbackByPlayerId[2].Verify(c => c.OnNewPassword(It.IsAny<PasswordWord>()), Times.Never);
-            ctx.CallbackByPlayerId[3].Verify(c => c.OnNewPassword(It.IsAny<PasswordWord>()), Times.Never);
-            ctx.CallbackByPlayerId[4].Verify(c => c.OnNewPassword(It.IsAny<PasswordWord>()), Times.Never);
+            // Assert
+            Assert.False(nullList);
+            Assert.False(less);
+            Assert.False(more);
         }
 
         [Fact]
-        public async Task SubscribeToMatch_InvalidPlayer_ShouldThrowFault()
+        public async Task SubscribeToMatch_ShouldBroadcastInit_OnLastPlayer_AndSendFirstWordToRedClue()
         {
-            var ctx = CreateSut();
+            // Arrange
+            var (sut, queue) = CreateSut();
+            var players = MakePlayers();
+            Assert.True(sut.CreateMatch("GAME1", players));
 
-            // Prepare3 valid joins first (still waiting state)
-            Assert.True(ctx.SUT.CreateMatch(ctx.GameCode, ctx.Players));
-            for (int i = 0; i < 3; i++)
-            {
-                var cb = new Mock<IGameManagerCallback>();
-                ctx.CallbackQueue.Enqueue(cb);
-                await ctx.SUT.SubscribeToMatchAsync(ctx.GameCode, ctx.Players[i].Id);
-            }
+            // prepare callbacks (order matches subscribe order)
+            var redClue = new Mock<IGameManagerCallback>();
+            var blueClue = new Mock<IGameManagerCallback>();
+            var redGuess = new Mock<IGameManagerCallback>();
+            var blueGuess = new Mock<IGameManagerCallback>();
+            queue.Enqueue(redClue);
+            queue.Enqueue(blueClue);
+            queue.Enqueue(redGuess);
+            queue.Enqueue(blueGuess);
 
-            //4th call uses non-expected player id
-            ctx.CallbackQueue.Enqueue(new Mock<IGameManagerCallback>());
-            await Assert.ThrowsAsync<FaultException>(async () =>
-            await ctx.SUT.SubscribeToMatchAsync(ctx.GameCode, 999));
+            mockWordRepository.Setup(w => w.GetRandomWordsAsync(It.IsAny<int>())).ReturnsAsync(MakeWords());
+
+            // Act
+            await sut.SubscribeToMatchAsync("GAME1",1);
+            await sut.SubscribeToMatchAsync("GAME1",2);
+            await sut.SubscribeToMatchAsync("GAME1",3);
+            await sut.SubscribeToMatchAsync("GAME1",4); // last triggers init + first password
+
+            // Assert: everyone gets initialized
+            redClue.Verify(c => c.OnMatchInitialized(It.IsAny<MatchInitStateDTO>()), Times.Once);
+            blueClue.Verify(c => c.OnMatchInitialized(It.IsAny<MatchInitStateDTO>()), Times.Once);
+            redGuess.Verify(c => c.OnMatchInitialized(It.IsAny<MatchInitStateDTO>()), Times.Once);
+            blueGuess.Verify(c => c.OnMatchInitialized(It.IsAny<MatchInitStateDTO>()), Times.Once);
+
+            // Red clue receives first word
+            redClue.Verify(c => c.OnNewPassword(It.Is<PasswordWordDTO>(p => p.EnglishWord == "WORD1")), Times.Once);
+            blueClue.Verify(c => c.OnNewPassword(It.IsAny<PasswordWordDTO>()), Times.Never);
+            redGuess.Verify(c => c.OnNewPassword(It.IsAny<PasswordWordDTO>()), Times.Never);
+            blueGuess.Verify(c => c.OnNewPassword(It.IsAny<PasswordWordDTO>()), Times.Never);
         }
 
         [Fact]
-        public async Task SubmitClue_FromCurrentClueGuy_SendsClueToPartner()
+        public async Task SubscribeToMatch_ShouldThrow_WhenMatchMissing()
         {
-            var ctx = CreateSut();
-            await SubscribeAllAsync(ctx);
+            // Arrange
+            var (sut, _) = CreateSut();
 
-            // Act: red clue sends a clue
-            await ctx.SUT.SubmitClueAsync(ctx.GameCode, 1, "one-word-clue");
-
-            // Assert: red guesser receives clue
-            ctx.CallbackByPlayerId[2].Verify(c => c.OnClueReceived("one-word-clue"), Times.Once);
-            // Others do not receive clue through OnClueReceived
-            ctx.CallbackByPlayerId[1].Verify(c => c.OnClueReceived(It.IsAny<string>()), Times.Never);
-            ctx.CallbackByPlayerId[3].Verify(c => c.OnClueReceived(It.IsAny<string>()), Times.Never);
-            ctx.CallbackByPlayerId[4].Verify(c => c.OnClueReceived(It.IsAny<string>()), Times.Never);
+            // Act + Assert
+            await Assert.ThrowsAsync<FaultException>(async () => await sut.SubscribeToMatchAsync("NOPE",1));
         }
 
         [Fact]
-        public async Task SubmitClue_FromWrongRoleOrWrongTeam_ShouldBeIgnored()
+        public async Task SubscribeToMatch_ShouldThrow_WhenUnauthorizedPlayer()
         {
-            var ctx = CreateSut();
-            await SubscribeAllAsync(ctx);
+            // Arrange
+            var (sut, queue) = CreateSut();
+            var players = MakePlayers();
+            sut.CreateMatch("GAME2", players);
+            queue.Enqueue(new Mock<IGameManagerCallback>());
 
-            // Blue clue tries to send during Red's turn
-            await ctx.SUT.SubmitClueAsync(ctx.GameCode, 3, "blue-clue");
-
-            // No one receives clue
-            foreach (var kv in ctx.CallbackByPlayerId)
-            {
-                kv.Value.Verify(c => c.OnClueReceived(It.IsAny<string>()), Times.Never);
-            }
-
-            // Guesser (red) tries to send clue -> ignored
-            await ctx.SUT.SubmitClueAsync(ctx.GameCode, 2, "should-be-ignored");
-            foreach (var kv in ctx.CallbackByPlayerId)
-            {
-                kv.Value.Verify(c => c.OnClueReceived("should-be-ignored"), Times.Never);
-            }
+            // Act + Assert
+            await Assert.ThrowsAsync<FaultException>(async () => await sut.SubscribeToMatchAsync("GAME2",999));
         }
 
         [Fact]
-        public async Task SubmitGuess_Correct_ShouldBroadcastAndAdvanceWord_ThenSendNextPasswordToClueGuy()
+        public async Task SubscribeToMatch_ShouldThrow_WhenAlreadyConnected()
         {
-            var ctx = CreateSut();
-            await SubscribeAllAsync(ctx);
+            // Arrange
+            var (sut, queue) = CreateSut();
+            var players = MakePlayers();
+            sut.CreateMatch("GAME3", players);
+            queue.Enqueue(new Mock<IGameManagerCallback>());
+            await sut.SubscribeToMatchAsync("GAME3",1);
+            queue.Enqueue(new Mock<IGameManagerCallback>());
 
-            // Act: red guesser guesses current password (alpha)
-            await ctx.SUT.SubmitGuessAsync(ctx.GameCode, 2, "alpha");
-
-            // Assert: all receive guess result (correct)
-            foreach (var p in ctx.Players)
-            {
-                ctx.CallbackByPlayerId[p.Id].Verify(c => c.OnGuessResult(It.Is<GuessResultDTO>(r => r.IsCorrect && r.Team == MatchTeam.RedTeam && r.NewScore == 1)), Times.Once);
-            }
-
-            // Red Clue gets next password "bravo"
-            ctx.CallbackByPlayerId[1].Verify(c => c.OnNewPassword("bravo"), Times.Once);
+            // Act + Assert
+            await Assert.ThrowsAsync<FaultException>(async () => await sut.SubscribeToMatchAsync("GAME3",1));
         }
 
         [Fact]
-        public async Task SubmitGuess_Wrong_ShouldNotifyOnlyActiveTeam()
+        public async Task SubscribeToMatch_ShouldThrow_WhenWrongStatus()
         {
-            var ctx = CreateSut();
-            await SubscribeAllAsync(ctx);
+            // Arrange
+            var (sut, queue) = CreateSut();
+            var players = MakePlayers();
+            sut.CreateMatch("GAME4", players);
 
-            // Act: wrong guess from red guesser
-            await ctx.SUT.SubmitGuessAsync(ctx.GameCode, 2, "wrong");
+            var redClue = new Mock<IGameManagerCallback>();
+            var blueClue = new Mock<IGameManagerCallback>();
+            var redGuess = new Mock<IGameManagerCallback>();
+            var blueGuess = new Mock<IGameManagerCallback>();
+            queue.Enqueue(redClue);
+            queue.Enqueue(blueClue);
+            queue.Enqueue(redGuess);
+            queue.Enqueue(blueGuess);
 
-            // Assert: only red team notified (guesser and clue)
-            ctx.CallbackByPlayerId[2].Verify(c => c.OnGuessResult(It.Is<GuessResultDTO>(r => !r.IsCorrect && r.Team == MatchTeam.RedTeam)), Times.Once);
-            ctx.CallbackByPlayerId[1].Verify(c => c.OnGuessResult(It.Is<GuessResultDTO>(r => !r.IsCorrect && r.Team == MatchTeam.RedTeam)), Times.Once);
+            mockWordRepository.Setup(w => w.GetRandomWordsAsync(It.IsAny<int>())).ReturnsAsync(MakeWords());
 
-            // Blue team not notified
-            ctx.CallbackByPlayerId[3].Verify(c => c.OnGuessResult(It.IsAny<GuessResultDTO>()), Times.Never);
-            ctx.CallbackByPlayerId[4].Verify(c => c.OnGuessResult(It.IsAny<GuessResultDTO>()), Times.Never);
+            await sut.SubscribeToMatchAsync("GAME4",1);
+            await sut.SubscribeToMatchAsync("GAME4",2);
+            await sut.SubscribeToMatchAsync("GAME4",3);
+            await sut.SubscribeToMatchAsync("GAME4",4); // match starts
+
+            // Act + Assert: now status is InProgress
+            await Assert.ThrowsAsync<FaultException>(async () => await sut.SubscribeToMatchAsync("GAME4",1));
         }
 
         [Fact]
-        public async Task PassTurnAsync_ShouldCompleteWithoutError()
+        public async Task SubmitClueAsync_ShouldDeliverToPartner_WhenValid()
         {
-            var ctx = CreateSut();
-            await ctx.SUT.PassTurnAsync("NO-GAME", 123);
-            // no assert - just ensure it does not throw
+            // Arrange
+            var (sut, queue) = CreateSut();
+            var players = MakePlayers();
+            sut.CreateMatch("GAME5", players);
+
+            var redClue = new Mock<IGameManagerCallback>();
+            var blueClue = new Mock<IGameManagerCallback>();
+            var redGuess = new Mock<IGameManagerCallback>();
+            var blueGuess = new Mock<IGameManagerCallback>();
+            queue.Enqueue(redClue);
+            queue.Enqueue(blueClue);
+            queue.Enqueue(redGuess);
+            queue.Enqueue(blueGuess);
+
+            mockWordRepository.Setup(w => w.GetRandomWordsAsync(It.IsAny<int>())).ReturnsAsync(MakeWords());
+
+            await sut.SubscribeToMatchAsync("GAME5",1);
+            await sut.SubscribeToMatchAsync("GAME5",2);
+            await sut.SubscribeToMatchAsync("GAME5",3);
+            await sut.SubscribeToMatchAsync("GAME5",4);
+
+            // Act
+            await sut.SubmitClueAsync("GAME5",1, "my clue");
+
+            // Assert: partner (red guesser id=3) gets clue
+            redGuess.Verify(c => c.OnClueReceived("my clue"), Times.Once);
+            redClue.Verify(c => c.OnClueReceived(It.IsAny<string>()), Times.Never);
+            blueClue.Verify(c => c.OnClueReceived(It.IsAny<string>()), Times.Never);
+            blueGuess.Verify(c => c.OnClueReceived(It.IsAny<string>()), Times.Never);
         }
 
         [Fact]
-        public async Task DisconnectionDuringClue_ShouldCancelMatch_AndNotifyRemainingPlayers()
+        public async Task SubmitClueAsync_ShouldNoop_WhenInvalid()
         {
-            var ctx = CreateSut();
+            // Arrange
+            var (sut, _) = CreateSut();
+            // No match created -> noop
 
-            // prepare callbacks with behavior: red guesser throws on OnClueReceived
-            foreach (var p in ctx.Players)
-            {
-                var cb = new Mock<IGameManagerCallback>(MockBehavior.Loose);
-                ctx.CallbackByPlayerId[p.Id] = cb;
-                ctx.CallbackQueue.Enqueue(cb);
-            }
-            ctx.CallbackByPlayerId[2]
-            .Setup(c => c.OnClueReceived(It.IsAny<string>()))
-            .Throws(new Exception("client disconnected"));
+            // Act + Assert (no exception)
+            await sut.SubmitClueAsync("NOPE",1, "x");
+        }
 
-            // create and start match
-            Assert.True(ctx.SUT.CreateMatch(ctx.GameCode, ctx.Players));
-            foreach (var p in ctx.Players)
-            {
-                await ctx.SUT.SubscribeToMatchAsync(ctx.GameCode, p.Id);
-            }
+        [Fact]
+        public async Task SubmitGuessAsync_ShouldBroadcastCorrect_AndAdvanceWord()
+        {
+            // Arrange
+            var (sut, queue) = CreateSut();
+            var players = MakePlayers();
+            sut.CreateMatch("GAME6", players);
 
-            // Act: clue from red clue to red guesser (who throws)
-            await ctx.SUT.SubmitClueAsync(ctx.GameCode, 1, "boom");
+            var redClue = new Mock<IGameManagerCallback>();
+            var blueClue = new Mock<IGameManagerCallback>();
+            var redGuess = new Mock<IGameManagerCallback>();
+            var blueGuess = new Mock<IGameManagerCallback>();
+            queue.Enqueue(redClue);
+            queue.Enqueue(blueClue);
+            queue.Enqueue(redGuess);
+            queue.Enqueue(blueGuess);
 
-            // Assert: remaining players are notified of cancellation
-            ctx.CallbackByPlayerId[1].Verify(c => c.OnMatchCancelled(It.IsAny<string>()), Times.Once);
-            ctx.CallbackByPlayerId[3].Verify(c => c.OnMatchCancelled(It.IsAny<string>()), Times.Once);
-            ctx.CallbackByPlayerId[4].Verify(c => c.OnMatchCancelled(It.IsAny<string>()), Times.Once);
+            mockWordRepository.Setup(w => w.GetRandomWordsAsync(It.IsAny<int>())).ReturnsAsync(MakeWords());
 
-            // Disconnected player did not receive cancellation
-            ctx.CallbackByPlayerId[2].Verify(c => c.OnMatchCancelled(It.IsAny<string>()), Times.Never);
-        }*/
+            await sut.SubscribeToMatchAsync("GAME6",1);
+            await sut.SubscribeToMatchAsync("GAME6",2);
+            await sut.SubscribeToMatchAsync("GAME6",3);
+            await sut.SubscribeToMatchAsync("GAME6",4);
+
+            // Act: red guesser guesses correctly first word
+            await sut.SubmitGuessAsync("GAME6",3, "WORD1");
+
+            // Assert: all get result correct
+            redClue.Verify(c => c.OnGuessResult(It.Is<GuessResultDTO>(r => r.IsCorrect && r.Team == MatchTeam.RedTeam)), Times.Once);
+            blueClue.Verify(c => c.OnGuessResult(It.IsAny<GuessResultDTO>()), Times.Once);
+            redGuess.Verify(c => c.OnGuessResult(It.IsAny<GuessResultDTO>()), Times.Once);
+            blueGuess.Verify(c => c.OnGuessResult(It.IsAny<GuessResultDTO>()), Times.Once);
+
+            // Red clue gets next word (WORD2)
+            redClue.Verify(c => c.OnNewPassword(It.Is<PasswordWordDTO>(p => p.EnglishWord == "WORD2")), Times.Once);
+        }
+
+        [Fact]
+        public async Task SubmitGuessAsync_ShouldNotifyOnlyTeam_WhenIncorrect()
+        {
+            // Arrange
+            var (sut, queue) = CreateSut();
+            var players = MakePlayers();
+            sut.CreateMatch("GAME7", players);
+
+            var redClue = new Mock<IGameManagerCallback>();
+            var blueClue = new Mock<IGameManagerCallback>();
+            var redGuess = new Mock<IGameManagerCallback>();
+            var blueGuess = new Mock<IGameManagerCallback>();
+            queue.Enqueue(redClue);
+            queue.Enqueue(blueClue);
+            queue.Enqueue(redGuess);
+            queue.Enqueue(blueGuess);
+
+            mockWordRepository.Setup(w => w.GetRandomWordsAsync(It.IsAny<int>())).ReturnsAsync(MakeWords());
+
+            await sut.SubscribeToMatchAsync("GAME7",1);
+            await sut.SubscribeToMatchAsync("GAME7",2);
+            await sut.SubscribeToMatchAsync("GAME7",3);
+            await sut.SubscribeToMatchAsync("GAME7",4);
+
+            // Act: wrong guess
+            await sut.SubmitGuessAsync("GAME7",3, "WRONG");
+
+            // Assert: only red team gets it
+            redGuess.Verify(c => c.OnGuessResult(It.Is<GuessResultDTO>(r => !r.IsCorrect && r.Team == MatchTeam.RedTeam)), Times.Once);
+            redClue.Verify(c => c.OnGuessResult(It.IsAny<GuessResultDTO>()), Times.Once);
+            blueClue.Verify(c => c.OnGuessResult(It.IsAny<GuessResultDTO>()), Times.Never);
+            blueGuess.Verify(c => c.OnGuessResult(It.IsAny<GuessResultDTO>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task SubmitValidationVotesAsync_ShouldApplyPenalties_AndSwitchTurn()
+        {
+            // Arrange
+            var (sut, queue) = CreateSut();
+            var players = MakePlayers();
+            sut.CreateMatch("GAME8", players);
+
+            var redClue = new Mock<IGameManagerCallback>();
+            var blueClue = new Mock<IGameManagerCallback>();
+            var redGuess = new Mock<IGameManagerCallback>();
+            var blueGuess = new Mock<IGameManagerCallback>();
+            queue.Enqueue(redClue);
+            queue.Enqueue(blueClue);
+            queue.Enqueue(redGuess);
+            queue.Enqueue(blueGuess);
+
+            mockWordRepository.Setup(w => w.GetRandomWordsAsync(It.IsAny<int>())).ReturnsAsync(MakeWords());
+
+            await sut.SubscribeToMatchAsync("GAME8",1);
+            await sut.SubscribeToMatchAsync("GAME8",2);
+            await sut.SubscribeToMatchAsync("GAME8",3);
+            await sut.SubscribeToMatchAsync("GAME8",4);
+
+            // Create history for TurnId0 and1 then complete5 correct guesses for red team to enter validation
+            await sut.SubmitClueAsync("GAME8",1, "clue-0"); // TurnId0
+            await sut.SubmitGuessAsync("GAME8",3, "WORD1");
+            await sut.SubmitClueAsync("GAME8",1, "clue-1"); // TurnId1
+            await sut.SubmitGuessAsync("GAME8",3, "WORD2");
+            await sut.SubmitGuessAsync("GAME8",3, "WORD3");
+            await sut.SubmitGuessAsync("GAME8",3, "WORD4");
+            await sut.SubmitGuessAsync("GAME8",3, "WORD5");
+
+            // Validators receive history to validate (Blue team only)
+            blueClue.Verify(c => c.OnBeginRoundValidation(It.Is<List<TurnHistoryDTO>>(l => l.Count >=2 && l[0].TurnId ==0 && l[1].TurnId ==1)), Times.Once);
+            blueGuess.Verify(c => c.OnBeginRoundValidation(It.Is<List<TurnHistoryDTO>>(l => l.Count >=2)), Times.Once);
+            redClue.Verify(c => c.OnBeginRoundValidation(It.IsAny<List<TurnHistoryDTO>>()), Times.Never);
+            redGuess.Verify(c => c.OnBeginRoundValidation(It.IsAny<List<TurnHistoryDTO>>()), Times.Never);
+
+            // Two blue validators vote
+            var votes1 = new List<ValidationVoteDTO> { new ValidationVoteDTO { TurnId =0, PenalizeSynonym = true } };
+            var votes2 = new List<ValidationVoteDTO> { new ValidationVoteDTO { TurnId =1, PenalizeMultiword = true } };
+            await sut.SubmitValidationVotesAsync("GAME8",2, votes1); // Blue Clue
+
+            // After the first vote, there should be no validation result yet
+            redClue.Verify(c => c.OnValidationComplete(It.IsAny<ValidationResultDTO>()), Times.Never);
+            redGuess.Verify(c => c.OnValidationComplete(It.IsAny<ValidationResultDTO>()), Times.Never);
+            blueClue.Verify(c => c.OnValidationComplete(It.IsAny<ValidationResultDTO>()), Times.Never);
+            blueGuess.Verify(c => c.OnValidationComplete(It.IsAny<ValidationResultDTO>()), Times.Never);
+
+            await sut.SubmitValidationVotesAsync("GAME8",4, votes2); // Blue Guess
+
+            // Assert: everyone gets validation result
+            redClue.Verify(c => c.OnValidationComplete(It.Is<ValidationResultDTO>(v => v.TeamThatWasValidated == MatchTeam.RedTeam && v.TotalPenaltyApplied ==3)), Times.Once);
+            redGuess.Verify(c => c.OnValidationComplete(It.IsAny<ValidationResultDTO>()), Times.Once);
+            blueClue.Verify(c => c.OnValidationComplete(It.IsAny<ValidationResultDTO>()), Times.Once);
+            blueGuess.Verify(c => c.OnValidationComplete(It.IsAny<ValidationResultDTO>()), Times.Once);
+
+            // Turn switches to Blue and Blue Clue receives a new word for next turn
+            blueClue.Verify(c => c.OnNewPassword(It.IsAny<PasswordWordDTO>()), Times.AtLeastOnce);
+        }
+
+        [Fact]
+        public async Task PassTurnAsync_ShouldComplete()
+        {
+            // Arrange
+            var (sut, _) = CreateSut();
+
+            // Act + Assert
+            await sut.PassTurnAsync("ANY",1);
+        }
     }
 }
