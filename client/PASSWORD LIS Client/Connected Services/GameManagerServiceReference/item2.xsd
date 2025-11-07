@@ -111,10 +111,17 @@
       </xs:sequence>
     </xs:complexType>
   </xs:element>
+  <xs:element name="OnValidationComplete">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q6="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" minOccurs="0" name="result" nillable="true" type="q6:ValidationResultDTO" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
   <xs:element name="OnMatchOver">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q6="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" minOccurs="0" name="summary" nillable="true" type="q6:MatchSummaryDTO" />
+        <xs:element xmlns:q7="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" minOccurs="0" name="summary" nillable="true" type="q7:MatchSummaryDTO" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>

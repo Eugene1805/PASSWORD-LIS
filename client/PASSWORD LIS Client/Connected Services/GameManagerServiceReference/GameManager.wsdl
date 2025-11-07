@@ -85,6 +85,9 @@
   <wsdl:message name="IGameManager_OnBeginRoundValidation_OutputCallbackMessage">
     <wsdl:part name="parameters" element="tns:OnBeginRoundValidation" />
   </wsdl:message>
+  <wsdl:message name="IGameManager_OnValidationComplete_OutputCallbackMessage">
+    <wsdl:part name="parameters" element="tns:OnValidationComplete" />
+  </wsdl:message>
   <wsdl:message name="IGameManager_OnMatchOver_OutputCallbackMessage">
     <wsdl:part name="parameters" element="tns:OnMatchOver" />
   </wsdl:message>
@@ -129,6 +132,9 @@
     </wsdl:operation>
     <wsdl:operation name="OnBeginRoundValidation">
       <wsdl:output wsaw:Action="http://tempuri.org/IGameManager/OnBeginRoundValidation" message="tns:IGameManager_OnBeginRoundValidation_OutputCallbackMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="OnValidationComplete">
+      <wsdl:output wsaw:Action="http://tempuri.org/IGameManager/OnValidationComplete" message="tns:IGameManager_OnValidationComplete_OutputCallbackMessage" />
     </wsdl:operation>
     <wsdl:operation name="OnMatchOver">
       <wsdl:output wsaw:Action="http://tempuri.org/IGameManager/OnMatchOver" message="tns:IGameManager_OnMatchOver_OutputCallbackMessage" />
@@ -221,6 +227,12 @@
         <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="OnValidationComplete">
+      <soap12:operation soapAction="http://tempuri.org/IGameManager/OnValidationComplete" style="document" />
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="OnMatchOver">
       <soap12:operation soapAction="http://tempuri.org/IGameManager/OnMatchOver" style="document" />
       <wsdl:output>
@@ -240,7 +252,7 @@
       <wsa10:EndpointReference>
         <wsa10:Address>net.tcp://localhost:8109/GameManager</wsa10:Address>
         <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
-          <Upn>LAPTOP-LF36UFJ4\artcu</Upn>
+          <Upn>SURFACE\eugen</Upn>
         </Identity>
       </wsa10:EndpointReference>
     </wsdl:port>
