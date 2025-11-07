@@ -59,7 +59,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 await roomManagerClient.SendGameInvitationByEmailAsync(Email, gameCode, inviterNickname);
 
                 windowService.ShowPopUp(Properties.Langs.Lang.successTitleText,
-                    "Invitación enviada corrextamente", PopUpIcon.Success);
+                    Properties.Langs.Lang.invitationsentSuccessText, PopUpIcon.Success);
 
                 windowService.CloseWindow(this);
             } 

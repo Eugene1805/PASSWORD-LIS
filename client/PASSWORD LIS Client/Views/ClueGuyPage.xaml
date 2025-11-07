@@ -11,6 +11,9 @@
       Title="{x:Static language:Lang.clueGuyText}">
 
     <Grid>
+        <Grid.Background>
+            <ImageBrush ImageSource="/Resources/wallpaperClueGuy.png"/>
+        </Grid.Background>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition/>
@@ -20,16 +23,16 @@
 
         <Border Grid.Column="0" Style="{StaticResource floatingBorderStyle}">
             <StackPanel>
-                <TextBlock Style="{StaticResource subtitleTextBlockStyle}" Margin="20,40,20,20"
+                <TextBlock x:Name="teamTextBlock" Style="{StaticResource subtitleTextBlockStyle}" Margin="20,40,20,20"
                            Text="{utils:Translate redTeamText}"/>
 
-                <TextBlock Style="{StaticResource bodyTextBlockStyle}" Margin="20"
+                <TextBlock x:Name="currentRoundTextBlock" Style="{StaticResource bodyTextBlockStyle}" Margin="20"
                            Text="a{Binding currentRound, StringFormat={utils:Translate currentRoundText}}"/>
 
-                <TextBlock Style="{StaticResource bodyTextBlockStyle}" Margin="20"
+                <TextBlock x:Name="currentWordTextBlock" Style="{StaticResource bodyTextBlockStyle}" Margin="20"
                            Text="a{Binding currentWord, StringFormat={utils:Translate currentWordText}}"/>
 
-                <TextBlock Style="{StaticResource bodyTextBlockStyle}" Margin="20"
+                <TextBlock x:Name="teamPointsTextBlock" Style="{StaticResource bodyTextBlockStyle}" Margin="20"
                            Text="a{Binding teamPoints, StringFormat={utils:Translate teamPointsText}}"/>
             </StackPanel>
         </Border>
@@ -38,7 +41,7 @@
             <StackPanel>
                 <TextBlock Style="{StaticResource titleTextBlockStyle}" 
                            Text="{utils:Translate clueGuyText}"
-                           Margin="20"/>
+                           Margin="20" Cursor="Hand"/>
                 <TextBlock Style="{StaticResource bodyTextBlockStyle}" Margin="20,0,20,20"
                            Text="{utils:Translate passwordToGuessText}"
                            TextWrapping="Wrap"
@@ -72,7 +75,7 @@
                                VerticalAlignment="Center"
                                HorizontalAlignment="Center"/>
                 </Grid>
-                <Button Style="{StaticResource gameButtonStyle}"
+                <Button x:Name="passPasswordButton" Style="{StaticResource gameButtonStyle}"
                         Margin="20" 
                         Height="35"
                         Content="{utils:Translate passText}"/>
