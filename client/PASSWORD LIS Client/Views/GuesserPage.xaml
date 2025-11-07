@@ -14,15 +14,19 @@
         <Grid.Background>
             <ImageBrush ImageSource="/Resources/wallpaperClueGuy.png"/>
         </Grid.Background>
-        
+
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
 
-        <Border Grid.Column="0" Style="{StaticResource floatingBorderStyle}">
+        <Border Grid.Column="0" Grid.RowSpan="2" Style="{StaticResource floatingBorderStyle}">
             <StackPanel>
                 <TextBlock x:Name="teamTextBlock" Style="{StaticResource subtitleTextBlockStyle}" Margin="20,40,20,20"
                            Text="{Binding TeamName}"/>
@@ -38,7 +42,7 @@
             </StackPanel>
         </Border>
 
-        <Border Grid.Column="1" Style="{StaticResource floatingBorderStyle}" Margin="20,20,20,220">
+        <Border Grid.Column="1" Grid.Row="0" Style="{StaticResource floatingBorderStyle}" Margin="20">
             <StackPanel>
                 <TextBlock Style="{StaticResource titleTextBlockStyle}" 
                            Text="{utils:Translate guesserText}"
@@ -53,20 +57,20 @@
             </StackPanel>
         </Border>
 
-        <Border Grid.Column="1" Style="{StaticResource floatingBorderStyle}" Margin="20,260,20,20">
+        <Border Grid.Column="1" Grid.Row="1"  Style="{StaticResource floatingBorderStyle}" Margin="20" Padding="10">
             <StackPanel>
-                <TextBlock Style="{StaticResource bodyTextBlockStyle}" Margin="20,10,20,20"
+                <TextBlock Style="{StaticResource bodyTextBlockStyle}" Margin="20,10"
                            Text="{utils:Translate writePasswordText}"
                            TextWrapping="Wrap"/>
                 <TextBox x:Name="passwordToGuessTextBox"
-                         Style="{StaticResource primaryTextBoxStyle}" Margin="20,-10,20,0"/>
+                         Style="{StaticResource primaryTextBoxStyle}" Margin="20,10"/>
 
-                <Button x:Name="sendPasswordToGuessButton" Style="{StaticResource primaryButtonStyle}" Margin="20,15,20,20" Height="30"
+                <Button x:Name="sendPasswordToGuessButton" Style="{StaticResource primaryButtonStyle}" Margin="20,10" Height="30"
                         Content="{utils:Translate sendText}"/>
             </StackPanel>
         </Border>
 
-        <Border Grid.Column="2" Style="{StaticResource floatingBorderStyle}">
+        <Border Grid.Column="2" Grid.RowSpan="2" Style="{StaticResource floatingBorderStyle}">
             <StackPanel>
                 <Grid Width="101" Height="107" Margin="20">
                     <Ellipse Style="{StaticResource circleEllipseStyle}" Fill="Transparent"/>
