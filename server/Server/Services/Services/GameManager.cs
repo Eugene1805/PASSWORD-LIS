@@ -357,10 +357,11 @@ namespace Services.Services
             await Task.WhenAll(tasks);
         }
 
+        //METODO MODIFICADO METODO ORIGINAL ABAJO
         private async Task StartRoundTurnAsync(MatchState matchState)
         {
             matchState.Status = MatchStatus.InProgress;
-
+            
             if (matchState.CurrentTurnTeam == MatchTeam.RedTeam)
             {
                 matchState.CurrentRoundWords = await wordRepository.GetRandomWordsAsync(WORDS_PER_ROUND);
@@ -393,6 +394,7 @@ namespace Services.Services
                 }
             }
         }
+        
 
         private async void TimerTickCallback(object state)
         {

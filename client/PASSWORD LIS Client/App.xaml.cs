@@ -25,6 +25,7 @@ namespace PASSWORD_LIS_Client
         public static IVerificationCodeManagerService VerificationCodeManagerService { get; private set; }
         public static IWaitingRoomManagerService WaitRoomManagerService { get; private set; }
         public static IReportManagerService ReportManagerService { get; private set; }
+        public static IGameManagerService GameManagerService { get; private set; }
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -52,6 +53,7 @@ namespace PASSWORD_LIS_Client
             VerificationCodeManagerService = new WcfVerificationCodeManagerService();
             WaitRoomManagerService = new WcfWaitingRoomManagerService();
             ReportManagerService = new WcfReportManagerService();
+            GameManagerService = new WcfGameManagerService();
 
 
             var loginViewModel = new LoginViewModel(LoginManagerService, WindowService);
