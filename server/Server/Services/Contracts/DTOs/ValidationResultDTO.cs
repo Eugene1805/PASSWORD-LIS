@@ -18,7 +18,5 @@ namespace Services.Contracts.DTOs
         [DataMember]
         public int NewBlueTeamScore { get; set; }
 
-        [DataMember]
-        public string Message { get; set; } // Ej: "Penalización de -3 puntos al Equipo Rojo"
     }
 }

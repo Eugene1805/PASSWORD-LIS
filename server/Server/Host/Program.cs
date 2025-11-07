@@ -34,7 +34,8 @@ namespace Host
                 var reportRepository = new ReportRepository();
                 var banRepository = new BanRepository();
                 var wordRepository = new WordRepository();
-                
+                var matchRepository = new MatchRepository();
+
 
                 var accountManagerInstance = new AccountManager(accountRepository, notificationService, codeService);
                 var loginManagerInstance = new LoginManager(accountRepository);
@@ -42,7 +43,7 @@ namespace Host
                 var passwordResetManagerInstance = new PasswordResetManager(accountRepository, notificationService, codeService);
                 var profileManagerInstance = new ProfileManager(accountRepository);
                 var topPlayersManagerInstance = new TopPlayersManager(statisticsRepository);
-                var gameManagerInstance = new GameManager(operationContextWrapper, wordRepository);
+                var gameManagerInstance = new GameManager(operationContextWrapper, wordRepository, matchRepository, playerRepository);
                 var waitingRoomManagerInstance = new WaitingRoomManager(playerRepository,operationContextWrapper,gameManagerInstance, accountRepository, notificationService);
                 var friendsManagerInstance = new FriendsManager(friendshipRepository, accountRepository, operationContextWrapper);
                 var reportManagerInstance = new ReportManager(reportRepository, playerRepository,banRepository,operationContextWrapper);

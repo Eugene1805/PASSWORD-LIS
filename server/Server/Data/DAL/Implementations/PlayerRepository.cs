@@ -40,5 +40,18 @@ namespace Data.DAL.Implementations
                         .FirstOrDefaultAsync(p => p.Id == playerId);
             }
         }
+
+        public async Task UpdatePlayerTotalPointsAsync(int playerId, int pointsGained)
+        {
+            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            {
+                var player = await context.Player.FindAsync(playerId);
+                if (player != null)
+                {
+                    player.TotalPoints += pointsGained;
+                    await context.SaveChangesAsync();
+                }
+            }
+        }
     }
 }

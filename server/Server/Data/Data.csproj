@@ -61,6 +61,7 @@
     <Compile Include="DAL\Implementations\AccountRepository.cs" />
     <Compile Include="DAL\Implementations\BanRepository.cs" />
     <Compile Include="DAL\Implementations\FriendshipRepository.cs" />
+    <Compile Include="DAL\Implementations\MatchRepository.cs" />
     <Compile Include="DAL\Implementations\PlayerRepository.cs" />
     <Compile Include="DAL\Implementations\ReportRepository.cs" />
     <Compile Include="DAL\Implementations\StatisticsRepository.cs" />
@@ -68,6 +69,7 @@
     <Compile Include="DAL\Interfaces\IAccountRepository.cs" />
     <Compile Include="DAL\Interfaces\IBanRepository.cs" />
     <Compile Include="DAL\Interfaces\IFriendshipRepository.cs" />
+    <Compile Include="DAL\Interfaces\IMatchRepository.cs" />
     <Compile Include="DAL\Interfaces\IPlayerRepository.cs" />
     <Compile Include="DAL\Interfaces\IReportRepository.cs" />
     <Compile Include="DAL\Interfaces\IStatisticsRepository.cs" />
