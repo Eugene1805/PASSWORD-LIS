@@ -395,8 +395,20 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             Application.Current.Dispatcher.Invoke(() =>
             {
-                // TODO: Add navigation to game page here based on the player role and team
-                windowService.NavigateTo(new ClueGuyPage());
+                if(currentPlayer == null)
+                {
+                    windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
+                    windowService.GoBack();
+                    return;
+                }
+
+                
+                var gameViewModel = new GameViewModel(App.GameManagerService, windowService, gameCode, currentPlayer);
+                var gamePage = new GamePage { DataContext = gameViewModel };
+                windowService.NavigateTo(gamePage);
+
+                _ = gameViewModel.InitializeAsync();
             });
         }
         private void OnMessageReceived(ChatMessageDTO message)
@@ -492,12 +504,10 @@ namespace PASSWORD_LIS_Client.ViewModels
                     Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
             }
         }
-        
         private bool CanInviteFriend()
         {
             return SelectedFriend != null && !IsGuest;
         }
-
         private void ShowInvitationByMail()
         {
             var showInvitationMailViewModel = new InvitationByMailViewModel(App.WaitRoomManagerService, App.WindowService, this.GameCode, SessionManager.CurrentUser.Nickname);
@@ -557,7 +567,6 @@ namespace PASSWORD_LIS_Client.ViewModels
                 IsLoadingFriends = false;
             }
         }
-
         private void OnFriendAdded(FriendDTO newFriend)
         {
             Application.Current.Dispatcher.InvokeAsync(() =>
@@ -569,7 +578,6 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
             });
         }
-
         private void OnFriendRemoved(int friendPlayerId)
         {
             Application.Current.Dispatcher.InvokeAsync(() =>
@@ -596,7 +604,6 @@ namespace PASSWORD_LIS_Client.ViewModels
                 await reportManagerService.UnsubscribeFromReportUpdatesAsync(SessionManager.CurrentUser.PlayerId);
             }
         }
-
         private void OnReportReceived(string reporterNickname, string reason)
         {
             lastReportReason = $"{Properties.Langs.Lang.youHaveBeenReportedByText} {reporterNickname}. {Properties.Langs.Lang.reasonText} {reason}";

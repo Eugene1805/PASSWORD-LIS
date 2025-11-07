@@ -24,16 +24,16 @@
         <Border Grid.Column="0" Style="{StaticResource floatingBorderStyle}">
             <StackPanel>
                 <TextBlock x:Name="teamTextBlock" Style="{StaticResource subtitleTextBlockStyle}" Margin="20,40,20,20"
-                           Text="{utils:Translate redTeamText}"/>
+                           Text="{Binding TeamName}"/>
 
                 <TextBlock x:Name="currentRoundTextBlock" Style="{StaticResource bodyTextBlockStyle}" Margin="20"
-                           Text="a{Binding currentRound, StringFormat={utils:Translate currentRoundText}}"/>
+                           Text="{Binding CurrentRoundText}"/>
 
                 <TextBlock x:Name="currentWordTextBlock" Style="{StaticResource bodyTextBlockStyle}" Margin="20"
-                           Text="a{Binding currentWord, StringFormat={utils:Translate currentWordText}}"/>
+                           Text="{Binding CurrentWordCountText}"/>
 
                 <TextBlock x:Name="teamPointsTextBlock" Style="{StaticResource bodyTextBlockStyle}" Margin="20"
-                           Text="a{Binding teamPoints, StringFormat={utils:Translate teamPointsText}}"/>
+                           Text="{Binding TeamPointsText}"/>
             </StackPanel>
         </Border>
 
@@ -47,7 +47,7 @@
                            TextWrapping="Wrap"
                            />
                 <TextBlock x:Name="passwordToGuessTextBlock" Style="{StaticResource titleTextBlockStyle}" 
-                           Text="EXAMPLE"/>
+                           Text="{Binding CurrentPasswordWord}"/>
             </StackPanel>
         </Border>
 
@@ -70,7 +70,7 @@
                     <Ellipse Style="{StaticResource circleEllipseStyle}" Fill="Transparent"/>
                     <TextBlock Style="{StaticResource titleTextBlockStyle}"
                                x:Name="timerTextBlock"
-                               Text="60"
+                               Text="{Binding TimerSeconds}"
                                FontSize="28"
                                VerticalAlignment="Center"
                                HorizontalAlignment="Center"/>

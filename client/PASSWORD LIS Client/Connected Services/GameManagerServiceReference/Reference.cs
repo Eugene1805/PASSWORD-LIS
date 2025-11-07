@@ -515,6 +515,115 @@ namespace PASSWORD_LIS_Client.GameManagerServiceReference {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="ValidationResultDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
+    [System.SerializableAttribute()]
+    public partial class ValidationResultDTO : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string MessageField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private int NewBlueTeamScoreField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private int NewRedTeamScoreField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private PASSWORD_LIS_Client.GameManagerServiceReference.MatchTeam TeamThatWasValidatedField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private int TotalPenaltyAppliedField;
+        
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Message {
+            get {
+                return this.MessageField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.MessageField, value) != true)) {
+                    this.MessageField = value;
+                    this.RaisePropertyChanged("Message");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public int NewBlueTeamScore {
+            get {
+                return this.NewBlueTeamScoreField;
+            }
+            set {
+                if ((this.NewBlueTeamScoreField.Equals(value) != true)) {
+                    this.NewBlueTeamScoreField = value;
+                    this.RaisePropertyChanged("NewBlueTeamScore");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public int NewRedTeamScore {
+            get {
+                return this.NewRedTeamScoreField;
+            }
+            set {
+                if ((this.NewRedTeamScoreField.Equals(value) != true)) {
+                    this.NewRedTeamScoreField = value;
+                    this.RaisePropertyChanged("NewRedTeamScore");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public PASSWORD_LIS_Client.GameManagerServiceReference.MatchTeam TeamThatWasValidated {
+            get {
+                return this.TeamThatWasValidatedField;
+            }
+            set {
+                if ((this.TeamThatWasValidatedField.Equals(value) != true)) {
+                    this.TeamThatWasValidatedField = value;
+                    this.RaisePropertyChanged("TeamThatWasValidated");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public int TotalPenaltyApplied {
+            get {
+                return this.TotalPenaltyAppliedField;
+            }
+            set {
+                if ((this.TotalPenaltyAppliedField.Equals(value) != true)) {
+                    this.TotalPenaltyAppliedField = value;
+                    this.RaisePropertyChanged("TotalPenaltyApplied");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="MatchSummaryDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
     [System.SerializableAttribute()]
     public partial class MatchSummaryDTO : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
@@ -645,6 +754,9 @@ namespace PASSWORD_LIS_Client.GameManagerServiceReference {
         
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IGameManager/OnBeginRoundValidation")]
         void OnBeginRoundValidation(PASSWORD_LIS_Client.GameManagerServiceReference.TurnHistoryDTO[] turns);
+        
+        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IGameManager/OnValidationComplete")]
+        void OnValidationComplete(PASSWORD_LIS_Client.GameManagerServiceReference.ValidationResultDTO result);
         
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IGameManager/OnMatchOver")]
         void OnMatchOver(PASSWORD_LIS_Client.GameManagerServiceReference.MatchSummaryDTO summary);

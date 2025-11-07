@@ -339,7 +339,43 @@ namespace Services.Services
             });
             await Task.WhenAll(tasks);
         }
+
+        //METODO MODIFICADO METODO ORIGINAL ABAJO
         private async Task StartRoundTurnAsync(MatchState matchState)
+        {
+            matchState.Status = MatchStatus.InProgress;
+
+            matchState.CurrentRoundWords = await wordRepository.GetRandomWordsAsync(WORDS_PER_ROUND); 
+            matchState.CurrentWordIndex = 0;
+            matchState.CurrentTurnHistory = new List<TurnHistoryDTO>();
+
+            if (matchState.CurrentRoundWords == null || matchState.CurrentRoundWords.Count < WORDS_PER_ROUND)
+            {
+                await BroadcastAsync(matchState, cb => cb.OnMatchCancelled("Error: No se encontraron palabras en la base de datos."));
+                matches.TryRemove(matchState.GameCode, out _);
+                return;
+            }
+
+            matchState.SecondsLeft = ROUND_DURATION_SECONDS;
+            matchState.RoundTimer = new Timer(TimerTickCallback, matchState, 1000, 1000);
+
+            var pistero = GetPlayerByRole(matchState, matchState.CurrentTurnTeam, PlayerRole.ClueGuy);
+            if (pistero.Callback != null)
+            {
+                try
+                {
+                    var firstWordEntity = matchState.GetCurrentPassword();
+                    pistero.Callback.OnNewPassword(ToDTO(firstWordEntity));
+                }
+                catch
+                {
+                    await HandlePlayerDisconnectionAsync(matchState, pistero.Player.Id);
+                }
+            }
+
+        }
+        /*
+                private async Task StartRoundTurnAsync(MatchState matchState)
         {
             matchState.Status = MatchStatus.InProgress;
             matchState.CurrentRoundWords = await wordRepository.GetRandomWordsAsync(WORDS_PER_ROUND);
@@ -377,6 +413,7 @@ namespace Services.Services
                 }
             }
         }
+        */
 
         private async void TimerTickCallback(object state)
         {
