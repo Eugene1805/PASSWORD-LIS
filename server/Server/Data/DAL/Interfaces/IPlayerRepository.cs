@@ -7,5 +7,6 @@ namespace Data.DAL.Interfaces
     {
         Task<Player> GetPlayerByEmailAsync(string email);
         Task<Player> GetPlayerByIdAsync(int playerId);
+        Task UpdatePlayerTotalPointsAsync(int playerId, int pointsGained);
     }
 }

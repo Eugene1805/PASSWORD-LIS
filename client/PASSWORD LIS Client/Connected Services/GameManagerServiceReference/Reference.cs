@@ -523,9 +523,6 @@ namespace PASSWORD_LIS_Client.GameManagerServiceReference {
         private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private string MessageField;
-        
-        [System.Runtime.Serialization.OptionalFieldAttribute()]
         private int NewBlueTeamScoreField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
@@ -544,19 +541,6 @@ namespace PASSWORD_LIS_Client.GameManagerServiceReference {
             }
             set {
                 this.extensionDataField = value;
-            }
-        }
-        
-        [System.Runtime.Serialization.DataMemberAttribute()]
-        public string Message {
-            get {
-                return this.MessageField;
-            }
-            set {
-                if ((object.ReferenceEquals(this.MessageField, value) != true)) {
-                    this.MessageField = value;
-                    this.RaisePropertyChanged("Message");
-                }
             }
         }
         
@@ -638,7 +622,7 @@ namespace PASSWORD_LIS_Client.GameManagerServiceReference {
         private int RedScoreField;
         
         [System.Runtime.Serialization.OptionalFieldAttribute()]
-        private PASSWORD_LIS_Client.GameManagerServiceReference.MatchTeam TeamField;
+        private System.Nullable<PASSWORD_LIS_Client.GameManagerServiceReference.MatchTeam> WinnerTeamField;
         
         [global::System.ComponentModel.BrowsableAttribute(false)]
         public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
@@ -677,14 +661,14 @@ namespace PASSWORD_LIS_Client.GameManagerServiceReference {
         }
         
         [System.Runtime.Serialization.DataMemberAttribute()]
-        public PASSWORD_LIS_Client.GameManagerServiceReference.MatchTeam Team {
+        public System.Nullable<PASSWORD_LIS_Client.GameManagerServiceReference.MatchTeam> WinnerTeam {
             get {
-                return this.TeamField;
+                return this.WinnerTeamField;
             }
             set {
-                if ((this.TeamField.Equals(value) != true)) {
-                    this.TeamField = value;
-                    this.RaisePropertyChanged("Team");
+                if ((this.WinnerTeamField.Equals(value) != true)) {
+                    this.WinnerTeamField = value;
+                    this.RaisePropertyChanged("WinnerTeam");
                 }
             }
         }

@@ -71,14 +71,22 @@ namespace Services.Services
         private readonly ConcurrentDictionary<string, MatchState> matches = new ConcurrentDictionary<string, MatchState>();
         private readonly IOperationContextWrapper operationContext;
         private readonly IWordRepository wordRepository;
+        private readonly IMatchRepository matchRepository;
+        private readonly IPlayerRepository playerRepository;
         private const int ROUND_DURATION_SECONDS = 60;
         private const int WORDS_PER_ROUND = 5;
         private const int TOTAL_ROUNDS = 5;
+        private const int POINTS_PER_WIN = 10;
+        private const int PENALTY_SYNONYM = 2;
+        private const int PENALTY_MULTIWORD = 1;
 
-        public GameManager(IOperationContextWrapper contextWrapper, IWordRepository wordRepository)
+        public GameManager(IOperationContextWrapper contextWrapper, IWordRepository wordRepository, IMatchRepository matchRepository,
+            IPlayerRepository playerRepository)
         {
             this.operationContext = contextWrapper;
             this.wordRepository = wordRepository;
+            this.matchRepository = matchRepository;
+            this.playerRepository = playerRepository;
         }
         public bool CreateMatch(string gameCode, List<PlayerDTO> playersFromWaitingRoom)
         {
@@ -177,7 +185,7 @@ namespace Services.Services
 
                 matchState.CurrentWordIndex++; // Move to the next word
 
-                if (matchState.CurrentWordIndex >= matchState.CurrentRoundWords.Count)
+                if (matchState.CurrentWordIndex >= WORDS_PER_ROUND)
                 {
                     // The 5 words are done. End the round.
                     matchState.RoundTimer?.Dispose();
@@ -492,32 +500,22 @@ namespace Services.Services
         }
         private async Task ProcessVotesAsync(MatchState matchState, MatchTeam teamThatPlayed)
         {
-            int totalPenalty = 0;
-            // (Regla: 2 puntos por sinónimo, 1 punto por multi-palabra, como definimos)
-            // (Regla: Se aplica la penalización si *CUALQUIER* validador la marca)
-
-            var penalizedTurns = new HashSet<int>();
-
-            // NOTA: Como no usas sinónimos, quitamos esa lógica, 
-            // pero mantenemos la de "multi-palabra" (más de una palabra por pista).
-            // Tu regla dice: "El 'Pistero' no tiene permitido decir más de una palabra por turno,
-            // sino el equipo será sancionado con un punto menos"
-
-            // Simplificamos la lógica de votación ya que no hay sinónimos:
-            // El DTO 'ValidationVoteDTO' solo necesita un bool 'PenalizeMultiword'
-            var turnsToPenalize = new HashSet<int>();
+            var synonymPenaltyTurns = new HashSet<int>();
+            var multiwordPenaltyTurns = new HashSet<int>();
 
             foreach (var voteList in matchState.ReceivedVotes)
             {
-                foreach (var vote in voteList.Where(v => v.PenalizeMultiword)) // Asumiendo que ValidationVoteDTO tiene 'PenalizeMultiword'
+                foreach (var vote in voteList)
                 {
-                    turnsToPenalize.Add(vote.TurnId);
+                    if (vote.PenalizeSynonym) synonymPenaltyTurns.Add(vote.TurnId);
+                    if (vote.PenalizeMultiword) multiwordPenaltyTurns.Add(vote.TurnId);
                 }
             }
 
-            totalPenalty = turnsToPenalize.Count; // 1 punto por cada turno penalizado
+            int synonymPenalty = synonymPenaltyTurns.Count * PENALTY_SYNONYM; // 2 puntos
+            int multiwordPenalty = multiwordPenaltyTurns.Count * PENALTY_MULTIWORD; // 1 punto
+            int totalPenalty = synonymPenalty + multiwordPenalty; // 1 punto por cada turno penalizado
 
-            // Tarea 4.3.3: Aplicar penalización
             lock (matchState)
             {
                 if (teamThatPlayed == MatchTeam.RedTeam)
@@ -536,8 +534,7 @@ namespace Services.Services
                 TeamThatWasValidated = teamThatPlayed,
                 TotalPenaltyApplied = totalPenalty,
                 NewRedTeamScore = matchState.RedTeamScore,
-                NewBlueTeamScore = matchState.BlueTeamScore,
-                Message = $"Penalización de {totalPenalty} puntos al Equipo {teamThatPlayed}"
+                NewBlueTeamScore = matchState.BlueTeamScore
             };
             await BroadcastAsync(matchState, cb => cb.OnValidationComplete(validationResult));
 
@@ -580,15 +577,75 @@ namespace Services.Services
         private async Task EndGameAsync(MatchState matchState)
         {
             matchState.Status = MatchStatus.Finished;
-            // TODO: Implementar Nivel 5
-            // 1. Comparar matchState.RedTeamScore vs BlueTeamScore
-            // 2. Manejar lógica de Muerte Súbita (empate)
-            // 3. Crear MatchSummaryDTO
-            // 4. Broadcast OnMatchOver
-            // 5. Persistir en BD (solo IDs > 0)
-            // 6. Limpiar (matches.TryRemove)
-            await Task.CompletedTask;
+            if (matchState.RedTeamScore == matchState.BlueTeamScore)
+            {
+                // Regla: "se hará una muerte súbita, hasta que un equipo obtenga menos puntos en la ronda."
+                // Esto es complejo. Una simplificación es jugar un solo turno más.
+                // Por ahora, declararemos un empate (sin ganador).
+                await PersistAndNotifyGameEnd(matchState, null); // null = Empate
+            }
+            else
+            {
+                // Determinar ganador
+                var winner = (matchState.RedTeamScore > matchState.BlueTeamScore)
+                    ? MatchTeam.RedTeam
+                    : MatchTeam.BlueTeam;
+                await PersistAndNotifyGameEnd(matchState, winner);
+            }
         }
+        private async Task PersistAndNotifyGameEnd(MatchState matchState, MatchTeam? winner)
+        {
+            var redTeamPlayers = GetPlayersByTeam(matchState, MatchTeam.RedTeam).Select(p => p.Player);
+            var blueTeamPlayers = GetPlayersByTeam(matchState, MatchTeam.BlueTeam).Select(p => p.Player);
+
+            // --- Lógica de Persistencia (CORREGIDA) ---
+            // 1. Obtener SÓLO los IDs de jugadores registrados
+            var redTeamPlayerIds = redTeamPlayers.Where(p => p.Id > 0).Select(p => p.Id);
+            var blueTeamPlayerIds = blueTeamPlayers.Where(p => p.Id > 0).Select(p => p.Id);
+
+            try
+            {
+                // 2. Guardar el resultado del Match (usando la interfaz corregida)
+                await matchRepository.SaveMatchResultAsync(
+                    matchState.RedTeamScore,
+                    matchState.BlueTeamScore,
+                    redTeamPlayerIds,
+                    blueTeamPlayerIds);
+
+                // 3. Actualizar los puntos totales de los jugadores ganadores (registrados)
+                if (winner.HasValue)
+                {
+                    var winningPlayerIds = (winner == MatchTeam.RedTeam) ? redTeamPlayerIds : blueTeamPlayerIds;
+                    var updateTasks = winningPlayerIds.Select(id => playerRepository.UpdatePlayerTotalPointsAsync(id, POINTS_PER_WIN));
+                    await Task.WhenAll(updateTasks);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log(ex) - Error al guardar en BD.
+                Console.WriteLine($"ERROR al persistir: {ex.Message}");
+                // No detenemos el flujo; el cliente debe ver el final del juego.
+            }
+            // --- Fin Persistencia ---
+
+            // Crear DTO de resumen
+            var summary = new MatchSummaryDTO
+            {
+                WinnerTeam = winner,
+                RedScore = matchState.RedTeamScore,
+                BlueScore = matchState.BlueTeamScore
+            };
+
+            // Notificar a todos los clientes
+            await BroadcastAsync(matchState, cb => cb.OnMatchOver(summary));
+
+            // Limpiar la partida de la memoria
+            if (matches.TryRemove(matchState.GameCode, out var removedMatch))
+            {
+                removedMatch.Dispose();
+            }
+        }
+
         private PasswordWordDTO ToDTO(PasswordWord entity)
         {
             if (entity == null) return new PasswordWordDTO();

@@ -70,7 +70,6 @@
   <xs:element name="TurnHistoryDTO" nillable="true" type="tns:TurnHistoryDTO" />
   <xs:complexType name="ValidationResultDTO">
     <xs:sequence>
-      <xs:element minOccurs="0" name="Message" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="NewBlueTeamScore" type="xs:int" />
       <xs:element minOccurs="0" name="NewRedTeamScore" type="xs:int" />
       <xs:element xmlns:q4="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" minOccurs="0" name="TeamThatWasValidated" type="q4:MatchTeam" />
@@ -82,7 +81,7 @@
     <xs:sequence>
       <xs:element minOccurs="0" name="BlueScore" type="xs:int" />
       <xs:element minOccurs="0" name="RedScore" type="xs:int" />
-      <xs:element xmlns:q5="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" minOccurs="0" name="Team" type="q5:MatchTeam" />
+      <xs:element xmlns:q5="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" minOccurs="0" name="WinnerTeam" nillable="true" type="q5:MatchTeam" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="MatchSummaryDTO" nillable="true" type="tns:MatchSummaryDTO" />

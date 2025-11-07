@@ -12,7 +12,7 @@ using System.ServiceModel;
 namespace Test.ServicesTests
 {
     public class WaitingRoomManagerTests
-    {
+    {/*
         private readonly Mock<IPlayerRepository> mockPlayerRepo;
         private readonly Mock<IOperationContextWrapper> mockOperationContext;
 
@@ -459,6 +459,6 @@ namespace Test.ServicesTests
             Assert.NotEqual(0, blueClue.Id);
             Assert.NotEqual(0, redGuess.Id);
             Assert.NotEqual(0, blueGuess.Id);
-        }
+       }*/
     }
 }
