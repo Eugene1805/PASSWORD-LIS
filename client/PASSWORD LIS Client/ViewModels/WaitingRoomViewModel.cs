@@ -462,8 +462,8 @@ namespace PASSWORD_LIS_Client.ViewModels
                 return;
             }
 
-            bool confirmed = windowService.ShowYesNoPopUp("Confirmar Invitación",
-                string.Format("Estás seguro de enviar una invitación a {0}?", friendToInvite.Nickname));
+            bool confirmed = windowService.ShowYesNoPopUp(Properties.Langs.Lang.confirmInvitationTitleText,
+                string.Format(Properties.Langs.Lang.areSureSendingInvitation, friendToInvite.Nickname));
 
             if (!confirmed)
             {
@@ -474,7 +474,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 await roomManagerClient.SendGameInvitationToFriendAsync(friendToInvite.PlayerId, gameCode, SessionManager.CurrentUser.Nickname);
                 windowService.ShowPopUp(Properties.Langs.Lang.successTitleText,
-                    "Invitación Enviada", PopUpIcon.Success);
+                    Properties.Langs.Lang.invitationsentSuccessText, PopUpIcon.Success);
             } 
             catch (FaultException<ServiceErrorDetailDTO> ex)
             {

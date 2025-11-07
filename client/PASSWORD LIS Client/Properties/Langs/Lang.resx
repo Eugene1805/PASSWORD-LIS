@@ -708,4 +708,13 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="addFriendTitleText" xml:space="preserve">
     <value>Add Friend</value>
   </data>
+  <data name="invitationsentSuccessText" xml:space="preserve">
+    <value>Invitation sent successfully</value>
+  </data>
+  <data name="confirmInvitationTitleText" xml:space="preserve">
+    <value>Confirm Invitation</value>
+  </data>
+  <data name="areSureSendingInvitation" xml:space="preserve">
+    <value>Are you sure about sending an invitation to {0}?</value>
+  </data>
 </root>

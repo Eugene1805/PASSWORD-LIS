@@ -97,6 +97,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a Are you sure about sending an invitation to {0}?.
+        /// </summary>
+        public static string areSureSendingInvitation {
+            get {
+                return ResourceManager.GetString("areSureSendingInvitation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a Back to Lobby.
         /// </summary>
         public static string backToLobbyText {
@@ -255,6 +264,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         public static string codeWordText {
             get {
                 return ResourceManager.GetString("codeWordText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a Confirm Invitation.
+        /// </summary>
+        public static string confirmInvitationTitleText {
+            get {
+                return ResourceManager.GetString("confirmInvitationTitleText", resourceCulture);
             }
         }
         
@@ -687,6 +705,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         public static string invitationMailText {
             get {
                 return ResourceManager.GetString("invitationMailText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a Invitation sent successfully.
+        /// </summary>
+        public static string invitationsentSuccessText {
+            get {
+                return ResourceManager.GetString("invitationsentSuccessText", resourceCulture);
             }
         }
         
