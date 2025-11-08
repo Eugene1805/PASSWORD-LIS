@@ -32,8 +32,9 @@
   <wsdl:types>
     <xsd:schema targetNamespace="http://tempuri.org/Imports">
       <xsd:import schemaLocation="http://localhost:8094/?xsd=xsd0" namespace="http://tempuri.org/" />
-      <xsd:import schemaLocation="http://localhost:8094/?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
       <xsd:import schemaLocation="http://localhost:8094/?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" />
+      <xsd:import schemaLocation="http://localhost:8094/?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+      <xsd:import schemaLocation="http://localhost:8094/?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" />
     </xsd:schema>
   </wsdl:types>
   <wsdl:message name="IAccountVerificationManager_VerifyEmail_InputMessage">
@@ -42,20 +43,28 @@
   <wsdl:message name="IAccountVerificationManager_VerifyEmail_OutputMessage">
     <wsdl:part name="parameters" element="tns:VerifyEmailResponse" />
   </wsdl:message>
+  <wsdl:message name="IAccountVerificationManager_VerifyEmail_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q1="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q1:ServiceErrorDetailDTO" />
+  </wsdl:message>
   <wsdl:message name="IAccountVerificationManager_ResendVerificationCode_InputMessage">
     <wsdl:part name="parameters" element="tns:ResendVerificationCode" />
   </wsdl:message>
   <wsdl:message name="IAccountVerificationManager_ResendVerificationCode_OutputMessage">
     <wsdl:part name="parameters" element="tns:ResendVerificationCodeResponse" />
   </wsdl:message>
+  <wsdl:message name="IAccountVerificationManager_ResendVerificationCode_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q2="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q2:ServiceErrorDetailDTO" />
+  </wsdl:message>
   <wsdl:portType name="IAccountVerificationManager">
     <wsdl:operation name="VerifyEmail">
       <wsdl:input wsaw:Action="http://tempuri.org/IAccountVerificationManager/VerifyEmail" message="tns:IAccountVerificationManager_VerifyEmail_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IAccountVerificationManager/VerifyEmailResponse" message="tns:IAccountVerificationManager_VerifyEmail_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IAccountVerificationManager/VerifyEmailServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IAccountVerificationManager_VerifyEmail_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
     <wsdl:operation name="ResendVerificationCode">
       <wsdl:input wsaw:Action="http://tempuri.org/IAccountVerificationManager/ResendVerificationCode" message="tns:IAccountVerificationManager_ResendVerificationCode_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IAccountVerificationManager/ResendVerificationCodeResponse" message="tns:IAccountVerificationManager_ResendVerificationCode_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IAccountVerificationManager/ResendVerificationCodeServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IAccountVerificationManager_ResendVerificationCode_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="NetTcpBinding_IAccountVerificationManager" type="tns:IAccountVerificationManager">
@@ -69,6 +78,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="ResendVerificationCode">
       <soap12:operation soapAction="http://tempuri.org/IAccountVerificationManager/ResendVerificationCode" style="document" />
@@ -78,6 +90,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
   </wsdl:binding>
   <wsdl:service name="VerificationCodeManager">
@@ -86,7 +101,7 @@
       <wsa10:EndpointReference>
         <wsa10:Address>net.tcp://localhost:8095/VerificationCodeManager</wsa10:Address>
         <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
-          <Upn>LAPTOP-LF36UFJ4\artcu</Upn>
+          <Upn>SURFACE\eugen</Upn>
         </Identity>
       </wsa10:EndpointReference>
     </wsdl:port>

@@ -197,7 +197,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             try
             {
-                if (!await ValidationUtils.IsNicknameInUseAsync(nickname))
+                if (await ValidationUtils.IsNicknameInUseAsync(nickname))
                 {
                     windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
                         Properties.Langs.Lang.nicknameInUseText, PopUpIcon.Warning);

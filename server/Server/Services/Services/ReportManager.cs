@@ -1,14 +1,16 @@
 ﻿using Data.DAL.Interfaces;
 using Data.Model;
+using log4net;
 using Services.Contracts;
 using Services.Contracts.DTOs;
+using Services.Contracts.Enums;
 using Services.Wrappers;
 using System;
 using System.Collections.Concurrent;
 using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
-using log4net;
+using Services.Util;
 
 namespace Services.Services
 {
@@ -37,12 +39,25 @@ namespace Services.Services
 
         public async Task<bool> IsPlayerBannedAsync(int playerId)
         {
-            var activeBan = await banRepository.GetActiveBanForPlayerAsync(playerId);
-            return activeBan != null;
+            try
+            {
+                var activeBan = await banRepository.GetActiveBanForPlayerAsync(playerId);
+                return activeBan != null;
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error checking ban status.", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Error checking ban status.");
+            }
         }
 
         public async Task<bool> SubmitReportAsync(ReportDTO reportDTO)
         {
+            if (reportDTO == null || reportDTO.ReporterPlayerId <= 0 || reportDTO.ReportedPlayerId <= 0)
+            {
+                throw FaultExceptionFactory.Create(ServiceErrorCode.InvalidReportPayload, "INVALID_REPORT_PAYLOAD", "Invalid report payload.");
+            }
+
             try
             {
                 var newReport = new Report
@@ -60,87 +75,138 @@ namespace Services.Services
                 if (connectedClients.TryGetValue(reportDTO.ReportedPlayerId, out var client))
                 {
                     var reporter = await playerRepository.GetPlayerByIdAsync(reportDTO.ReporterPlayerId);
-                    if (reporter == null || reporter.Id < 0)
+                    if (reporter == null || reporter.Id <= 0)
                     {
-                        // TODO: ADD Fault Exception and log the error 
-                        return false;
+                        throw FaultExceptionFactory.Create(ServiceErrorCode.ReporterNotFound, "REPORTER_NOT_FOUND", "Reporter player not found.");
                     }
                     client.Callback.OnReportReceived(reporter.UserAccount.Nickname, reportDTO.Reason);
                     client.Callback.OnReportCountUpdated(totalReports);
                 }
 
-                if (totalReports >= ReportsForBan && !await IsPlayerBannedAsync(reportDTO.ReportedPlayerId))
+                if (totalReports >= ReportsForBan)
                 {
-                    await BanPlayerAsync(reportDTO.ReportedPlayerId);
+                    if (await IsPlayerBannedAsync(reportDTO.ReportedPlayerId))
+                    {
+                        log.WarnFormat("Player {0} already banned; skipping ban.", reportDTO.ReportedPlayerId);
+                    }
+                    else
+                    {
+                        await BanPlayerAsync(reportDTO.ReportedPlayerId);
+                    }
                 }
 
                 return true;
             }
+            catch (FaultException<ServiceErrorDetailDTO>)
+            {
+                // Already a controlled fault, just rethrow
+                throw;
+            }
             catch (Exception ex)
             {
                 log.Error("Error while submitting report.", ex);
-                return false;
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Unexpected error while submitting report.");
             }
         }
 
         private async Task BanPlayerAsync(int playerId)
         {
-            var startTime = DateTime.UtcNow;
-            var endTime = startTime.Add(BanDuration);
-
-            var newBan = new Ban
+            try
             {
-                PlayerId = playerId,
-                StartTime = startTime,
-                EndTime = endTime
-            };
-            await banRepository.AddBanAsync(newBan);
-            log.InfoFormat("Player {0} banned until {1:O}.", playerId, endTime);
+                var startTime = DateTime.UtcNow;
+                var endTime = startTime.Add(BanDuration);
 
-            if (connectedClients.TryGetValue(playerId, out var client))
+                var newBan = new Ban
+                {
+                    PlayerId = playerId,
+                    StartTime = startTime,
+                    EndTime = endTime
+                };
+                await banRepository.AddBanAsync(newBan);
+                log.InfoFormat("Player {0} banned until {1:O}.", playerId, endTime);
+
+                if (connectedClients.TryGetValue(playerId, out var client))
+                {
+                    client.Callback.OnPlayerBanned(endTime);
+
+                    var banTimer = new Timer(_ => NotifyPlayerUnbanned(playerId), null, BanDuration, Timeout.InfiniteTimeSpan);
+                    connectedClients[playerId] = (client.Callback, banTimer);
+                }
+            }
+            catch (Exception ex)
             {
-                client.Callback.OnPlayerBanned(endTime);
-
-                var banTimer = new Timer(_ => NotifyPlayerUnbanned(playerId), null, BanDuration, Timeout.InfiniteTimeSpan);
-                connectedClients[playerId] = (client.Callback, banTimer);
+                log.Error("Error banning player.", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.BanPersistenceError, "BAN_PERSISTENCE_ERROR", "Failed to persist ban information.");
             }
         }
 
         private void NotifyPlayerUnbanned(int playerId)
         {
-            if (connectedClients.TryGetValue(playerId, out var client))
+            try
             {
-                client.Callback.OnPlayerUnbanned();
-                client.BanTimer?.Dispose();
-                connectedClients[playerId] = (client.Callback, null);
-                log.InfoFormat("Player {0} unbanned and timer disposed.", playerId);
+                if (connectedClients.TryGetValue(playerId, out var client))
+                {
+                    client.Callback.OnPlayerUnbanned();
+                    client.BanTimer?.Dispose();
+                    connectedClients[playerId] = (client.Callback, null);
+                    log.InfoFormat("Player {0} unbanned and timer disposed.", playerId);
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error notifying player unbanned.", ex);
             }
         }
 
         public Task SubscribeToReportUpdatesAsync(int playerId)
         {
-            var callbackChannel = operationContext.GetCallbackChannel<IReportManagerCallback>();
-            connectedClients[playerId] = (callbackChannel, null);
-            log.InfoFormat("Player {0} subscribed to report updates.", playerId);
-
-            var commObject = (ICommunicationObject)callbackChannel;
-            commObject.Faulted += (s, e) => UnsubscribeFromReportUpdatesAsync(playerId);
-            commObject.Closed += (s, e) => UnsubscribeFromReportUpdatesAsync(playerId);
-
-            return Task.CompletedTask;
-        }
-        public Task UnsubscribeFromReportUpdatesAsync(int playerId)
-        {
-            if (connectedClients.TryRemove(playerId, out var client))
+            try
             {
-                client.BanTimer?.Dispose();
-                log.InfoFormat("Player {0} unsubscribed from report updates.", playerId);
+                var callbackChannel = operationContext.GetCallbackChannel<IReportManagerCallback>();
+                connectedClients[playerId] = (callbackChannel, null);
+                log.InfoFormat("Player {0} subscribed to report updates.", playerId);
+
+                var commObject = (ICommunicationObject)callbackChannel;
+                commObject.Faulted += (s, e) => UnsubscribeFromReportUpdatesAsync(playerId);
+                commObject.Closed += (s, e) => UnsubscribeFromReportUpdatesAsync(playerId);
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error subscribing to report updates.", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError, "SUBSCRIPTION_ERROR", "Failed to subscribe player to report updates.");
             }
             return Task.CompletedTask;
         }
+
+        public Task UnsubscribeFromReportUpdatesAsync(int playerId)
+        {
+            try
+            {
+                if (connectedClients.TryRemove(playerId, out var client))
+                {
+                    client.BanTimer?.Dispose();
+                    log.InfoFormat("Player {0} unsubscribed from report updates.", playerId);
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error unsubscribing from report updates.", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnsubscriptionError, "UNSUBSCRIPTION_ERROR", "Failed to unsubscribe player from report updates.");
+            }
+            return Task.CompletedTask;
+        }
+
         public async Task<int> GetCurrentReportCountAsync(int playerId)
         {
-            return await reportRepository.GetReportCountForPlayerAsync(playerId);
+            try
+            {
+                return await reportRepository.GetReportCountForPlayerAsync(playerId);
+            }
+            catch (Exception ex)
+            {
+                log.Error("Error getting current report count.", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Error retrieving report count.");
+            }
         }
     }
 }

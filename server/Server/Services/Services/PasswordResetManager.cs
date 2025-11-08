@@ -4,6 +4,8 @@ using Services.Contracts.DTOs;
 using Services.Util;
 using System.ServiceModel;
 using log4net;
+using Services.Contracts.Enums;
+using System;
 
 namespace Services.Services
 {
@@ -24,52 +26,76 @@ namespace Services.Services
         }
         public bool RequestPasswordResetCode(EmailVerificationDTO emailVerificationDTO)
         {
-            if (!repository.AccountAlreadyExist(emailVerificationDTO.Email) ||
-                !codeService.CanRequestCode(emailVerificationDTO.Email, CodeType.PasswordReset))
+            try
             {
-                log.WarnFormat("Password reset code request denied for '{0}'. Account missing or rate-limited.", emailVerificationDTO.Email);
-                return false;
-            }
-            var code = codeService.GenerateAndStoreCode(emailVerificationDTO.Email, CodeType.PasswordReset);
-            _ = notification.SendPasswordResetEmailAsync(emailVerificationDTO.Email, code);
-            log.InfoFormat("Password reset code sent to '{0}'.", emailVerificationDTO.Email);
+                if (!repository.AccountAlreadyExist(emailVerificationDTO.Email) ||
+                    !codeService.CanRequestCode(emailVerificationDTO.Email, CodeType.PasswordReset))
+                {
+                    log.WarnFormat("Password reset code request denied for '{0}'. Account missing or rate-limited.", emailVerificationDTO.Email);
+                    return false;
+                }
+                var code = codeService.GenerateAndStoreCode(emailVerificationDTO.Email, CodeType.PasswordReset);
+                _ = notification.SendPasswordResetEmailAsync(emailVerificationDTO.Email, code);
+                log.InfoFormat("Password reset code sent to '{0}'.", emailVerificationDTO.Email);
 
-            return true;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                log.Error("Unexpected error requesting password reset code.", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Unexpected error requesting password reset code.");
+            }
         }
 
         public bool ResetPassword(PasswordResetDTO passwordResetDTO)
         {   
-            if (!codeService.ValidateCode(passwordResetDTO.Email, passwordResetDTO.ResetCode, CodeType.PasswordReset))
+            try
             {
-                log.WarnFormat("Password reset failed for '{0}': invalid or expired code.", passwordResetDTO.Email);
-                return false;
+                if (!codeService.ValidateCode(passwordResetDTO.Email, passwordResetDTO.ResetCode, CodeType.PasswordReset))
+                {
+                    log.WarnFormat("Password reset failed for '{0}': invalid or expired code.", passwordResetDTO.Email);
+                    return false;
+                }
+                var hashedPassword = BCrypt.Net.BCrypt.HashPassword(passwordResetDTO.NewPassword);
+                var result = repository.ResetPassword(passwordResetDTO.Email, hashedPassword);
+                if (result)
+                {
+                    log.InfoFormat("Password reset succeeded for '{0}'.", passwordResetDTO.Email);
+                }
+                else
+                {
+                    log.WarnFormat("Password reset repository update failed for '{0}'.", passwordResetDTO.Email);
+                }
+                return result;
             }
-            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(passwordResetDTO.NewPassword);
-            var result = repository.ResetPassword(passwordResetDTO.Email, hashedPassword);
-            if (result)
+            catch (Exception ex)
             {
-                log.InfoFormat("Password reset succeeded for '{0}'.", passwordResetDTO.Email);
+                log.Error("Unexpected error resetting password.", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Unexpected error resetting password.");
             }
-            else
-            {
-                log.WarnFormat("Password reset repository update failed for '{0}'.", passwordResetDTO.Email);
-            }
-            return result;
         }
 
         public bool ValidatePasswordResetCode(EmailVerificationDTO emailVerificationDTO)
         {
-            var ok = codeService.ValidateCode(emailVerificationDTO.Email, emailVerificationDTO.VerificationCode, 
-                CodeType.PasswordReset, consume:false);
-            if (!ok)
+            try
             {
-                log.WarnFormat("Password reset code validation failed for '{0}'.", emailVerificationDTO.Email);
+                var ok = codeService.ValidateCode(emailVerificationDTO.Email, emailVerificationDTO.VerificationCode, 
+                    CodeType.PasswordReset, consume:false);
+                if (!ok)
+                {
+                    log.WarnFormat("Password reset code validation failed for '{0}'.", emailVerificationDTO.Email);
+                }
+                else
+                {
+                    log.InfoFormat("Password reset code validation succeeded for '{0}'.", emailVerificationDTO.Email);
+                }
+                return ok;
             }
-            else
+            catch (Exception ex)
             {
-                log.InfoFormat("Password reset code validation succeeded for '{0}'.", emailVerificationDTO.Email);
+                log.Error("Unexpected error validating password reset code.", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Unexpected error validating password reset code.");
             }
-            return ok;
         }
     }
 }

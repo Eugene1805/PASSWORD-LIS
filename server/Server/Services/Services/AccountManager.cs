@@ -53,35 +53,17 @@ namespace Services.Services
             {
                 log.WarnFormat("Duplicated registry attempt for the email: {0}", newAccount.Email);
                 log.Warn("DuplicateAccountException thrown while creating account.", ex);
-                var errorDetail = new ServiceErrorDetailDTO
-                {
-                    Code = ServiceErrorCode.UserAlreadyExists,
-                    ErrorCode = "USER_ALREADY_EXISTS",
-                    Message = ex.Message 
-                };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UserAlreadyExists, "USER_ALREADY_EXISTS", ex.Message);
             }
             catch (DbUpdateException dbEx)
             {
                 log.Error("Error at the dababase when creating the account.", dbEx);
-                var errorDetail = new ServiceErrorDetailDTO
-                {
-                    Code = ServiceErrorCode.DatabaseError,
-                    ErrorCode = "DATABASE_ERROR",
-                    Message = "An error occurred while processing your request. Please try again later."
-                };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason("Data layer error."));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "An error occurred while processing your request. Please try again later.");
             }
             catch (Exception ex)
             {
                 log.Fatal("Unexpected fatal error in CreateAccount.", ex);
-                var errorDetail = new ServiceErrorDetailDTO
-                {
-                    Code = ServiceErrorCode.UnexpectedError,
-                    ErrorCode = "UNEXPECTED_ERROR",
-                    Message = "An unexpected server error occurred."
-                };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason("Generic server error."));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "An unexpected server error occurred.");
             }
 
         }
@@ -92,38 +74,20 @@ namespace Services.Services
             {
                 return await repository.IsNicknameInUse(nickname);
             }
-            catch(ArgumentNullException ex) 
+            catch(ArgumentNullException ex)
             {
                 log.Error("Argument null error in IsNickNameInUse.", ex);
-                var errorDetail = new ServiceErrorDetailDTO
-                {
-                    Code = ServiceErrorCode.DatabaseError,
-                    ErrorCode = "DATABASE_ERROR",
-                    Message = "An error occurred while querying the database. Please try again later."
-                };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "An error occurred while querying the database. Please try again later.");
             }
             catch(InvalidOperationException ex)
             {
                 log.Error("Invalid operation error in IsNickNameInUse.", ex);
-                var errorDetail = new ServiceErrorDetailDTO
-                {
-                    Code = ServiceErrorCode.DatabaseError,
-                    ErrorCode = "DATABASE_ERROR",
-                    Message = "An error occurred while querying the database. Please try again later."
-                };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "An error occurred while querying the database. Please try again later.");
             }
             catch (Exception ex)
             {
                 log.Fatal("Unexpected fatal error in IsNickNameInUse.", ex);
-                var errorDetail = new ServiceErrorDetailDTO
-                {
-                    Code = ServiceErrorCode.UnexpectedError,
-                    ErrorCode = "UNEXPECTED_ERROR",
-                    Message = "An unexpected server error occurred."
-                };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason("Generic server error."));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "An unexpected server error occurred.");
             }
             
         }

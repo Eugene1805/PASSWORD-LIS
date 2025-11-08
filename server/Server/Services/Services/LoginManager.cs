@@ -8,6 +8,7 @@ using System;
 using System.Data.Common;
 using System.Linq;
 using System.ServiceModel;
+using Services.Util;
 
 namespace Services.Services
 {
@@ -52,23 +53,12 @@ namespace Services.Services
             catch (DbException dbEx)
             {
                 log.Error("Database error (DbException) during login.", dbEx);
-                var errorDetail = new ServiceErrorDetailDTO
-                {
-                    Code = ServiceErrorCode.DatabaseError,
-                    ErrorCode = "DATABASE_ERROR",
-                    Message = "An error occurred while querying the database. Please try again later."
-                };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
-            } catch (Exception ex)
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "An error occurred while querying the database. Please try again later.");
+            }
+            catch (Exception ex)
             {
                 log.Fatal("Unexpected fatal error in Login.", ex);
-                var errorDetail = new ServiceErrorDetailDTO
-                {
-                    Code = ServiceErrorCode.UnexpectedError,
-                    ErrorCode = "UNEXPECTED_ERROR",
-                    Message = "An unexpected server error occurred."
-                };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "An unexpected server error occurred.");
             }
         }
         private UserDTO MapUserToDTO(UserAccount userAccount, Player player)

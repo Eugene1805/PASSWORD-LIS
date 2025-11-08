@@ -55,11 +55,17 @@
   <wsdl:message name="IReportManager_GetCurrentReportCount_OutputMessage">
     <wsdl:part name="parameters" element="tns:GetCurrentReportCountResponse" />
   </wsdl:message>
+  <wsdl:message name="IReportManager_GetCurrentReportCount_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q2="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q2:ServiceErrorDetailDTO" />
+  </wsdl:message>
   <wsdl:message name="IReportManager_IsPlayerBanned_InputMessage">
     <wsdl:part name="parameters" element="tns:IsPlayerBanned" />
   </wsdl:message>
   <wsdl:message name="IReportManager_IsPlayerBanned_OutputMessage">
     <wsdl:part name="parameters" element="tns:IsPlayerBannedResponse" />
+  </wsdl:message>
+  <wsdl:message name="IReportManager_IsPlayerBanned_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q3="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q3:ServiceErrorDetailDTO" />
   </wsdl:message>
   <wsdl:message name="IReportManager_UnsubscribeFromReportUpdates_InputMessage">
     <wsdl:part name="parameters" element="tns:UnsubscribeFromReportUpdates" />
@@ -88,10 +94,12 @@
     <wsdl:operation name="GetCurrentReportCount">
       <wsdl:input wsaw:Action="http://tempuri.org/IReportManager/GetCurrentReportCount" message="tns:IReportManager_GetCurrentReportCount_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IReportManager/GetCurrentReportCountResponse" message="tns:IReportManager_GetCurrentReportCount_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IReportManager/GetCurrentReportCountServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IReportManager_GetCurrentReportCount_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
     <wsdl:operation name="IsPlayerBanned">
       <wsdl:input wsaw:Action="http://tempuri.org/IReportManager/IsPlayerBanned" message="tns:IReportManager_IsPlayerBanned_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IReportManager/IsPlayerBannedResponse" message="tns:IReportManager_IsPlayerBanned_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IReportManager/IsPlayerBannedServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IReportManager_IsPlayerBanned_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
     <wsdl:operation name="UnsubscribeFromReportUpdates">
       <wsdl:input wsaw:Action="http://tempuri.org/IReportManager/UnsubscribeFromReportUpdates" message="tns:IReportManager_UnsubscribeFromReportUpdates_InputMessage" />
@@ -138,6 +146,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="IsPlayerBanned">
       <soap12:operation soapAction="http://tempuri.org/IReportManager/IsPlayerBanned" style="document" />
@@ -147,6 +158,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="UnsubscribeFromReportUpdates">
       <soap12:operation soapAction="http://tempuri.org/IReportManager/UnsubscribeFromReportUpdates" style="document" />
@@ -185,7 +199,7 @@
       <wsa10:EndpointReference>
         <wsa10:Address>net.tcp://localhost:8107/ReportManager</wsa10:Address>
         <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
-          <Upn>LAPTOP-LF36UFJ4\artcu</Upn>
+          <Upn>SURFACE\eugen</Upn>
         </Identity>
       </wsa10:EndpointReference>
     </wsdl:port>

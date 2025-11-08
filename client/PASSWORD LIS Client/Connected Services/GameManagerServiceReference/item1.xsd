@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:import schemaLocation="http://localhost:8108/?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" />
+  <xs:complexType name="ServiceErrorDetailDTO">
+    <xs:sequence>
+      <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" minOccurs="0" name="Code" type="q1:ServiceErrorCode" />
+      <xs:element minOccurs="0" name="ErrorCode" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Message" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ServiceErrorDetailDTO" nillable="true" type="tns:ServiceErrorDetailDTO" />
   <xs:complexType name="ArrayOfValidationVoteDTO">
     <xs:sequence>
       <xs:element minOccurs="0" maxOccurs="unbounded" name="ValidationVoteDTO" nillable="true" type="tns:ValidationVoteDTO" />
@@ -32,8 +40,8 @@
       <xs:element minOccurs="0" name="Id" type="xs:int" />
       <xs:element minOccurs="0" name="Nickname" nillable="true" type="xs:string" />
       <xs:element minOccurs="0" name="PhotoId" type="xs:int" />
-      <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" minOccurs="0" name="Role" type="q1:PlayerRole" />
-      <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" minOccurs="0" name="Team" type="q2:MatchTeam" />
+      <xs:element xmlns:q2="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" minOccurs="0" name="Role" type="q2:PlayerRole" />
+      <xs:element xmlns:q3="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" minOccurs="0" name="Team" type="q3:MatchTeam" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="PlayerDTO" nillable="true" type="tns:PlayerDTO" />
@@ -50,7 +58,7 @@
     <xs:sequence>
       <xs:element minOccurs="0" name="IsCorrect" type="xs:boolean" />
       <xs:element minOccurs="0" name="NewScore" type="xs:int" />
-      <xs:element xmlns:q3="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" minOccurs="0" name="Team" type="q3:MatchTeam" />
+      <xs:element xmlns:q4="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" minOccurs="0" name="Team" type="q4:MatchTeam" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="GuessResultDTO" nillable="true" type="tns:GuessResultDTO" />
@@ -72,7 +80,7 @@
     <xs:sequence>
       <xs:element minOccurs="0" name="NewBlueTeamScore" type="xs:int" />
       <xs:element minOccurs="0" name="NewRedTeamScore" type="xs:int" />
-      <xs:element xmlns:q4="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" minOccurs="0" name="TeamThatWasValidated" type="q4:MatchTeam" />
+      <xs:element xmlns:q5="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" minOccurs="0" name="TeamThatWasValidated" type="q5:MatchTeam" />
       <xs:element minOccurs="0" name="TotalPenaltyApplied" type="xs:int" />
     </xs:sequence>
   </xs:complexType>
@@ -81,7 +89,7 @@
     <xs:sequence>
       <xs:element minOccurs="0" name="BlueScore" type="xs:int" />
       <xs:element minOccurs="0" name="RedScore" type="xs:int" />
-      <xs:element xmlns:q5="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" minOccurs="0" name="WinnerTeam" nillable="true" type="q5:MatchTeam" />
+      <xs:element xmlns:q6="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" minOccurs="0" name="WinnerTeam" nillable="true" type="q6:MatchTeam" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="MatchSummaryDTO" nillable="true" type="tns:MatchSummaryDTO" />

@@ -23,8 +23,9 @@
   </MetadataSources>
   <Metadata>
     <MetadataFile FileName="PasswordResetManager.wsdl" MetadataType="Wsdl" ID="97ca2aa3-cb96-441f-ba58-2269acaa16bc" SourceId="1" SourceUrl="http://localhost:8098/?wsdl" />
-    <MetadataFile FileName="item.xsd" MetadataType="Schema" ID="ec47e6a4-fcf7-42a0-914a-b65a33f04a8e" SourceId="1" SourceUrl="http://localhost:8098/?xsd=xsd0" />
     <MetadataFile FileName="item1.xsd" MetadataType="Schema" ID="350abebd-bef0-432d-8e50-31a471a67042" SourceId="1" SourceUrl="http://localhost:8098/?xsd=xsd2" />
+    <MetadataFile FileName="item3.xsd" MetadataType="Schema" ID="1c1ddd1d-12f6-4dca-b652-3a32938e3f32" SourceId="1" SourceUrl="http://localhost:8098/?xsd=xsd3" />
+    <MetadataFile FileName="item.xsd" MetadataType="Schema" ID="ec47e6a4-fcf7-42a0-914a-b65a33f04a8e" SourceId="1" SourceUrl="http://localhost:8098/?xsd=xsd0" />
     <MetadataFile FileName="item2.xsd" MetadataType="Schema" ID="9a7f0a41-7ed7-4f94-b067-c87e3a4191d4" SourceId="1" SourceUrl="http://localhost:8098/?xsd=xsd1" />
     <MetadataFile FileName="item.disco" MetadataType="Disco" ID="34baaf90-3a46-48d6-9d77-1d2046080497" SourceId="1" SourceUrl="http://localhost:8098/?disco" />
   </Metadata>

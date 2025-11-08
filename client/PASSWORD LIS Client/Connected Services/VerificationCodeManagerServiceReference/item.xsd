@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://localhost:8094/?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" />
   <xs:complexType name="EmailVerificationDTO">
     <xs:sequence>
       <xs:element minOccurs="0" name="Email" nillable="true" type="xs:string" />
@@ -7,4 +8,12 @@
     </xs:sequence>
   </xs:complexType>
   <xs:element name="EmailVerificationDTO" nillable="true" type="tns:EmailVerificationDTO" />
+  <xs:complexType name="ServiceErrorDetailDTO">
+    <xs:sequence>
+      <xs:element xmlns:q1="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" minOccurs="0" name="Code" type="q1:ServiceErrorCode" />
+      <xs:element minOccurs="0" name="ErrorCode" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Message" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ServiceErrorDetailDTO" nillable="true" type="tns:ServiceErrorDetailDTO" />
 </xs:schema>

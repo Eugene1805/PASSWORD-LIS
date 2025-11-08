@@ -1,5 +1,6 @@
 ﻿using Data.DAL.Interfaces;
 using Data.Model;
+using log4net;
 using Services.Contracts;
 using Services.Contracts.DTOs;
 using Services.Contracts.Enums;
@@ -73,6 +74,7 @@ namespace Services.Services
         private readonly IWordRepository wordRepository;
         private readonly IMatchRepository matchRepository;
         private readonly IPlayerRepository playerRepository;
+        private readonly ILog log = LogManager.GetLogger(typeof(GameManager));
         private const int ROUND_DURATION_SECONDS = 60;
         private const int WORDS_PER_ROUND = 5;
         private const int TOTAL_ROUNDS = 5;
@@ -292,12 +294,19 @@ namespace Services.Services
             var expectedPlayer = matchState.ExpectedPlayers.FirstOrDefault(p => p.Id == playerId);
             if (expectedPlayer == null)
             {
+                log.WarnFormat("Unauthorized join attempt to match {0} by player {1}.", gameCode, playerId);
+                
                 throw new FaultException("You are not authorized to join this match.");
             }
 
             if (matchState.ActivePlayers.ContainsKey(playerId))
             {
-                throw new FaultException("You are already connected to this match.");
+                var errorDetail = new ServiceErrorDetailDTO
+                {
+                    Code = ServiceErrorCode.AlreadyInRoom,
+                    ErrorCode = "PLAYER_ALREADY_IN_MATCH"
+                };
+                throw new FaultException<ServiceErrorDetailDTO>(errorDetail,new FaultReason(errorDetail.ErrorCode));
             }
 
             var callback = operationContext.GetCallbackChannel<IGameManagerCallback>();
@@ -340,20 +349,22 @@ namespace Services.Services
             }
         }
 
-        private async Task BroadcastAsync(MatchState game, Action<IGameManagerCallback> action)
+        private static async Task BroadcastAsync(MatchState game, Action<IGameManagerCallback> action)
         {
-            var tasks = game.ActivePlayers.Select(async playerEntry =>
+            var tasks = game.ActivePlayers.Select(playerEntry =>
+        Task.Run(() =>
+        {
+            try
             {
-                try
-                {
-                    action(playerEntry.Value.Callback);
-                }
-                catch
-                {
-                    // Disconnection handling: remove unreachable player
-                    game.ActivePlayers.TryRemove(playerEntry.Key, out _);
-                }
-            });
+                action(playerEntry.Value.Callback);
+            }
+            catch
+            {
+                // Disconnection handling: remove unreachable player
+                game.ActivePlayers.TryRemove(playerEntry.Key, out _);
+            }
+        })
+    );
             await Task.WhenAll(tasks);
         }
 
@@ -518,14 +529,16 @@ namespace Services.Services
             }
         }
 
-        private async Task BroadcastToPlayersAsync(IEnumerable<(IGameManagerCallback Callback, PlayerDTO Player)> players, Action<IGameManagerCallback> action)
+        private static async Task BroadcastToPlayersAsync(IEnumerable<(IGameManagerCallback Callback, PlayerDTO Player)> players, Action<IGameManagerCallback> action)
         {
             // Broadcast to a subset of players (e.g., the validators)
-            var tasks = players.Select(async playerEntry =>
-            {
-                try { action(playerEntry.Callback); }
-                catch { /* Optionally handle disconnection here as well */ }
-            });
+            var tasks = players.Select(playerEntry =>
+        Task.Run(() =>
+        {
+            try { action(playerEntry.Callback); }
+            catch { /* Optionally handle disconnection here as well */ }
+        })
+    );
             await Task.WhenAll(tasks);
         }
 
@@ -611,17 +624,17 @@ namespace Services.Services
         // Tuple-returning helpers 
         // ------------------------
 
-        private IEnumerable<(IGameManagerCallback Callback, PlayerDTO Player)> GetPlayersByTeam(MatchState state, MatchTeam team)
+        private static IEnumerable<(IGameManagerCallback Callback, PlayerDTO Player)> GetPlayersByTeam(MatchState state, MatchTeam team)
         {
             return state.ActivePlayers.Values.Where(p => p.Player.Team == team);
         }
 
-        private (IGameManagerCallback Callback, PlayerDTO Player) GetPlayerByRole(MatchState state, MatchTeam team, PlayerRole role)
+        private static (IGameManagerCallback Callback, PlayerDTO Player) GetPlayerByRole(MatchState state, MatchTeam team, PlayerRole role)
         {
             return state.ActivePlayers.Values.FirstOrDefault(p => p.Player.Team == team && p.Player.Role == role);
         }
 
-        private (IGameManagerCallback Callback, PlayerDTO Player) GetPartner(MatchState state, (IGameManagerCallback Callback, PlayerDTO Player) player)
+        private static (IGameManagerCallback Callback, PlayerDTO Player) GetPartner(MatchState state, (IGameManagerCallback Callback, PlayerDTO Player) player)
         {
             // Find the teammate (same team, different player)
             return state.ActivePlayers.Values.FirstOrDefault(p => p.Player.Team == player.Player.Team && p.Player.Id != player.Player.Id);

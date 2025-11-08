@@ -133,6 +133,7 @@
     <Compile Include="Services\VerificationCodeManager.cs" />
     <Compile Include="Services\WaitingRoomManager.cs" />
     <Compile Include="Util\EmailSender.cs" />
+    <Compile Include="Util\FaultExceptionFactory.cs" />
     <Compile Include="Util\INotificationService.cs" />
     <Compile Include="Util\IVerificationCodeService.cs" />
     <Compile Include="Wrappers\OperationContextWrapper.cs" />

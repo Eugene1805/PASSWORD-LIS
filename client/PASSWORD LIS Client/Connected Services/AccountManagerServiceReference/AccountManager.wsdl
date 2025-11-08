@@ -52,6 +52,9 @@
   <wsdl:message name="IAccountManager_IsNicknameInUse_OutputMessage">
     <wsdl:part name="parameters" element="tns:IsNicknameInUseResponse" />
   </wsdl:message>
+  <wsdl:message name="IAccountManager_IsNicknameInUse_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q2="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q2:ServiceErrorDetailDTO" />
+  </wsdl:message>
   <wsdl:portType name="IAccountManager">
     <wsdl:operation name="CreateAccount">
       <wsdl:input wsaw:Action="http://tempuri.org/IAccountManager/CreateAccount" message="tns:IAccountManager_CreateAccount_InputMessage" />
@@ -61,6 +64,7 @@
     <wsdl:operation name="IsNicknameInUse">
       <wsdl:input wsaw:Action="http://tempuri.org/IAccountManager/IsNicknameInUse" message="tns:IAccountManager_IsNicknameInUse_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IAccountManager/IsNicknameInUseResponse" message="tns:IAccountManager_IsNicknameInUse_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IAccountManager/IsNicknameInUseServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IAccountManager_IsNicknameInUse_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="NetTcpBinding_IAccountManager" type="tns:IAccountManager">
@@ -86,6 +90,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
   </wsdl:binding>
   <wsdl:service name="AccountManager">
@@ -94,7 +101,7 @@
       <wsa10:EndpointReference>
         <wsa10:Address>net.tcp://localhost:8091/AccountManager</wsa10:Address>
         <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
-          <Upn>LAPTOP-LF36UFJ4\artcu</Upn>
+          <Upn>SURFACE\eugen</Upn>
         </Identity>
       </wsa10:EndpointReference>
     </wsdl:port>

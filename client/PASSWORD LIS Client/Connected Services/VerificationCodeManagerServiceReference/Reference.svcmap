@@ -22,11 +22,12 @@
     <MetadataSource Address="http://localhost:8094" Protocol="http" SourceId="1" />
   </MetadataSources>
   <Metadata>
-    <MetadataFile FileName="VerificationCodeManager.wsdl" MetadataType="Wsdl" ID="2928b5c3-34d9-4bf5-b2cf-47194e5eba7a" SourceId="1" SourceUrl="http://localhost:8094/?wsdl" />
     <MetadataFile FileName="item.disco" MetadataType="Disco" ID="0feec2b2-f825-40a2-9ed3-84240edd4e11" SourceId="1" SourceUrl="http://localhost:8094/?disco" />
     <MetadataFile FileName="item.xsd" MetadataType="Schema" ID="df4341b3-5074-408d-a1bf-c924ffda291b" SourceId="1" SourceUrl="http://localhost:8094/?xsd=xsd2" />
+    <MetadataFile FileName="item3.xsd" MetadataType="Schema" ID="6689769b-277f-4254-9648-764f29f59500" SourceId="1" SourceUrl="http://localhost:8094/?xsd=xsd3" />
     <MetadataFile FileName="item1.xsd" MetadataType="Schema" ID="272e50f5-0403-4449-87f6-312ef57990e8" SourceId="1" SourceUrl="http://localhost:8094/?xsd=xsd0" />
     <MetadataFile FileName="item2.xsd" MetadataType="Schema" ID="97bfb358-fed9-4157-b73f-457aa3142626" SourceId="1" SourceUrl="http://localhost:8094/?xsd=xsd1" />
+    <MetadataFile FileName="VerificationCodeManager.wsdl" MetadataType="Wsdl" ID="2928b5c3-34d9-4bf5-b2cf-47194e5eba7a" SourceId="1" SourceUrl="http://localhost:8094/?wsdl" />
   </Metadata>
   <Extensions>
     <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />

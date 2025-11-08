@@ -32,8 +32,8 @@
   <wsdl:types>
     <xsd:schema targetNamespace="http://tempuri.org/Imports">
       <xsd:import schemaLocation="http://localhost:8108/?xsd=xsd0" namespace="http://tempuri.org/" />
-      <xsd:import schemaLocation="http://localhost:8108/?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
       <xsd:import schemaLocation="http://localhost:8108/?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" />
+      <xsd:import schemaLocation="http://localhost:8108/?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
       <xsd:import schemaLocation="http://localhost:8108/?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" />
     </xsd:schema>
   </wsdl:types>
@@ -43,11 +43,17 @@
   <wsdl:message name="IGameManager_SubscribeToMatch_OutputMessage">
     <wsdl:part name="parameters" element="tns:SubscribeToMatchResponse" />
   </wsdl:message>
+  <wsdl:message name="IGameManager_SubscribeToMatch_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q1="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q1:ServiceErrorDetailDTO" />
+  </wsdl:message>
   <wsdl:message name="IGameManager_SubmitClue_InputMessage">
     <wsdl:part name="parameters" element="tns:SubmitClue" />
   </wsdl:message>
   <wsdl:message name="IGameManager_SubmitClue_OutputMessage">
     <wsdl:part name="parameters" element="tns:SubmitClueResponse" />
+  </wsdl:message>
+  <wsdl:message name="IGameManager_SubmitClue_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q2="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q2:ServiceErrorDetailDTO" />
   </wsdl:message>
   <wsdl:message name="IGameManager_SubmitGuess_InputMessage">
     <wsdl:part name="parameters" element="tns:SubmitGuess" />
@@ -55,17 +61,26 @@
   <wsdl:message name="IGameManager_SubmitGuess_OutputMessage">
     <wsdl:part name="parameters" element="tns:SubmitGuessResponse" />
   </wsdl:message>
+  <wsdl:message name="IGameManager_SubmitGuess_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q3="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q3:ServiceErrorDetailDTO" />
+  </wsdl:message>
   <wsdl:message name="IGameManager_PassTurn_InputMessage">
     <wsdl:part name="parameters" element="tns:PassTurn" />
   </wsdl:message>
   <wsdl:message name="IGameManager_PassTurn_OutputMessage">
     <wsdl:part name="parameters" element="tns:PassTurnResponse" />
   </wsdl:message>
+  <wsdl:message name="IGameManager_PassTurn_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q4="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q4:ServiceErrorDetailDTO" />
+  </wsdl:message>
   <wsdl:message name="IGameManager_SubmitValidationVotes_InputMessage">
     <wsdl:part name="parameters" element="tns:SubmitValidationVotes" />
   </wsdl:message>
   <wsdl:message name="IGameManager_SubmitValidationVotes_OutputMessage">
     <wsdl:part name="parameters" element="tns:SubmitValidationVotesResponse" />
+  </wsdl:message>
+  <wsdl:message name="IGameManager_SubmitValidationVotes_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q5="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q5:ServiceErrorDetailDTO" />
   </wsdl:message>
   <wsdl:message name="IGameManager_OnMatchInitialized_OutputCallbackMessage">
     <wsdl:part name="parameters" element="tns:OnMatchInitialized" />
@@ -98,22 +113,27 @@
     <wsdl:operation name="SubscribeToMatch">
       <wsdl:input wsaw:Action="http://tempuri.org/IGameManager/SubscribeToMatch" message="tns:IGameManager_SubscribeToMatch_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IGameManager/SubscribeToMatchResponse" message="tns:IGameManager_SubscribeToMatch_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IGameManager/SubscribeToMatchServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IGameManager_SubscribeToMatch_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
     <wsdl:operation name="SubmitClue">
       <wsdl:input wsaw:Action="http://tempuri.org/IGameManager/SubmitClue" message="tns:IGameManager_SubmitClue_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IGameManager/SubmitClueResponse" message="tns:IGameManager_SubmitClue_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IGameManager/SubmitClueServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IGameManager_SubmitClue_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
     <wsdl:operation name="SubmitGuess">
       <wsdl:input wsaw:Action="http://tempuri.org/IGameManager/SubmitGuess" message="tns:IGameManager_SubmitGuess_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IGameManager/SubmitGuessResponse" message="tns:IGameManager_SubmitGuess_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IGameManager/SubmitGuessServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IGameManager_SubmitGuess_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
     <wsdl:operation name="PassTurn">
       <wsdl:input wsaw:Action="http://tempuri.org/IGameManager/PassTurn" message="tns:IGameManager_PassTurn_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IGameManager/PassTurnResponse" message="tns:IGameManager_PassTurn_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IGameManager/PassTurnServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IGameManager_PassTurn_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
     <wsdl:operation name="SubmitValidationVotes">
       <wsdl:input wsaw:Action="http://tempuri.org/IGameManager/SubmitValidationVotes" message="tns:IGameManager_SubmitValidationVotes_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IGameManager/SubmitValidationVotesResponse" message="tns:IGameManager_SubmitValidationVotes_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IGameManager/SubmitValidationVotesServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IGameManager_SubmitValidationVotes_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
     <wsdl:operation name="OnMatchInitialized">
       <wsdl:output wsaw:Action="http://tempuri.org/IGameManager/OnMatchInitialized" message="tns:IGameManager_OnMatchInitialized_OutputCallbackMessage" />
@@ -154,6 +174,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="SubmitClue">
       <soap12:operation soapAction="http://tempuri.org/IGameManager/SubmitClue" style="document" />
@@ -163,6 +186,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="SubmitGuess">
       <soap12:operation soapAction="http://tempuri.org/IGameManager/SubmitGuess" style="document" />
@@ -172,6 +198,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="PassTurn">
       <soap12:operation soapAction="http://tempuri.org/IGameManager/PassTurn" style="document" />
@@ -181,6 +210,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="SubmitValidationVotes">
       <soap12:operation soapAction="http://tempuri.org/IGameManager/SubmitValidationVotes" style="document" />
@@ -190,6 +222,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="OnMatchInitialized">
       <soap12:operation soapAction="http://tempuri.org/IGameManager/OnMatchInitialized" style="document" />
@@ -252,7 +287,7 @@
       <wsa10:EndpointReference>
         <wsa10:Address>net.tcp://localhost:8109/GameManager</wsa10:Address>
         <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
-          <Upn>LAPTOP-LF36UFJ4\artcu</Upn>
+          <Upn>SURFACE\eugen</Upn>
         </Identity>
       </wsa10:EndpointReference>
     </wsdl:port>

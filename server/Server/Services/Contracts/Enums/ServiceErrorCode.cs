@@ -22,6 +22,21 @@ namespace Services.Contracts.Enums
          [EnumMember(Value = "PLAYER_NOT_FOUND")]
          PlayerNotFound,
          [EnumMember(Value = "ALREADY_IN_ROOM")]
-         AlreadyInRoom
+         AlreadyInRoom,
+         // --- Added for Report/Ban flows ---
+         [EnumMember(Value = "INVALID_REPORT_PAYLOAD")]
+         InvalidReportPayload,
+         [EnumMember(Value = "REPORTER_NOT_FOUND")]
+         ReporterNotFound,
+         [EnumMember(Value = "REPORTED_PLAYER_NOT_FOUND")]
+         ReportedPlayerNotFound,
+         [EnumMember(Value = "PLAYER_ALREADY_BANNED")]
+         PlayerAlreadyBanned,
+         [EnumMember(Value = "BAN_PERSISTENCE_ERROR")]
+         BanPersistenceError,
+         [EnumMember(Value = "SUBSCRIPTION_ERROR")]
+         SubscriptionError,
+         [EnumMember(Value = "UNSUBSCRIPTION_ERROR")]
+         UnsubscriptionError
     }
 }
