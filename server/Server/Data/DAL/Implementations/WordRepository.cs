@@ -11,7 +11,6 @@ namespace Data.DAL.Implementations
 {
     public class WordRepository : IWordRepository
     {
-        private static readonly Random rand = new Random();
         public async Task<List<PasswordWord>> GetRandomWordsAsync(int count)
         {
             using (var context = new PasswordLISEntities(Connection.GetConnectionString()))

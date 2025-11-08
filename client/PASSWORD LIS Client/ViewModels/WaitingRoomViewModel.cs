@@ -106,7 +106,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
 
         
-        public FriendDTO selectedFriend;
+        private FriendDTO selectedFriend;
         public FriendDTO SelectedFriend 
         {
             get => selectedFriend;
