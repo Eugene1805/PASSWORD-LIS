@@ -56,7 +56,27 @@ namespace PASSWORD_LIS_Client.Services
 
         public Task UnsubscribeFromReportUpdatesAsync(int playerId)
         {
-            return proxy.UnsubscribeFromReportUpdatesAsync(playerId);
+            var channel = proxy as ICommunicationObject;
+            try
+            {
+                if (channel == null || channel.State == CommunicationState.Faulted)
+                {
+                    channel?.Abort();
+                    return Task.CompletedTask;
+                }
+                return proxy.UnsubscribeFromReportUpdatesAsync(playerId);
+            }
+            catch (CommunicationException)
+            {
+                channel?.Abort();
+                return Task.CompletedTask;
+            }
+            catch (Exception)
+            {
+                channel?.Abort();
+                return Task.CompletedTask;
+            }
+
         }
 
         public void OnPlayerBanned(DateTime banLiftTime)
