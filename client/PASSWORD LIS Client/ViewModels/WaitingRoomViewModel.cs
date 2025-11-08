@@ -17,8 +17,14 @@ namespace PASSWORD_LIS_Client.ViewModels
 {
     public class WaitingRoomViewModel : BaseViewModel
     {
-        public ObservableCollection<string> ChatMessages { get; }
-        public ObservableCollection<PlayerDTO> ConnectedPlayers { get; }
+        private readonly IWaitingRoomManagerService roomManagerClient;
+        private readonly IWindowService windowService;
+        private readonly IFriendsManagerService friendsManagerService;
+        private readonly IReportManagerService reportManagerService;
+        private const int MaxPlayers = 4;
+        private const int MaxReports = 3;
+        private string lastReportReason;
+        private PlayerDTO currentPlayer;
 
         private string gameCode;
         public string GameCode
@@ -117,7 +123,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
         }
 
-        private PlayerDTO currentPlayer;
         public ICommand SendMessageCommand { get; }
         public ICommand LeaveRoomCommand { get; }
         public ICommand ReportCommand { get; }
@@ -125,15 +130,11 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand CopyGameCodeCommand { get; }
         public ICommand InviteFriendCommand { get; }
         public ICommand InviteByMailCommand { get; }
+        public ObservableCollection<string> ChatMessages { get; }
+        public ObservableCollection<PlayerDTO> ConnectedPlayers { get; }
 
-        private readonly IWaitingRoomManagerService roomManagerClient;
-        private readonly IWindowService windowService;
-        private readonly IFriendsManagerService friendsManagerService;
-        private readonly IReportManagerService reportManagerService;
-        private const int MaxPlayers = 4;
-        private string lastReportReason;
-        public WaitingRoomViewModel(IWaitingRoomManagerService roomManagerService, IWindowService windowService, IFriendsManagerService friendsManagerService,
-            IReportManagerService reportManagerService) 
+        public WaitingRoomViewModel(IWaitingRoomManagerService roomManagerService, IWindowService windowService,
+            IFriendsManagerService friendsManagerService,IReportManagerService reportManagerService) 
         {
             this.roomManagerClient = roomManagerService;
             this.windowService = windowService;
@@ -172,21 +173,23 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             try
             {
-                var players = await roomManagerClient.GetPlayersInRoomAsync(this.GameCode).ConfigureAwait(false) ?? new List<PlayerDTO>();
-                if (!this.IsGuest)
+                var players = await roomManagerClient.GetPlayersInRoomAsync(GameCode)
+                    .ConfigureAwait(false) ?? new List<PlayerDTO>();
+                if (!IsGuest)
                 {
-                    this.currentPlayer = players.FirstOrDefault(p => p.Id == SessionManager.CurrentUser.PlayerId);
+                    currentPlayer = players.FirstOrDefault(p => p.Id == SessionManager.CurrentUser.PlayerId);
 
                     _ = LoadFriendsAsync();
 
                     reportManagerService.ReportReceived += OnReportReceived;
                     reportManagerService.ReportCountUpdated += OnReportCountUpdated;
                     reportManagerService.PlayerBanned += OnPlayerBanned;
-                    await reportManagerService.SubscribeToReportUpdatesAsync(SessionManager.CurrentUser.PlayerId).ConfigureAwait(false);
+                    await reportManagerService.SubscribeToReportUpdatesAsync(SessionManager.CurrentUser.PlayerId)
+                        .ConfigureAwait(false);
                 }
                 else
                 {
-                    this.currentPlayer = players.FirstOrDefault(p => p.Nickname == SessionManager.CurrentUser.Nickname);
+                    currentPlayer = players.FirstOrDefault(p => p.Nickname == SessionManager.CurrentUser.Nickname);
                 }
 
                 Action update = () =>
@@ -401,13 +404,10 @@ namespace PASSWORD_LIS_Client.ViewModels
                         Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
                     windowService.GoBack();
                     return;
-                }
-
-                
+                }              
                 var gameViewModel = new GameViewModel(App.GameManagerService, windowService, gameCode, currentPlayer);
                 var gamePage = new GamePage { DataContext = gameViewModel };
                 windowService.NavigateTo(gamePage);
-
                 _ = gameViewModel.InitializeAsync();
             });
         }
@@ -452,9 +452,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             SnackbarMessage = message;
             IsSnackbarVisible = true;
-
             await Task.Delay(3000);
-
             IsSnackbarVisible = false;
         }
         private void CopyGameCodeToClipboard()
@@ -473,10 +471,8 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 return;
             }
-
             bool confirmed = windowService.ShowYesNoPopUp(Properties.Langs.Lang.confirmInvitationTitleText,
                 string.Format(Properties.Langs.Lang.areSureSendingInvitation, friendToInvite.Nickname));
-
             if (!confirmed)
             {
                 return;
@@ -484,7 +480,8 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             try
             {
-                await roomManagerClient.SendGameInvitationToFriendAsync(friendToInvite.PlayerId, gameCode, SessionManager.CurrentUser.Nickname);
+                await roomManagerClient.SendGameInvitationToFriendAsync(friendToInvite.PlayerId, gameCode,
+                    SessionManager.CurrentUser.Nickname);
                 windowService.ShowPopUp(Properties.Langs.Lang.successTitleText,
                     Properties.Langs.Lang.invitationsentSuccessText, PopUpIcon.Success);
             } 
@@ -510,7 +507,8 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
         private void ShowInvitationByMail()
         {
-            var showInvitationMailViewModel = new InvitationByMailViewModel(App.WaitRoomManagerService, App.WindowService, this.GameCode, SessionManager.CurrentUser.Nickname);
+            var showInvitationMailViewModel = new InvitationByMailViewModel(App.WaitRoomManagerService,
+                App.WindowService, GameCode, SessionManager.CurrentUser.Nickname);
             var invitationWindow = new InvitationByMailWindow { DataContext = showInvitationMailViewModel };
             invitationWindow.ShowDialog();
         }
@@ -520,12 +518,12 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 return;
             }
-
             IsLoadingFriends = true;
             try
             {
-                var friendsArray = await friendsManagerService.GetFriendsAsync(SessionManager.CurrentUser.UserAccountId);
-                Application.Current.Dispatcher.Invoke(() =>
+                var friendsArray = await friendsManagerService.
+                    GetFriendsAsync(SessionManager.CurrentUser.UserAccountId);
+                _ = Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     Friends.Clear();
                     if (friendsArray != null)
@@ -606,14 +604,16 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
         private void OnReportReceived(string reporterNickname, string reason)
         {
-            lastReportReason = $"{Properties.Langs.Lang.youHaveBeenReportedByText} {reporterNickname}. {Properties.Langs.Lang.reasonText} {reason}";
+            lastReportReason = $"{Properties.Langs.Lang.youHaveBeenReportedByText} {reporterNickname}. " +
+                $"{Properties.Langs.Lang.reasonText} {reason}";
         }
 
         private void OnReportCountUpdated(int newReportCount)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                var message = $"{lastReportReason} | {Properties.Langs.Lang.currentReportsText}: {newReportCount}/3";
+                var message = $"{lastReportReason} | " +
+                $"{Properties.Langs.Lang.currentReportsText}: {newReportCount}/{MaxReports}";
                 _ = ShowSnackbarAsync(message);
             });
         }
@@ -641,15 +641,12 @@ namespace PASSWORD_LIS_Client.ViewModels
                     Properties.Langs.Lang.hostLeftText,
                     PopUpIcon.Warning);
                 }
-                
                 if (!IsGuest)
                 {
                     await CleanupAndUnsubscribeAsync();
                 }
-
                 windowService.GoBack();
             });
         }
-
     }
 }

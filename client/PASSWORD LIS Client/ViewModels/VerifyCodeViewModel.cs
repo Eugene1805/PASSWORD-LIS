@@ -11,12 +11,12 @@ namespace PASSWORD_LIS_Client.ViewModels
 {
     public class VerifyCodeViewModel : BaseViewModel
     {
-        public string Email { get; }
         private readonly VerificationReason reason;
         private readonly IWindowService windowService;
         private readonly IVerificationCodeManagerService newAccountClient;
         private readonly IPasswordResetManagerService resetPasswordClient;
 
+        public string Email { get; }
         private string enteredCode;
         public string EnteredCode
         {
@@ -46,7 +46,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             this.VerifyCodeCommand = new RelayCommand(async (_) => await VerifyCodeAsync(), (_) => CanVerify());
             this.ResendCodeCommand = new RelayCommand(async (_) => await ResendCodeAsync(), (_) => !this.IsBusy);
         }
-        public VerifyCodeViewModel() { }
         private bool CanVerify()
         {
             return !this.IsBusy && !string.IsNullOrWhiteSpace(this.EnteredCode);
@@ -140,7 +139,6 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private async Task<bool> TryResendCodeAsync()
         {
-            
             try
             {
                 bool success = false;

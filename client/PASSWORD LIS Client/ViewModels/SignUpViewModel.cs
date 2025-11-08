@@ -15,6 +15,10 @@ namespace PASSWORD_LIS_Client.ViewModels
 {
     public class SignUpViewModel : BaseViewModel
     {
+        private readonly IAccountManagerService client;
+
+        private readonly IWindowService windowService;
+
         private string firstName;
         public string FirstName
         {
@@ -64,15 +68,11 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
 
         public string TCLink { get; }
-        
 
         public ICommand SignUpCommand { get; }
         public ICommand NavigateToLoginCommand { get; }
         public ICommand OpenTermsAndConditionsCommand { get; }
 
-        private readonly IAccountManagerService client;
-        
-        private readonly IWindowService windowService;
         public SignUpViewModel(IAccountManagerService accountManager,IWindowService windowService)
         {
             this.client = accountManager;

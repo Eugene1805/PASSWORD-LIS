@@ -33,7 +33,8 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         public ICommand SubmitReportCommand { get; }
 
-        public ReportViewModel(UserDTO reporter, PlayerDTO reportedPlayer, IWindowService windowService, IReportManagerService reportManagerService)
+        public ReportViewModel(UserDTO reporter, PlayerDTO reportedPlayer, IWindowService windowService,
+            IReportManagerService reportManagerService)
         {
             this.reporter = reporter;
             this.reportedPlayer = reportedPlayer;
@@ -62,11 +63,13 @@ namespace PASSWORD_LIS_Client.ViewModels
 
                 if (success)
                 {
-                    windowService.ShowPopUp(Properties.Langs.Lang.reportSummitedText, Properties.Langs.Lang.thanksForReportText, PopUpIcon.Success);
+                    windowService.ShowPopUp(Properties.Langs.Lang.reportSummitedText,
+                        Properties.Langs.Lang.thanksForReportText, PopUpIcon.Success);
                 }
                 else
                 {
-                    windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, Properties.Langs.Lang.couldNotSummitReportText, PopUpIcon.Error);
+                    windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, 
+                        Properties.Langs.Lang.couldNotSummitReportText, PopUpIcon.Error);
                 }
             }
             catch (TimeoutException)

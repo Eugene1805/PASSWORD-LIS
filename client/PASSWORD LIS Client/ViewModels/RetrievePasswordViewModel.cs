@@ -11,6 +11,9 @@ namespace PASSWORD_LIS_Client.ViewModels
 {
     public class RetrievePasswordViewModel : BaseViewModel
     {
+        private readonly IWindowService windowService;
+        private readonly IPasswordResetManagerService passwordResetClient;
+
         private string email;
         public string Email
         {
@@ -27,8 +30,6 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         public RelayCommand SendCodeCommand { get; }
 
-        private readonly IWindowService windowService;
-        private readonly IPasswordResetManagerService passwordResetClient;
         public RetrievePasswordViewModel(IPasswordResetManagerService resetManagerService,IWindowService windowService)
         {
             this.passwordResetClient = resetManagerService;
