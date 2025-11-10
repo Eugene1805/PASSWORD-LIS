@@ -93,6 +93,7 @@ namespace Services.Services
         private readonly ILog log = LogManager.GetLogger(typeof(GameManager));
         private const int ROUND_DURATION_SECONDS = 60;
         private const int VALIDATION_DURATION_SECONDS = 20;
+        private const int SUDDEN_DEATH_DURATION_SECONDS = 30;
         private const int WORDS_PER_ROUND = 5;
         private const int TOTAL_ROUNDS = 5;
         private const int POINTS_PER_WIN = 10;
@@ -216,6 +217,22 @@ namespace Services.Services
 
             if (currentPassword != null && (guess.Equals(currentPassword.EnglishWord, StringComparison.OrdinalIgnoreCase) || guess.Equals(currentPassword.SpanishWord, StringComparison.OrdinalIgnoreCase)))
             {
+                if (matchState.Status == MatchStatus.SuddenDeath)
+                {
+                    // We have an instant winner!
+                    matchState.Status = MatchStatus.Finished;
+                    matchState.RoundTimer?.Dispose();
+                    matchState.RoundTimer = null;
+
+                    // Add the final winning point to the score.
+                    if (team == MatchTeam.RedTeam) matchState.RedTeamScore++;
+                    else matchState.BlueTeamScore++;
+
+                    // End the game immediately, declaring the guessing team as the winner.
+                    await PersistAndNotifyGameEnd(matchState, team);
+                    return; // IMPORTANT: Stop execution here.
+                }
+
                 int newScore;
                 lock (matchState)
                 {
@@ -397,7 +414,7 @@ namespace Services.Services
         private async void TimerTickCallback(object state)
         {
             var matchState = (MatchState)state;
-            if (matchState.Status != MatchStatus.InProgress) return;
+            if (matchState.Status != MatchStatus.InProgress && matchState.Status != MatchStatus.SuddenDeath) return;
             int newTime = Interlocked.Decrement(ref matchState.SecondsLeft);
             await BroadcastAsync(matchState, cb => cb.OnTimerTick(newTime));
             if (newTime <= 0)
@@ -524,20 +541,68 @@ namespace Services.Services
         // --- Helper and Private Methods (no significant changes needed below) ---
         private async Task EndGameAsync(MatchState matchState)
         {
+            if (matchState.RedTeamScore == matchState.BlueTeamScore)
+            {
+                // <-- CAMBIO CLAVE: En lugar de terminar, inicia la muerte súbita.
+                await StartSuddenDeathAsync(matchState);
+                return; // Stop execution to avoid finishing the match.
+            }
             matchState.Status = MatchStatus.Finished;
-            MatchTeam? winner = null;
-            if (matchState.RedTeamScore > matchState.BlueTeamScore) winner = MatchTeam.RedTeam;
-            else if (matchState.BlueTeamScore > matchState.RedTeamScore) winner = MatchTeam.BlueTeam;
+            MatchTeam? winner = (matchState.RedTeamScore > matchState.BlueTeamScore) ? MatchTeam.RedTeam : MatchTeam.BlueTeam;
             await PersistAndNotifyGameEnd(matchState, winner);
         }
+        // En la clase GameManager
+        private async Task StartSuddenDeathAsync(MatchState matchState)
+        {
+            matchState.Status = MatchStatus.SuddenDeath;
 
+            // Notify clients that the tiebreaker is starting.
+            await BroadcastAsync(matchState, cb => cb.OnSuddenDeathStarted());
+
+            // Get only ONE word for each team.
+            matchState.RedTeamWords = await wordRepository.GetRandomWordsAsync(1);
+            matchState.BlueTeamWords = await wordRepository.GetRandomWordsAsync(1);
+
+            if (matchState.RedTeamWords.Count < 1 || matchState.BlueTeamWords.Count < 1)
+            {
+                await BroadcastAsync(matchState, cb => cb.OnMatchCancelled("Error: Could not retrieve words for sudden death."));
+                matches.TryRemove(matchState.GameCode, out _);
+                return;
+            }
+
+            matchState.RedTeamWordIndex = 0;
+            matchState.BlueTeamWordIndex = 0;
+            matchState.RedTeamTurnHistory.Clear(); // Clear history for the new phase.
+            matchState.BlueTeamTurnHistory.Clear();
+            matchState.RedTeamPassedThisRound = true; // Disable passing during sudden death.
+            matchState.BlueTeamPassedThisRound = true;
+
+            
+            matchState.SecondsLeft = SUDDEN_DEATH_DURATION_SECONDS;
+            matchState.RoundTimer = new Timer(TimerTickCallback, matchState, 1000, 1000);
+
+            // Send the single word to each team's ClueGuy.
+            var redClueGuy = GetPlayerByRole(matchState, MatchTeam.RedTeam, PlayerRole.ClueGuy);
+            var blueClueGuy = GetPlayerByRole(matchState, MatchTeam.BlueTeam, PlayerRole.ClueGuy);
+            if (redClueGuy.Callback != null)
+            {
+                try { redClueGuy.Callback.OnNewPassword(ToDTO(matchState.GetCurrentPassword(MatchTeam.RedTeam))); }
+                catch { await HandlePlayerDisconnectionAsync(matchState, redClueGuy.Player.Id); }
+            }
+            if (blueClueGuy.Callback != null)
+            {
+                try { blueClueGuy.Callback.OnNewPassword(ToDTO(matchState.GetCurrentPassword(MatchTeam.BlueTeam))); }
+                catch { await HandlePlayerDisconnectionAsync(matchState, blueClueGuy.Player.Id); }
+            }
+        }
         private async Task PersistAndNotifyGameEnd(MatchState matchState, MatchTeam? winner)
         {
             var redTeamPlayers = GetPlayersByTeam(matchState, MatchTeam.RedTeam).Select(p => p.Player);
             var blueTeamPlayers = GetPlayersByTeam(matchState, MatchTeam.BlueTeam).Select(p => p.Player);
             try
             {
-                await matchRepository.SaveMatchResultAsync(matchState.RedTeamScore, matchState.BlueTeamScore, redTeamPlayers.Select(p => p.Id), blueTeamPlayers.Select(p => p.Id));
+                await matchRepository.SaveMatchResultAsync(matchState.RedTeamScore, matchState.BlueTeamScore,
+                    redTeamPlayers.Select(p => p.Id), blueTeamPlayers.Select(p => p.Id));
                 if (winner.HasValue)
                 {
                     var winningPlayerIds = (winner == MatchTeam.RedTeam) ? redTeamPlayers.Select(p => p.Id) : blueTeamPlayers.Select(p => p.Id);
