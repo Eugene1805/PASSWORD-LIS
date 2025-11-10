@@ -158,9 +158,14 @@ namespace Services.Services
             try { sender.Callback.OnNewPassword(ToDTO(nextWord)); }
             catch { await HandlePlayerDisconnectionAsync(matchState, sender.Player.Id); }
 
+            // Enviar al Adivinador (partner)
             var partner = GetPartner(matchState, sender);
             if (partner.Callback != null)
             {
+                // ¡Importante! Enviar la nueva palabra Y la notificación de "Pass"
+                try { partner.Callback.OnNewPassword(ToDTOForGuesser(nextWord)); } // <-- AÑADIR ESTO
+                catch { await HandlePlayerDisconnectionAsync(matchState, partner.Player.Id); }
+
                 try { partner.Callback.OnClueReceived("Your partner passed the word."); }
                 catch { await HandlePlayerDisconnectionAsync(matchState, partner.Player.Id); }
             }
@@ -228,10 +233,17 @@ namespace Services.Services
                 if (nextWord != null)
                 {
                     var clueGuy = GetPlayerByRole(matchState, team, PlayerRole.ClueGuy);
+                    var guesser = GetPlayerByRole(matchState, team, PlayerRole.Guesser); // <-- Obtener Adivinador
+
                     if (clueGuy.Callback != null)
                     {
                         try { clueGuy.Callback.OnNewPassword(ToDTO(nextWord)); }
                         catch { await HandlePlayerDisconnectionAsync(matchState, clueGuy.Player.Id); }
+                    }
+                    if (guesser.Callback != null) // <-- Añadir envío al Adivinador
+                    {
+                        try { guesser.Callback.OnNewPassword(ToDTOForGuesser(nextWord)); }
+                        catch { await HandlePlayerDisconnectionAsync(matchState, guesser.Player.Id); }
                     }
                 }
             }
@@ -351,16 +363,34 @@ namespace Services.Services
             matchState.RoundTimer = new Timer(TimerTickCallback, matchState, 1000, 1000);
 
             var redClueGuy = GetPlayerByRole(matchState, MatchTeam.RedTeam, PlayerRole.ClueGuy);
+            var redGuesser = GetPlayerByRole(matchState, MatchTeam.RedTeam, PlayerRole.Guesser);
             var blueClueGuy = GetPlayerByRole(matchState, MatchTeam.BlueTeam, PlayerRole.ClueGuy);
+            var blueGuesser = GetPlayerByRole(matchState, MatchTeam.BlueTeam, PlayerRole.Guesser);
+
+            // Enviar a Equipo Rojo
+            var redWord = matchState.GetCurrentPassword(MatchTeam.RedTeam);
             if (redClueGuy.Callback != null)
             {
-                try { redClueGuy.Callback.OnNewPassword(ToDTO(matchState.GetCurrentPassword(MatchTeam.RedTeam))); }
+                try { redClueGuy.Callback.OnNewPassword(ToDTO(redWord)); }
                 catch { await HandlePlayerDisconnectionAsync(matchState, redClueGuy.Player.Id); }
             }
+            if (redGuesser.Callback != null)
+            {
+                try { redGuesser.Callback.OnNewPassword(ToDTOForGuesser(redWord)); } // <-- Envío al Adivinador
+                catch { await HandlePlayerDisconnectionAsync(matchState, redGuesser.Player.Id); }
+            }
+
+            // Enviar a Equipo Azul
+            var blueWord = matchState.GetCurrentPassword(MatchTeam.BlueTeam);
             if (blueClueGuy.Callback != null)
             {
-                try { blueClueGuy.Callback.OnNewPassword(ToDTO(matchState.GetCurrentPassword(MatchTeam.BlueTeam))); }
+                try { blueClueGuy.Callback.OnNewPassword(ToDTO(blueWord)); }
                 catch { await HandlePlayerDisconnectionAsync(matchState, blueClueGuy.Player.Id); }
+            }
+            if (blueGuesser.Callback != null)
+            {
+                try { blueGuesser.Callback.OnNewPassword(ToDTOForGuesser(blueWord)); } // <-- Envío al Adivinador
+                catch { await HandlePlayerDisconnectionAsync(matchState, blueGuesser.Player.Id); }
             }
         }
 
@@ -541,6 +571,19 @@ namespace Services.Services
         {
             if (entity == null) return new PasswordWordDTO { SpanishWord = "END", EnglishWord = "END" };
             return new PasswordWordDTO { EnglishWord = entity.EnglishWord, SpanishWord = entity.SpanishWord, EnglishDescription = entity.EnglishDescription, SpanishDescription = entity.SpanishDescription };
+        }
+        private PasswordWordDTO ToDTOForGuesser(PasswordWord entity)
+        {
+            if (entity == null) return new PasswordWordDTO { SpanishWord = "END", EnglishWord = "END" };
+
+            // El Adivinador recibe las descripciones, pero NO la palabra.
+            return new PasswordWordDTO
+            {
+                EnglishWord = string.Empty, // O string.Empty, como prefieras
+                SpanishWord = string.Empty, // O string.Empty
+                EnglishDescription = entity.EnglishDescription,
+                SpanishDescription = entity.SpanishDescription
+            };
         }
 
         private static IEnumerable<(IGameManagerCallback Callback, PlayerDTO Player)> GetPlayersByTeam(MatchState state, MatchTeam team) => state.ActivePlayers.Values.Where(p => p.Player.Team == team);

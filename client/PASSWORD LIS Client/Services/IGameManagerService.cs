@@ -19,6 +19,8 @@ namespace PASSWORD_LIS_Client.Services
         event Action<ValidationResultDTO> ValidationComplete;
         event Action<MatchSummaryDTO> MatchOver;
         event Action<string> MatchCancelled;
+        event Action<RoundStartStateDTO> NewRoundStarted;
+        event Action<int> ValidationTimerTick;
 
         Task SubscribeToMatchAsync(string gameCode, int playerId);
         Task SubmitClueAsync(string gameCode, int senderPlayerId, string clue);
@@ -40,6 +42,8 @@ namespace PASSWORD_LIS_Client.Services
         public event Action<ValidationResultDTO> ValidationComplete;
         public event Action<MatchSummaryDTO> MatchOver;
         public event Action<string> MatchCancelled;
+        public event Action<RoundStartStateDTO> NewRoundStarted;
+        public event Action<int> ValidationTimerTick;
 
         private readonly GameManagerClient client;
 
@@ -142,6 +146,16 @@ namespace PASSWORD_LIS_Client.Services
         public void OnValidationComplete(ValidationResultDTO result)
         {
             ValidationComplete?.Invoke(result);
+        }
+
+        public void OnNewRoundStarted(RoundStartStateDTO state)
+        {
+            NewRoundStarted?.Invoke(state);
+        }
+
+        public void OnValidationTimerTick(int secondsLeft)
+        {
+            ValidationTimerTick?.Invoke(secondsLeft);
         }
     }
 }

@@ -45,6 +45,13 @@
     </xs:sequence>
   </xs:complexType>
   <xs:element name="PlayerDTO" nillable="true" type="tns:PlayerDTO" />
+  <xs:complexType name="RoundStartStateDTO">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="CurrentRound" type="xs:int" />
+      <xs:element minOccurs="0" name="PlayersWithNewRoles" nillable="true" type="tns:ArrayOfPlayerDTO" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="RoundStartStateDTO" nillable="true" type="tns:RoundStartStateDTO" />
   <xs:complexType name="PasswordWordDTO">
     <xs:sequence>
       <xs:element minOccurs="0" name="EnglishDescription" nillable="true" type="xs:string" />

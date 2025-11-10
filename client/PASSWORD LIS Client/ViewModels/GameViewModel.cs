@@ -166,6 +166,8 @@ namespace PASSWORD_LIS_Client.ViewModels
             gameManagerService.ValidationComplete += OnValidationComplete;
             gameManagerService.BeginRoundValidation += OnBeginRoundValidation;
             gameManagerService.MatchOver += OnMatchOver;
+            gameManagerService.NewRoundStarted += OnNewRoundStarted;
+            gameManagerService.ValidationTimerTick += OnValidationTimerTick;
 
             SubmitClueCommand = new RelayCommand(async (_) => await SendClueAsync(), (_) => CanSendClue && !string.IsNullOrWhiteSpace(CurrentClueText));
             SubmitGuessCommand = new RelayCommand(async (_) => await SendGuessAsync(), (_) => CanSendGuess && !string.IsNullOrWhiteSpace(CurrentGuessText));
@@ -350,6 +352,31 @@ namespace PASSWORD_LIS_Client.ViewModels
         private void OnMatchOver(MatchSummaryDTO summary)
         {
             // TODO: Nivel 5 - Navegar a la página de ganadores/perdedores
+        }
+
+        private void OnNewRoundStarted(RoundStartStateDTO state)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                // Esta es la lógica para actualizar los roles (Pistero <-> Adivinador)
+                var thisPlayer = state.PlayersWithNewRoles.FirstOrDefault(p => p.Id == currentPlayer.Id);
+                if (thisPlayer != null)
+                {
+                    CurrentPlayerRole = thisPlayer.Role;
+                }
+
+                // Podrías añadir un popup o notificación si quieres
+                // windowService.ShowPopUp("Nueva Ronda", $"¡Comienza la Ronda {state.CurrentRound}!", PopUpIcon.Information);
+            });
+        }
+
+        private void OnValidationTimerTick(int secondsLeft)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                // Aquí puedes actualizar un contador de tiempo en la UI de Validación
+                // (Si no tienes uno, puedes dejar este método vacío por ahora)
+            });
         }
 
         // --- Petición 4: Lógica para Enviar Pista ---

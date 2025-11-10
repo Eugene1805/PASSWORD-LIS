@@ -97,6 +97,7 @@
     <Compile Include="Contracts\DTOs\PasswordWordDTO.cs" />
     <Compile Include="Contracts\DTOs\PlayerDTO.cs" />
     <Compile Include="Contracts\DTOs\ReportDTO.cs" />
+    <Compile Include="Contracts\DTOs\RoundStartedStateDTO.cs" />
     <Compile Include="Contracts\DTOs\TurnHistoryDTO.cs" />
     <Compile Include="Contracts\DTOs\ValidationResultDTO.cs" />
     <Compile Include="Contracts\DTOs\ValidationVoteDTO.cs" />

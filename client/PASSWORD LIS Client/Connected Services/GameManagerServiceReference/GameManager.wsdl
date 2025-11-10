@@ -85,6 +85,9 @@
   <wsdl:message name="IGameManager_OnMatchInitialized_OutputCallbackMessage">
     <wsdl:part name="parameters" element="tns:OnMatchInitialized" />
   </wsdl:message>
+  <wsdl:message name="IGameManager_OnNewRoundStarted_OutputCallbackMessage">
+    <wsdl:part name="parameters" element="tns:OnNewRoundStarted" />
+  </wsdl:message>
   <wsdl:message name="IGameManager_OnTimerTick_OutputCallbackMessage">
     <wsdl:part name="parameters" element="tns:OnTimerTick" />
   </wsdl:message>
@@ -99,6 +102,9 @@
   </wsdl:message>
   <wsdl:message name="IGameManager_OnBeginRoundValidation_OutputCallbackMessage">
     <wsdl:part name="parameters" element="tns:OnBeginRoundValidation" />
+  </wsdl:message>
+  <wsdl:message name="IGameManager_OnValidationTimerTick_OutputCallbackMessage">
+    <wsdl:part name="parameters" element="tns:OnValidationTimerTick" />
   </wsdl:message>
   <wsdl:message name="IGameManager_OnValidationComplete_OutputCallbackMessage">
     <wsdl:part name="parameters" element="tns:OnValidationComplete" />
@@ -138,6 +144,9 @@
     <wsdl:operation name="OnMatchInitialized">
       <wsdl:output wsaw:Action="http://tempuri.org/IGameManager/OnMatchInitialized" message="tns:IGameManager_OnMatchInitialized_OutputCallbackMessage" />
     </wsdl:operation>
+    <wsdl:operation name="OnNewRoundStarted">
+      <wsdl:output wsaw:Action="http://tempuri.org/IGameManager/OnNewRoundStarted" message="tns:IGameManager_OnNewRoundStarted_OutputCallbackMessage" />
+    </wsdl:operation>
     <wsdl:operation name="OnTimerTick">
       <wsdl:output wsaw:Action="http://tempuri.org/IGameManager/OnTimerTick" message="tns:IGameManager_OnTimerTick_OutputCallbackMessage" />
     </wsdl:operation>
@@ -152,6 +161,9 @@
     </wsdl:operation>
     <wsdl:operation name="OnBeginRoundValidation">
       <wsdl:output wsaw:Action="http://tempuri.org/IGameManager/OnBeginRoundValidation" message="tns:IGameManager_OnBeginRoundValidation_OutputCallbackMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="OnValidationTimerTick">
+      <wsdl:output wsaw:Action="http://tempuri.org/IGameManager/OnValidationTimerTick" message="tns:IGameManager_OnValidationTimerTick_OutputCallbackMessage" />
     </wsdl:operation>
     <wsdl:operation name="OnValidationComplete">
       <wsdl:output wsaw:Action="http://tempuri.org/IGameManager/OnValidationComplete" message="tns:IGameManager_OnValidationComplete_OutputCallbackMessage" />
@@ -232,6 +244,12 @@
         <soap12:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="OnNewRoundStarted">
+      <soap12:operation soapAction="http://tempuri.org/IGameManager/OnNewRoundStarted" style="document" />
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
     <wsdl:operation name="OnTimerTick">
       <soap12:operation soapAction="http://tempuri.org/IGameManager/OnTimerTick" style="document" />
       <wsdl:output>
@@ -258,6 +276,12 @@
     </wsdl:operation>
     <wsdl:operation name="OnBeginRoundValidation">
       <soap12:operation soapAction="http://tempuri.org/IGameManager/OnBeginRoundValidation" style="document" />
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="OnValidationTimerTick">
+      <soap12:operation soapAction="http://tempuri.org/IGameManager/OnValidationTimerTick" style="document" />
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>

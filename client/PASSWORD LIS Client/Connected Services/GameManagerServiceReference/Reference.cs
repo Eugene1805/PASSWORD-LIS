@@ -398,6 +398,67 @@ namespace PASSWORD_LIS_Client.GameManagerServiceReference {
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="RoundStartStateDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
+    [System.SerializableAttribute()]
+    public partial class RoundStartStateDTO : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private int CurrentRoundField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private PASSWORD_LIS_Client.GameManagerServiceReference.PlayerDTO[] PlayersWithNewRolesField;
+        
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public int CurrentRound {
+            get {
+                return this.CurrentRoundField;
+            }
+            set {
+                if ((this.CurrentRoundField.Equals(value) != true)) {
+                    this.CurrentRoundField = value;
+                    this.RaisePropertyChanged("CurrentRound");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public PASSWORD_LIS_Client.GameManagerServiceReference.PlayerDTO[] PlayersWithNewRoles {
+            get {
+                return this.PlayersWithNewRolesField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.PlayersWithNewRolesField, value) != true)) {
+                    this.PlayersWithNewRolesField = value;
+                    this.RaisePropertyChanged("PlayersWithNewRoles");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="PasswordWordDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
     [System.SerializableAttribute()]
     public partial class PasswordWordDTO : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
@@ -859,6 +920,9 @@ namespace PASSWORD_LIS_Client.GameManagerServiceReference {
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IGameManager/OnMatchInitialized")]
         void OnMatchInitialized(PASSWORD_LIS_Client.GameManagerServiceReference.MatchInitStateDTO state);
         
+        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IGameManager/OnNewRoundStarted")]
+        void OnNewRoundStarted(PASSWORD_LIS_Client.GameManagerServiceReference.RoundStartStateDTO state);
+        
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IGameManager/OnTimerTick")]
         void OnTimerTick(int secondsLeft);
         
@@ -873,6 +937,9 @@ namespace PASSWORD_LIS_Client.GameManagerServiceReference {
         
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IGameManager/OnBeginRoundValidation")]
         void OnBeginRoundValidation(PASSWORD_LIS_Client.GameManagerServiceReference.TurnHistoryDTO[] turns);
+        
+        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IGameManager/OnValidationTimerTick")]
+        void OnValidationTimerTick(int secondsLeft);
         
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IGameManager/OnValidationComplete")]
         void OnValidationComplete(PASSWORD_LIS_Client.GameManagerServiceReference.ValidationResultDTO result);
