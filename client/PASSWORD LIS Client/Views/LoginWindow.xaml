@@ -26,7 +26,8 @@
             <TextBlock Text="{utils:Translate logInText}" 
                    Style="{StaticResource titleBlackTextBlockStyle}" 
                    HorizontalAlignment="Center" 
-                   Margin="0,0,0,20"/>
+                   Margin="0,0,0,20"
+                   AutomationProperties.AutomationId="loginText"/>
 
             <TextBlock Text="{utils:Translate emailText}" Style="{StaticResource subtitleBlackTextBlockStyle}"
                        HorizontalAlignment="Left"/>
@@ -64,6 +65,7 @@
                 Margin="0,15,0,10" 
                 HorizontalAlignment="Center"
                 Command="{Binding PlayAsGuestCommand}"
+                AutomationProperties.AutomationId="playAsGuestButton"
                 />
 
             <TextBlock Style="{StaticResource bodyTextBlockStyle}" TextWrapping="Wrap" HorizontalAlignment="Center">
