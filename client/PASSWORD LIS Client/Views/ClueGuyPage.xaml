@@ -27,16 +27,16 @@
 
         <Border Grid.Column="0" Grid.RowSpan="2" Style="{StaticResource floatingBorderStyle}">
             <StackPanel>
-                <TextBlock x:Name="teamTextBlock" Style="{StaticResource subtitleTextBlockStyle}" Margin="20,40,20,20"
+                <TextBlock Style="{StaticResource subtitleTextBlockStyle}" Margin="20,40,20,20"
                            Text="{Binding TeamName}"/>
 
-                <TextBlock x:Name="currentRoundTextBlock" Style="{StaticResource bodyTextBlockStyle}" Margin="20"
+                <TextBlock Style="{StaticResource bodyTextBlockStyle}" Margin="20"
                            Text="{Binding CurrentRoundText}"/>
 
-                <TextBlock x:Name="currentWordTextBlock" Style="{StaticResource bodyTextBlockStyle}" Margin="20"
+                <TextBlock Style="{StaticResource bodyTextBlockStyle}" Margin="20"
                            Text="{Binding CurrentWordCountText}"/>
 
-                <TextBlock x:Name="teamPointsTextBlock" Style="{StaticResource bodyTextBlockStyle}" Margin="20"
+                <TextBlock Style="{StaticResource bodyTextBlockStyle}" Margin="20"
                            Text="{Binding TeamPointsText}"/>
             </StackPanel>
         </Border>
@@ -48,8 +48,7 @@
                            Margin="20" Cursor="Hand"/>
                 <TextBlock Style="{StaticResource bodyTextBlockStyle}" Margin="20,0,20,20"
                            Text="{utils:Translate passwordToGuessText}"
-                           TextWrapping="Wrap"
-                           />
+                           TextWrapping="Wrap"/>
                 <TextBlock x:Name="passwordToGuessTextBlock" Style="{StaticResource titleTextBlockStyle}" 
                            Text="{Binding CurrentPasswordWord}"/>
             </StackPanel>
@@ -61,10 +60,13 @@
                            Text="{utils:Translate writeClueText}"
                            TextWrapping="Wrap"/>
                 <TextBox x:Name="clueGivenTextBox"
-                         Style="{StaticResource primaryTextBoxStyle}" Margin="20,10"/>
+                         Style="{StaticResource primaryTextBoxStyle}" Margin="20,10"
+                         Text="{Binding CurrentClueText, UpdateSourceTrigger=PropertyChanged}"
+                         IsEnabled="{Binding CandSendClue}"/>
 
                 <Button Style="{StaticResource primaryButtonStyle}" Margin="20,10" Height="30"
-                        Content="{utils:Translate sendText}"/>
+                        Content="{utils:Translate sendText}"
+                        Command="{Binding SubmitClueCommand}" />
             </StackPanel>
         </Border>
 
@@ -79,10 +81,12 @@
                                VerticalAlignment="Center"
                                HorizontalAlignment="Center"/>
                 </Grid>
-                <Button x:Name="passPasswordButton" Style="{StaticResource gameButtonStyle}"
+                <Button Style="{StaticResource gameButtonStyle}"
                         Margin="20" 
                         Height="35"
-                        Content="{utils:Translate passText}"/>
+                        Content="{utils:Translate passText}"
+                        Command="{Binding PassTurnCommand}"
+                        IsEnabled="{Binding CanPassTurn}"/>
             </StackPanel>
         </Border>
     </Grid>
