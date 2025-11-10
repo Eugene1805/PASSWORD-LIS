@@ -5,6 +5,7 @@
         WaitingForPlayers,
         InProgress,
         Validating,
+        SuddenDeath,
         Finished
     }
 }

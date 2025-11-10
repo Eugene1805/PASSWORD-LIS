@@ -131,7 +131,11 @@ namespace Services.Contracts
         /// <param name="result">The validation outcome, including penalties.</param>
         [OperationContract(IsOneWay = true)]
         void OnValidationComplete(ValidationResultDTO result);
-
+        /// <summary>
+        /// Notifies all players that a sudden death round has begun.
+        /// </summary>
+        [OperationContract(IsOneWay = true)]
+        void OnSuddenDeathStarted();
         /// <summary>
         /// Notifies players that the match has ended and who the winner is.
         /// </summary>
