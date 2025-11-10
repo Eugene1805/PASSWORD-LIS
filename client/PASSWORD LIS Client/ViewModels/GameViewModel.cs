@@ -1,14 +1,14 @@
-﻿using PASSWORD_LIS_Client.GameManagerServiceReference;
+﻿using PASSWORD_LIS_Client.Commands;
+using PASSWORD_LIS_Client.GameManagerServiceReference;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 
 namespace PASSWORD_LIS_Client.ViewModels
 {
@@ -77,7 +77,56 @@ namespace PASSWORD_LIS_Client.ViewModels
             set => SetProperty(ref currentClue, value);
         }
 
+        private string currentClueText;
+        public string CurrentClueText
+        {
+            get => currentClueText;
+            set
+            {
+                SetProperty(ref currentClueText, value);
+                RelayCommand.RaiseCanExecuteChanged();
+            }
+        }
+        private string currentGuessText;
+        public string CurrentGuessText // Para el Adivinador
+        {
+            get => currentGuessText;
+            set
+            {
+                SetProperty(ref currentGuessText, value);
+                RelayCommand.RaiseCanExecuteChanged();
+            }
+        }
+        private bool canSendClue = true;
+        public bool CanSendClue
+        {
+            get => canSendClue;
+            set => SetProperty(ref canSendClue, value);
+        }
 
+        private bool canSendGuess = false; // Adivinador
+        public bool CanSendGuess
+        {
+            get => canSendGuess;
+            set => SetProperty(ref canSendGuess, value);
+        }
+
+        private bool canPassTurn = true; // Pistero 
+        public bool CanPassTurn
+        {
+            get => canPassTurn;
+            set => SetProperty(ref canPassTurn, value);
+        }
+        private bool canRequestHint = true; // Adivinador 
+        public bool CanRequestHint
+        {
+            get => canRequestHint;
+            set => SetProperty(ref canRequestHint, value);
+        }
+        public ICommand SubmitClueCommand { get; }
+        public ICommand SubmitGuessCommand { get; }
+        public ICommand PassTurnCommand { get; }
+        public ICommand RequestHintCommand { get; }
 
         private readonly IGameManagerService gameManagerService;
         private readonly IWindowService windowService;
@@ -88,12 +137,14 @@ namespace PASSWORD_LIS_Client.ViewModels
         private int currentRoundIndex = 1; // Contador de rondas (1 a 5)
         private const int MaxRounds = 5;  // Rondas totales
         private const int MaxWordsPerRound = 5; // Palabras por ronda
-
+        private readonly string currentLanguage;
+        private PasswordWordDTO currentPasswordDto;
         public GameViewModel(IGameManagerService gameManagerService, IWindowService windowService, string gameCode, WaitingRoomManagerServiceReference.PlayerDTO waitingRoomPlayer)
         {
             this.gameManagerService = gameManagerService;
             this.windowService = windowService;
             this.gameCode = gameCode;
+            currentLanguage = Properties.Settings.Default.languageCode;
 
             currentPlayer = new PlayerDTO
             {
@@ -112,11 +163,14 @@ namespace PASSWORD_LIS_Client.ViewModels
             gameManagerService.NewPasswordReceived += OnNewPasswordReceived;
             gameManagerService.ClueReceived += OnClueReceived;
             gameManagerService.GuessResult += OnGuessResult;
-            gameManagerService.ValidationComplete += OnValidationComplete;  
+            gameManagerService.ValidationComplete += OnValidationComplete;
             gameManagerService.BeginRoundValidation += OnBeginRoundValidation;
             gameManagerService.MatchOver += OnMatchOver;
-            
 
+            SubmitClueCommand = new RelayCommand(async (_) => await SendClueAsync(), (_) => CanSendClue && !string.IsNullOrWhiteSpace(CurrentClueText));
+            SubmitGuessCommand = new RelayCommand(async (_) => await SendGuessAsync(), (_) => CanSendGuess && !string.IsNullOrWhiteSpace(CurrentGuessText));
+            PassTurnCommand = new RelayCommand(async (_) => await PassTurnAsync(), (_) => CanPassTurn);
+            RequestHintCommand = new RelayCommand((_) => RequestHint());
         }
 
         public async Task InitializeAsync()
@@ -132,7 +186,6 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void OnMatchInitialized(MatchInitStateDTO state)
         {
-
             Application.Current.Dispatcher.Invoke(() =>
             {
                 try
@@ -146,18 +199,17 @@ namespace PASSWORD_LIS_Client.ViewModels
                         CurrentPlayerRole = thisPlayer.Role;
                         TeamName = thisPlayer.Team == MatchTeam.RedTeam ?
                             Properties.Langs.Lang.redTeamText : Properties.Langs.Lang.blueTeamText;
-
                     }
 
                     CurrentRoundText = string.Format(Properties.Langs.Lang.currentRoundText, currentRoundIndex);
                     CurrentWordCountText = string.Format(Properties.Langs.Lang.currentWordText, currentWordIndex);
                     TeamPointsText = string.Format(Properties.Langs.Lang.teamPointsText, 0);
 
-                    IsLoading = false;
+                    IsLoading = false; // ¡Se desbloquea la UI!
                 }
                 catch (Exception ex)
                 {
-                    HandleConnectionError(ex, "Error al inicializar el estado de la partida");
+                    HandleConnectionError(ex, "Error al inicializar la partida.");
                 }
             });
         }
@@ -184,8 +236,23 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                CurrentPasswordWord = password.SpanishWord;
+                currentPasswordDto = password;
+
+                if (currentPlayer.Role == PlayerRole.ClueGuy)
+                {
+                    if (currentLanguage.StartsWith("es"))
+                    {
+                        CurrentPasswordWord = password.SpanishWord;
+                    }
+                    else
+                    {
+                        CurrentPasswordWord = password.EnglishWord;
+                    }
+                }
+
                 CurrentClue = "Esperando pista...";
+                CanSendClue = true;
+                CanSendGuess = false;
                 CurrentWordCountText = string.Format(Properties.Langs.Lang.currentWordText, currentWordIndex);
             });
         }
@@ -194,7 +261,9 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
+                //Mostrar la pista al Adivinador 
                 CurrentClue = clue;
+                CanSendGuess = true; // El Adivinador ahora puede adivinar
             });
         }
 
@@ -202,21 +271,51 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
+                if (currentPlayer.Role == PlayerRole.Guesser)
+                {
+                    if (result.IsCorrect)
+                    {
+                        windowService.ShowPopUp("Correcto", "Palabra Correcta", PopUpIcon.Success);
+                    }
+                    else
+                    {
+                        windowService.ShowPopUp("Incorrecto", "Palabra Incorrecta", PopUpIcon.Error);
+                    }
+                }
+                // Actualizar puntaje de mi equipo
                 if (result.Team == currentPlayer.Team)
                 {
                     TeamPointsText = string.Format(Properties.Langs.Lang.teamPointsText, result.NewScore);
-                }
 
-                if (result.IsCorrect && result.Team == currentPlayer.Team)
-                {
-                    currentWordIndex++;
-                    if (currentWordIndex > MaxWordsPerRound)
+                    // --- Petición 2: Arreglo del Contador ---
+                    // Si *mi equipo* acertó, actualizo *mi* contador de palabra
+                    if (result.IsCorrect)
                     {
-                        currentWordIndex = MaxWordsPerRound;
+                        currentWordIndex++; // <-- Aumenta el contador de palabra
+                        if (currentWordIndex > MaxWordsPerRound)
+                        {
+                            currentWordIndex = MaxWordsPerRound;
+                        }
+                        CurrentWordCountText = string.Format(Properties.Langs.Lang.currentWordText, currentWordIndex);
+                        CurrentGuessText = string.Empty; // Limpiar la caja de texto del Adivinador
                     }
-                    CurrentWordCountText = string.Format(Properties.Langs.Lang.currentWordText, currentWordIndex);
                 }
 
+                // Si CUALQUIER equipo acierta, el Pistero puede enviar una nueva pista
+                // (Porque la palabra cambia para él)
+                if (result.IsCorrect)
+                {
+                    // Correcto: Deshabilitar a ambos. Esperarán el OnNewPassword del servidor.
+                    CanSendClue = false;
+                    CanSendGuess = false;
+                }
+                else
+                {
+                    // Incorrecto: El Pistero (ClueGuy) debe dar OTRA pista.
+                    CanSendClue = true;
+                    // El Adivinador (Guesser) debe esperar esa nueva pista.
+                    CanSendGuess = false;
+                }
             });
         }
 
@@ -241,12 +340,77 @@ namespace PASSWORD_LIS_Client.ViewModels
 
                 CurrentRoundText = string.Format(Properties.Langs.Lang.currentRoundText, currentRoundIndex);
                 CurrentWordCountText = string.Format(Properties.Langs.Lang.currentWordText, currentWordIndex);
+
+                // Habilitar botones para la nueva ronda
+                CanPassTurn = true;
+                CanRequestHint = true;
             });
         }
 
         private void OnMatchOver(MatchSummaryDTO summary)
         {
             // TODO: Nivel 5 - Navegar a la página de ganadores/perdedores
+        }
+
+        // --- Petición 4: Lógica para Enviar Pista ---
+        private async Task SendClueAsync()
+        {
+            CanSendClue = false; // Deshabilitar el botón/textbox
+            try
+            {
+                // Enviamos la pista al servidor
+                await gameManagerService.SubmitClueAsync(gameCode, currentPlayer.Id, currentClueText);
+                CurrentClueText = string.Empty; // Limpiar la caja de texto
+            }
+            catch (Exception ex)
+            {
+                HandleConnectionError(ex, "Error al enviar la pista.");
+                CanSendClue = true; // Rehabilitar si falló
+            }
+        }
+        private async Task SendGuessAsync()
+        {
+            CanSendGuess = false; // Deshabilitar hasta que haya nueva pista
+            try
+            {
+                await gameManagerService.SubmitGuessAsync(gameCode, currentPlayer.Id, currentGuessText);
+                // No limpiamos el texto, OnGuessResult(true) lo hará si es correcto
+            }
+            catch (Exception ex)
+            {
+                HandleConnectionError(ex, "Error al enviar la adivinanza.");
+                CanSendGuess = true;
+            }
+        }
+        private async Task PassTurnAsync()
+        {
+            CanPassTurn = false; // Solo se puede pasar una vez por ronda
+            try
+            {
+                await gameManagerService.PassTurnAsync(gameCode, currentPlayer.Id);
+            }
+            catch (Exception ex)
+            {
+                HandleConnectionError(ex, "Error al pasar turno.");
+                CanPassTurn = true; // Rehabilitar si falló
+            }
+        }
+        private void RequestHint()
+        {
+            // Petición 2 (Nueva): Lógica de "Pista"
+            CanRequestHint = false; // Deshabilitar hasta la próxima ronda
+
+            if (currentPasswordDto == null ||
+                (string.IsNullOrEmpty(currentPasswordDto.SpanishDescription) && string.IsNullOrEmpty(currentPasswordDto.EnglishDescription)))
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.clueText, "No hay pista disponible para esta palabra.", PopUpIcon.Warning);
+                return;
+            }
+
+            string description = currentLanguage.StartsWith("es") ?
+                currentPasswordDto.SpanishDescription : currentPasswordDto.EnglishDescription;
+
+            windowService.ShowPopUp(Properties.Langs.Lang.clueText, description, PopUpIcon.Information);
         }
 
         private void HandleConnectionError(Exception ex, string customMessage)

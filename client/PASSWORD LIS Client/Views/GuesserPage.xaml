@@ -63,10 +63,13 @@
                            Text="{utils:Translate writePasswordText}"
                            TextWrapping="Wrap"/>
                 <TextBox x:Name="passwordToGuessTextBox"
-                         Style="{StaticResource primaryTextBoxStyle}" Margin="20,10"/>
+                         Style="{StaticResource primaryTextBoxStyle}" Margin="20,10"
+                         Text="{Binding CurrentGuessText, UpdateSourceTrigger=PropertyChanged}"
+                         IsEnabled="{Binding CanSendGuess}"/>
 
                 <Button x:Name="sendPasswordToGuessButton" Style="{StaticResource primaryButtonStyle}" Margin="20,10" Height="30"
-                        Content="{utils:Translate sendText}"/>
+                        Content="{utils:Translate sendText}"
+                        Command="{Binding SubmitGuessCommand}" />
             </StackPanel>
         </Border>
 
@@ -81,11 +84,12 @@
                                VerticalAlignment="Center"
                                HorizontalAlignment="Center"/>
                 </Grid>
-                <Button x:Name="giveClueButton" Style="{StaticResource gameButtonStyle}"
+                <Button Style="{StaticResource gameButtonStyle}"
                         Margin="20" 
                         Height="35"
                         Content="{utils:Translate clueText}"
-                        />
+                        Command="{Binding RequestHintCommand}"
+                        IsEnabled="{Binding CanRequestHint}"/>
             </StackPanel>
         </Border>
     </Grid>
