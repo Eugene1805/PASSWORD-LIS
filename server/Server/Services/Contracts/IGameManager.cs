@@ -79,7 +79,12 @@ namespace Services.Contracts
         /// <param name="state">The initial state, including active players.</param>
         [OperationContract(IsOneWay = true)]
         void OnMatchInitialized(MatchInitStateDTO state);
-
+        /// <summary>
+        /// Notifies that a new round has started, providing the current round number and updated player roles.
+        /// </summary>
+        /// <param name="state">The initial state for the new round.</param>
+        [OperationContract(IsOneWay = true)]
+        void OnNewRoundStarted(RoundStartStateDTO state);
         /// <summary>
         /// Notifies clients about the remaining time in the current turn.
         /// </summary>
@@ -114,7 +119,12 @@ namespace Services.Contracts
         /// <param name="turns">The list of turns to review and vote on.</param>
         [OperationContract(IsOneWay = true)]
         void OnBeginRoundValidation(List<TurnHistoryDTO> turns); // FOr the validators
-
+        /// <summary>
+        /// Notifies clients about the remaining time in the current validation phase.
+        /// </summary>
+        /// <param name="secondsLeft">Seconds left to vote.</param>
+        [OperationContract(IsOneWay = true)]
+        void OnValidationTimerTick(int secondsLeft);
         /// <summary>
         /// Sends the aggregated validation result and updated scores to players.
         /// </summary>
