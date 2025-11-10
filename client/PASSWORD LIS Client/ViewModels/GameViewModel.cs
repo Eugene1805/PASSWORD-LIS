@@ -237,6 +237,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             Application.Current.Dispatcher.Invoke(() =>
             {
                 currentPasswordDto = password;
+
                 if (currentPlayer.Role == PlayerRole.ClueGuy)
                 {
                     if (currentLanguage.StartsWith("es"))
