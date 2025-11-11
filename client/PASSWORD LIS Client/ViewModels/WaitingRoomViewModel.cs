@@ -251,7 +251,11 @@ namespace PASSWORD_LIS_Client.ViewModels
                     Properties.Langs.Lang.noSelectedPlayerToReport, PopUpIcon.Warning);
                 return false;
             }
-            if(SelectedPlayer.Id == SessionManager.CurrentUser.PlayerId)
+            if (SelectedPlayer.Id < 0)
+            {
+                return false;
+            }
+            if (SelectedPlayer.Id == SessionManager.CurrentUser.PlayerId)
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
                     Properties.Langs.Lang.cantReportYourself, PopUpIcon.Warning);
