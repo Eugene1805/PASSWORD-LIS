@@ -28,7 +28,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             set => SetProperty(ref currentPlayerRole, value);
         }
 
-        private int timerSeconds = 60;
+        private int timerSeconds = 300; //Cambiado para pruebas
         public int TimerSeconds
         {
             get => timerSeconds;
@@ -122,6 +122,34 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             get => canRequestHint;
             set => SetProperty(ref canRequestHint, value);
+        }
+
+        private string snackbarMessage;
+        public string SnackbarMessage
+        {
+            get => snackbarMessage;
+            set => SetProperty(ref snackbarMessage, value);
+        }
+
+        private bool isSnackbarVisible;
+        public bool IsSnackbarVisible
+        {
+            get => isSnackbarVisible;
+            set => SetProperty(ref isSnackbarVisible, value);
+        }
+
+        private string currentHintText;
+        public string CurrentHintText
+        {
+            get => currentHintText;
+            set => SetProperty(ref currentHintText, value);
+        }
+
+        private bool isHintVisible;
+        public bool IsHintVisible
+        {
+            get => isHintVisible;
+            set => SetProperty(ref isHintVisible, value);
         }
         public ICommand SubmitClueCommand { get; }
         public ICommand SubmitGuessCommand { get; }
@@ -256,6 +284,8 @@ namespace PASSWORD_LIS_Client.ViewModels
                 CanSendClue = true;
                 CanSendGuess = false;
                 CurrentWordCountText = string.Format(Properties.Langs.Lang.currentWordText, currentWordIndex);
+                IsHintVisible = false;
+                CurrentHintText = string.Empty;
             });
         }
 
@@ -277,11 +307,11 @@ namespace PASSWORD_LIS_Client.ViewModels
                 {
                     if (result.IsCorrect)
                     {
-                        windowService.ShowPopUp("Correcto", "Palabra Correcta", PopUpIcon.Success);
+                        ShowSnackbar(Properties.Langs.Lang.correctWordGuessedText);
                     }
                     else
                     {
-                        windowService.ShowPopUp("Incorrecto", "Palabra Incorrecta", PopUpIcon.Error);
+                        ShowSnackbar(Properties.Langs.Lang.incorrectWordGuessedText);
                     }
                 }
                 // Actualizar puntaje de mi equipo
@@ -364,9 +394,6 @@ namespace PASSWORD_LIS_Client.ViewModels
                 {
                     CurrentPlayerRole = thisPlayer.Role;
                 }
-
-                // Podrías añadir un popup o notificación si quieres
-                // windowService.ShowPopUp("Nueva Ronda", $"¡Comienza la Ronda {state.CurrentRound}!", PopUpIcon.Information);
             });
         }
 
@@ -424,20 +451,29 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
         private void RequestHint()
         {
-            // Petición 2 (Nueva): Lógica de "Pista"
-            CanRequestHint = false; // Deshabilitar hasta la próxima ronda
+            CanRequestHint = false; // Deshabilitar el botón
 
             if (currentPasswordDto == null ||
                 (string.IsNullOrEmpty(currentPasswordDto.SpanishDescription) && string.IsNullOrEmpty(currentPasswordDto.EnglishDescription)))
             {
-                windowService.ShowPopUp(Properties.Langs.Lang.clueText, "No hay pista disponible para esta palabra.", PopUpIcon.Warning);
+                ShowSnackbar(Properties.Langs.Lang.noClueAvailableText);
+                CanRequestHint = true; // Permitir que lo intente de nuevo si no había
                 return;
             }
 
             string description = currentLanguage.StartsWith("es") ?
                 currentPasswordDto.SpanishDescription : currentPasswordDto.EnglishDescription;
 
-            windowService.ShowPopUp(Properties.Langs.Lang.clueText, description, PopUpIcon.Information);
+            CurrentHintText = description;
+            IsHintVisible = true;
+        }
+
+        private async void ShowSnackbar(string message)
+        {
+            SnackbarMessage = message;
+            IsSnackbarVisible = true;
+            await Task.Delay(3000); // Muestra el mensaje por 3 segundos
+            IsSnackbarVisible = false;
         }
 
         private void HandleConnectionError(Exception ex, string customMessage)

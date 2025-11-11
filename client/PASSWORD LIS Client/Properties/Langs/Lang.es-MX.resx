@@ -717,4 +717,13 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
   <data name="areSureSendingInvitation" xml:space="preserve">
     <value>¿Estás seguro de enviarle una invitación a {0}?</value>
   </data>
+  <data name="correctWordGuessedText" xml:space="preserve">
+    <value>¡Palabra Adivinada Correctamente!</value>
+  </data>
+  <data name="incorrectWordGuessedText" xml:space="preserve">
+    <value>¡Palabra adivinada Incorrectamente!</value>
+  </data>
+  <data name="noClueAvailableText" xml:space="preserve">
+    <value>No hay pista disponible para esta palabra</value>
+  </data>
 </root>

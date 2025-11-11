@@ -322,6 +322,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a Word Guessed Correctly!.
+        /// </summary>
+        public static string correctWordGuessedText {
+            get {
+                return ResourceManager.GetString("correctWordGuessedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a The game could not be created..
         /// </summary>
         public static string couldNotCreateMatch {
@@ -664,6 +673,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a Word Guessed Incorrectly!.
+        /// </summary>
+        public static string incorrectWordGuessedText {
+            get {
+                return ResourceManager.GetString("incorrectWordGuessedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a Information.
         /// </summary>
         public static string informationText {
@@ -993,6 +1011,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         public static string noButtonText {
             get {
                 return ResourceManager.GetString("noButtonText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a There is no clue available for this word.
+        /// </summary>
+        public static string noClueAvailableText {
+            get {
+                return ResourceManager.GetString("noClueAvailableText", resourceCulture);
             }
         }
         

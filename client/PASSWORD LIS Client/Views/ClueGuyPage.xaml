@@ -6,9 +6,14 @@
       xmlns:local="clr-namespace:PASSWORD_LIS_Client.Views"
       xmlns:utils="clr-namespace:PASSWORD_LIS_Client.Utils"
       xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
+      xmlns:converters="clr-namespace:PASSWORD_LIS_Client.Converters"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="{x:Static language:Lang.clueGuyText}">
+    
+    <Page.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Page.Resources>
 
     <Grid>
         <Grid.Background>
@@ -88,6 +93,13 @@
                         Command="{Binding PassTurnCommand}"
                         IsEnabled="{Binding CanPassTurn}"/>
             </StackPanel>
+        </Border>
+        <Border Grid.RowSpan="2" Grid.ColumnSpan="3"
+                HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                Background="#323232" CornerRadius="5"
+                Padding="15,10" Margin="20" Style="{StaticResource snackbarBorderStyle}"
+                Visibility="{Binding IsSnackbarVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <TextBlock Text="{Binding SnackbarMessage}" Foreground="White" FontSize="14"/>
         </Border>
     </Grid>
 </Page>
