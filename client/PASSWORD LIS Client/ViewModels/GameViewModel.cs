@@ -70,7 +70,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             set => SetProperty(ref currentPasswordWord, value);
         }
 
-        private string currentClue = "Esperando pista..."; 
+        private string currentClue = "Esperando pista..."; //waitingAClueText
         public string CurrentClue
         {
             get => currentClue;
@@ -88,7 +88,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
         }
         private string currentGuessText;
-        public string CurrentGuessText // Para el Adivinador
+        public string CurrentGuessText 
         {
             get => currentGuessText;
             set
@@ -104,20 +104,20 @@ namespace PASSWORD_LIS_Client.ViewModels
             set => SetProperty(ref canSendClue, value);
         }
 
-        private bool canSendGuess = false; // Adivinador
+        private bool canSendGuess = false;
         public bool CanSendGuess
         {
             get => canSendGuess;
             set => SetProperty(ref canSendGuess, value);
         }
 
-        private bool canPassTurn = true; // Pistero 
+        private bool canPassTurn = true;  
         public bool CanPassTurn
         {
             get => canPassTurn;
             set => SetProperty(ref canPassTurn, value);
         }
-        private bool canRequestHint = true; // Adivinador 
+        private bool canRequestHint = true; 
         public bool CanRequestHint
         {
             get => canRequestHint;
@@ -209,7 +209,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 await gameManagerService.SubscribeToMatchAsync(gameCode, currentPlayer.Id);
             }catch (Exception ex)
             {
-                HandleConnectionError(ex, "Error al suscribirse al la partida");
+                HandleConnectionError(ex, "Error al suscribirse al la partida"); //errorSubscribingGameText
             }
         }
 
@@ -234,11 +234,11 @@ namespace PASSWORD_LIS_Client.ViewModels
                     CurrentWordCountText = string.Format(Properties.Langs.Lang.currentWordText, currentWordIndex);
                     TeamPointsText = string.Format(Properties.Langs.Lang.teamPointsText, 0);
 
-                    IsLoading = false; // ¡Se desbloquea la UI!
+                    IsLoading = false;
                 }
                 catch (Exception ex)
                 {
-                    HandleConnectionError(ex, "Error al inicializar la partida.");
+                    HandleConnectionError(ex, "Error al inicializar la partida."); //errorInitializingGameText
                 }
             });
         }
@@ -303,9 +303,8 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                //Mostrar la pista al Adivinador 
                 CurrentClue = clue;
-                CanSendGuess = true; // El Adivinador ahora puede adivinar
+                CanSendGuess = true;
             });
         }
 
@@ -329,11 +328,10 @@ namespace PASSWORD_LIS_Client.ViewModels
                 {
                     TeamPointsText = string.Format(Properties.Langs.Lang.teamPointsText, result.NewScore);
 
-                    // --- Petición 2: Arreglo del Contador ---
-                    // Si *mi equipo* acertó, actualizo *mi* contador de palabra
+                    // Si mi equipo acertó, actualizo contador de palabra
                     if (result.IsCorrect)
                     {
-                        currentWordIndex++; // <-- Aumenta el contador de palabra
+                        currentWordIndex++; 
                         if (currentWordIndex > MaxWordsPerRound)
                         {
                             currentWordIndex = MaxWordsPerRound;
@@ -452,7 +450,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             try
             {
                 await gameManagerService.SubmitGuessAsync(gameCode, currentPlayer.Id, currentGuessText);
-                // No limpiamos el texto, OnGuessResult(true) lo hará si es correcto
             }
             catch (Exception ex)
             {

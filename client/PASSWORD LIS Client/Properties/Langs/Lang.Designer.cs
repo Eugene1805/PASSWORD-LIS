@@ -511,6 +511,33 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a Error initializing the game.
+        /// </summary>
+        public static string errorInitializingGameText {
+            get {
+                return ResourceManager.GetString("errorInitializingGameText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a Error sending votes.
+        /// </summary>
+        public static string errorSendingVotesText {
+            get {
+                return ResourceManager.GetString("errorSendingVotesText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a Error subscribing to the game.
+        /// </summary>
+        public static string errorSubscribingGameText {
+            get {
+                return ResourceManager.GetString("errorSubscribingGameText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a Error.
         /// </summary>
         public static string errorTitleText {
@@ -1761,6 +1788,24 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         public static string waitAMinuteForCodeText {
             get {
                 return ResourceManager.GetString("waitAMinuteForCodeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a Waiting for a clue....
+        /// </summary>
+        public static string waitingAClueText {
+            get {
+                return ResourceManager.GetString("waitingAClueText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a Waiting for the other players....
+        /// </summary>
+        public static string waitingOtherPlayersText {
+            get {
+                return ResourceManager.GetString("waitingOtherPlayersText", resourceCulture);
             }
         }
         

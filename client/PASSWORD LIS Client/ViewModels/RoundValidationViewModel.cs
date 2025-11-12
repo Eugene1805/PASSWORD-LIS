@@ -18,7 +18,7 @@ namespace PASSWORD_LIS_Client.ViewModels
     public class RoundValidationViewModel : BaseViewModel
     {
         public ObservableCollection<ValidationTurnViewModel> TurnsToValidate { get; }
-        private int validationSeconds = 20;
+        private int validationSeconds; //CAMBIADO PARA PRUEBAS DE 20 A 60
         public int ValidationSeconds
         {
             get => validationSeconds;
@@ -98,7 +98,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             catch (Exception ex)
             {
                 HandleConnectionError(ex,"Error al enviar los votos" ); //errorSendingVotesText
-                CanSubmit = true; // Permitir reintento si falló
+                CanSubmit = true; 
             }
         }
         private void Cleanup()
@@ -106,12 +106,12 @@ namespace PASSWORD_LIS_Client.ViewModels
             gameManagerService.ValidationTimerTick -= OnValidationTimerTick;
             gameManagerService.ValidationComplete -= OnValidationComplete;
         }
+
         // --- MÉTODO DE MANEJO DE EXCEPCIONES  ---
         private void HandleConnectionError(Exception ex, string customMessage)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                // Usamos '??' como "Plan B" por si faltan los strings de traducción
                 string title = Properties.Langs.Lang.errorTitleText;
                 string message = $"{customMessage}\n{Properties.Langs.Lang.unexpectedErrorText}";
 
@@ -133,7 +133,6 @@ namespace PASSWORD_LIS_Client.ViewModels
 
                 windowService.ShowPopUp(title, message, PopUpIcon.Error);
 
-                // Limpiamos y volvemos a la página de juego
                 Cleanup();
                 windowService.GoBack();
             });
