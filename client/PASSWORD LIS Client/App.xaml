@@ -248,35 +248,83 @@
             <Setter Property="Padding" Value="5"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#343A40"/>
+            <Style.Triggers>
+                <!-- Hover: leve cambio de color -->
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#3E444A"/>
+                </Trigger>
+                <!-- Evitar efecto visual al seleccionar -->
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="#343A40"/>
+                    <Setter Property="Foreground" Value="White"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
 
+        <!-- Estilo para encabezados de columnas -->
         <Style x:Key="cleanDataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="FontWeight" Value="Bold"/>
             <Setter Property="FontSize" Value="24"/>
             <Setter Property="Foreground" Value="#66B2FF"/>
-            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Background" Value="#2C3035"/>
             <Setter Property="BorderThickness" Value="0,0,0,2"/>
             <Setter Property="BorderBrush" Value="#66B2FF"/>
             <Setter Property="Padding" Value="5"/>
-            <Setter Property="SeparatorBrush" Value="#DDDDDD"/>
+            <Setter Property="SeparatorBrush" Value="#50555A"/>
             <Setter Property="SeparatorVisibility" Value="Visible"/>
         </Style>
 
+        <!-- Estilo general del DataGrid -->
         <Style x:Key="cleanDataGridStyle" TargetType="DataGrid">
             <Setter Property="AutoGenerateColumns" Value="False"/>
             <Setter Property="IsReadOnly" Value="True"/>
             <Setter Property="HeadersVisibility" Value="Column"/>
             <Setter Property="GridLinesVisibility" Value="None"/>
-            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Background" Value="#343A40"/>
+            <Setter Property="RowBackground" Value="#343A40"/>
+            <Setter Property="AlternatingRowBackground" Value="#3E444A"/>
             <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="BorderBrush" Value="#343A40"/>
             <Setter Property="CanUserAddRows" Value="False"/>
             <Setter Property="CanUserDeleteRows" Value="False"/>
             <Setter Property="CanUserReorderColumns" Value="False"/>
             <Setter Property="CanUserResizeRows" Value="False"/>
-            <Setter Property="AlternatingRowBackground" Value="#F9F9F9"/>
+            <Setter Property="HorizontalGridLinesBrush" Value="#50555A"/>
+            <Setter Property="VerticalGridLinesBrush" Value="#50555A"/>
             <Setter Property="CellStyle" Value="{StaticResource cleanDataGridCellStyle}"/>
             <Setter Property="ColumnHeaderStyle" Value="{StaticResource cleanDataGridColumnHeaderStyle}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="16"/>
+            <!-- SelectionUnit y SelectionMode sí pertenecen al DataGrid y se pueden poner aquí -->
+            <Setter Property="SelectionMode" Value="Single"/>
+            <Setter Property="SelectionUnit" Value="Cell"/>
+            <!-- RowStyle para controlar visual de selección/hover -->
+            <Setter Property="RowStyle">
+                <Setter.Value>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="Background" Value="#343A40"/>
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                        <Setter Property="SnapsToDevicePixels" Value="True"/>
+                        <Style.Triggers>
+                            <!-- Hover -->
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#3E444A"/>
+                            </Trigger>
+                            <!-- Sin efecto al seleccionar -->
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#343A40"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <Style x:Key="LoadingButtonStyle" TargetType="Button" BasedOn="{StaticResource primaryButtonStyle}">
