@@ -157,5 +157,10 @@ namespace PASSWORD_LIS_Client.Services
         {
             ValidationTimerTick?.Invoke(secondsLeft);
         }
+
+        public void OnSuddenDeathStarted()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

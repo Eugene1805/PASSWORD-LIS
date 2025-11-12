@@ -115,8 +115,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         private async Task RespondToRequest(bool accepted)
         {
             var requestToRespond = SelectedRequest;
-            if (requestToRespond == null) return;
-
+            if (requestToRespond == null)
+            {
+                return;
+            }
             IsLoading = true; 
             try
             {

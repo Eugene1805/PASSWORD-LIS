@@ -91,7 +91,7 @@ namespace Services.Services
         private readonly IMatchRepository matchRepository;
         private readonly IPlayerRepository playerRepository;
         private readonly ILog log = LogManager.GetLogger(typeof(GameManager));
-        private const int ROUND_DURATION_SECONDS = 60;
+        private const int ROUND_DURATION_SECONDS = 180; // CAMBIADO PARA PRUEBAS
         private const int VALIDATION_DURATION_SECONDS = 20;
         private const int SUDDEN_DEATH_DURATION_SECONDS = 30;
         private const int WORDS_PER_ROUND = 5;
@@ -184,6 +184,8 @@ namespace Services.Services
 
             var team = sender.Player.Team;
             var currentPassword = matchState.GetCurrentPassword(team);
+            if (currentPassword == null) return;
+
             var historyItem = new TurnHistoryDTO
             {
                 TurnId = (team == MatchTeam.RedTeam) ? matchState.RedTeamWordIndex : matchState.BlueTeamWordIndex,

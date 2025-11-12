@@ -223,7 +223,7 @@
     <value>First Name</value>
   </data>
   <data name="nextRoundText" xml:space="preserve">
-    <value>nextRound</value>
+    <value>Next Round</value>
   </data>
   <data name="nicknameText" xml:space="preserve">
     <value>Nickname</value>
@@ -716,5 +716,14 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   </data>
   <data name="areSureSendingInvitation" xml:space="preserve">
     <value>Are you sure about sending an invitation to {0}?</value>
+  </data>
+  <data name="correctWordGuessedText" xml:space="preserve">
+    <value>Word Guessed Correctly!</value>
+  </data>
+  <data name="incorrectWordGuessedText" xml:space="preserve">
+    <value>Word Guessed Incorrectly!</value>
+  </data>
+  <data name="noClueAvailableText" xml:space="preserve">
+    <value>There is no clue available for this word</value>
   </data>
 </root>
