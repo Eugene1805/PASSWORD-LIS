@@ -52,8 +52,10 @@ namespace PASSWORD_LIS_Client.ViewModels
             gameManagerService.ValidationTimerTick += OnValidationTimerTick;
             gameManagerService.ValidationComplete += OnValidationComplete;
 
-            TurnsToValidate = new ObservableCollection<ValidationTurnViewModel>(
-                turns.Select(turn => new ValidationTurnViewModel(turn, language)));
+            var groupedTurns = turns.Where(turn => turn.Password.EnglishWord != "END" && turn.Password.SpanishWord != "END")
+                .GroupBy(turn => turn.TurnId)
+                .Select(group => new ValidationTurnViewModel(group, language));
+            TurnsToValidate = new ObservableCollection<ValidationTurnViewModel>(groupedTurns);
 
             SubmitVotesCommand = new RelayCommand(async (_) => await SubmitVotesAsync(), (_) => CanSubmit);
         }

@@ -944,6 +944,9 @@ namespace PASSWORD_LIS_Client.GameManagerServiceReference {
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IGameManager/OnValidationComplete")]
         void OnValidationComplete(PASSWORD_LIS_Client.GameManagerServiceReference.ValidationResultDTO result);
         
+        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IGameManager/OnSuddenDeathStarted")]
+        void OnSuddenDeathStarted();
+        
         [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IGameManager/OnMatchOver")]
         void OnMatchOver(PASSWORD_LIS_Client.GameManagerServiceReference.MatchSummaryDTO summary);
         

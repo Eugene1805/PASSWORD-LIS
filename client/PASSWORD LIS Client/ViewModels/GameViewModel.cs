@@ -267,7 +267,18 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 currentPasswordDto = password;
 
-                if (currentPlayer.Role == PlayerRole.ClueGuy)
+                if (password.EnglishWord == "END" || password.SpanishWord == "END")
+                {
+                    CurrentPasswordWord = "¡Ronda terminada!"; //Properties.Langs.Lang.roundOverText
+                    CanSendClue = false; // Deshabilitar Pistero
+                    CanSendGuess = false; // Deshabilitar Adivinador
+                    CurrentClue = "Esperando al otro equipo..."; //Properties.Langs.Lang.waitingForOtherTeamTexT
+                    IsHintVisible = false;
+                    CurrentHintText = string.Empty;
+                    return; // Salir del método
+                }
+
+                if (CurrentPlayerRole == PlayerRole.ClueGuy)
                 {
                     if (currentLanguage.StartsWith("es"))
                     {
@@ -302,7 +313,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                if (currentPlayer.Role == PlayerRole.Guesser)
+                if (currentPlayer.Role == PlayerRole.Guesser && result.Team == currentPlayer.Team)
                 {
                     if (result.IsCorrect)
                     {
@@ -332,20 +343,21 @@ namespace PASSWORD_LIS_Client.ViewModels
                     }
                 }
 
-                // Si CUALQUIER equipo acierta, el Pistero puede enviar una nueva pista
-                // (Porque la palabra cambia para él)
-                if (result.IsCorrect)
+                // 3. Lógica de Habilitar/Deshabilitar Botones (Solo para MI EQUIPO)
+                if (result.Team == currentPlayer.Team)
                 {
-                    // Correcto: Deshabilitar a ambos. Esperarán el OnNewPassword del servidor.
-                    CanSendClue = false;
-                    CanSendGuess = false;
-                }
-                else
-                {
-                    // Incorrecto: El Pistero (ClueGuy) debe dar OTRA pista.
-                    CanSendClue = true;
-                    // El Adivinador (Guesser) debe esperar esa nueva pista.
-                    CanSendGuess = false;
+                    if (result.IsCorrect)
+                    {
+                        // Correcto: Deshabilitar a mi equipo.
+                        CanSendClue = false;
+                        CanSendGuess = false;
+                    }
+                    else
+                    {
+                        // Incorrecto: Re-habilitar al Pistero de mi equipo.
+                        CanSendClue = true;
+                        CanSendGuess = false;
+                    }
                 }
             });
         }
@@ -396,6 +408,23 @@ namespace PASSWORD_LIS_Client.ViewModels
                 if (thisPlayer != null)
                 {
                     CurrentPlayerRole = thisPlayer.Role;
+                }
+
+                if (CurrentPlayerRole == PlayerRole.ClueGuy && currentPasswordDto != null)
+                {
+                    if (currentLanguage.StartsWith("es"))
+                    {
+                        CurrentPasswordWord = currentPasswordDto.SpanishWord;
+                    }
+                    else
+                    {
+                        CurrentPasswordWord = currentPasswordDto.EnglishWord;
+                    }
+                }
+                else if (CurrentPlayerRole == PlayerRole.Guesser)
+                {
+                    // Si soy el adivinador, oculto la palabra.
+                    CurrentPasswordWord = "...";
                 }
             });
         }

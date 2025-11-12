@@ -184,6 +184,8 @@ namespace Services.Services
 
             var team = sender.Player.Team;
             var currentPassword = matchState.GetCurrentPassword(team);
+            if (currentPassword == null) return;
+
             var historyItem = new TurnHistoryDTO
             {
                 TurnId = (team == MatchTeam.RedTeam) ? matchState.RedTeamWordIndex : matchState.BlueTeamWordIndex,

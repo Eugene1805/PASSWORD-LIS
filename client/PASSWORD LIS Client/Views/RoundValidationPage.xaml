@@ -64,7 +64,7 @@
                                            VerticalAlignment="Center" HorizontalAlignment="Left"
                                            TextWrapping="Wrap" FontWeight="Bold"/>
 
-                                <TextBlock Grid.Column="1" Text="{Binding Clue}" 
+                                <TextBlock Grid.Column="1" Text="{Binding Clues}" 
                                            Style="{StaticResource bodyTextBlockStyle}" 
                                            VerticalAlignment="Center" HorizontalAlignment="Left"
                                            TextWrapping="Wrap" FontStyle="Italic"/>

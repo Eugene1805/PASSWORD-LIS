@@ -1,4 +1,5 @@
 ﻿using PASSWORD_LIS_Client.GameManagerServiceReference;
+using System.Linq;
 
 namespace PASSWORD_LIS_Client.ViewModels
 {
@@ -6,7 +7,7 @@ namespace PASSWORD_LIS_Client.ViewModels
     {
         public int TurnId { get; }
         public string Word { get; }
-        public string Clue { get; }
+        public string Clues { get; }
         public string Language { get; }
 
         private bool penalizeSynonym;
@@ -23,20 +24,21 @@ namespace PASSWORD_LIS_Client.ViewModels
             set => SetProperty(ref penalizeMultiword, value);
         }
 
-        public ValidationTurnViewModel(TurnHistoryDTO turn, string language)
+        public ValidationTurnViewModel(IGrouping<int, TurnHistoryDTO> turnGroup, string language)
         {
-            TurnId = turn.TurnId;
-            Clue = turn.ClueUsed;
+            var firstTurn = turnGroup.First();
+            TurnId = firstTurn.TurnId;
             Language = language;
 
             if (Language.StartsWith("es"))
             {
-                Word = turn.Password.SpanishWord;
+                Word = firstTurn.Password.SpanishWord;
             }
             else
             {
-                Word = turn.Password.EnglishWord;
+                Word = firstTurn.Password.EnglishWord;
             }
+            Clues = string.Join(", ", turnGroup.Select(t => t.ClueUsed));
         }
     }
 }
