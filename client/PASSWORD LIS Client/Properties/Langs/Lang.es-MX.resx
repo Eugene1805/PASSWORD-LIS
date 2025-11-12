@@ -726,4 +726,19 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
   <data name="noClueAvailableText" xml:space="preserve">
     <value>No hay pista disponible para esta palabra</value>
   </data>
+  <data name="errorSendingVotesText" xml:space="preserve">
+    <value>Error al enviar los votos</value>
+  </data>
+  <data name="waitingOtherPlayersText" xml:space="preserve">
+    <value>Esperando a los demás jugadores…</value>
+  </data>
+  <data name="waitingAClueText" xml:space="preserve">
+    <value>Esperando pista...</value>
+  </data>
+  <data name="errorSubscribingGameText" xml:space="preserve">
+    <value>Error al suscribirse a la partida</value>
+  </data>
+  <data name="errorInitializingGameText" xml:space="preserve">
+    <value>Error al inicializar la partida</value>
+  </data>
 </root>

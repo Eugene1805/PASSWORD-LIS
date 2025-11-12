@@ -726,4 +726,19 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="noClueAvailableText" xml:space="preserve">
     <value>There is no clue available for this word</value>
   </data>
+  <data name="errorSendingVotesText" xml:space="preserve">
+    <value>Error sending votes</value>
+  </data>
+  <data name="waitingOtherPlayersText" xml:space="preserve">
+    <value>Waiting for the other players...</value>
+  </data>
+  <data name="waitingAClueText" xml:space="preserve">
+    <value>Waiting for a clue...</value>
+  </data>
+  <data name="errorSubscribingGameText" xml:space="preserve">
+    <value>Error subscribing to the game</value>
+  </data>
+  <data name="errorInitializingGameText" xml:space="preserve">
+    <value>Error initializing the game</value>
+  </data>
 </root>
