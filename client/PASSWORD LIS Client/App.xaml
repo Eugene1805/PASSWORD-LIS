@@ -447,6 +447,47 @@
             </Setter>
         </Style>
 
+        <Style x:Key="primaryCheckBoxStyle" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid Background="Transparent">
+                            <Border x:Name="BackgroundBorder"
+                            Width="20" Height="20"
+                            CornerRadius="4"
+                            BorderBrush="White"
+                            BorderThickness="2"
+                            Background="Transparent"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center"/>
+
+                            <Path x:Name="CheckMark"
+                          Data="M 4,10 L 8,14 L 16,6" 
+                          Stroke="White"
+                          StrokeThickness="3"
+                          Stretch="Fill"
+                          Width="12" Height="12"
+                          VerticalAlignment="Center"
+                          HorizontalAlignment="Center"
+                          Visibility="Collapsed"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="BackgroundBorder" Property="Background" Value="#66B2FF"/>
+                                <Setter TargetName="BackgroundBorder" Property="BorderBrush" Value="#66B2FF"/>
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="BackgroundBorder" Property="Background" Value="#33FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <BitmapImage x:Key="DefaultAvatarImage" UriSource="/Resources/AvatarDefault.png"/>
 
     </Application.Resources>

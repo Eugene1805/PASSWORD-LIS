@@ -961,7 +961,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
-        ///   Busca una cadena traducida similar a nextRound.
+        ///   Busca una cadena traducida similar a Next Round.
         /// </summary>
         public static string nextRoundText {
             get {

@@ -8,9 +8,10 @@
       xmlns:utils="clr-namespace:PASSWORD_LIS_Client.Utils"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="a{x:Static language:Lang.roundValidationText}">
+      Title="a{x:Static language:Lang.roundValidationText}"
+      Background="#1A1A1A">
 
-    <Grid Margin="20" Background="Black">
+    <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -18,83 +19,80 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Text="{utils:Translate roundValidationText}"
-                   Style="{StaticResource titleTextBlockStyle}"
-                   HorizontalAlignment="Center"
-                   Margin="0,10,0,20"/>
+        <Grid Grid.Row="0" Margin="0,10,0,20">
+            <TextBlock Text="{utils:Translate roundValidationText}"
+                       Style="{StaticResource titleTextBlockStyle}"
+                       HorizontalAlignment="Center"/>
 
-        <Grid Grid.Row="1" Margin="0,0,0,10">
+            <TextBlock Text="{Binding ValidationSeconds}"
+                       Style="{StaticResource titleTextBlockStyle}"
+                       FontSize="28"
+                       HorizontalAlignment="Right"
+                       VerticalAlignment="Center"
+                       Foreground="#FFC107"/>
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="10,0,10,10">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="150"/>
-                <ColumnDefinition Width="150"/>
-                <ColumnDefinition Width="150"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="1.2*"/>
             </Grid.ColumnDefinitions>
 
             <TextBlock Text="{utils:Translate currentWordText}" Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="0"/>
             <TextBlock Text="{utils:Translate clueText}" Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="1"/>
-            <TextBlock Text="{utils:Translate sinonymsQuestionText}" Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="2" TextWrapping="Wrap"/>
-            <TextBlock Text="{utils:Translate oneMoreWordQuestionText}" Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="3" TextWrapping="Wrap"/>
+            <TextBlock Text="{utils:Translate sinonymsQuestionText}" Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="2" TextWrapping="Wrap" HorizontalAlignment="Center"/>
+            <TextBlock Text="{utils:Translate oneMoreWordQuestionText}" Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="3" TextWrapping="Wrap" HorizontalAlignment="Center"/>
         </Grid>
 
-        <StackPanel Grid.Row="2">
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl ItemsSource="{Binding TurnsToValidate}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource floatingBorderStyle}" Padding="10" Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="1*"/>
+                                    <ColumnDefinition Width="2*"/>
+                                    <ColumnDefinition Width="1*"/>
+                                    <ColumnDefinition Width="1.2*"/>
+                                </Grid.ColumnDefinitions>
 
-            <Grid Margin="0,10">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding Word}" 
+                                           Style="{StaticResource bodyTextBlockStyle}" 
+                                           VerticalAlignment="Center" HorizontalAlignment="Left"
+                                           TextWrapping="Wrap" FontWeight="Bold"/>
 
-                <Border Style="{StaticResource floatingBorderStyle}" Grid.Column="0" Height="30" Width="100" HorizontalAlignment="Center">
-                    <TextBlock Text="Calidad" Style="{StaticResource subtitleTextBlockStyle}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                </Border>
+                                <TextBlock Grid.Column="1" Text="{Binding Clue}" 
+                                           Style="{StaticResource bodyTextBlockStyle}" 
+                                           VerticalAlignment="Center" HorizontalAlignment="Left"
+                                           TextWrapping="Wrap" FontStyle="Italic"/>
 
-                <ListBox Grid.Column="1" Height="60" Width="100" HorizontalAlignment="Center">
-                    <ListBoxItem Content="Atributo"/>
-                    <ListBoxItem Content="Buena"/>
-                    <ListBoxItem Content="Excelencia"/>
-                </ListBox>
+                                <CheckBox Grid.Column="2" 
+                                          IsChecked="{Binding PenalizeSynonym, Mode=TwoWay}"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center"
+                                          Style="{StaticResource primaryCheckBoxStyle}"/>
 
-                <CheckBox Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="False"/>
-
-                <CheckBox Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="False"/>
-            </Grid>
-
-            <Grid Margin="0,10">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="150"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <Border Style="{StaticResource floatingBorderStyle}" Grid.Column="0" Height="30" Width="100" HorizontalAlignment="Center">
-                    <TextBlock Text="Requisito" Style="{StaticResource subtitleTextBlockStyle}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                </Border>
-
-                <ListBox Grid.Column="1" Height="60" Width="100" HorizontalAlignment="Center">
-                    <ListBoxItem Content="Fase"/>
-                    <ListBoxItem Content="Necesario"/>
-                    <ListBoxItem Content="Condición"/>
-                </ListBox>
-
-                <CheckBox Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="True"/>
-
-                <CheckBox Grid.Column="3" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,0" IsChecked="False"/>
-            </Grid>
-        </StackPanel>
+                                <CheckBox Grid.Column="3" 
+                                          IsChecked="{Binding PenalizeMultiword, Mode=TwoWay}"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center"
+                                          Style="{StaticResource primaryCheckBoxStyle}"/>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
 
         <Button Content="{utils:Translate nextRoundText}"
                 Grid.Row="3"
-                Grid.ColumnSpan="2"
                 Style="{StaticResource primaryButtonStyle}"
-                Width="100"
-                Height="30"
+                Width="120" Height="35"
                 HorizontalAlignment="Right"
-                Margin="0,20,20,20"
-                />
+                Margin="0,20,0,0"
+                Command="{Binding SubmitVotesCommand}"
+                IsEnabled="{Binding CanSubmit}"/>
 
     </Grid>
 </Page>

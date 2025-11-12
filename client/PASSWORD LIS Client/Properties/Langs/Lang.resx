@@ -223,7 +223,7 @@
     <value>First Name</value>
   </data>
   <data name="nextRoundText" xml:space="preserve">
-    <value>nextRound</value>
+    <value>Next Round</value>
   </data>
   <data name="nicknameText" xml:space="preserve">
     <value>Nickname</value>

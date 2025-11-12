@@ -1,4 +1,5 @@
-﻿using PASSWORD_LIS_Client.ViewModels;
+﻿using PASSWORD_LIS_Client.GameManagerServiceReference;
+using PASSWORD_LIS_Client.ViewModels;
 using PASSWORD_LIS_Client.Views;
 using PASSWORD_LIS_Client.WaitingRoomManagerServiceReference;
 using System.Linq;
@@ -18,9 +19,10 @@ namespace PASSWORD_LIS_Client.Utils
         void CloseWindow(object viewModel);
         void ShowPopUp(string title, string message, PopUpIcon icon);
         bool ShowYesNoPopUp(string title, string message);
-        void ShowReportWindow(PlayerDTO reportedPlayer);
+        void ShowReportWindow(WaitingRoomManagerServiceReference.PlayerDTO reportedPlayer);
         void ShowMainWindow();
         void CloseMainWindow();
+        void NavigateToValidationPage(TurnHistoryDTO[] turns, string gameCode, int playerId, string language);
 
     }
 
@@ -91,7 +93,7 @@ namespace PASSWORD_LIS_Client.Utils
             return userResponse.HasValue && userResponse.Value;
         }
 
-        public void ShowReportWindow(PlayerDTO reportedPlayer)
+        public void ShowReportWindow(WaitingRoomManagerServiceReference.PlayerDTO reportedPlayer)
         {
             var reporter = SessionManager.CurrentUser;
 
@@ -113,6 +115,14 @@ namespace PASSWORD_LIS_Client.Utils
             {
                 mainWindow.Close();
             }
+        }
+
+        public void NavigateToValidationPage(TurnHistoryDTO[] turns, string gameCode, int playerId, string language)
+        {
+            var validationViewModel = new RoundValidationViewModel(turns, App.GameManagerService, App.WindowService,
+                gameCode, playerId, language);
+            var validationPage = new RoundValidationPage { DataContext = validationViewModel };
+            mainFrame?.NavigationService.Navigate(validationPage);
         }
     }
 }
