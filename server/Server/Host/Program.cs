@@ -30,7 +30,7 @@ namespace Host
                 var codeService = new VerificationCodeService();
                 var notificationService = new NotificationService(emailSender);
                 var statisticsRepository = new StatisticsRepository(dbContextFactory);
-                var playerRepository = new PlayerRepository();
+                var playerRepository = new PlayerRepository(dbContextFactory);
                 var operationContextWrapper = new OperationContextWrapper();
                 var friendshipRepository = new FriendshipRepository();
                 var reportRepository = new ReportRepository(dbContextFactory);
