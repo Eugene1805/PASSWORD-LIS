@@ -25,13 +25,15 @@ namespace Host
                 // We create the dependencies first so they can be used in every service
                 var dbContextFactory = new DbContextFactory();
 
-                var accountRepository = new AccountRepository();
                 var emailSender = new EmailSender();
                 var codeService = new VerificationCodeService();
                 var notificationService = new NotificationService(emailSender);
+
+                var operationContextWrapper = new OperationContextWrapper();
+
+                var accountRepository = new AccountRepository(dbContextFactory);
                 var statisticsRepository = new StatisticsRepository(dbContextFactory);
                 var playerRepository = new PlayerRepository(dbContextFactory);
-                var operationContextWrapper = new OperationContextWrapper();
                 var friendshipRepository = new FriendshipRepository(dbContextFactory);
                 var reportRepository = new ReportRepository(dbContextFactory);
                 var banRepository = new BanRepository(dbContextFactory);

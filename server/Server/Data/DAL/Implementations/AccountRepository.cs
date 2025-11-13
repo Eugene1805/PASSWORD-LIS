@@ -1,7 +1,6 @@
 ﻿using Data.DAL.Interfaces;
 using Data.Exceptions;
 using Data.Model;
-using Data.Util;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -12,9 +11,14 @@ namespace Data.DAL.Implementations
 {
     public class AccountRepository : IAccountRepository
     {
+        private readonly IDbContextFactory contextFactory;
+        public AccountRepository(IDbContextFactory contextFactory)
+        {
+            this.contextFactory = contextFactory;
+        }
         public async Task CreateAccountAsync(UserAccount account)
         {
-            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            using (var context = contextFactory.CreateDbContext())
             {
                 if ( await context.UserAccount.AnyAsync(a => a.Email == account.Email))
                 {
@@ -33,7 +37,7 @@ namespace Data.DAL.Implementations
             {
                 return false;
             }
-            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            using (var context = contextFactory.CreateDbContext())
             {
                 return context.UserAccount.Any(a => a.Email == email);
             }
@@ -42,7 +46,7 @@ namespace Data.DAL.Implementations
 
         public UserAccount GetUserByEmail(string email)
         {
-            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            using (var context = contextFactory.CreateDbContext())
             {
                 UserAccount userAccount = context.UserAccount
                     .Include(u => u.Player)
@@ -54,7 +58,7 @@ namespace Data.DAL.Implementations
 
         public bool VerifyEmail(string email)
         {
-            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            using (var context = contextFactory.CreateDbContext())
             {
                 UserAccount user = context.UserAccount.FirstOrDefault(u => u.Email == email);
 
@@ -70,7 +74,7 @@ namespace Data.DAL.Implementations
 
         public bool ResetPassword(string email, string passwordHash)
         {
-            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            using (var context = contextFactory.CreateDbContext())
             {
                 UserAccount user = context.UserAccount.FirstOrDefault(u => u.Email == email);
 
@@ -87,7 +91,7 @@ namespace Data.DAL.Implementations
         }
         public bool UpdateUserProfile(int playerId, UserAccount updatedAccountData, List<SocialAccount> updatedSocialsAccounts)
         {
-            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            using (var context = contextFactory.CreateDbContext())
             {
                 using (var transaction = context.Database.BeginTransaction())
                 {
@@ -126,7 +130,7 @@ namespace Data.DAL.Implementations
 
         public UserAccount GetUserByPlayerId(int playerId)
         {
-            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            using (var context = contextFactory.CreateDbContext())
             {
                 return context.UserAccount
                     .Include(u => u.Player)
@@ -135,7 +139,7 @@ namespace Data.DAL.Implementations
         }
         public UserAccount GetUserByUserAccountId(int userAccountId)
         {
-            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            using (var context = contextFactory.CreateDbContext())
             {
                 return context.UserAccount
                               .Include(u => u.Player)
@@ -188,7 +192,7 @@ namespace Data.DAL.Implementations
 
         public async Task<bool> IsNicknameInUse(string nickname)
         {
-            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            using (var context = contextFactory.CreateDbContext())
             {
                 return await context.UserAccount.AnyAsync(p => p.Nickname == nickname);
             }
