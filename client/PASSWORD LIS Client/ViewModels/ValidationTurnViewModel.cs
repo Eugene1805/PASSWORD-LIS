@@ -9,6 +9,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         public string Word { get; }
         public string Clues { get; }
         public string Language { get; }
+        public bool IsPassed { get; }
 
         private bool penalizeSynonym;
         public bool PenalizeSynonym
@@ -39,6 +40,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 Word = firstTurn.Password.EnglishWord;
             }
             Clues = string.Join(", ", turnGroup.Select(t => t.ClueUsed));
+            IsPassed = turnGroup.Any(t => t.ClueUsed == "[PALABRA PASADA]");
         }
     }
 }

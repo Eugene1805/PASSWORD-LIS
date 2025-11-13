@@ -303,6 +303,11 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
+                if (currentPasswordDto == null || currentPasswordDto.EnglishWord == "END" ||
+                    currentPasswordDto.SpanishWord == "END")
+                {
+                    return;
+                }
                 CurrentClue = clue;
                 CanSendGuess = true;
             });
@@ -312,13 +317,13 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                if (currentPlayer.Role == PlayerRole.Guesser && result.Team == currentPlayer.Team)
+                if (result.Team == currentPlayer.Team)
                 {
                     if (result.IsCorrect)
                     {
                         ShowSnackbar(Properties.Langs.Lang.correctWordGuessedText);
                     }
-                    else
+                    else if(CurrentPlayerRole == PlayerRole.Guesser)
                     {
                         ShowSnackbar(Properties.Langs.Lang.incorrectWordGuessedText);
                     }

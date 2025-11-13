@@ -67,7 +67,7 @@
                 <TextBox x:Name="clueGivenTextBox"
                          Style="{StaticResource primaryTextBoxStyle}" Margin="20,10"
                          Text="{Binding CurrentClueText, UpdateSourceTrigger=PropertyChanged}"
-                         IsEnabled="{Binding CandSendClue}"/>
+                         IsEnabled="{Binding CanSendClue}"/>
 
                 <Button Style="{StaticResource primaryButtonStyle}" Margin="20,10" Height="30"
                         Content="{utils:Translate sendText}"

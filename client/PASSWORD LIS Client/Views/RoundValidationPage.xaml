@@ -6,10 +6,14 @@
       xmlns:local="clr-namespace:PASSWORD_LIS_Client.Views"
       xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
       xmlns:utils="clr-namespace:PASSWORD_LIS_Client.Utils"
+      xmlns:converters="clr-namespace:PASSWORD_LIS_Client.Converters"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="a{x:Static language:Lang.roundValidationText}"
       Background="#1A1A1A">
+    <Page.Resources>
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+    </Page.Resources>
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
@@ -72,12 +76,14 @@
                                 <CheckBox Grid.Column="2" 
                                           IsChecked="{Binding PenalizeSynonym, Mode=TwoWay}"
                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                          Style="{StaticResource primaryCheckBoxStyle}"/>
+                                          Style="{StaticResource primaryCheckBoxStyle}"
+                                          IsEnabled="{Binding IsPassed, Converter={StaticResource InverseBooleanConverter}}" />
 
                                 <CheckBox Grid.Column="3" 
                                           IsChecked="{Binding PenalizeMultiword, Mode=TwoWay}"
                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                          Style="{StaticResource primaryCheckBoxStyle}"/>
+                                          Style="{StaticResource primaryCheckBoxStyle}"
+                                          IsEnabled="{Binding IsPassed, Converter={StaticResource InverseBooleanConverter} }" />
                             </Grid>
                         </Border>
                     </DataTemplate>
