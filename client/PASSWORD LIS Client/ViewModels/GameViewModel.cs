@@ -269,13 +269,16 @@ namespace PASSWORD_LIS_Client.ViewModels
 
                 if (password.EnglishWord == "END" || password.SpanishWord == "END")
                 {
-                    CurrentPasswordWord = "¡Ronda terminada!"; //Properties.Langs.Lang.roundOverText
-                    CanSendClue = false; // Deshabilitar Pistero
-                    CanSendGuess = false; // Deshabilitar Adivinador
-                    CurrentClue = "Esperando al otro equipo..."; //Properties.Langs.Lang.waitingForOtherTeamTexT
+                    // --- INICIO DE LA CORRECCIÓN ---
+                    string roundOverMsg = "¡Ronda terminada!";
+                    CurrentPasswordWord = roundOverMsg; // Para el Pistero
+                    CurrentClue = roundOverMsg; // Para el Adivinador
+
+                    CanSendClue = false;
+                    CanSendGuess = false;
                     IsHintVisible = false;
                     CurrentHintText = string.Empty;
-                    return; // Salir del método
+                    return;
                 }
 
                 if (CurrentPlayerRole == PlayerRole.ClueGuy)

@@ -40,7 +40,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 Word = firstTurn.Password.EnglishWord;
             }
             Clues = string.Join(", ", turnGroup.Select(t => t.ClueUsed));
-            IsPassed = turnGroup.Any(t => t.ClueUsed == "[PALABRA PASADA]");
+            IsPassed = turnGroup.Any(t => t.ClueUsed == "[PASSED]");
         }
     }
 }

@@ -43,7 +43,7 @@ namespace Services.Services
             public bool BlueTeamPassedThisRound { get; set; } // ADDED: Tracks if the blue team used their pass.
             // -------------------------------------
 
-            public List<List<ValidationVoteDTO>> ReceivedVotes { get; }
+            public List<(MatchTeam VoterTeam, List<ValidationVoteDTO> Votes)> ReceivedVotes { get; }
             public HashSet<int> PlayersWhoVoted { get; }
 
             public MatchState(string gameCode, List<PlayerDTO> expectedPlayers)
@@ -63,7 +63,7 @@ namespace Services.Services
                 CurrentRound = 0;
                 RedTeamPassedThisRound = false;
                 BlueTeamPassedThisRound = false;
-                ReceivedVotes = new List<List<ValidationVoteDTO>>();
+                ReceivedVotes = new List<(MatchTeam, List<ValidationVoteDTO>)>();
                 PlayersWhoVoted = new HashSet<int>();
             }
             public PasswordWord GetCurrentPassword(MatchTeam team)
@@ -291,7 +291,7 @@ namespace Services.Services
                 if (matchState.PlayersWhoVoted.Contains(senderPlayerId)) return;
 
                 matchState.PlayersWhoVoted.Add(senderPlayerId);
-                matchState.ReceivedVotes.Add(votes);
+                matchState.ReceivedVotes.Add((sender.Player.Team, votes));
 
                 if (matchState.PlayersWhoVoted.Count >= 4)
                 {
@@ -484,23 +484,25 @@ namespace Services.Services
             var redTurnsToPenalizeSynonym = new HashSet<int>();
             var blueTurnsToPenalizeSynonym = new HashSet<int>();
 
-            foreach (var voteList in matchState.ReceivedVotes)
+            foreach (var (voterTeam, voteList) in matchState.ReceivedVotes)
             {
                 foreach (var vote in voteList)
                 {
-                    bool isRedTeamTurn = matchState.RedTeamTurnHistory.Any(t => t.TurnId == vote.TurnId);
-                    if (isRedTeamTurn)
-                    {
-                        if (vote.PenalizeMultiword) redTurnsToPenalizeMultiword.Add(vote.TurnId);
-                        if (vote.PenalizeSynonym) redTurnsToPenalizeSynonym.Add(vote.TurnId);
-                    }
-                    else
+                    // Si el votante es del Equipo Rojo, está votando por las palabras del Equipo Azul.
+                    if (voterTeam == MatchTeam.RedTeam)
                     {
                         if (vote.PenalizeMultiword) blueTurnsToPenalizeMultiword.Add(vote.TurnId);
                         if (vote.PenalizeSynonym) blueTurnsToPenalizeSynonym.Add(vote.TurnId);
                     }
+                    // Si el votante es del Equipo Azul, está votando por las palabras del Equipo Rojo.
+                    else // (voterTeam == MatchTeam.BlueTeam)
+                    {
+                        if (vote.PenalizeMultiword) redTurnsToPenalizeMultiword.Add(vote.TurnId);
+                        if (vote.PenalizeSynonym) redTurnsToPenalizeSynonym.Add(vote.TurnId);
+                    }
                 }
             }
+
             redTeamPenalty = (redTurnsToPenalizeMultiword.Count * PENALTY_MULTIWORD) + (redTurnsToPenalizeSynonym.Count * PENALTY_SYNONYM);
             blueTeamPenalty = (blueTurnsToPenalizeMultiword.Count * PENALTY_MULTIWORD) + (blueTurnsToPenalizeSynonym.Count * PENALTY_SYNONYM);
             lock (matchState)
