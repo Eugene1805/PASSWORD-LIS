@@ -34,7 +34,7 @@ namespace Host
                 var operationContextWrapper = new OperationContextWrapper();
                 var friendshipRepository = new FriendshipRepository(dbContextFactory);
                 var reportRepository = new ReportRepository(dbContextFactory);
-                var banRepository = new BanRepository();
+                var banRepository = new BanRepository(dbContextFactory);
                 var wordRepository = new WordRepository(dbContextFactory);
                 var matchRepository = new MatchRepository(dbContextFactory);
 
