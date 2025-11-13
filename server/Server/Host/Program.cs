@@ -29,7 +29,7 @@ namespace Host
                 var emailSender = new EmailSender();
                 var codeService = new VerificationCodeService();
                 var notificationService = new NotificationService(emailSender);
-                var statisticsRepository = new StatisticsRepository();
+                var statisticsRepository = new StatisticsRepository(dbContextFactory);
                 var playerRepository = new PlayerRepository();
                 var operationContextWrapper = new OperationContextWrapper();
                 var friendshipRepository = new FriendshipRepository();
