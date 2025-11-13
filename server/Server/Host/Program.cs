@@ -23,6 +23,8 @@ namespace Host
             {
                 log.Info("The server started.");
                 // We create the dependencies first so they can be used in every service
+                var dbContextFactory = new DbContextFactory();
+
                 var accountRepository = new AccountRepository();
                 var emailSender = new EmailSender();
                 var codeService = new VerificationCodeService();
@@ -31,7 +33,7 @@ namespace Host
                 var playerRepository = new PlayerRepository();
                 var operationContextWrapper = new OperationContextWrapper();
                 var friendshipRepository = new FriendshipRepository();
-                var reportRepository = new ReportRepository();
+                var reportRepository = new ReportRepository(dbContextFactory);
                 var banRepository = new BanRepository();
                 var wordRepository = new WordRepository();
                 var matchRepository = new MatchRepository();
