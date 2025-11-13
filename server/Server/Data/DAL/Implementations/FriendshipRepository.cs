@@ -5,16 +5,19 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Data.Entity;
-using Data.Util;
 
 namespace Data.DAL.Implementations
 {
     public class FriendshipRepository : IFriendshipRepository
     {
-        
+        private readonly IDbContextFactory contextFactory;
+        public FriendshipRepository(IDbContextFactory contextFactory)
+        {
+            this.contextFactory = contextFactory;
+        }
         public List<UserAccount> GetFriendsByUserAccountId(int userAccountId)
         {
-            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            using (var context = contextFactory.CreateDbContext())
             {
                 var player = context.Player.FirstOrDefault(p => p.UserAccountId == userAccountId);
                 if (player == null)
@@ -45,7 +48,7 @@ namespace Data.DAL.Implementations
 
         public bool DeleteFriendship(int currentUserId, int friendToDeleteId)
         {
-            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            using (var context = contextFactory.CreateDbContext())
             {
                 using (var transaction = context.Database.BeginTransaction())
                 {
@@ -76,7 +79,7 @@ namespace Data.DAL.Implementations
 
         public bool CreateFriendRequest(int requesterPlayerId, int addresseePlayerId)
         {
-            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            using (var context = contextFactory.CreateDbContext())
             {
                 using(var transaction = context.Database.BeginTransaction())
                 {
@@ -116,7 +119,7 @@ namespace Data.DAL.Implementations
 
         public List<Friendship> GetPendingRequests(int userAccountId)
         {
-            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            using (var context = contextFactory.CreateDbContext())
             {
                 var player = context.Player.FirstOrDefault(p => p.UserAccountId == userAccountId);
                 if (player == null)
@@ -133,7 +136,7 @@ namespace Data.DAL.Implementations
 
         public bool RespondToFriendRequest(int requesterPlayerId, int addresseePlayerId, bool accept)
         {
-            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            using (var context = contextFactory.CreateDbContext())
             {
                 using (var transaction = context.Database.BeginTransaction())
                 {

@@ -9,9 +9,9 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         Title="{utils:Translate howToPlayText}" Height="500" Width="600"
-        Background="#EEEFF0">
+        Background="#343A40">
     <Grid>
-        <Border Style="{StaticResource floatingBorderStyle}" Padding="10">
+        <Border Style="{StaticResource  floatingBorderStyle}" Padding="10">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -20,7 +20,7 @@
 
                 <TextBlock Grid.Row="0" Style="{StaticResource subtitleTextBlockStyle}"
                    Text="{utils:Translate howToPlayText}"/>
-                <ScrollViewer Grid.Row="1" Margin="20" VerticalScrollBarVisibility="Disabled">
+                <ScrollViewer Grid.Row="1" Margin="10" VerticalScrollBarVisibility="Hidden">
                     <TextBlock Style="{StaticResource bodyTextBlockStyle}"
                        Text="{utils:Translate rulesGameText}"
                        TextWrapping="Wrap"

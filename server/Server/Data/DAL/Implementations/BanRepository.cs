@@ -1,6 +1,5 @@
 ﻿using Data.DAL.Interfaces;
 using Data.Model;
-using Data.Util;
 using System;
 using System.Data.Entity;
 using System.Linq;
@@ -10,9 +9,14 @@ namespace Data.DAL.Implementations
 {
     public class BanRepository : IBanRepository
     {
+        private readonly IDbContextFactory contextFactory;
+        public BanRepository(IDbContextFactory contextFactory)
+        {
+            this.contextFactory = contextFactory;
+        }
         public async Task AddBanAsync(Ban newBan)
         {
-            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            using (var context = contextFactory.CreateDbContext())
             {
                 context.Ban.Add(newBan);
                 await context.SaveChangesAsync();
@@ -21,7 +25,7 @@ namespace Data.DAL.Implementations
 
         public async Task<Ban> GetActiveBanForPlayerAsync(int playerId)
         {
-            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            using (var context = contextFactory.CreateDbContext())
             {
                 var now = DateTime.UtcNow;
                 return await context.Ban

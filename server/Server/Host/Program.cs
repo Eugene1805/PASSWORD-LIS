@@ -23,18 +23,22 @@ namespace Host
             {
                 log.Info("The server started.");
                 // We create the dependencies first so they can be used in every service
-                var accountRepository = new AccountRepository();
+                var dbContextFactory = new DbContextFactory();
+
                 var emailSender = new EmailSender();
                 var codeService = new VerificationCodeService();
                 var notificationService = new NotificationService(emailSender);
-                var statisticsRepository = new StatisticsRepository();
-                var playerRepository = new PlayerRepository();
+
                 var operationContextWrapper = new OperationContextWrapper();
-                var friendshipRepository = new FriendshipRepository();
-                var reportRepository = new ReportRepository();
-                var banRepository = new BanRepository();
-                var wordRepository = new WordRepository();
-                var matchRepository = new MatchRepository();
+
+                var accountRepository = new AccountRepository(dbContextFactory);
+                var statisticsRepository = new StatisticsRepository(dbContextFactory);
+                var playerRepository = new PlayerRepository(dbContextFactory);
+                var friendshipRepository = new FriendshipRepository(dbContextFactory);
+                var reportRepository = new ReportRepository(dbContextFactory);
+                var banRepository = new BanRepository(dbContextFactory);
+                var wordRepository = new WordRepository(dbContextFactory);
+                var matchRepository = new MatchRepository(dbContextFactory);
 
 
                 var accountManagerInstance = new AccountManager(accountRepository, notificationService, codeService);

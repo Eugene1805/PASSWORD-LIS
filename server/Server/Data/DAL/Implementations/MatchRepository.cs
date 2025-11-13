@@ -1,6 +1,5 @@
 ﻿using Data.DAL.Interfaces;
 using Data.Model;
-using Data.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +10,11 @@ namespace Data.DAL.Implementations
 {
     public class MatchRepository : IMatchRepository
     {
+        private readonly IDbContextFactory contextFactory;
+        public MatchRepository(IDbContextFactory contextFactory)
+        {
+            this.contextFactory = contextFactory;
+        }
         public async Task SaveMatchResultAsync(
             int redScore,
             int blueScore,
@@ -26,7 +30,7 @@ namespace Data.DAL.Implementations
                 throw new ArgumentNullException(nameof(blueTeamPlayerIds));
             }
 
-            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            using (var context = contextFactory.CreateDbContext())
             using (var transaction = context.Database.BeginTransaction())
             {
                 try
