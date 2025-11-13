@@ -36,7 +36,7 @@ namespace Host
                 var reportRepository = new ReportRepository(dbContextFactory);
                 var banRepository = new BanRepository();
                 var wordRepository = new WordRepository(dbContextFactory);
-                var matchRepository = new MatchRepository();
+                var matchRepository = new MatchRepository(dbContextFactory);
 
 
                 var accountManagerInstance = new AccountManager(accountRepository, notificationService, codeService);
