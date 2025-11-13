@@ -32,7 +32,7 @@ namespace Host
                 var statisticsRepository = new StatisticsRepository(dbContextFactory);
                 var playerRepository = new PlayerRepository(dbContextFactory);
                 var operationContextWrapper = new OperationContextWrapper();
-                var friendshipRepository = new FriendshipRepository();
+                var friendshipRepository = new FriendshipRepository(dbContextFactory);
                 var reportRepository = new ReportRepository(dbContextFactory);
                 var banRepository = new BanRepository();
                 var wordRepository = new WordRepository(dbContextFactory);
