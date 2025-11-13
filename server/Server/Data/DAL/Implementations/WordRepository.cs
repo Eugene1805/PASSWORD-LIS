@@ -11,9 +11,14 @@ namespace Data.DAL.Implementations
 {
     public class WordRepository : IWordRepository
     {
+        private readonly IDbContextFactory contextFactory;
+        public WordRepository(IDbContextFactory contextFactory)
+        {
+            this.contextFactory = contextFactory;
+        }
         public async Task<List<PasswordWord>> GetRandomWordsAsync(int count)
         {
-            using (var context = new PasswordLISEntities(Connection.GetConnectionString()))
+            using (var context = contextFactory.CreateDbContext())
             {
                     var words = await context.PasswordWord
                                          .OrderBy(w => Guid.NewGuid())
