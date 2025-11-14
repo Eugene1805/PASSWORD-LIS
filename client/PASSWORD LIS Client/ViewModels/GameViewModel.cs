@@ -8,6 +8,7 @@ using System.Linq;
 using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace PASSWORD_LIS_Client.ViewModels
@@ -276,8 +277,13 @@ namespace PASSWORD_LIS_Client.ViewModels
 
                     CanSendClue = false;
                     CanSendGuess = false;
+                    CanPassTurn = false;    // <-- AÑADIDO
+                    CanRequestHint = false; // <-- AÑADIDO
+
                     IsHintVisible = false;
                     CurrentHintText = string.Empty;
+                    CurrentClueText = string.Empty;  // <-- AÑADIDO (Recomendado)
+                    CurrentGuessText = string.Empty; // <-- AÑADIDO (Recomendado)
                     return;
                 }
 
@@ -402,7 +408,28 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void OnMatchOver(MatchSummaryDTO summary)
         {
-            // TODO: Nivel 5 - Navegar a la página de ganadores/perdedores
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                
+
+                // 2. Determinar si este jugador ganó
+                bool didIWin = summary.WinnerTeam.HasValue && summary.WinnerTeam.Value == currentPlayer.Team;
+                var gameEndViewModel = new GameEndViewModel(summary.RedScore, summary.BlueScore, windowService);
+                Page endPage;
+
+                if (didIWin)
+                {
+                    endPage = new WinnersPage();
+                }
+                else
+                {
+                    endPage = new LosersPage();
+                }
+                endPage.DataContext = gameEndViewModel;
+                windowService.NavigateTo(endPage);
+
+                gameManagerService.Cleanup();
+            });
         }
 
         private void OnNewRoundStarted(RoundStartStateDTO state)

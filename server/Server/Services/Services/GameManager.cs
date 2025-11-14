@@ -95,7 +95,7 @@ namespace Services.Services
         private const int VALIDATION_DURATION_SECONDS = 60; //Cambiado para pruebas de 20 a 60
         private const int SUDDEN_DEATH_DURATION_SECONDS = 30;
         private const int WORDS_PER_ROUND = 5;
-        private const int TOTAL_ROUNDS = 5;
+        private const int TOTAL_ROUNDS = 1; //CAMBIADO DE 5 A 1
         private const int POINTS_PER_WIN = 10;
         private const int PENALTY_SYNONYM = 2;
         private const int PENALTY_MULTIWORD = 1;
@@ -249,8 +249,7 @@ namespace Services.Services
                 else matchState.BlueTeamWordIndex++;
 
                 var nextWord = matchState.GetCurrentPassword(team);
-                if (nextWord != null)
-                {
+                
                     var clueGuy = GetPlayerByRole(matchState, team, PlayerRole.ClueGuy);
                     var guesser = GetPlayerByRole(matchState, team, PlayerRole.Guesser); // <-- Obtener Adivinador
 
@@ -264,7 +263,7 @@ namespace Services.Services
                         try { guesser.Callback.OnNewPassword(ToDTOForGuesser(nextWord)); }
                         catch { await HandlePlayerDisconnectionAsync(matchState, guesser.Player.Id); }
                     }
-                }
+                    
             }
             else
             {
