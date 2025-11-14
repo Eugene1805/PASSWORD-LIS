@@ -18,8 +18,8 @@ namespace Data.DAL.Implementations
         }
         public async Task CreateAccountAsync(UserAccount account)
         {
-            using (var context = contextFactory.CreateDbContext())
-            {
+            var context = contextFactory.CreateDbContext();
+            
                 if ( await context.UserAccount.AnyAsync(a => a.Email == account.Email))
                 {
                     throw new DuplicateAccountException($"An account with the email '{account.Email}' already exists.");
@@ -27,7 +27,7 @@ namespace Data.DAL.Implementations
                     context.UserAccount.Add(account);
                     context.Player.Add(new Player { UserAccount = account });
                     await context.SaveChangesAsync();
-            }
+            
 
         }
 
@@ -37,29 +37,28 @@ namespace Data.DAL.Implementations
             {
                 return false;
             }
-            using (var context = contextFactory.CreateDbContext())
-            {
+            var context = contextFactory.CreateDbContext();
+            
                 return context.UserAccount.Any(a => a.Email == email);
-            }
 
         }
 
         public UserAccount GetUserByEmail(string email)
         {
-            using (var context = contextFactory.CreateDbContext())
-            {
+            var context = contextFactory.CreateDbContext();
+            
                 UserAccount userAccount = context.UserAccount
                     .Include(u => u.Player)
                     .Include(u => u.SocialAccount)
                     .FirstOrDefault(u => u.Email == email);
                 return userAccount;
-            }
+            
         }
 
         public bool VerifyEmail(string email)
         {
-            using (var context = contextFactory.CreateDbContext())
-            {
+            var context = contextFactory.CreateDbContext();
+            
                 UserAccount user = context.UserAccount.FirstOrDefault(u => u.Email == email);
 
                 if (user == null)
@@ -69,13 +68,13 @@ namespace Data.DAL.Implementations
                 user.EmailVerified = true;
                 context.SaveChanges();
                 return true;
-            }
+            
         }
 
         public bool ResetPassword(string email, string passwordHash)
         {
-            using (var context = contextFactory.CreateDbContext())
-            {
+            var context = contextFactory.CreateDbContext();
+            
                 UserAccount user = context.UserAccount.FirstOrDefault(u => u.Email == email);
 
                 if (user == null)
@@ -87,12 +86,12 @@ namespace Data.DAL.Implementations
                 context.SaveChanges();
 
                 return true;
-            }
+            
         }
         public bool UpdateUserProfile(int playerId, UserAccount updatedAccountData, List<SocialAccount> updatedSocialsAccounts)
         {
-            using (var context = contextFactory.CreateDbContext())
-            {
+            var context = contextFactory.CreateDbContext();
+            
                 using (var transaction = context.Database.BeginTransaction())
                 {
                     try
@@ -125,26 +124,25 @@ namespace Data.DAL.Implementations
 
                     }
                 }
-            }
         }
 
         public UserAccount GetUserByPlayerId(int playerId)
         {
-            using (var context = contextFactory.CreateDbContext())
-            {
+            var context = contextFactory.CreateDbContext();
+            
                 return context.UserAccount
                     .Include(u => u.Player)
                     .FirstOrDefault(u => u.Player.Any(p => p.Id == playerId));
-            }
+            
         }
         public UserAccount GetUserByUserAccountId(int userAccountId)
         {
-            using (var context = contextFactory.CreateDbContext())
-            {
+            var context = contextFactory.CreateDbContext();
+            
                 return context.UserAccount
                               .Include(u => u.Player)
                               .FirstOrDefault(u => u.Id == userAccountId);
-            }
+            
         }
 
         private static void UpdateSocialAccounts(PasswordLISEntities context, UserAccount userAccountToUpdate, List<SocialAccount> updatedSocialsAccounts)
