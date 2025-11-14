@@ -209,7 +209,9 @@ namespace Services.Services
             // ADDED: Validation for empty or whitespace guesses.
             if (string.IsNullOrWhiteSpace(guess)) return;
 
-            if (!matches.TryGetValue(gameCode, out MatchState matchState) || matchState.Status != MatchStatus.InProgress) return;
+            // Allow guesses during normal play AND sudden death
+            if (!matches.TryGetValue(gameCode, out MatchState matchState) || 
+                (matchState.Status != MatchStatus.InProgress && matchState.Status != MatchStatus.SuddenDeath)) return;
             if (!matchState.ActivePlayers.TryGetValue(senderPlayerId, out var sender)) return;
             if (sender.Player.Role != PlayerRole.Guesser) return;
 

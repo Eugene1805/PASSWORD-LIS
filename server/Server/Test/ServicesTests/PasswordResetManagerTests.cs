@@ -3,6 +3,7 @@ using Moq;
 using Services.Contracts.DTOs;
 using Services.Services;
 using Services.Util;
+using System.ServiceModel;
 
 namespace Test.ServicesTests
 {
@@ -130,7 +131,7 @@ namespace Test.ServicesTests
                 .Throws(new Exception("storage unavailable"));
 
             // Act + Assert
-            Assert.Throws<Exception>(() => passwordManager.RequestPasswordResetCode(emailDto));
+            Assert.Throws<FaultException<ServiceErrorDetailDTO>>(() => passwordManager.RequestPasswordResetCode(emailDto));
             mockNotification.Verify(s => s.SendPasswordResetEmailAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
@@ -178,7 +179,7 @@ namespace Test.ServicesTests
                 .Throws(new Exception("validation service down"));
 
             // Act + Assert
-            Assert.Throws<Exception>(() => passwordManager.ResetPassword(dto));
+            Assert.Throws<FaultException<ServiceErrorDetailDTO>>(() => passwordManager.ResetPassword(dto));
             mockRepo.Verify(r => r.ResetPassword(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
