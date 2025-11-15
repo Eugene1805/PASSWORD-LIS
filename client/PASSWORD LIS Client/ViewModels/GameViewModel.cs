@@ -379,7 +379,11 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                windowService.NavigateToValidationPage(turns, gameCode, currentPlayer.Id, currentLanguage);
+                var validationViewModel = new RoundValidationViewModel(
+                turns, gameManagerService, windowService, gameCode, currentPlayer.Id, currentLanguage);
+                var validationPage = new RoundValidationPage { DataContext = validationViewModel };
+
+                windowService.NavigateTo(validationPage);
 
             });
         }

@@ -25,7 +25,6 @@ namespace PASSWORD_LIS_Client.Utils
         void ShowReportWindow(WaitingRoomManagerServiceReference.PlayerDTO reportedPlayer);
         void ShowMainWindow();
         void CloseMainWindow();
-        void NavigateToValidationPage(List<TurnHistoryDTO> turns, string gameCode, int playerId, string language);
 
     }
 
@@ -72,7 +71,31 @@ namespace PASSWORD_LIS_Client.Utils
 
         public void NavigateTo(Page page)
         {
-            mainFrame?.NavigationService.Navigate(page);
+            try
+            {
+                log.Info($"NavigateTo called - Page: {page.GetType().Name}, mainFrame null: {mainFrame == null}");
+
+                if (mainFrame != null)
+                {
+                    mainFrame.NavigationService.Navigate(page);
+                    log.Info($"Navigation completed - CanGoBack: {mainFrame.CanGoBack}");
+                }
+                else
+                {
+                    log.Error("mainFrame is null in NavigateTo!");
+
+                    // Fallback: usar el Frame de MainWindow directamente
+                    if (Application.Current.MainWindow is MainWindow mainWindow && mainWindow.mainFrame != null)
+                    {
+                        log.Info("Using MainWindow's mainFrame as fallback");
+                        mainWindow.mainFrame.Navigate(page);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Error in NavigateTo: {ex.Message}", ex);
+            }
         }
         public void ShowVerifyCodeWindow(string email, VerificationReason reason)
         {
@@ -143,14 +166,6 @@ namespace PASSWORD_LIS_Client.Utils
             {
                 mainWindow.Close();
             }
-        }
-
-        public void NavigateToValidationPage(List<TurnHistoryDTO> turns, string gameCode, int playerId, string language)
-        {
-            var validationViewModel = new RoundValidationViewModel(turns, App.GameManagerService, App.WindowService,
-                gameCode, playerId, language);
-            var validationPage = new RoundValidationPage { DataContext = validationViewModel };
-            mainFrame?.NavigationService.Navigate(validationPage);
         }
     }
 }
