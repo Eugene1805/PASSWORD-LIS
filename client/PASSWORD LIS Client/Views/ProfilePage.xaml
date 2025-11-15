@@ -14,6 +14,7 @@
 
     <Page.Resources>
         <converters:AvatarIdToImageConverter x:Key="AvatarIdToImageConverter"/>
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
     </Page.Resources>
 
     <Grid>
@@ -54,7 +55,8 @@
                         HorizontalAlignment="Right" 
                         VerticalAlignment="Center"
                         Width="50" Height="50"
-                        Command="{Binding EditProfileCommand}">
+                        Command="{Binding EditProfileCommand}"
+                        IsEnabled="{Binding IsEditMode, Converter={StaticResource InverseBooleanConverter}}">
                     <Image Source="/Resources/pencil_icon.png" Width="30" Stretch="Uniform"/>
                 </Button>
             </Grid>
@@ -94,10 +96,12 @@
                         <TextBlock Text="{utils:Translate nameText}" Style="{StaticResource bodyTextBlockStyle}" Margin="0,10,0,5"/>
                         <TextBox Text="{Binding FirstName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource primaryTextBoxStyle}"
                                  Margin="0,0,0,15" IsEnabled="{Binding IsEditMode}"/>
+                        <TextBlock Text="{Binding FirstNameError}" Style="{StaticResource errorTextBlockStyle}" Margin="5,-10,0,10"/>
 
                         <TextBlock Text="{utils:Translate lastNameText}" Style="{StaticResource bodyTextBlockStyle}" Margin="0,10,0,5"/>
                         <TextBox Text="{Binding LastName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource primaryTextBoxStyle}" 
                                  Margin="0,0,0,15" IsEnabled="{Binding IsEditMode}"/>
+                        <TextBlock Text="{Binding LastNameError}" Style="{StaticResource errorTextBlockStyle}" Margin="5,-10,0,10"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Margin="20,0,0,0" VerticalAlignment="Center">
@@ -107,42 +111,53 @@
                                HorizontalAlignment="Center"
                                FontSize="18"/>
 
-                        <StackPanel Orientation="Horizontal" Margin="0,5,0,15" HorizontalAlignment="Center">
-                            <Image Source="/Resources/x_logo.png" Width="40" Height="40" Margin="0,0,15,0"/>
-                            <TextBox Text="{Binding XSocialMedia, UpdateSourceTrigger=PropertyChanged}" 
+                        <StackPanel HorizontalAlignment="Center" Margin="0,5,0,15">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="/Resources/x_logo.png" Width="40" Height="40" Margin="0,0,15,0"/>
+                                <TextBox Text="{Binding XSocialMedia, UpdateSourceTrigger=PropertyChanged}" 
                                      Style="{StaticResource primaryTextBoxStyle}" 
                                      VerticalAlignment="Center" 
                                      IsEnabled="{Binding IsEditMode}"
-                                     MinWidth="200" MaxLength="50"/>
+                                     MinWidth="200"/>
+                            </StackPanel>
+                            <TextBlock Text="{Binding XSocialMediaError}" Style="{StaticResource errorTextBlockStyle}" Margin="55,0,0,0"/>
                         </StackPanel>
 
-                        <StackPanel Orientation="Horizontal" Margin="0,5,0,30" HorizontalAlignment="Center">
-                            <Image Source="/Resources/tiktok_logo.png" Width="40" Height="40" Margin="0,0,15,0"/>
-                            <TextBox Text="{Binding Tiktok, UpdateSourceTrigger=PropertyChanged}" 
+                        <StackPanel Margin="0,5,0,30" HorizontalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="/Resources/tiktok_logo.png" Width="40" Height="40" Margin="0,0,15,0"/>
+                                <TextBox Text="{Binding Tiktok, UpdateSourceTrigger=PropertyChanged}" 
                                      Style="{StaticResource primaryTextBoxStyle}" 
                                      VerticalAlignment="Center" 
                                      IsEnabled="{Binding IsEditMode}"
-                                     MinWidth="200" MaxLength="50"/>       
+                                     MinWidth="200"/>
+                            </StackPanel>
+                            <TextBlock Text="{Binding TiktokError}" Style="{StaticResource errorTextBlockStyle}" Margin="55,0,0,0"/>
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,5,0,15" HorizontalAlignment="Center">
-                            <Image Source="/Resources/facebook_logo.png" Width="40" Height="40" Margin="0,0,15,0"/>
-                            <TextBox Text="{Binding Facebook,UpdateSourceTrigger=PropertyChanged}" 
-                                     Style="{StaticResource primaryTextBoxStyle}" 
-                                     VerticalAlignment="Center" 
-                                     IsEnabled="{Binding IsEditMode}"
-                                     MinWidth="200" MaxLength="50"/>
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal" Margin="0,5,0,15" HorizontalAlignment="Center">
-                            <Image Source="/Resources/instagram_logo.png" Width="40" Height="40" Margin="0,0,15,0"/>
-                            <TextBox Text="{Binding Instagram,UpdateSourceTrigger=PropertyChanged}" 
-                                     Style="{StaticResource primaryTextBoxStyle}" 
-                                     VerticalAlignment="Center" 
-                                     IsEnabled="{Binding IsEditMode}"
-                                     MinWidth="200" MaxLength="50"/>
-                        </StackPanel>
-
                         
+                        <StackPanel Margin="0,5,0,15" HorizontalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="/Resources/facebook_logo.png" Width="40" Height="40" Margin="0,0,15,0"/>
+                                <TextBox Text="{Binding Facebook,UpdateSourceTrigger=PropertyChanged}" 
+                                     Style="{StaticResource primaryTextBoxStyle}" 
+                                     VerticalAlignment="Center" 
+                                     IsEnabled="{Binding IsEditMode}"
+                                     MinWidth="200"/>
+                            </StackPanel>
+                            <TextBlock Text="{Binding FacebookError}" Style="{StaticResource errorTextBlockStyle}" Margin="55,0,0,0"/>
+                        </StackPanel>
+
+                        <StackPanel Margin="0,5,0,15" HorizontalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="/Resources/instagram_logo.png" Width="40" Height="40" Margin="0,0,15,0"/>
+                                <TextBox Text="{Binding Instagram,UpdateSourceTrigger=PropertyChanged}" 
+                                     Style="{StaticResource primaryTextBoxStyle}" 
+                                     VerticalAlignment="Center" 
+                                     IsEnabled="{Binding IsEditMode}"
+                                     MinWidth="200"/>
+                            </StackPanel>
+                            <TextBlock Text="{Binding InstagramError}" Style="{StaticResource errorTextBlockStyle}" Margin="55,0,0,0"/>
+                        </StackPanel>
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
                             <Button Content="{utils:Translate changePasswordText}" 
@@ -150,14 +165,16 @@
                                     Height="40" 
                                     MinWidth="140"
                                     Margin="10,10,20,10"
-                                    Command="{Binding ChangePasswordCommand}"/>
+                                    Command="{Binding ChangePasswordCommand}"
+                                    IsEnabled="{Binding IsEditMode, Converter={StaticResource InverseBooleanConverter}}"/>
                             <Button Content="{utils:Translate saveChangesText}" 
                                     Style="{StaticResource LoadingButtonStyle}"
                                     Height="40" 
                                     MinWidth="120"
                                     Margin="10,10,10,10"
                                     Command="{Binding SaveChangesCommand}"
-                                    IsEnabled="{Binding IsEditMode}"/>
+                                    IsEnabled="{Binding IsEditMode}"
+                                    utils:ButtonProperties.IsBusy="{Binding IsSaving}"/>
                         </StackPanel>
                     </StackPanel>
                 </Grid>
