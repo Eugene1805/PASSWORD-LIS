@@ -65,7 +65,6 @@ namespace PASSWORD_LIS_Client.Utils
             catch (Exception ex)
             {
                 log.Error($"Error in WindowService.GoBack: {ex.Message}", ex);
-                throw;
             }
         }
 
@@ -73,12 +72,12 @@ namespace PASSWORD_LIS_Client.Utils
         {
             try
             {
-                log.Info($"NavigateTo called - Page: {page.GetType().Name}, mainFrame null: {mainFrame == null}");
+                log.InfoFormat("NavigateTo called - Page: {0}, mainFrame null: {1}", page.GetType().Name, mainFrame == null);
 
                 if (mainFrame != null)
                 {
                     mainFrame.NavigationService.Navigate(page);
-                    log.Info($"Navigation completed - CanGoBack: {mainFrame.CanGoBack}");
+                    log.InfoFormat("Navigation completed - CanGoBack: {0}", mainFrame.CanGoBack);
                 }
                 else
                 {

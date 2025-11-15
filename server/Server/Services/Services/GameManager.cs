@@ -88,14 +88,14 @@ namespace Services.Services
         private readonly IMatchRepository matchRepository;
         private readonly IPlayerRepository playerRepository;
         private static readonly ILog log = LogManager.GetLogger(typeof(GameManager));
-        private const int ROUND_DURATION_SECONDS = 30; // CAMBIADO PARA PRUEBAS de 60 a 180
-        private const int VALIDATION_DURATION_SECONDS = 20; //Cambiado para pruebas de 20 a 60
-        private const int SUDDEN_DEATH_DURATION_SECONDS = 30;
-        private const int WORDS_PER_ROUND = 5; // Change from 5 to 3 for testing
-        private const int TOTAL_ROUNDS = 1; //CAMBIADO DE 5 A 1
-        private const int POINTS_PER_WIN = 10;
-        private const int PENALTY_SYNONYM = 2;
-        private const int PENALTY_MULTIWORD = 1;
+        private const int RoundDurationSeconds = 30; // CAMBIADO PARA PRUEBAS de 60 a 180
+        private const int ValidationDurationSeconds = 20; //Cambiado para pruebas de 20 a 60
+        private const int SuddenDeathDurationSeconds = 30;
+        private const int WordsPerRound = 5; // Change from 5 to 3 for testing
+        private const int TotalRounds = 1; //CAMBIADO DE 5 A 1
+        private const int PointsPerWin = 10;
+        private const int PenaltySynonim = 2;
+        private const int PenaltyMultiword = 1;
 
         public GameManager(IOperationContextWrapper contextWrapper, IWordRepository wordRepository, IMatchRepository matchRepository, IPlayerRepository playerRepository)
         {
@@ -287,7 +287,7 @@ namespace Services.Services
         {
             try
             {
-                log.Info($"SubmitValidationVotesAsync called - GameCode: {gameCode}, PlayerId: {senderPlayerId}, VotesCount: {votes?.Count}");
+                log.InfoFormat("SubmitValidationVotesAsync called - GameCode: {0}, PlayerId: {1}, VotesCount: {2}", gameCode, senderPlayerId, votes?.Count);
                 if (votes == null)
                 {
                     log.Warn("Votes list is null");
@@ -295,13 +295,13 @@ namespace Services.Services
                 }
                 if (!matches.TryGetValue(gameCode, out MatchState matchState) || matchState.Status != MatchStatus.Validating)
                 {
-                    log.Warn($"Match not found or not in validating state: {gameCode}");
+                    log.WarnFormat("Match not found or not in validating state: {0}", gameCode);
                     return;
                 }
 
                 if (!matchState.ActivePlayers.TryGetValue(senderPlayerId, out var sender))
                 {
-                    log.Warn($"Player not found in match: {senderPlayerId}");
+                    log.WarnFormat("Player not found in match: {0}", senderPlayerId);
                     return;
                 }
 
@@ -323,14 +323,14 @@ namespace Services.Services
                 {
                     matchState.ValidationTimer?.Dispose();
                     matchState.ValidationTimer = null;
-                    _ = Task.Run(async () => await ProcessVotesAsync(matchState));
+                    await Task.Run(async () => await ProcessVotesAsync(matchState));
                 }
                 log.Info("Votes processed successfully");
             }
             catch (Exception ex)
             {
                 log.Error($"Error in SubmitValidationVotesAsync: {ex.Message}", ex);
-                log.Debug("Stack Trace: " + ex.StackTrace);
+                log.DebugFormat("Stack Trace: {0}", ex.StackTrace);
                 throw;
             }
             
@@ -388,8 +388,8 @@ namespace Services.Services
             };
             await BroadcastAsync(matchState, cb => cb.OnNewRoundStarted(roundStartState));
 
-            matchState.RedTeamWords = await wordRepository.GetRandomWordsAsync(WORDS_PER_ROUND);
-            matchState.BlueTeamWords = await wordRepository.GetRandomWordsAsync(WORDS_PER_ROUND);
+            matchState.RedTeamWords = await wordRepository.GetRandomWordsAsync(WordsPerRound);
+            matchState.BlueTeamWords = await wordRepository.GetRandomWordsAsync(WordsPerRound);
             matchState.RedTeamWordIndex = 0;
             matchState.BlueTeamWordIndex = 0;
             matchState.RedTeamTurnHistory.Clear();
@@ -397,14 +397,14 @@ namespace Services.Services
             matchState.RedTeamPassedThisRound = false;
             matchState.BlueTeamPassedThisRound = false;
 
-            if (matchState.RedTeamWords.Count < WORDS_PER_ROUND || matchState.BlueTeamWords.Count < WORDS_PER_ROUND)
+            if (matchState.RedTeamWords.Count < WordsPerRound || matchState.BlueTeamWords.Count < WordsPerRound)
             {
                 await BroadcastAsync(matchState, cb => cb.OnMatchCancelled("Error: Not enough words found in the database."));
                 matches.TryRemove(matchState.GameCode, out _);
                 return;
             }
 
-            matchState.SecondsLeft = ROUND_DURATION_SECONDS;
+            matchState.SecondsLeft = RoundDurationSeconds;
             matchState.RoundTimer = new Timer(TimerTickCallback, matchState, 1000, 1000);
 
             var redClueGuy = GetPlayerByRole(matchState, MatchTeam.RedTeam, PlayerRole.ClueGuy);
@@ -469,7 +469,7 @@ namespace Services.Services
                 return;
             }
 
-            matchState.ValidationSecondsLeft = VALIDATION_DURATION_SECONDS;
+            matchState.ValidationSecondsLeft = ValidationDurationSeconds;
             matchState.ValidationTimer = new Timer(ValidationTimerTickCallback, matchState, 1000, 1000);
         }
         private async void ValidationTimerTickCallback(object state)
@@ -521,8 +521,8 @@ namespace Services.Services
                     }
                 }
 
-                redTeamPenalty = (redTurnsToPenalizeMultiword.Count * PENALTY_MULTIWORD) + (redTurnsToPenalizeSynonym.Count * PENALTY_SYNONYM);
-                blueTeamPenalty = (blueTurnsToPenalizeMultiword.Count * PENALTY_MULTIWORD) + (blueTurnsToPenalizeSynonym.Count * PENALTY_SYNONYM);
+                redTeamPenalty = (redTurnsToPenalizeMultiword.Count * PenaltyMultiword) + (redTurnsToPenalizeSynonym.Count * PenaltySynonim);
+                blueTeamPenalty = (blueTurnsToPenalizeMultiword.Count * PenaltyMultiword) + (blueTurnsToPenalizeSynonym.Count * PenaltySynonim);
                 lock (matchState)
                 {
                     matchState.RedTeamScore = Math.Max(0, matchState.RedTeamScore - redTeamPenalty);
@@ -537,7 +537,7 @@ namespace Services.Services
                 log.Info("Before BroadcastAsync");
                 await BroadcastAsync(matchState, cb => cb.OnValidationComplete(validationResult));
                 log.Info("After BroadcastAsync - all callbacks completed");
-                if (matchState.CurrentRound >= TOTAL_ROUNDS)
+                if (matchState.CurrentRound >= TotalRounds)
                 {
                     await EndGameAsync(matchState);
                 }
@@ -606,7 +606,7 @@ namespace Services.Services
             matchState.BlueTeamPassedThisRound = true;
 
             
-            matchState.SecondsLeft = SUDDEN_DEATH_DURATION_SECONDS;
+            matchState.SecondsLeft = SuddenDeathDurationSeconds;
             matchState.RoundTimer = new Timer(TimerTickCallback, matchState, 1000, 1000);
 
             var redClueGuy = GetPlayerByRole(matchState, MatchTeam.RedTeam, PlayerRole.ClueGuy);
@@ -640,7 +640,7 @@ namespace Services.Services
                     var winningPlayerIds = (winner == MatchTeam.RedTeam) ? registeredRedPlayerIds : registeredBluePlayerIds;
                     if (winningPlayerIds.Any())
                     {
-                        await Task.WhenAll(winningPlayerIds.Select(id => playerRepository.UpdatePlayerTotalPointsAsync(id, POINTS_PER_WIN)));
+                        await Task.WhenAll(winningPlayerIds.Select(id => playerRepository.UpdatePlayerTotalPointsAsync(id, PointsPerWin)));
                     }
                 }
             }

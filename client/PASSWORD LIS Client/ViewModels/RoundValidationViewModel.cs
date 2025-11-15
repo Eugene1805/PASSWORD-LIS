@@ -75,15 +75,15 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             try
             {
-                log.Info($"OnValidationComplete processing - Red: {result.NewRedTeamScore}, Blue: {result.NewBlueTeamScore}");
+                log.InfoFormat("OnValidationComplete processing - Red: {0}, Blue: {1}", result.NewRedTeamScore, result.NewBlueTeamScore);
                 LogCurrentState();
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    log.Info("Dispatcher invoked - starting cleanup");
+                    log.InfoFormat("Dispatcher invoked - starting cleanup");
                     Cleanup();
-                    log.Info("Cleanup completed - calling GoBack");
+                    log.InfoFormat("Cleanup completed - calling GoBack");
                     windowService.GoBack();
-                    log.Info("Successfully navigated back from validation");
+                    log.InfoFormat("Successfully navigated back from validation");
                 });
             }
             catch (Exception ex)
@@ -108,9 +108,9 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             try
             {
-                log.Info($"Submitting {votes.Count} validation votes for game {gameCode}, player {playerId}");
+                log.InfoFormat("Submitting {0} validation votes for game {1}, player {2}", votes.Count, gameCode, playerId);
                 await gameManagerService.SubmitValidationVotesAsync(gameCode, playerId, votes);
-                log.Info("SubmitValidationVotesAsync completed successfully");
+                log.InfoFormat("SubmitValidationVotesAsync completed successfully");
             }
             catch (FaultException fe)
             {
@@ -135,13 +135,13 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             try
             {
-                log.Info($"Current state - CanSubmit: {CanSubmit}, TurnsCount: {TurnsToValidate.Count}");
-                log.Info($"Application.Current null: {Application.Current == null}");
-                log.Info($"Application.Current.MainWindow null: {Application.Current?.MainWindow == null}");
+                log.InfoFormat("Current state - CanSubmit: {0}, TurnsCount: {1}", CanSubmit, TurnsToValidate.Count);
+                log.InfoFormat("Application.Current null: {0}", Application.Current == null);
+                log.InfoFormat("Application.Current.MainWindow null: {0}", Application.Current?.MainWindow == null);
 
                 if (Application.Current?.MainWindow != null && Application.Current.MainWindow.Content is Frame frame)
                 {
-                    log.Info($"Frame CanGoBack: {frame.CanGoBack}, Content: {frame.Content?.GetType().Name}");
+                    log.InfoFormat("Frame CanGoBack: {0}, Content: {1}", frame.CanGoBack, frame.Content?.GetType().Name);
                 }
             }
             catch (Exception ex)
@@ -153,10 +153,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             try
             {
-                log.Info("Starting cleanup - unsubscribing from events");
+                log.InfoFormat("Starting cleanup - unsubscribing from events");
                 gameManagerService.ValidationTimerTick -= OnValidationTimerTick;
                 gameManagerService.ValidationComplete -= OnValidationComplete;
-                log.Info("Cleanup completed successfully");
+                log.InfoFormat("Cleanup completed successfully");
             }
             catch (Exception ex)
             {
