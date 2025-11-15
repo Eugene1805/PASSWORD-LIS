@@ -33,15 +33,10 @@ namespace Data.DAL.Implementations
         {
             using (var context = contextFactory.CreateDbContext())
             {
-                var userAccount = context.UserAccount.FirstOrDefault(u =>
-                u.Email.Equals(playerId));
-                if (userAccount == null)
-                {
-                    return new Player { Id = -1 };
-                }
-                return await context.Player
-                        .Include("UserAccount")
-                        .FirstOrDefaultAsync(p => p.Id == playerId);
+                var player = await context.Player
+                    .Include(p => p.UserAccount)
+                    .FirstOrDefaultAsync(p => p.Id == playerId);
+                return player ?? new Player { Id = -1 };
             }
         }
 

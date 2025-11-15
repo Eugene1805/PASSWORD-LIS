@@ -83,6 +83,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataTests\AccountRepositoryTests.cs" />
+    <Compile Include="DataTests\BanRepositoryTests.cs" />
+    <Compile Include="DataTests\DataTestsBase.cs" />
+    <Compile Include="DataTests\FriendshipRepositoryTests.cs" />
+    <Compile Include="DataTests\MatchRepositoryTests.cs" />
+    <Compile Include="DataTests\PlayerRepositoryTests.cs" />
+    <Compile Include="DataTests\ReportRepositoryTests.cs" />
+    <Compile Include="DataTests\StatisticsRepositoryTests.cs" />
+    <Compile Include="DataTests\WordRepositoryTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
