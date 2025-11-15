@@ -1,7 +1,10 @@
-﻿using PASSWORD_LIS_Client.GameManagerServiceReference;
+﻿using log4net;
+using PASSWORD_LIS_Client.GameManagerServiceReference;
 using PASSWORD_LIS_Client.ViewModels;
 using PASSWORD_LIS_Client.Views;
 using PASSWORD_LIS_Client.WaitingRoomManagerServiceReference;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,13 +25,14 @@ namespace PASSWORD_LIS_Client.Utils
         void ShowReportWindow(WaitingRoomManagerServiceReference.PlayerDTO reportedPlayer);
         void ShowMainWindow();
         void CloseMainWindow();
-        void NavigateToValidationPage(TurnHistoryDTO[] turns, string gameCode, int playerId, string language);
+        void NavigateToValidationPage(List<TurnHistoryDTO> turns, string gameCode, int playerId, string language);
 
     }
 
     public class WindowService : IWindowService
     {
         private Frame mainFrame;
+        private static readonly ILog log = LogManager.GetLogger(typeof(WindowService));
 
         public void Initialize(Frame frame)
         {
@@ -36,9 +40,33 @@ namespace PASSWORD_LIS_Client.Utils
         }
         public void GoBack()
         {
-            if (mainFrame?.NavigationService.CanGoBack == true)
+            try
             {
-                mainFrame.NavigationService.GoBack();
+                log.Info("WindowService.GoBack called");
+
+                if (Application.Current.MainWindow != null)
+                {
+                    var mainWindow = Application.Current.MainWindow;
+                    if (mainWindow.Content is Frame frame && frame.CanGoBack)
+                    {
+                        log.Info("Navigating frame back");
+                        frame.GoBack();
+                        log.Info("Frame navigation completed");
+                    }
+                    else
+                    {
+                        log.Warn("Cannot navigate back - no frame or CanGoBack is false");
+                    }
+                }
+                else
+                {
+                    log.Warn("Application.Current.MainWindow is null");
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Error in WindowService.GoBack: {ex.Message}", ex);
+                throw;
             }
         }
 
@@ -117,7 +145,7 @@ namespace PASSWORD_LIS_Client.Utils
             }
         }
 
-        public void NavigateToValidationPage(TurnHistoryDTO[] turns, string gameCode, int playerId, string language)
+        public void NavigateToValidationPage(List<TurnHistoryDTO> turns, string gameCode, int playerId, string language)
         {
             var validationViewModel = new RoundValidationViewModel(turns, App.GameManagerService, App.WindowService,
                 gameCode, playerId, language);

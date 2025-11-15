@@ -87,7 +87,7 @@ namespace Services.Services
         private readonly IWordRepository wordRepository;
         private readonly IMatchRepository matchRepository;
         private readonly IPlayerRepository playerRepository;
-        private readonly ILog log = LogManager.GetLogger(typeof(GameManager));
+        private static readonly ILog log = LogManager.GetLogger(typeof(GameManager));
         private const int ROUND_DURATION_SECONDS = 30; // CAMBIADO PARA PRUEBAS de 60 a 180
         private const int VALIDATION_DURATION_SECONDS = 20; //Cambiado para pruebas de 20 a 60
         private const int SUDDEN_DEATH_DURATION_SECONDS = 30;
@@ -285,31 +285,55 @@ namespace Services.Services
 
         public async Task SubmitValidationVotesAsync(string gameCode, int senderPlayerId, List<ValidationVoteDTO> votes)
         {
-            if (votes == null) return;
-
-            if (!matches.TryGetValue(gameCode, out MatchState matchState) || matchState.Status != MatchStatus.Validating) return;
-            if (!matchState.ActivePlayers.TryGetValue(senderPlayerId, out var sender)) return;
-
-            bool allVotesIn = false;
-            lock (matchState.ReceivedVotes)
+            try
             {
-                if (matchState.PlayersWhoVoted.Contains(senderPlayerId)) return;
-
-                matchState.PlayersWhoVoted.Add(senderPlayerId);
-                matchState.ReceivedVotes.Add((sender.Player.Team, votes));
-
-                if (matchState.PlayersWhoVoted.Count >= 4)
+                log.Info($"SubmitValidationVotesAsync called - GameCode: {gameCode}, PlayerId: {senderPlayerId}, VotesCount: {votes?.Count}");
+                if (votes == null)
                 {
-                    allVotesIn = true;
+                    log.Warn("Votes list is null");
+                    return;
                 }
-            }
+                if (!matches.TryGetValue(gameCode, out MatchState matchState) || matchState.Status != MatchStatus.Validating)
+                {
+                    log.Warn($"Match not found or not in validating state: {gameCode}");
+                    return;
+                }
 
-            if (allVotesIn)
-            {
-                matchState.ValidationTimer?.Dispose(); 
-                matchState.ValidationTimer = null;
-                await ProcessVotesAsync(matchState);
+                if (!matchState.ActivePlayers.TryGetValue(senderPlayerId, out var sender))
+                {
+                    log.Warn($"Player not found in match: {senderPlayerId}");
+                    return;
+                }
+
+                bool allVotesIn = false;
+                lock (matchState.ReceivedVotes)
+                {
+                    if (matchState.PlayersWhoVoted.Contains(senderPlayerId)) return;
+
+                    matchState.PlayersWhoVoted.Add(senderPlayerId);
+                    matchState.ReceivedVotes.Add((sender.Player.Team, votes));
+
+                    if (matchState.PlayersWhoVoted.Count >= 4)
+                    {
+                        allVotesIn = true;
+                    }
+                }
+
+                if (allVotesIn)
+                {
+                    matchState.ValidationTimer?.Dispose();
+                    matchState.ValidationTimer = null;
+                    _ = Task.Run(async () => await ProcessVotesAsync(matchState));
+                }
+                log.Info("Votes processed successfully");
             }
+            catch (Exception ex)
+            {
+                log.Error($"Error in SubmitValidationVotesAsync: {ex.Message}", ex);
+                log.Debug("Stack Trace: " + ex.StackTrace);
+                throw;
+            }
+            
         }
 
         public async Task SubscribeToMatchAsync(string gameCode, int playerId)
@@ -466,55 +490,68 @@ namespace Services.Services
 
         private async Task ProcessVotesAsync(MatchState matchState)
         {
-            matchState.ValidationTimer?.Dispose();
-            matchState.ValidationTimer = null;
-
-            int redTeamPenalty = 0;
-            int blueTeamPenalty = 0;
-
-            var redTurnsToPenalizeMultiword = new HashSet<int>();
-            var blueTurnsToPenalizeMultiword = new HashSet<int>();
-            var redTurnsToPenalizeSynonym = new HashSet<int>();
-            var blueTurnsToPenalizeSynonym = new HashSet<int>();
-
-            foreach (var (voterTeam, voteList) in matchState.ReceivedVotes)
+            try
             {
-                foreach (var vote in voteList)
+                log.Info("Starting ProcessVotesAsync");
+                matchState.ValidationTimer?.Dispose();
+                matchState.ValidationTimer = null;
+
+                int redTeamPenalty = 0;
+                int blueTeamPenalty = 0;
+
+                var redTurnsToPenalizeMultiword = new HashSet<int>();
+                var blueTurnsToPenalizeMultiword = new HashSet<int>();
+                var redTurnsToPenalizeSynonym = new HashSet<int>();
+                var blueTurnsToPenalizeSynonym = new HashSet<int>();
+
+                foreach (var (voterTeam, voteList) in matchState.ReceivedVotes)
                 {
-                    if (voterTeam == MatchTeam.RedTeam)
+                    foreach (var vote in voteList)
                     {
-                        if (vote.PenalizeMultiword) blueTurnsToPenalizeMultiword.Add(vote.TurnId);
-                        if (vote.PenalizeSynonym) blueTurnsToPenalizeSynonym.Add(vote.TurnId);
-                    }
-                    else
-                    {
-                        if (vote.PenalizeMultiword) redTurnsToPenalizeMultiword.Add(vote.TurnId);
-                        if (vote.PenalizeSynonym) redTurnsToPenalizeSynonym.Add(vote.TurnId);
+                        if (voterTeam == MatchTeam.RedTeam)
+                        {
+                            if (vote.PenalizeMultiword) blueTurnsToPenalizeMultiword.Add(vote.TurnId);
+                            if (vote.PenalizeSynonym) blueTurnsToPenalizeSynonym.Add(vote.TurnId);
+                        }
+                        else
+                        {
+                            if (vote.PenalizeMultiword) redTurnsToPenalizeMultiword.Add(vote.TurnId);
+                            if (vote.PenalizeSynonym) redTurnsToPenalizeSynonym.Add(vote.TurnId);
+                        }
                     }
                 }
-            }
 
-            redTeamPenalty = (redTurnsToPenalizeMultiword.Count * PENALTY_MULTIWORD) + (redTurnsToPenalizeSynonym.Count * PENALTY_SYNONYM);
-            blueTeamPenalty = (blueTurnsToPenalizeMultiword.Count * PENALTY_MULTIWORD) + (blueTurnsToPenalizeSynonym.Count * PENALTY_SYNONYM);
-            lock (matchState)
-            {
-                matchState.RedTeamScore = Math.Max(0, matchState.RedTeamScore - redTeamPenalty);
-                matchState.BlueTeamScore = Math.Max(0, matchState.BlueTeamScore - blueTeamPenalty);
+                redTeamPenalty = (redTurnsToPenalizeMultiword.Count * PENALTY_MULTIWORD) + (redTurnsToPenalizeSynonym.Count * PENALTY_SYNONYM);
+                blueTeamPenalty = (blueTurnsToPenalizeMultiword.Count * PENALTY_MULTIWORD) + (blueTurnsToPenalizeSynonym.Count * PENALTY_SYNONYM);
+                lock (matchState)
+                {
+                    matchState.RedTeamScore = Math.Max(0, matchState.RedTeamScore - redTeamPenalty);
+                    matchState.BlueTeamScore = Math.Max(0, matchState.BlueTeamScore - blueTeamPenalty);
+                }
+                var validationResult = new ValidationResultDTO
+                {
+                    TotalPenaltyApplied = redTeamPenalty + blueTeamPenalty,
+                    NewRedTeamScore = matchState.RedTeamScore,
+                    NewBlueTeamScore = matchState.BlueTeamScore,
+                };
+                log.Info("Before BroadcastAsync");
+                await BroadcastAsync(matchState, cb => cb.OnValidationComplete(validationResult));
+                log.Info("After BroadcastAsync - all callbacks completed");
+                if (matchState.CurrentRound >= TOTAL_ROUNDS)
+                {
+                    await EndGameAsync(matchState);
+                }
+                else
+                {
+                    await StartNewRoundAsync(matchState);
+                }
+                log.Info("ProcessVotesAsync completed successfully");
+
             }
-            var validationResult = new ValidationResultDTO
+            catch (Exception ex)
             {
-                TotalPenaltyApplied = redTeamPenalty + blueTeamPenalty,
-                NewRedTeamScore = matchState.RedTeamScore,
-                NewBlueTeamScore = matchState.BlueTeamScore,
-            };
-            await BroadcastAsync(matchState, cb => cb.OnValidationComplete(validationResult));
-            if (matchState.CurrentRound >= TOTAL_ROUNDS)
-            {
-                await EndGameAsync(matchState);
-            }
-            else
-            {
-                await StartNewRoundAsync(matchState);
+                log.Error($"Error in ProcessVotesAsync: {ex.Message}", ex);
+                throw;
             }
         }
 
@@ -621,17 +658,50 @@ namespace Services.Services
 
         private static async Task BroadcastAsync(MatchState game, Action<IGameManagerCallback> action)
         {
-            var tasks = game.ActivePlayers.Select(playerEntry => Task.Run(() => {
-                try 
-                { 
-                    action(playerEntry.Value.Callback); 
+            try
+            {
+                var disconnectedPlayers = new ConcurrentBag<int>();
+                var tasks = game.ActivePlayers.Select(async playerEntry =>
+                {
+                    try
+                    {
+                        // Ejecutar el callback de manera síncrona dentro del task
+                        action(playerEntry.Value.Callback);
+                        await Task.CompletedTask; // Para hacer el método async
+                    }
+                    catch (CommunicationException ex)
+                    {
+                        log.Warn($"CommunicationException in callback for player {playerEntry.Key}: {ex.Message}");
+                        disconnectedPlayers.Add(playerEntry.Key);
+                    }
+                    catch (TimeoutException ex)
+                    {
+                        log.Warn($"TimeoutException in callback for player {playerEntry.Key}: {ex.Message}");
+                        disconnectedPlayers.Add(playerEntry.Key);
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Error($"Unexpected error in callback for player {playerEntry.Key}: {ex.Message}", ex);
+                        disconnectedPlayers.Add(playerEntry.Key);
+                    }
+                });
+
+                await Task.WhenAll(tasks);
+
+                // Remover jugadores desconectados
+                foreach (var playerId in disconnectedPlayers)
+                {
+                    if (game.ActivePlayers.TryRemove(playerId, out _))
+                    {
+                        log.Info($"Successfully removed disconnected player: {playerId}");
+                    }
                 }
-                catch (Exception) 
-                { 
-                    game.ActivePlayers.TryRemove(playerEntry.Key, out _); 
-                }
-            }));
-            await Task.WhenAll(tasks);
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Error in BroadcastAsync: {ex.Message}", ex);
+                throw;
+            }
         }
 
         private static async Task BroadcastToPlayersAsync(IEnumerable<(IGameManagerCallback Callback, PlayerDTO Player)> players, Action<IGameManagerCallback> action)

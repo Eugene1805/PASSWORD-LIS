@@ -1,10 +1,12 @@
-﻿using PASSWORD_LIS_Client.GameManagerServiceReference;
+﻿using log4net;
+using PASSWORD_LIS_Client.GameManagerServiceReference;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace PASSWORD_LIS_Client.Services
 {
@@ -15,7 +17,7 @@ namespace PASSWORD_LIS_Client.Services
         event Action<PasswordWordDTO> NewPasswordReceived;
         event Action<string> ClueReceived;
         event Action<GuessResultDTO> GuessResult;
-        event Action<TurnHistoryDTO[]> BeginRoundValidation;
+        event Action<List<TurnHistoryDTO>> BeginRoundValidation;
         event Action<ValidationResultDTO> ValidationComplete;
         event Action<MatchSummaryDTO> MatchOver;
         event Action<string> MatchCancelled;
@@ -26,7 +28,7 @@ namespace PASSWORD_LIS_Client.Services
         Task SubmitClueAsync(string gameCode, int senderPlayerId, string clue);
         Task SubmitGuessAsync(string gameCode, int senderPlayerId, string guess);
         Task PassTurnAsync(string gameCode, int senderPlayerId);
-        Task SubmitValidationVotesAsync(string gameCode, int senderPlayerId, ValidationVoteDTO[] votes);
+        Task SubmitValidationVotesAsync(string gameCode, int senderPlayerId, List<ValidationVoteDTO> votes);
         void Cleanup();
     }
 
@@ -38,7 +40,7 @@ namespace PASSWORD_LIS_Client.Services
         public event Action<PasswordWordDTO> NewPasswordReceived;
         public event Action<string> ClueReceived;
         public event Action<GuessResultDTO> GuessResult;
-        public event Action<TurnHistoryDTO[]> BeginRoundValidation;
+        public event Action<List<TurnHistoryDTO>> BeginRoundValidation;
         public event Action<ValidationResultDTO> ValidationComplete;
         public event Action<MatchSummaryDTO> MatchOver;
         public event Action<string> MatchCancelled;
@@ -46,7 +48,7 @@ namespace PASSWORD_LIS_Client.Services
         public event Action<int> ValidationTimerTick;
 
         private readonly GameManagerClient client;
-
+        private static readonly ILog log = LogManager.GetLogger(typeof(WcfGameManagerService));
         public WcfGameManagerService()
         {
             var context = new InstanceContext(this);
@@ -76,7 +78,7 @@ namespace PASSWORD_LIS_Client.Services
             }
         }
 
-        public void OnBeginRoundValidation(TurnHistoryDTO[] turns)
+        public void OnBeginRoundValidation(List<TurnHistoryDTO> turns)
         {
             BeginRoundValidation?.Invoke(turns);
         }
@@ -133,8 +135,9 @@ namespace PASSWORD_LIS_Client.Services
             return client.SubmitGuessAsync(gameCode, senderPlayerId, guess);
         }
 
-        public Task SubmitValidationVotesAsync(string gameCode, int senderPlayerId, ValidationVoteDTO[] votes)
+        public Task SubmitValidationVotesAsync(string gameCode, int senderPlayerId, List<ValidationVoteDTO> votes)
         {
+            log.Info($"SubmitValidationVotesAsync called - GameCode: {gameCode}, PlayerId: {senderPlayerId}, VotesCount: {votes?.Count}");
             return client.SubmitValidationVotesAsync(gameCode, senderPlayerId, votes);
         }
 
@@ -145,12 +148,33 @@ namespace PASSWORD_LIS_Client.Services
 
         public void OnValidationComplete(ValidationResultDTO result)
         {
-            ValidationComplete?.Invoke(result);
+            log.Info($"OnValidationComplete received - RedScore: {result.NewRedTeamScore}, BlueScore: {result.NewBlueTeamScore}");
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    ValidationComplete?.Invoke(result);
+                }
+                catch (Exception ex)
+                {
+                    log.Error($"Error in OnValidationComplete callback: {ex.Message}", ex);
+                }
+            }));
         }
 
         public void OnNewRoundStarted(RoundStartStateDTO state)
         {
-            NewRoundStarted?.Invoke(state);
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    NewRoundStarted?.Invoke(state);
+                }
+                catch (Exception ex)
+                {
+                    log.Error($"Error in OnNewRoundStarted callback: {ex.Message}", ex);
+                }
+            }));
         }
 
         public void OnValidationTimerTick(int secondsLeft)

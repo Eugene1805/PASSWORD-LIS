@@ -1,4 +1,5 @@
-﻿using PASSWORD_LIS_Client.Commands;
+﻿using log4net;
+using PASSWORD_LIS_Client.Commands;
 using PASSWORD_LIS_Client.GameManagerServiceReference;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
@@ -11,6 +12,7 @@ using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace PASSWORD_LIS_Client.ViewModels
@@ -39,8 +41,9 @@ namespace PASSWORD_LIS_Client.ViewModels
         private readonly string gameCode;
         private readonly int playerId;
         private readonly string language;
+        private readonly ILog log = LogManager.GetLogger(typeof(RoundValidationViewModel));
 
-        public RoundValidationViewModel(TurnHistoryDTO[] turns, IGameManagerService gameManagerService, IWindowService windowService,
+        public RoundValidationViewModel(List<TurnHistoryDTO> turns, IGameManagerService gameManagerService, IWindowService windowService,
             string gameCode, int playerId, string language)
         {
             this.gameManagerService = gameManagerService;
@@ -70,17 +73,29 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void OnValidationComplete(ValidationResultDTO result)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            try
             {
-                Cleanup();
-                windowService.GoBack();
-            });
+                log.Info($"OnValidationComplete processing - Red: {result.NewRedTeamScore}, Blue: {result.NewBlueTeamScore}");
+                LogCurrentState();
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    log.Info("Dispatcher invoked - starting cleanup");
+                    Cleanup();
+                    log.Info("Cleanup completed - calling GoBack");
+                    windowService.GoBack();
+                    log.Info("Successfully navigated back from validation");
+                });
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Error in OnValidationComplete: {ex.Message}", ex);
+            }
         }
 
         private async Task SubmitVotesAsync()
         {
             CanSubmit = false;
-            var votes = new List<ValidationVoteDTO>();
+            List<ValidationVoteDTO> votes = new List<ValidationVoteDTO>();
             foreach (var turn in TurnsToValidate)
             {
                 votes.Add(new ValidationVoteDTO
@@ -93,18 +108,60 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             try
             {
-                await gameManagerService.SubmitValidationVotesAsync(gameCode, playerId, votes.ToArray());
+                log.Info($"Submitting {votes.Count} validation votes for game {gameCode}, player {playerId}");
+                await gameManagerService.SubmitValidationVotesAsync(gameCode, playerId, votes);
+                log.Info("SubmitValidationVotesAsync completed successfully");
+            }
+            catch (FaultException fe)
+            {
+                log.Error($"FaultException in SubmitVotesAsync: {fe.Message}", fe);
+                HandleConnectionError(fe, "Error al enviar los votos");
+                CanSubmit = true;
+            }
+            catch (CommunicationException ce)
+            {
+                log.Error($"CommunicationException in SubmitVotesAsync: {ce.Message}", ce);
+                HandleConnectionError(ce, "Error de comunicación al enviar los votos");
+                CanSubmit = true;
             }
             catch (Exception ex)
             {
-                HandleConnectionError(ex,"Error al enviar los votos" ); //errorSendingVotesText
-                CanSubmit = true; 
+                log.Error($"Unexpected error in SubmitVotesAsync: {ex.Message}", ex);
+                HandleConnectionError(ex, "Error al enviar los votos");
+                CanSubmit = true;
+            }
+        }
+        private void LogCurrentState()
+        {
+            try
+            {
+                log.Info($"Current state - CanSubmit: {CanSubmit}, TurnsCount: {TurnsToValidate.Count}");
+                log.Info($"Application.Current null: {Application.Current == null}");
+                log.Info($"Application.Current.MainWindow null: {Application.Current?.MainWindow == null}");
+
+                if (Application.Current?.MainWindow != null && Application.Current.MainWindow.Content is Frame frame)
+                {
+                    log.Info($"Frame CanGoBack: {frame.CanGoBack}, Content: {frame.Content?.GetType().Name}");
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Error logging current state: {ex.Message}", ex);
             }
         }
         private void Cleanup()
         {
-            gameManagerService.ValidationTimerTick -= OnValidationTimerTick;
-            gameManagerService.ValidationComplete -= OnValidationComplete;
+            try
+            {
+                log.Info("Starting cleanup - unsubscribing from events");
+                gameManagerService.ValidationTimerTick -= OnValidationTimerTick;
+                gameManagerService.ValidationComplete -= OnValidationComplete;
+                log.Info("Cleanup completed successfully");
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Error during cleanup: {ex.Message}", ex);
+            }
         }
 
         // --- MÉTODO DE MANEJO DE EXCEPCIONES  ---
