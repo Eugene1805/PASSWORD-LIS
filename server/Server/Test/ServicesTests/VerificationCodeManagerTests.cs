@@ -3,6 +3,7 @@ using Moq;
 using Services.Contracts.DTOs;
 using Services.Services;
 using Services.Util;
+using System.ServiceModel;
 
 namespace Test.ServicesTests
 {
@@ -108,10 +109,10 @@ namespace Test.ServicesTests
             // Arrange
             var dto = new EmailVerificationDTO { Email = "e@x.com", VerificationCode = "X" };
             mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.VerificationCode, CodeType.EmailVerification, true))
-                            .Throws(new System.Exception("validation failure"));
+                            .Throws(new Exception("validation failure"));
 
             // Act + Assert
-            Assert.Throws<System.Exception>(() => verificationCodeManager.VerifyEmail(dto));
+            Assert.Throws<FaultException<ServiceErrorDetailDTO>>(() => verificationCodeManager.VerifyEmail(dto));
             mockAccountRepository.Verify(r => r.VerifyEmail(It.IsAny<string>()), Times.Never);
         }
 
@@ -123,10 +124,10 @@ namespace Test.ServicesTests
             mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.VerificationCode, CodeType.EmailVerification, true))
                             .Returns(true);
             mockAccountRepository.Setup(r => r.VerifyEmail(dto.Email))
-                                 .Throws(new System.Exception("db failure"));
+                                 .Throws(new Exception("db failure"));
 
             // Act + Assert
-            Assert.Throws<System.Exception>(() => verificationCodeManager.VerifyEmail(dto));
+            Assert.Throws<FaultException<ServiceErrorDetailDTO>>(() => verificationCodeManager.VerifyEmail(dto));
         }
 
         [Fact]
@@ -153,10 +154,10 @@ namespace Test.ServicesTests
             var email = "user@example.com";
             mockCodeService.Setup(s => s.CanRequestCode(email, CodeType.EmailVerification)).Returns(true);
             mockCodeService.Setup(s => s.GenerateAndStoreCode(email, CodeType.EmailVerification))
-                            .Throws(new System.Exception("storage down"));
+                            .Throws(new Exception("storage down"));
 
             // Act + Assert
-            Assert.Throws<System.Exception>(() => verificationCodeManager.ResendVerificationCode(email));
+            Assert.Throws<FaultException<ServiceErrorDetailDTO>>(() => verificationCodeManager.ResendVerificationCode(email));
             mockNotificationService.Verify(n => n.SendAccountVerificationEmailAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
