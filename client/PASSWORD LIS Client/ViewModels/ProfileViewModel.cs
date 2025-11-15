@@ -26,14 +26,14 @@ namespace PASSWORD_LIS_Client.ViewModels
         public string FirstName
         {
             get => firstName;
-            set { firstName = value; OnPropertyChanged(); }
+            set { firstName = value; ValidateFirstName(); OnPropertyChanged(); }
         }
 
         private string lastName;
         public string LastName
         {
             get => lastName;
-            set { lastName = value; OnPropertyChanged(); }
+            set { lastName = value; ValidateLastName(); OnPropertyChanged(); }
         }
 
         private int photoId;
@@ -47,28 +47,28 @@ namespace PASSWORD_LIS_Client.ViewModels
         public string Facebook
         {
             get => facebook;
-            set { facebook = value; OnPropertyChanged(); }
+            set { facebook = value; ValidateFacebook(); OnPropertyChanged(); }
         }
 
         private string instagram;
         public string Instagram
         {
             get => instagram;
-            set { instagram = value; OnPropertyChanged(); }
+            set { instagram = value; ValidateInstagram(); OnPropertyChanged(); }
         }
 
         private string xSocialMedia;
         public string XSocialMedia
         {
             get => xSocialMedia;
-            set { xSocialMedia = value; OnPropertyChanged(); }
+            set { xSocialMedia = value; ValidateXSocialMedia(); OnPropertyChanged(); }
         }
 
         private string tiktok;
         public string Tiktok
         {
             get => tiktok;
-            set { tiktok = value; OnPropertyChanged(); }
+            set { tiktok = value; ValidateTiktok(); OnPropertyChanged(); }
         }
 
         private bool isEditMode;
@@ -81,6 +81,42 @@ namespace PASSWORD_LIS_Client.ViewModels
         public bool IsSaving { 
             get => isSaving; 
             set { isSaving = value; OnPropertyChanged(); } 
+        }
+        private string firstNameError;
+        public string FirstNameError
+        {
+            get => firstNameError;
+            set { firstNameError = value; OnPropertyChanged(); }
+        }
+        private string lastNameError;
+        public string LastNameError
+        {
+            get => lastNameError;
+            set { lastNameError = value; OnPropertyChanged(); }
+        }
+        private string facebookError;
+        public string FacebookError
+        {
+            get => facebookError;
+            set { facebookError = value; OnPropertyChanged(); }
+        }
+        private string instagramError;
+        public string InstagramError
+        {
+            get => instagramError;
+            set { instagramError = value; OnPropertyChanged(); }
+        }
+        private string xSocialMediaError;
+        public string XSocialMediaError
+        {
+            get => xSocialMediaError;
+            set { xSocialMediaError = value; OnPropertyChanged(); }
+        }
+        private string tiktokError;
+        public string TiktokError
+        {
+            get => tiktokError;
+            set { tiktokError = value; OnPropertyChanged(); }
         }
 
         public ICommand BackToLobbyCommand { get; }
@@ -130,18 +166,12 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void EditProfile(object parameter)
         {
-            IsEditMode = !IsEditMode;
-            if (IsEditMode)
-            {
-                windowService.ShowPopUp("Edicion",
-                                        "Edicion Activada", PopUpIcon.Information); //Properties.Langs.Lang.editingModeTitle, Properties.Langs.Lang.editingModeActiveText
-            }
-            /*
-            else
-            {
-                LoadProfileData(); // Preguntar que pasaria si se vuelve a presionar el botóm, deberia de estar desabilitado o que salga un mensaje de que perderá sus cambios
-            }
-            */
+            IsEditMode = true; 
+            ClearAllErrors();
+
+            windowService.ShowPopUp("Edicion",
+                "Edicion Activada", PopUpIcon.Information); //Properties.Langs.Lang.editingModeTitle, Properties.Langs.Lang.editingModeActiveText
+            
         }
 
         private void ChooseAnAvatar(object parameter)
@@ -223,62 +253,106 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             if (IsEditMode)
             {
-                bool userConfirmedExit = windowService.ShowYesNoPopUp(
-                    Properties.Langs.Lang.unsavedChangesWarningTitleText,
-                    Properties.Langs.Lang.unsavedChangesWarningText);
-               
-                if (!userConfirmedExit)
-                {
-                    return;
-                }
+                windowService.ShowPopUp("Modo edición Activado", "Debe guardar sus cambios para poder volver al lobby",
+                    PopUpIcon.Information);
+                return;
             }
             windowService.GoBack();
+        }
+        private void ClearAllErrors()
+        {
+            FirstNameError = null;
+            LastNameError = null;
+            FacebookError = null;
+            InstagramError = null;
+            XSocialMediaError = null;
+            TiktokError = null;
         }
 
         private bool AreFieldsValid()
         {
-            string title = Properties.Langs.Lang.verificationFailedTitleText;
-            return ValidateFirstName(title) && ValidateLastName(title);
+            bool isFirstNameValid = ValidateFirstName();
+            bool isLastNameValid = ValidateLastName();
+            bool isFacebookValid = ValidateFacebook();
+            bool isInstagramValid = ValidateInstagram();
+            bool isXValid = ValidateXSocialMedia();
+            bool isTiktokValid = ValidateTiktok();
+
+            
+            return isFirstNameValid && isLastNameValid && isFacebookValid && isInstagramValid && isXValid && isTiktokValid;
         }
 
-        private bool ValidateFirstName(string errorTitle)
+        private bool ValidateFirstName()
         {
             if (string.IsNullOrWhiteSpace(FirstName))
             {
-                windowService.ShowPopUp(errorTitle, Properties.Langs.Lang.emptyFirstNameText, PopUpIcon.Warning);
+                FirstNameError = Properties.Langs.Lang.emptyFirstNameText;
                 return false;
             }
             if (FirstName.Length > 50)
             {
-                windowService.ShowPopUp(errorTitle, Properties.Langs.Lang.firstNameTooLongText, PopUpIcon.Warning);
+                FirstNameError = Properties.Langs.Lang.firstNameTooLongText;
                 return false;
             }
             if (!ValidationUtils.ContainsOnlyLetters(FirstName))
             {
-                windowService.ShowPopUp(errorTitle, Properties.Langs.Lang.nameInvalidCharsText, PopUpIcon.Warning);
+                FirstNameError = Properties.Langs.Lang.nameInvalidCharsText;
                 return false;
             }
-            return true;
+            FirstNameError = null; // Limpia el error si es válido
+            return true; ;
         }
 
-        private bool ValidateLastName(string errorTitle)
+        private bool ValidateLastName()
         {
             if (string.IsNullOrWhiteSpace(LastName))
             {
-                windowService.ShowPopUp(errorTitle, Properties.Langs.Lang.emptyLastNameText, PopUpIcon.Warning);
+                LastNameError = Properties.Langs.Lang.emptyLastNameText;
                 return false;
             }
             if (LastName.Length > 80)
             {
-                windowService.ShowPopUp(errorTitle, Properties.Langs.Lang.lastNameTooLongText, PopUpIcon.Warning);
+                LastNameError = Properties.Langs.Lang.lastNameTooLongText;
                 return false;
             }
             if (!ValidationUtils.ContainsOnlyLetters(LastName))
             {
-                windowService.ShowPopUp(errorTitle, Properties.Langs.Lang.lastNameInvalidCharsText, PopUpIcon.Warning);
+                LastNameError = Properties.Langs.Lang.lastNameInvalidCharsText;
                 return false;
             }
+            LastNameError = null; // Limpia el error si es válido
             return true;
+        }
+        private string ValidateSocialMediaField(string socialMediaUsername)
+        {
+            if (!string.IsNullOrEmpty(socialMediaUsername) && socialMediaUsername.Length > 50)
+            {
+                return "El usuario no debe exceder los 50 caracteres."; // O usa un Lang resource
+            }
+            return null;
+        }
+        private bool ValidateFacebook()
+        {
+            FacebookError = ValidateSocialMediaField(Facebook);
+            return FacebookError == null;
+        }
+
+        private bool ValidateInstagram()
+        {
+            InstagramError = ValidateSocialMediaField(Instagram);
+            return InstagramError == null;
+        }
+
+        private bool ValidateXSocialMedia()
+        {
+            XSocialMediaError = ValidateSocialMediaField(XSocialMedia);
+            return XSocialMediaError == null;
+        }
+
+        private bool ValidateTiktok()
+        {
+            TiktokError = ValidateSocialMediaField(Tiktok);
+            return TiktokError == null;
         }
 
         private ProfileUserDTO CollectUserData()
@@ -312,7 +386,8 @@ namespace PASSWORD_LIS_Client.ViewModels
                     Properties.Langs.Lang.profileChangesSavedSuccessText,
                     PopUpIcon.Success);
 
-                IsEditMode = false; 
+                IsEditMode = false;
+                ClearAllErrors();
             }
             else
             {

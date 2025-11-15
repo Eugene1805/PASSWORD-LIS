@@ -11,8 +11,6 @@ namespace PASSWORD_LIS_Client.Views
     public partial class ChooseAvatarWindow : Window
     {
         public int SelectedAvatarId { get; private set; } = 0;
-
-
         public ChooseAvatarWindow()
         {
             InitializeComponent();
@@ -26,15 +24,15 @@ namespace PASSWORD_LIS_Client.Views
             if (checkedRadioButton != null)
             {
                 SelectedAvatarId = int.Parse(checkedRadioButton.Tag.ToString());
-                this.DialogResult = true;
+                DialogResult = true;
 
             }
             else
             {
-                this.DialogResult = false;
+                DialogResult = false;
             }
 
-            this.Close();
+            Close();
         }
     }
 }

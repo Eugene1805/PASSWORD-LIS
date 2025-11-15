@@ -10,34 +10,6 @@
         WindowStartupLocation="CenterScreen"
         Title="{utils:Translate selectAvatarText}" Height="700" Width="400">
 
-    <Window.Resources>
-        <Style x:Key="AvatarSelectorStyle" TargetType="RadioButton">
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="RadioButton">
-                        <Border x:Name="mainBorder" 
-                                Style="{StaticResource floatingBorderStyle}"
-                                BorderThickness="3"
-                                BorderBrush="Transparent"
-                                Margin="10">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="mainBorder" Property="BorderBrush" Value="DodgerBlue"/>
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="mainBorder" Property="BorderBrush" Value="LightGray"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-    </Window.Resources>
-
     <Grid Background="#343A40">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -66,24 +38,24 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <RadioButton Tag="1"  Grid.Row="0" Grid.Column="0" Style="{StaticResource AvatarSelectorStyle}" GroupName="AvatarGroup">
+                    <RadioButton Tag="1"  Grid.Row="0" Grid.Column="0" Style="{StaticResource avatarSelectorStyle}" GroupName="AvatarGroup">
                         <Image Source="/Resources/Avatar1.png" Width="100" Height="100"/>
                     </RadioButton>
-                    <RadioButton Tag="2" Grid.Row="0" Grid.Column="1" Style="{StaticResource AvatarSelectorStyle}" GroupName="AvatarGroup">
+                    <RadioButton Tag="2" Grid.Row="0" Grid.Column="1" Style="{StaticResource avatarSelectorStyle}" GroupName="AvatarGroup">
                         <Image Source="/Resources/Avatar2.png" Width="100" Height="100"/>
                     </RadioButton>
 
-                    <RadioButton Tag="3" Grid.Row="1" Grid.Column="0" Style="{StaticResource AvatarSelectorStyle}" GroupName="AvatarGroup">
+                    <RadioButton Tag="3" Grid.Row="1" Grid.Column="0" Style="{StaticResource avatarSelectorStyle}" GroupName="AvatarGroup">
                         <Image Source="/Resources/Avatar3.png" Width="100" Height="100"/>
                     </RadioButton>
-                    <RadioButton Tag="4" Grid.Row="1" Grid.Column="1" Style="{StaticResource AvatarSelectorStyle}" GroupName="AvatarGroup">
+                    <RadioButton Tag="4" Grid.Row="1" Grid.Column="1" Style="{StaticResource avatarSelectorStyle}" GroupName="AvatarGroup">
                         <Image Source="/Resources/Avatar4.png" Width="100" Height="100"/>
                     </RadioButton>
 
-                    <RadioButton Tag="5" Grid.Row="2" Grid.Column="0" Style="{StaticResource AvatarSelectorStyle}" GroupName="AvatarGroup">
+                    <RadioButton Tag="5" Grid.Row="2" Grid.Column="0" Style="{StaticResource avatarSelectorStyle}" GroupName="AvatarGroup">
                         <Image Source="/Resources/Avatar5.png" Width="100" Height="100"/>
                     </RadioButton>
-                    <RadioButton Tag="6" Grid.Row="2" Grid.Column="1" Style="{StaticResource AvatarSelectorStyle}" GroupName="AvatarGroup">
+                    <RadioButton Tag="6" Grid.Row="2" Grid.Column="1" Style="{StaticResource avatarSelectorStyle}" GroupName="AvatarGroup">
                         <Image Source="/Resources/Avatar6.png" Width="100" Height="100"/>
                     </RadioButton>
                 </Grid>
