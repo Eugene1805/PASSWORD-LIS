@@ -7,7 +7,6 @@ namespace Data.Util
 {
     public static class Connection
     {
-        private readonly static ILog Logger = LogManager.GetLogger(typeof(Connection));
         public static String GetConnectionString()
         {
             var sqlBuilder = new SqlConnectionStringBuilder
@@ -26,7 +25,6 @@ namespace Data.Util
                 Metadata = "res://*/Model.PasswordLISModel.csdl|res://*/Model.PasswordLISModel.ssdl|res://*/Model.PasswordLISModel.msl"
 
             };
-            Logger.Info("Database connection string constructed.");
             return entityBuilder.ToString();
         }
     }

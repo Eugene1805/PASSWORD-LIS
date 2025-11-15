@@ -27,22 +27,19 @@ namespace Services.Services
             public int RedTeamScore { get; set; }
             public int BlueTeamScore { get; set; }
             public Timer RoundTimer { get; set; }
-            public Timer ValidationTimer { get; set; } // ADDED: Timer for the validation phase.
+            public Timer ValidationTimer { get; set; } 
             public int SecondsLeft;
-            public int ValidationSecondsLeft; // ADDED: Seconds left for validation.
+            public int ValidationSecondsLeft; 
             public int CurrentRound { get; set; }
 
-            // --- Logic for Simultaneous Gameplay ---
             public List<PasswordWord> RedTeamWords { get; set; }
             public List<PasswordWord> BlueTeamWords { get; set; }
             public int RedTeamWordIndex { get; set; }
             public int BlueTeamWordIndex { get; set; }
             public List<TurnHistoryDTO> RedTeamTurnHistory { get; set; }
             public List<TurnHistoryDTO> BlueTeamTurnHistory { get; set; }
-            public bool RedTeamPassedThisRound { get; set; } // ADDED: Tracks if the red team used their pass.
-            public bool BlueTeamPassedThisRound { get; set; } // ADDED: Tracks if the blue team used their pass.
-            // -------------------------------------
-
+            public bool RedTeamPassedThisRound { get; set; } 
+            public bool BlueTeamPassedThisRound { get; set; } 
             public List<(MatchTeam VoterTeam, List<ValidationVoteDTO> Votes)> ReceivedVotes { get; }
             public HashSet<int> PlayersWhoVoted { get; }
 
@@ -81,7 +78,7 @@ namespace Services.Services
             public void Dispose()
             {
                 RoundTimer?.Dispose();
-                ValidationTimer?.Dispose(); // ADDED: Ensure validation timer is disposed.
+                ValidationTimer?.Dispose();
             }
         }
 
@@ -91,10 +88,10 @@ namespace Services.Services
         private readonly IMatchRepository matchRepository;
         private readonly IPlayerRepository playerRepository;
         private readonly ILog log = LogManager.GetLogger(typeof(GameManager));
-        private const int ROUND_DURATION_SECONDS = 180; // CAMBIADO PARA PRUEBAS de 60 a 180
-        private const int VALIDATION_DURATION_SECONDS = 60; //Cambiado para pruebas de 20 a 60
+        private const int ROUND_DURATION_SECONDS = 30; // CAMBIADO PARA PRUEBAS de 60 a 180
+        private const int VALIDATION_DURATION_SECONDS = 20; //Cambiado para pruebas de 20 a 60
         private const int SUDDEN_DEATH_DURATION_SECONDS = 30;
-        private const int WORDS_PER_ROUND = 5;
+        private const int WORDS_PER_ROUND = 5; // Change from 5 to 3 for testing
         private const int TOTAL_ROUNDS = 1; //CAMBIADO DE 5 A 1
         private const int POINTS_PER_WIN = 10;
         private const int PENALTY_SYNONYM = 2;
@@ -117,7 +114,6 @@ namespace Services.Services
 
         public async Task PassTurnAsync(string gameCode, int senderPlayerId)
         {
-            // --- IMPLEMENTED ---
             if (!matches.TryGetValue(gameCode, out MatchState matchState) || matchState.Status != MatchStatus.InProgress) return;
             if (!matchState.ActivePlayers.TryGetValue(senderPlayerId, out var sender)) return;
             if (sender.Player.Role != PlayerRole.ClueGuy) return;
@@ -126,7 +122,6 @@ namespace Services.Services
             if ((team == MatchTeam.RedTeam && matchState.RedTeamPassedThisRound) ||
                 (team == MatchTeam.BlueTeam && matchState.BlueTeamPassedThisRound))
             {
-                // Player's team has already passed this round, ignore request.
                 return;
             }
 
@@ -159,23 +154,31 @@ namespace Services.Services
             try { sender.Callback.OnNewPassword(ToDTO(nextWord)); }
             catch { await HandlePlayerDisconnectionAsync(matchState, sender.Player.Id); }
 
-            // Enviar al Adivinador (partner)
             var partner = GetPartner(matchState, sender);
             if (partner.Callback != null)
             {
-                // ¡Importante! Enviar la nueva palabra Y la notificación de "Pass"
-                try { partner.Callback.OnNewPassword(ToDTOForGuesser(nextWord)); } // <-- AÑADIR ESTO
-                catch { await HandlePlayerDisconnectionAsync(matchState, partner.Player.Id); }
+                try 
+                { 
+                    partner.Callback.OnNewPassword(ToDTOForGuesser(nextWord)); 
+                }
+                catch 
+                { 
+                    await HandlePlayerDisconnectionAsync(matchState, partner.Player.Id); 
+                }
 
-                try { partner.Callback.OnClueReceived("Your partner passed the word."); }
-                catch { await HandlePlayerDisconnectionAsync(matchState, partner.Player.Id); }
+                try 
+                { 
+                    partner.Callback.OnClueReceived("Your partner passed the word."); 
+                }
+                catch {
+                    await HandlePlayerDisconnectionAsync(matchState, partner.Player.Id); 
+                }
             }
         }
 
 
         public async Task SubmitClueAsync(string gameCode, int senderPlayerId, string clue)
         {
-            // ADDED: Validation for empty or whitespace clues.
             if (string.IsNullOrWhiteSpace(clue)) return;
 
             if (!matches.TryGetValue(gameCode, out MatchState matchState) || matchState.Status != MatchStatus.InProgress) return;
@@ -206,10 +209,8 @@ namespace Services.Services
 
         public async Task SubmitGuessAsync(string gameCode, int senderPlayerId, string guess)
         {
-            // ADDED: Validation for empty or whitespace guesses.
             if (string.IsNullOrWhiteSpace(guess)) return;
 
-            // Allow guesses during normal play AND sudden death
             if (!matches.TryGetValue(gameCode, out MatchState matchState) || 
                 (matchState.Status != MatchStatus.InProgress && matchState.Status != MatchStatus.SuddenDeath)) return;
             if (!matchState.ActivePlayers.TryGetValue(senderPlayerId, out var sender)) return;
@@ -219,22 +220,26 @@ namespace Services.Services
             var currentPassword = matchState.GetCurrentPassword(team);
             int currentScore = (team == MatchTeam.RedTeam) ? matchState.RedTeamScore : matchState.BlueTeamScore;
 
-            if (currentPassword != null && (guess.Equals(currentPassword.EnglishWord, StringComparison.OrdinalIgnoreCase) || guess.Equals(currentPassword.SpanishWord, StringComparison.OrdinalIgnoreCase)))
+            if (currentPassword != null && (guess.Equals(currentPassword.EnglishWord, StringComparison.OrdinalIgnoreCase) 
+                || guess.Equals(currentPassword.SpanishWord, StringComparison.OrdinalIgnoreCase)))
             {
                 if (matchState.Status == MatchStatus.SuddenDeath)
                 {
-                    // We have an instant winner!
                     matchState.Status = MatchStatus.Finished;
                     matchState.RoundTimer?.Dispose();
-                    matchState.RoundTimer = null;
+                    matchState.RoundTimer = null; 
 
-                    // Add the final winning point to the score.
-                    if (team == MatchTeam.RedTeam) matchState.RedTeamScore++;
-                    else matchState.BlueTeamScore++;
+                    if (team == MatchTeam.RedTeam)
+                    {
+                        matchState.RedTeamScore++;
+                    }
+                    else 
+                    {
+                        matchState.BlueTeamScore++;
+                    }
 
-                    // End the game immediately, declaring the guessing team as the winner.
                     await PersistAndNotifyGameEnd(matchState, team);
-                    return; // IMPORTANT: Stop execution here.
+                    return;
                 }
 
                 int newScore;
@@ -253,14 +258,14 @@ namespace Services.Services
                 var nextWord = matchState.GetCurrentPassword(team);
                 
                     var clueGuy = GetPlayerByRole(matchState, team, PlayerRole.ClueGuy);
-                    var guesser = GetPlayerByRole(matchState, team, PlayerRole.Guesser); // <-- Obtener Adivinador
+                    var guesser = GetPlayerByRole(matchState, team, PlayerRole.Guesser);
 
                     if (clueGuy.Callback != null)
                     {
                         try { clueGuy.Callback.OnNewPassword(ToDTO(nextWord)); }
                         catch { await HandlePlayerDisconnectionAsync(matchState, clueGuy.Player.Id); }
                     }
-                    if (guesser.Callback != null) // <-- Añadir envío al Adivinador
+                    if (guesser.Callback != null)
                     {
                         try { guesser.Callback.OnNewPassword(ToDTOForGuesser(nextWord)); }
                         catch { await HandlePlayerDisconnectionAsync(matchState, guesser.Player.Id); }
@@ -280,7 +285,6 @@ namespace Services.Services
 
         public async Task SubmitValidationVotesAsync(string gameCode, int senderPlayerId, List<ValidationVoteDTO> votes)
         {
-            // ADDED: Validation for null votes list.
             if (votes == null) return;
 
             if (!matches.TryGetValue(gameCode, out MatchState matchState) || matchState.Status != MatchStatus.Validating) return;
@@ -302,7 +306,7 @@ namespace Services.Services
 
             if (allVotesIn)
             {
-                matchState.ValidationTimer?.Dispose(); // Stop the timer early.
+                matchState.ValidationTimer?.Dispose(); 
                 matchState.ValidationTimer = null;
                 await ProcessVotesAsync(matchState);
             }
@@ -342,11 +346,9 @@ namespace Services.Services
 
         private async Task StartNewRoundAsync(MatchState matchState)
         {
-            // --- REFACTORED METHOD ---
             matchState.Status = MatchStatus.InProgress;
             matchState.CurrentRound++;
 
-            // ADDED: Swap player roles after the first round.
             if (matchState.CurrentRound > 1)
             {
                 foreach (var playerEntry in matchState.ActivePlayers.Values)
@@ -355,7 +357,6 @@ namespace Services.Services
                 }
             }
 
-            // ADDED: Notify clients about the new round and potential role changes.
             var roundStartState = new RoundStartStateDTO
             {
                 CurrentRound = matchState.CurrentRound,
@@ -369,7 +370,7 @@ namespace Services.Services
             matchState.BlueTeamWordIndex = 0;
             matchState.RedTeamTurnHistory.Clear();
             matchState.BlueTeamTurnHistory.Clear();
-            matchState.RedTeamPassedThisRound = false; // Reset pass flags.
+            matchState.RedTeamPassedThisRound = false;
             matchState.BlueTeamPassedThisRound = false;
 
             if (matchState.RedTeamWords.Count < WORDS_PER_ROUND || matchState.BlueTeamWords.Count < WORDS_PER_ROUND)
@@ -387,7 +388,6 @@ namespace Services.Services
             var blueClueGuy = GetPlayerByRole(matchState, MatchTeam.BlueTeam, PlayerRole.ClueGuy);
             var blueGuesser = GetPlayerByRole(matchState, MatchTeam.BlueTeam, PlayerRole.Guesser);
 
-            // Enviar a Equipo Rojo
             var redWord = matchState.GetCurrentPassword(MatchTeam.RedTeam);
             if (redClueGuy.Callback != null)
             {
@@ -396,11 +396,10 @@ namespace Services.Services
             }
             if (redGuesser.Callback != null)
             {
-                try { redGuesser.Callback.OnNewPassword(ToDTOForGuesser(redWord)); } // <-- Envío al Adivinador
+                try { redGuesser.Callback.OnNewPassword(ToDTOForGuesser(redWord)); } 
                 catch { await HandlePlayerDisconnectionAsync(matchState, redGuesser.Player.Id); }
             }
 
-            // Enviar a Equipo Azul
             var blueWord = matchState.GetCurrentPassword(MatchTeam.BlueTeam);
             if (blueClueGuy.Callback != null)
             {
@@ -409,7 +408,7 @@ namespace Services.Services
             }
             if (blueGuesser.Callback != null)
             {
-                try { blueGuesser.Callback.OnNewPassword(ToDTOForGuesser(blueWord)); } // <-- Envío al Adivinador
+                try { blueGuesser.Callback.OnNewPassword(ToDTOForGuesser(blueWord)); }
                 catch { await HandlePlayerDisconnectionAsync(matchState, blueGuesser.Player.Id); }
             }
         }
@@ -446,12 +445,9 @@ namespace Services.Services
                 return;
             }
 
-            // ADDED: Start a timer for the voting phase to prevent deadlocks.
             matchState.ValidationSecondsLeft = VALIDATION_DURATION_SECONDS;
             matchState.ValidationTimer = new Timer(ValidationTimerTickCallback, matchState, 1000, 1000);
         }
-
-        // --- NEW METHOD ---
         private async void ValidationTimerTickCallback(object state)
         {
             var matchState = (MatchState)state;
@@ -464,19 +460,15 @@ namespace Services.Services
             {
                 matchState.ValidationTimer?.Dispose();
                 matchState.ValidationTimer = null;
-                // Time's up, process whatever votes we have.
                 await ProcessVotesAsync(matchState);
             }
         }
 
-
         private async Task ProcessVotesAsync(MatchState matchState)
         {
-            // ADDED: Ensure the validation timer is stopped if it wasn't already.
             matchState.ValidationTimer?.Dispose();
             matchState.ValidationTimer = null;
 
-            // The rest of the method is the same...
             int redTeamPenalty = 0;
             int blueTeamPenalty = 0;
 
@@ -489,14 +481,12 @@ namespace Services.Services
             {
                 foreach (var vote in voteList)
                 {
-                    // Si el votante es del Equipo Rojo, está votando por las palabras del Equipo Azul.
                     if (voterTeam == MatchTeam.RedTeam)
                     {
                         if (vote.PenalizeMultiword) blueTurnsToPenalizeMultiword.Add(vote.TurnId);
                         if (vote.PenalizeSynonym) blueTurnsToPenalizeSynonym.Add(vote.TurnId);
                     }
-                    // Si el votante es del Equipo Azul, está votando por las palabras del Equipo Rojo.
-                    else // (voterTeam == MatchTeam.BlueTeam)
+                    else
                     {
                         if (vote.PenalizeMultiword) redTurnsToPenalizeMultiword.Add(vote.TurnId);
                         if (vote.PenalizeSynonym) redTurnsToPenalizeSynonym.Add(vote.TurnId);
@@ -543,28 +533,24 @@ namespace Services.Services
             }
         }
 
-        // --- Helper and Private Methods (no significant changes needed below) ---
         private async Task EndGameAsync(MatchState matchState)
         {
             if (matchState.RedTeamScore == matchState.BlueTeamScore)
             {
-                // <-- CAMBIO CLAVE: En lugar de terminar, inicia la muerte súbita.
                 await StartSuddenDeathAsync(matchState);
-                return; // Stop execution to avoid finishing the match.
+                return; 
             }
             matchState.Status = MatchStatus.Finished;
             MatchTeam? winner = (matchState.RedTeamScore > matchState.BlueTeamScore) ? MatchTeam.RedTeam : MatchTeam.BlueTeam;
             await PersistAndNotifyGameEnd(matchState, winner);
         }
-        // En la clase GameManager
+        
         private async Task StartSuddenDeathAsync(MatchState matchState)
         {
             matchState.Status = MatchStatus.SuddenDeath;
 
-            // Notify clients that the tiebreaker is starting.
             await BroadcastAsync(matchState, cb => cb.OnSuddenDeathStarted());
 
-            // Get only ONE word for each team.
             matchState.RedTeamWords = await wordRepository.GetRandomWordsAsync(1);
             matchState.BlueTeamWords = await wordRepository.GetRandomWordsAsync(1);
 
@@ -577,16 +563,15 @@ namespace Services.Services
 
             matchState.RedTeamWordIndex = 0;
             matchState.BlueTeamWordIndex = 0;
-            matchState.RedTeamTurnHistory.Clear(); // Clear history for the new phase.
+            matchState.RedTeamTurnHistory.Clear(); 
             matchState.BlueTeamTurnHistory.Clear();
-            matchState.RedTeamPassedThisRound = true; // Disable passing during sudden death.
+            matchState.RedTeamPassedThisRound = true;
             matchState.BlueTeamPassedThisRound = true;
 
             
             matchState.SecondsLeft = SUDDEN_DEATH_DURATION_SECONDS;
             matchState.RoundTimer = new Timer(TimerTickCallback, matchState, 1000, 1000);
 
-            // Send the single word to each team's ClueGuy.
             var redClueGuy = GetPlayerByRole(matchState, MatchTeam.RedTeam, PlayerRole.ClueGuy);
             var blueClueGuy = GetPlayerByRole(matchState, MatchTeam.BlueTeam, PlayerRole.ClueGuy);
             if (redClueGuy.Callback != null)
@@ -604,27 +589,47 @@ namespace Services.Services
         {
             var redTeamPlayers = GetPlayersByTeam(matchState, MatchTeam.RedTeam).Select(p => p.Player);
             var blueTeamPlayers = GetPlayersByTeam(matchState, MatchTeam.BlueTeam).Select(p => p.Player);
+
+            var registeredRedPlayerIds = redTeamPlayers.Where(p => p.Id > 0).Select(p => p.Id).ToList();
+
+            var registeredBluePlayerIds = blueTeamPlayers.Where(p => p.Id > 0).Select(p => p.Id).ToList();
+
             try
             {
                 await matchRepository.SaveMatchResultAsync(matchState.RedTeamScore, matchState.BlueTeamScore,
-                    redTeamPlayers.Select(p => p.Id), blueTeamPlayers.Select(p => p.Id));
+                    registeredRedPlayerIds, registeredBluePlayerIds);
                 if (winner.HasValue)
                 {
-                    var winningPlayerIds = (winner == MatchTeam.RedTeam) ? redTeamPlayers.Select(p => p.Id) : blueTeamPlayers.Select(p => p.Id);
-                    await Task.WhenAll(winningPlayerIds.Select(id => playerRepository.UpdatePlayerTotalPointsAsync(id, POINTS_PER_WIN)));
+                    var winningPlayerIds = (winner == MatchTeam.RedTeam) ? registeredRedPlayerIds : registeredBluePlayerIds;
+                    if (winningPlayerIds.Any())
+                    {
+                        await Task.WhenAll(winningPlayerIds.Select(id => playerRepository.UpdatePlayerTotalPointsAsync(id, POINTS_PER_WIN)));
+                    }
                 }
             }
-            catch (Exception ex) { log.Error($"ERROR persisting match {matchState.GameCode}: {ex.Message}"); }
+            catch (Exception ex) 
+            {
+                log.ErrorFormat("ERROR persisting match {0}: {1}", matchState.GameCode, ex.Message); 
+            }
             var summary = new MatchSummaryDTO { WinnerTeam = winner, RedScore = matchState.RedTeamScore, BlueScore = matchState.BlueTeamScore };
             await BroadcastAsync(matchState, cb => cb.OnMatchOver(summary));
-            if (matches.TryRemove(matchState.GameCode, out var removedMatch)) removedMatch.Dispose();
+            if (matches.TryRemove(matchState.GameCode, out var removedMatch)) 
+            {
+                removedMatch.Dispose();
+            }
         }
 
         private static async Task BroadcastAsync(MatchState game, Action<IGameManagerCallback> action)
         {
             var tasks = game.ActivePlayers.Select(playerEntry => Task.Run(() => {
-                try { action(playerEntry.Value.Callback); }
-                catch (Exception) { game.ActivePlayers.TryRemove(playerEntry.Key, out _); }
+                try 
+                { 
+                    action(playerEntry.Value.Callback); 
+                }
+                catch (Exception) 
+                { 
+                    game.ActivePlayers.TryRemove(playerEntry.Key, out _); 
+                }
             }));
             await Task.WhenAll(tasks);
         }
@@ -632,7 +637,12 @@ namespace Services.Services
         private static async Task BroadcastToPlayersAsync(IEnumerable<(IGameManagerCallback Callback, PlayerDTO Player)> players, Action<IGameManagerCallback> action)
         {
             var tasks = players.Select(playerEntry => Task.Run(() => {
-                try { action(playerEntry.Callback); } catch { /* Ignore disconnection here */ }
+                try 
+                { 
+                    action(playerEntry.Callback); 
+                } catch 
+                { /* Ignore disconnection here */ 
+                }
             }));
             await Task.WhenAll(tasks);
         }
@@ -646,11 +656,10 @@ namespace Services.Services
         {
             if (entity == null) return new PasswordWordDTO { SpanishWord = "END", EnglishWord = "END" };
 
-            // El Adivinador recibe las descripciones, pero NO la palabra.
             return new PasswordWordDTO
             {
-                EnglishWord = string.Empty, // O string.Empty, como prefieras
-                SpanishWord = string.Empty, // O string.Empty
+                EnglishWord = string.Empty, 
+                SpanishWord = string.Empty,
                 EnglishDescription = entity.EnglishDescription,
                 SpanishDescription = entity.SpanishDescription
             };
