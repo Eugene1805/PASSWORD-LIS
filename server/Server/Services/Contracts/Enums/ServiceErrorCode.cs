@@ -38,6 +38,10 @@ namespace Services.Contracts.Enums
          [EnumMember(Value = "UNSUBSCRIPTION_ERROR")]
          UnsubscriptionError,
         [EnumMember(Value = "NULL_ARGUMENT")]
-         NullArgument
+         NullArgument,
+        [EnumMember(Value = "EMAIL_SENDING_ERROR")]
+         EmailSendingError,
+        [EnumMember(Value = "EMAIL_CONFIGURATION_ERROR")]
+         EmailConfigurationError
     }
 }

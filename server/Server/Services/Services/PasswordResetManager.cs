@@ -28,6 +28,15 @@ namespace Services.Services
         {
             try
             {
+                if (emailVerificationDTO == null || string.IsNullOrWhiteSpace(emailVerificationDTO.Email))
+                {
+                    throw FaultExceptionFactory.Create(
+                        ServiceErrorCode.NullArgument,
+                        "NULL_ARGUMENT",
+                        "Email verification DTO or email is null/empty"
+                    );
+                }
+
                 if (!repository.AccountAlreadyExist(emailVerificationDTO.Email) ||
                     !codeService.CanRequestCode(emailVerificationDTO.Email, CodeType.PasswordReset))
                 {
@@ -56,6 +65,14 @@ namespace Services.Services
         {   
             try
             {
+                if (passwordResetDTO == null || string.IsNullOrWhiteSpace(passwordResetDTO.Email))
+                {
+                    throw FaultExceptionFactory.Create(
+                        ServiceErrorCode.NullArgument,
+                        "NULL_ARGUMENT",
+                        "Email verification DTO or email is null/empty"
+                    );
+                }
                 if (!codeService.ValidateCode(passwordResetDTO.Email, passwordResetDTO.ResetCode, CodeType.PasswordReset))
                 {
                     log.WarnFormat("Password reset failed for '{0}': invalid or expired code.", passwordResetDTO.Email);
@@ -89,6 +106,14 @@ namespace Services.Services
         {
             try
             {
+                if (emailVerificationDTO == null || string.IsNullOrWhiteSpace(emailVerificationDTO.Email))
+                {
+                    throw FaultExceptionFactory.Create(
+                        ServiceErrorCode.NullArgument,
+                        "NULL_ARGUMENT",
+                        "Email verification DTO or email is null/empty"
+                    );
+                }
                 var ok = codeService.ValidateCode(emailVerificationDTO.Email, emailVerificationDTO.VerificationCode, 
                     CodeType.PasswordReset, consume:false);
                 if (!ok)
