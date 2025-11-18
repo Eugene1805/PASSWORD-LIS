@@ -741,4 +741,19 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="errorInitializingGameText" xml:space="preserve">
     <value>Error initializing the game</value>
   </data>
+  <data name="matchCancelledText" xml:space="preserve">
+    <value>Match Cancelled</value>
+  </data>
+  <data name="roundCompleted" xml:space="preserve">
+    <value>Round Completed!</value>
+  </data>
+  <data name="errorSendingClueText" xml:space="preserve">
+    <value>Error sending the clue</value>
+  </data>
+  <data name="errorSendingRiddleText" xml:space="preserve">
+    <value>Error sending the riddle.</value>
+  </data>
+  <data name="errorPassingTurnText" xml:space="preserve">
+    <value>Error when passing turn</value>
+  </data>
 </root>

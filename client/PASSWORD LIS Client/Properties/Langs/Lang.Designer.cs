@@ -520,6 +520,33 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a Error when passing turn.
+        /// </summary>
+        public static string errorPassingTurnText {
+            get {
+                return ResourceManager.GetString("errorPassingTurnText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a Error sending the clue.
+        /// </summary>
+        public static string errorSendingClueText {
+            get {
+                return ResourceManager.GetString("errorSendingClueText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a Error sending the riddle..
+        /// </summary>
+        public static string errorSendingRiddleText {
+            get {
+                return ResourceManager.GetString("errorSendingRiddleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a Error sending votes.
         /// </summary>
         public static string errorSendingVotesText {
@@ -916,6 +943,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a Match Cancelled.
+        /// </summary>
+        public static string matchCancelledText {
+            get {
+                return ResourceManager.GetString("matchCancelledText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a Verify that both passwords match.
         /// </summary>
         public static string matchingPasswordErrorText {
@@ -1308,6 +1344,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         public static string roomFullText {
             get {
                 return ResourceManager.GetString("roomFullText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a Round Completed!.
+        /// </summary>
+        public static string roundCompleted {
+            get {
+                return ResourceManager.GetString("roundCompleted", resourceCulture);
             }
         }
         

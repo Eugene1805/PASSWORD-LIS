@@ -741,4 +741,20 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="errorInitializingGameText" xml:space="preserve">
     <value>Error initializing the game</value>
   </data>
+  <data name="matchCancelledText" xml:space="preserve">
+    <value>Match Cancelled</value>
+  </data>
+  <data name="roundCompleted" xml:space="preserve">
+    <value>Round Completed!</value>
+  </data>
+  <data name="errorSendingClueText" xml:space="preserve">
+    <value>Error sending the clue.</value>
+  </data>
+  <data name="errorSendingRiddleText" xml:space="preserve">
+    <value>Error sending the riddle.</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="errorPassingTurnText" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
+  </data>
 </root>

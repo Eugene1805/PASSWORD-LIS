@@ -164,7 +164,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
         }
 
-        // --- MÉTODO DE MANEJO DE EXCEPCIONES  ---
         private void HandleConnectionError(Exception ex, string customMessage)
         {
             Application.Current.Dispatcher.Invoke(() =>
