@@ -15,7 +15,7 @@ namespace PASSWORD_LIS_Client.Converters
             {
                 if (!nombres.Any())
                 {
-                    return "(Sin jugadores)";
+                    return "";
                 }
                 return string.Join(" & ", nombres);
             }
