@@ -72,7 +72,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             set => SetProperty(ref currentPasswordWord, value);
         }
 
-        private string currentClue = "Esperando pista..."; //waitingAClueText
+        private string currentClue = Properties.Langs.Lang.waitingAClueText;
         public string CurrentClue
         {
             get => currentClue;
@@ -163,8 +163,8 @@ namespace PASSWORD_LIS_Client.ViewModels
         private readonly string gameCode;
         private readonly PlayerDTO currentPlayer;
 
-        private int currentWordIndex = 1; // Contador de palabras (1 a 5)
-        private int currentRoundIndex = 1; // Contador de rondas (1 a 5)
+        private int currentWordIndex = 1;
+        private int currentRoundIndex = 1;
         private const int MaxRounds = 5;  // Rondas totales
         private const int MaxWordsPerRound = 5; // Palabras por ronda
         private readonly string currentLanguage;
@@ -211,7 +211,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 await gameManagerService.SubscribeToMatchAsync(gameCode, currentPlayer.Id);
             }catch (Exception ex)
             {
-                HandleConnectionError(ex, "Error al suscribirse al la partida"); //errorSubscribingGameText
+                HandleConnectionError(ex, Properties.Langs.Lang.errorSubscribingGameText); 
             }
         }
 
@@ -240,7 +240,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    HandleConnectionError(ex, "Error al inicializar la partida."); //errorInitializingGameText
+                    HandleConnectionError(ex, Properties.Langs.Lang.errorInitializingGameText); 
                 }
             });
         }
@@ -257,7 +257,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                windowService.ShowPopUp("Partida Cancelada", reason, PopUpIcon.Warning);
+                windowService.ShowPopUp(Properties.Langs.Lang.matchCancelledText, reason, PopUpIcon.Warning);
                 gameManagerService.Cleanup();
                 windowService.GoBack();
             });
@@ -271,20 +271,19 @@ namespace PASSWORD_LIS_Client.ViewModels
 
                 if (password.EnglishWord == "END" || password.SpanishWord == "END")
                 {
-                    // --- INICIO DE LA CORRECCIÓN ---
-                    string roundOverMsg = "¡Ronda terminada!";
+                    string roundOverMsg = Properties.Langs.Lang.roundCompleted;
                     CurrentPasswordWord = roundOverMsg; // Para el Pistero
                     CurrentClue = roundOverMsg; // Para el Adivinador
 
                     CanSendClue = false;
                     CanSendGuess = false;
-                    CanPassTurn = false;    // <-- AÑADIDO
-                    CanRequestHint = false; // <-- AÑADIDO
+                    CanPassTurn = false;
+                    CanRequestHint = false;
 
                     IsHintVisible = false;
                     CurrentHintText = string.Empty;
-                    CurrentClueText = string.Empty;  // <-- AÑADIDO (Recomendado)
-                    CurrentGuessText = string.Empty; // <-- AÑADIDO (Recomendado)
+                    CurrentClueText = string.Empty;
+                    CurrentGuessText = string.Empty; 
                     return;
                 }
 
@@ -300,7 +299,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                     }
                 }
 
-                CurrentClue = "Esperando pista...";
+                CurrentClue = Properties.Langs.Lang.waitingAClueText;
                 CanSendClue = true;
                 CanSendGuess = false;
                 CurrentWordCountText = string.Format(Properties.Langs.Lang.currentWordText, currentWordIndex);
@@ -338,12 +337,11 @@ namespace PASSWORD_LIS_Client.ViewModels
                         ShowSnackbar(Properties.Langs.Lang.incorrectWordGuessedText);
                     }
                 }
-                // Actualizar puntaje de mi equipo
+
                 if (result.Team == currentPlayer.Team)
                 {
                     TeamPointsText = string.Format(Properties.Langs.Lang.teamPointsText, result.NewScore);
 
-                    // Si mi equipo acertó, actualizo contador de palabra
                     if (result.IsCorrect)
                     {
                         currentWordIndex++; 
@@ -352,22 +350,19 @@ namespace PASSWORD_LIS_Client.ViewModels
                             currentWordIndex = MaxWordsPerRound;
                         }
                         CurrentWordCountText = string.Format(Properties.Langs.Lang.currentWordText, currentWordIndex);
-                        CurrentGuessText = string.Empty; // Limpiar la caja de texto del Adivinador
+                        CurrentGuessText = string.Empty;
                     }
                 }
 
-                // 3. Lógica de Habilitar/Deshabilitar Botones (Solo para MI EQUIPO)
                 if (result.Team == currentPlayer.Team)
                 {
                     if (result.IsCorrect)
                     {
-                        // Correcto: Deshabilitar a mi equipo.
                         CanSendClue = false;
                         CanSendGuess = false;
                     }
                     else
                     {
-                        // Incorrecto: Re-habilitar al Pistero de mi equipo.
                         CanSendClue = true;
                         CanSendGuess = false;
                     }
@@ -405,7 +400,6 @@ namespace PASSWORD_LIS_Client.ViewModels
                 CurrentRoundText = string.Format(Properties.Langs.Lang.currentRoundText, currentRoundIndex);
                 CurrentWordCountText = string.Format(Properties.Langs.Lang.currentWordText, currentWordIndex);
 
-                // Habilitar botones para la nueva ronda
                 CanPassTurn = true;
                 CanRequestHint = true;
             });
@@ -415,9 +409,6 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                
-
-                // 2. Determinar si este jugador ganó
                 bool didIWin = summary.WinnerTeam.HasValue && summary.WinnerTeam.Value == currentPlayer.Team;
                 var gameEndViewModel = new GameEndViewModel(summary.RedScore, summary.BlueScore, windowService);
                 Page endPage;
@@ -441,7 +432,6 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                // Esta es la lógica para actualizar los roles (Pistero <-> Adivinador)
                 var thisPlayer = state.PlayersWithNewRoles.FirstOrDefault(p => p.Id == currentPlayer.Id);
                 if (thisPlayer != null)
                 {
@@ -461,64 +451,60 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
                 else if (CurrentPlayerRole == PlayerRole.Guesser)
                 {
-                    // Si soy el adivinador, oculto la palabra.
                     CurrentPasswordWord = "...";
                 }
             });
         }
 
-
-        // --- Petición 4: Lógica para Enviar Pista ---
         private async Task SendClueAsync()
         {
-            CanSendClue = false; // Deshabilitar el botón/textbox
+            CanSendClue = false;
             try
             {
-                // Enviamos la pista al servidor
                 await gameManagerService.SubmitClueAsync(gameCode, currentPlayer.Id, currentClueText);
-                CurrentClueText = string.Empty; // Limpiar la caja de texto
+                CurrentClueText = string.Empty; 
             }
             catch (Exception ex)
             {
-                HandleConnectionError(ex, "Error al enviar la pista.");
-                CanSendClue = true; // Rehabilitar si falló
+                HandleConnectionError(ex, Properties.Langs.Lang.errorSendingClueText);
+                CanSendClue = true;
             }
         }
         private async Task SendGuessAsync()
         {
-            CanSendGuess = false; // Deshabilitar hasta que haya nueva pista
+            CanSendGuess = false;
             try
             {
                 await gameManagerService.SubmitGuessAsync(gameCode, currentPlayer.Id, currentGuessText);
             }
             catch (Exception ex)
             {
-                HandleConnectionError(ex, "Error al enviar la adivinanza.");
+                HandleConnectionError(ex, Properties.Langs.Lang.errorSendingRiddleText);
                 CanSendGuess = true;
             }
         }
         private async Task PassTurnAsync()
         {
-            CanPassTurn = false; // Solo se puede pasar una vez por ronda
+            CanPassTurn = false;
             try
             {
                 await gameManagerService.PassTurnAsync(gameCode, currentPlayer.Id);
             }
             catch (Exception ex)
             {
-                HandleConnectionError(ex, "Error al pasar turno.");
-                CanPassTurn = true; // Rehabilitar si falló
+                HandleConnectionError(ex, Properties.Langs.Lang.errorPassingTurnText);
+                CanPassTurn = true;
             }
         }
         private void RequestHint()
         {
-            CanRequestHint = false; // Deshabilitar el botón
+            CanRequestHint = false;
 
             if (currentPasswordDto == null ||
                 (string.IsNullOrEmpty(currentPasswordDto.SpanishDescription) && string.IsNullOrEmpty(currentPasswordDto.EnglishDescription)))
             {
                 ShowSnackbar(Properties.Langs.Lang.noClueAvailableText);
-                CanRequestHint = true; // Permitir que lo intente de nuevo si no había
+                CanRequestHint = true;
                 return;
             }
 
@@ -533,7 +519,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             SnackbarMessage = message;
             IsSnackbarVisible = true;
-            await Task.Delay(3000); // Muestra el mensaje por 3 segundos
+            await Task.Delay(3000); 
             IsSnackbarVisible = false;
         }
 

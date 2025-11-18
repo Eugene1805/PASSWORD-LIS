@@ -8,6 +8,8 @@
       xmlns:lang="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
       xmlns:gameRef="clr-namespace:PASSWORD_LIS_Client.GameManagerServiceReference"
       xmlns:converters="clr-namespace:PASSWORD_LIS_Client.Converters"
+      xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
+      xmlns:utils="clr-namespace:PASSWORD_LIS_Client.Utils"
       mc:Ignorable="d"
       d:DataContext="{d:DesignInstance Type=vms:BaseViewModel, IsDesignTimeCreatable=False}"
       d:DesignHeight="720" d:DesignWidth="1280"
@@ -21,12 +23,12 @@
     <Grid>
         <Border Background="#99000000" Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <TextBlock Text="Esperando a los demás jugadores..." 
+                <TextBlock Text="{utils:Translate waitingOtherPlayersText}"
                            Foreground="White" FontSize="32" FontWeight="Bold"/>
             </StackPanel>
         </Border>
 
-        <Frame x:Name="GameContentFrame" NavigationUIVisibility="Hidden" Visibility="{Binding IsLoading, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+        <Frame x:Name="gameContentFrame" NavigationUIVisibility="Hidden" Visibility="{Binding IsLoading, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
             <Frame.Style>
                 <Style TargetType="Frame">
                     <Setter Property="Content" Value="{x:Null}" />
