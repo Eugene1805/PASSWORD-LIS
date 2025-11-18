@@ -138,7 +138,7 @@ namespace Test.ServicesTests
             callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
             var gameCode = await sut.CreateRoomAsync(host.UserAccount.Email);
 
-            mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync("ghost@test.com")).ReturnsAsync((Player)null);
+            mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync("ghost@test.com")).ReturnsAsync((Player?)null);
 
             // Act + Assert
             await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(async () =>
@@ -562,7 +562,7 @@ namespace Test.ServicesTests
         {
             // Arrange
             var (sut, _, _) = CreateSut(mockPlayerRepo, mockOperationContext);
-            mockAccountRepository.Setup(a => a.GetUserByPlayerId(42)).Returns(new UserAccount { Email = "friend@test.com" });
+            mockAccountRepository.Setup(a => a.GetUserByPlayerIdAsync(42)).ReturnsAsync(new UserAccount { Email = "friend@test.com" });
 
             // Act
             await sut.SendGameInvitationToFriendAsync(42, "ABCDE", "Host");
@@ -576,7 +576,7 @@ namespace Test.ServicesTests
         {
             // Arrange
             var (sut, _, _) = CreateSut(mockPlayerRepo, mockOperationContext);
-            mockAccountRepository.Setup(a => a.GetUserByPlayerId(42)).Returns((UserAccount)null);
+            mockAccountRepository.Setup(a => a.GetUserByPlayerIdAsync(42)).ReturnsAsync((UserAccount?)null);
 
             // Act + Assert
             await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(() =>
@@ -588,7 +588,7 @@ namespace Test.ServicesTests
         {
             // Arrange
             var (sut, _, _) = CreateSut(mockPlayerRepo, mockOperationContext);
-            mockAccountRepository.Setup(a => a.GetUserByPlayerId(42)).Returns(new UserAccount { Email = "friend@test.com" });
+            mockAccountRepository.Setup(a => a.GetUserByPlayerIdAsync(42)).ReturnsAsync(new UserAccount { Email = "friend@test.com" });
             mockNotificationService
             .Setup(n => n.SendGameInvitationEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
             .ThrowsAsync(new SmtpException("smtp error"));
@@ -603,7 +603,7 @@ namespace Test.ServicesTests
         {
             // Arrange
             var (sut, _, _) = CreateSut(mockPlayerRepo, mockOperationContext);
-            mockAccountRepository.Setup(a => a.GetUserByPlayerId(42)).Returns(new UserAccount { Email = "friend@test.com" });
+            mockAccountRepository.Setup(a => a.GetUserByPlayerIdAsync(42)).ReturnsAsync(new UserAccount { Email = "friend@test.com" });
             mockNotificationService
             .Setup(n => n.SendGameInvitationEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
             .ThrowsAsync(new Exception("boom"));

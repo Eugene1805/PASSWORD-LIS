@@ -43,16 +43,16 @@ namespace Data.DAL.Implementations
 
         }
 
-        public UserAccount GetUserByEmail(string email)
+        public async Task<UserAccount> GetUserByEmailAsync(string email)
         {
-            var context = contextFactory.CreateDbContext();
-            
-                UserAccount userAccount = context.UserAccount
+            using (var context = contextFactory.CreateDbContext())
+            {
+                UserAccount userAccount = await context.UserAccount
                     .Include(u => u.Player)
                     .Include(u => u.SocialAccount)
-                    .FirstOrDefault(u => u.Email == email);
+                    .FirstOrDefaultAsync(u => u.Email == email);
                 return userAccount;
-            
+            }
         }
 
         public bool VerifyEmail(string email)
@@ -88,10 +88,11 @@ namespace Data.DAL.Implementations
                 return true;
             
         }
-        public bool UpdateUserProfile(int playerId, UserAccount updatedAccountData, List<SocialAccount> updatedSocialsAccounts)
+        public async Task<bool> UpdateUserProfileAsync(int playerId, UserAccount updatedAccountData, List<SocialAccount> updatedSocialsAccounts)
         {
-            var context = contextFactory.CreateDbContext();
-            
+            using (var context = contextFactory.CreateDbContext())
+            {
+
                 using (var transaction = context.Database.BeginTransaction())
                 {
                     try
@@ -112,8 +113,8 @@ namespace Data.DAL.Implementations
                         userAccountToUpdate.PhotoId = updatedAccountData.PhotoId;
 
                         UpdateSocialAccounts(context, userAccountToUpdate, updatedSocialsAccounts);
-                     
-                        context.SaveChanges();
+
+                        await context.SaveChangesAsync();
                         transaction.Commit();
                         return true;
                     }
@@ -124,25 +125,26 @@ namespace Data.DAL.Implementations
 
                     }
                 }
+            }
         }
 
-        public UserAccount GetUserByPlayerId(int playerId)
+        public async Task<UserAccount> GetUserByPlayerIdAsync(int playerId)
         {
-            var context = contextFactory.CreateDbContext();
-            
-                return context.UserAccount
+            using (var context = contextFactory.CreateDbContext())
+            {
+                return await context.UserAccount
                     .Include(u => u.Player)
-                    .FirstOrDefault(u => u.Player.Any(p => p.Id == playerId));
-            
+                    .FirstOrDefaultAsync(u => u.Player.Any(p => p.Id == playerId));
+            }
         }
-        public UserAccount GetUserByUserAccountId(int userAccountId)
+        public async Task<UserAccount> GetUserByUserAccountIdAsync(int userAccountId)
         {
-            var context = contextFactory.CreateDbContext();
-            
-                return context.UserAccount
+            using (var context = contextFactory.CreateDbContext())
+            {
+                return await context.UserAccount
                               .Include(u => u.Player)
-                              .FirstOrDefault(u => u.Id == userAccountId);
-            
+                              .FirstOrDefaultAsync(u => u.Id == userAccountId);
+            }
         }
 
         private static void UpdateSocialAccounts(PasswordLISEntities context, UserAccount userAccountToUpdate, List<SocialAccount> updatedSocialsAccounts)

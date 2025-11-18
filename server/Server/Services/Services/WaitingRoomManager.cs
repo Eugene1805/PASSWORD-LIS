@@ -423,7 +423,7 @@ namespace Services.Services
         {
             try
             {
-                var userAccount = await Task.Run(() => accountRepository.GetUserByPlayerId(friendPlayerId));
+                var userAccount = await accountRepository.GetUserByPlayerIdAsync(friendPlayerId);
                 if (userAccount == null || string.IsNullOrEmpty(userAccount.Email))
                 {
                     log.WarnFormat("SendGameInvitationToFriendAsync falló: No se pudo encontrar el correo para el PlayerId {0}", friendPlayerId);

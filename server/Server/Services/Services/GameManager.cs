@@ -88,8 +88,8 @@ namespace Services.Services
         private readonly IMatchRepository matchRepository;
         private readonly IPlayerRepository playerRepository;
         private static readonly ILog log = LogManager.GetLogger(typeof(GameManager));
-        private const int RoundDurationSeconds = 30; // CAMBIADO PARA PRUEBAS de 60 a 180
-        private const int ValidationDurationSeconds = 20; //Cambiado para pruebas de 20 a 60
+        private const int RoundDurationSeconds = 120; // CAMBIADO PARA PRUEBAS de 60 a 180
+        private const int ValidationDurationSeconds = 60; //Cambiado para pruebas de 20 a 60
         private const int SuddenDeathDurationSeconds = 30;
         private const int WordsPerRound = 5; // Change from 5 to 3 for testing
         private const int TotalRounds = 1; //CAMBIADO DE 5 A 1

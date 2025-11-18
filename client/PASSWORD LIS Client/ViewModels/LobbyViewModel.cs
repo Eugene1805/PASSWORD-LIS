@@ -140,15 +140,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
 
         private void NavigateToProfile(object parameter)
-        {// TODO Change from navigation service to window service
+        {
             var profileViewModel = new ProfileViewModel(App.ProfileManagerService, App.WindowService);
-
-
-            var page = parameter as Page;
-            if (page != null)
-            {
-                page.NavigationService.Navigate(new ProfilePage { DataContext = profileViewModel });
-            }
+            var profilePage = new ProfilePage { DataContext = profileViewModel };
+            windowService.NavigateTo(profilePage);
         }
 
         private async Task LoadFriendsAsync()
@@ -162,7 +157,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             try
             {
                 var friendsArray = await friendsManagerService.GetFriendsAsync(SessionManager.CurrentUser.UserAccountId);
-                Application.Current.Dispatcher.Invoke(() =>
+                await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     Friends.Clear();
                     if (friendsArray != null)

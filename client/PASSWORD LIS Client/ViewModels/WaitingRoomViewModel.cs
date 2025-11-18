@@ -527,7 +527,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 var friendsArray = await friendsManagerService.
                     GetFriendsAsync(SessionManager.CurrentUser.UserAccountId);
-                _ = Application.Current.Dispatcher.InvokeAsync(() =>
+                await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     Friends.Clear();
                     if (friendsArray != null)

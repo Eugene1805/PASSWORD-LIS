@@ -20,7 +20,7 @@ namespace PASSWORD_LIS_Client.ViewModels
     public class RoundValidationViewModel : BaseViewModel
     {
         public ObservableCollection<ValidationTurnViewModel> TurnsToValidate { get; }
-        private int validationSeconds; //CAMBIADO PARA PRUEBAS DE 20 A 60
+        private int validationSeconds = 60; //CAMBIADO PARA PRUEBAS DE 20 A 60
         public int ValidationSeconds
         {
             get => validationSeconds;
