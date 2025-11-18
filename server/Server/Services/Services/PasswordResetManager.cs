@@ -40,6 +40,11 @@ namespace Services.Services
 
                 return true;
             }
+            catch (ArgumentNullException ex)
+            {
+                log.Error("Null argument provided to RequestPasswordResetCode.", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.NullArgument, "NULL_ARGUMENT", "A null argument was received occurred.");
+            }
             catch (Exception ex)
             {
                 log.Error("Unexpected error requesting password reset code.", ex);
@@ -68,6 +73,11 @@ namespace Services.Services
                 }
                 return result;
             }
+            catch (ArgumentNullException ex)
+            {
+                log.Error("Null argument provided to CreateAccountAsync.", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.NullArgument, "NULL_ARGUMENT", "A null argument was received occurred.");
+            }
             catch (Exception ex)
             {
                 log.Error("Unexpected error resetting password.", ex);
@@ -90,6 +100,11 @@ namespace Services.Services
                     log.InfoFormat("Password reset code validation succeeded for '{0}'.", emailVerificationDTO.Email);
                 }
                 return ok;
+            }
+            catch (ArgumentNullException ex)
+            {
+                log.Error("Null argument provided to CreateAccountAsync.", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.NullArgument, "NULL_ARGUMENT", "A null argument was received occurred.");
             }
             catch (Exception ex)
             {

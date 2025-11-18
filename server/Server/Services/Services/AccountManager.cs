@@ -49,6 +49,11 @@ namespace Services.Services
                 var code = codeService.GenerateAndStoreCode(newAccount.Email, CodeType.EmailVerification);
                 _ = notification.SendAccountVerificationEmailAsync(newAccount.Email, code);
             }
+            catch(ArgumentNullException ex)
+            {
+                log.Error("Null argument provided to CreateAccountAsync.", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.NullArgument, "NULL_ARGUMENT", "A null argument was received occurred.");
+            }
             catch (DuplicateAccountException ex)
             {
                 log.WarnFormat("Duplicated registry attempt for the email: {0}", newAccount.Email);
@@ -58,7 +63,7 @@ namespace Services.Services
             catch (DbUpdateException dbEx)
             {
                 log.Error("Error at the dababase when creating the account.", dbEx);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "An error occurred while processing your request. Please try again later.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "An error occurred while processing the request.");
             }
             catch (Exception ex)
             {
@@ -70,19 +75,18 @@ namespace Services.Services
 
         public async Task<bool> IsNicknameInUse(string nickname)
         {
+            if (nickname is null)
+            {
+                return false;
+            }
             try
             {
                 return await repository.IsNicknameInUse(nickname);
             }
-            catch(ArgumentNullException ex)
-            {
-                log.Error("Argument null error in IsNickNameInUse.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "An error occurred while querying the database. Please try again later.");
-            }
             catch(InvalidOperationException ex)
             {
                 log.Error("Invalid operation error in IsNickNameInUse.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "An error occurred while querying the database. Please try again later.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "An error occurred while querying the database");
             }
             catch (Exception ex)
             {
