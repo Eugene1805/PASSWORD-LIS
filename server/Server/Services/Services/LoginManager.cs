@@ -9,26 +9,27 @@ using System.Data.Common;
 using System.Linq;
 using System.ServiceModel;
 using Services.Util;
+using System.Threading.Tasks;
 
 namespace Services.Services
 {
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
     public class LoginManager : ILoginManager
     {
-        public readonly IAccountRepository repository;
-        public static readonly ILog log = LogManager.GetLogger(typeof(LoginManager));
+        private readonly IAccountRepository repository;
+        private static readonly ILog log = LogManager.GetLogger(typeof(LoginManager));
 
         public LoginManager(IAccountRepository accountRepository)
         {
             repository = accountRepository;
         }
 
-        public UserDTO Login(string email, string password)
+        public async Task<UserDTO> LoginAsync(string email, string password)
         {
             try
             {
                 log.InfoFormat("Login attempt for email: {0}", email);
-                var userAccount = repository.GetUserByEmail(email);
+                var userAccount = await repository.GetUserByEmailAsync(email);
 
                 if (userAccount == null)
                 {

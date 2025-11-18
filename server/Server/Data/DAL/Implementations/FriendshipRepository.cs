@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Data.Entity;
+using System.Threading.Tasks;
 
 namespace Data.DAL.Implementations
 {
@@ -15,11 +16,11 @@ namespace Data.DAL.Implementations
         {
             this.contextFactory = contextFactory;
         }
-        public List<UserAccount> GetFriendsByUserAccountId(int userAccountId)
+        public async Task<List<UserAccount>> GetFriendsByUserAccountIdAsync(int userAccountId)
         {
             using (var context = contextFactory.CreateDbContext())
             {
-                var player = context.Player.FirstOrDefault(p => p.UserAccountId == userAccountId);
+                var player = await context.Player.FirstOrDefaultAsync(p => p.UserAccountId == userAccountId);
                 if (player == null)
                 {
                     return new List<UserAccount>();
@@ -27,26 +28,35 @@ namespace Data.DAL.Implementations
 
                 int playerId = player.Id;
 
-                var friendIdsFromRequesters = context.Friendship
+                // Consultas asíncronas separadas para obtener los IDs
+                var friendIdsFromRequesters = await context.Friendship
                     .Where(f => f.AddresseeId == playerId && f.Status == 1)
-                    .Select(f => f.RequesterId);
+                    .Select(f => f.RequesterId)
+                    .ToListAsync();
 
-                var friendIdsFromAddressees = context.Friendship
+                var friendIdsFromAddressees = await context.Friendship
                     .Where(f => f.RequesterId == playerId && f.Status == 1)
-                    .Select(f => f.AddresseeId);
+                    .Select(f => f.AddresseeId)
+                    .ToListAsync();
 
                 var allFriendIds = friendIdsFromRequesters.Concat(friendIdsFromAddressees).ToList();
 
-                var friends = context.UserAccount
+                if (!allFriendIds.Any())
+                {
+                    return new List<UserAccount>();
+                }
+
+                // Carga asíncrona de los amigos
+                var friends = await context.UserAccount
                     .Where(u => u.Player.Any(p => allFriendIds.Contains(p.Id)))
-                    .Include(u => u.Player) 
-                    .ToList();
+                    .Include(u => u.Player)
+                    .ToListAsync();
 
                 return friends;
             }
         }
 
-        public bool DeleteFriendship(int currentUserId, int friendToDeleteId)
+        public async Task<bool> DeleteFriendshipAsync(int currentUserId, int friendToDeleteId)
         {
             using (var context = contextFactory.CreateDbContext())
             {
@@ -54,18 +64,17 @@ namespace Data.DAL.Implementations
                 {
                     try
                     {
-                        var friendship = context.Friendship.FirstOrDefault(f =>
+                        var friendship = await context.Friendship.FirstOrDefaultAsync(f =>
                             (f.RequesterId == currentUserId && f.AddresseeId == friendToDeleteId) ||
                             (f.RequesterId == friendToDeleteId && f.AddresseeId == currentUserId));
 
                         if (friendship != null)
                         {
                             context.Friendship.Remove(friendship);
-                            context.SaveChanges();
+                            await context.SaveChangesAsync();
                             transaction.Commit();
                             return true;
                         }
-                        transaction.Rollback();
                         return false;
                     }
                     catch (Exception)
@@ -77,21 +86,20 @@ namespace Data.DAL.Implementations
             }
         }
 
-        public bool CreateFriendRequest(int requesterPlayerId, int addresseePlayerId)
+        public async Task<bool> CreateFriendRequestAsync(int requesterPlayerId, int addresseePlayerId)
         {
             using (var context = contextFactory.CreateDbContext())
             {
-                using(var transaction = context.Database.BeginTransaction())
+                using (var transaction = context.Database.BeginTransaction())
                 {
                     try
                     {
-                        bool requestExists = context.Friendship.Any(f =>
+                        bool requestExists = await context.Friendship.AnyAsync(f =>
                         (f.RequesterId == requesterPlayerId && f.AddresseeId == addresseePlayerId) ||
                         (f.RequesterId == addresseePlayerId && f.AddresseeId == requesterPlayerId));
 
                         if (requestExists)
                         {
-                            transaction.Rollback();
                             return false;
                         }
 
@@ -104,7 +112,7 @@ namespace Data.DAL.Implementations
                         };
 
                         context.Friendship.Add(newRequest);
-                        context.SaveChanges();
+                        await context.SaveChangesAsync();
                         transaction.Commit();
                         return true;
                     }
@@ -117,24 +125,24 @@ namespace Data.DAL.Implementations
             }
         }
 
-        public List<Friendship> GetPendingRequests(int userAccountId)
+        public async Task<List<Friendship>> GetPendingRequestsAsync(int userAccountId)
         {
             using (var context = contextFactory.CreateDbContext())
             {
-                var player = context.Player.FirstOrDefault(p => p.UserAccountId == userAccountId);
+                var player = await context.Player.FirstOrDefaultAsync(p => p.UserAccountId == userAccountId);
                 if (player == null)
                 {
                     return new List<Friendship>();
                 }
 
-                return context.Friendship
+                return await context.Friendship
                     .Include(f => f.Player1.UserAccount)
                     .Where(f => f.AddresseeId == player.Id && f.Status == 0)
-                    .ToList();
+                    .ToListAsync();
             }
         }
 
-        public bool RespondToFriendRequest(int requesterPlayerId, int addresseePlayerId, bool accept)
+        public async Task<bool> RespondToFriendRequestAsync(int requesterPlayerId, int addresseePlayerId, bool accept)
         {
             using (var context = contextFactory.CreateDbContext())
             {
@@ -142,12 +150,11 @@ namespace Data.DAL.Implementations
                 {
                     try
                     {
-                        var request = context.Friendship.FirstOrDefault(f =>
+                        var request = await context.Friendship.FirstOrDefaultAsync(f =>
                         f.RequesterId == requesterPlayerId && f.AddresseeId == addresseePlayerId && f.Status == 0);
 
                         if (request == null)
                         {
-                            transaction.Rollback();
                             return false;
                         }
                         if (accept)
@@ -161,7 +168,7 @@ namespace Data.DAL.Implementations
                             context.Friendship.Remove(request);
                         }
 
-                        context.SaveChanges();
+                        await context.SaveChangesAsync();
                         transaction.Commit();
                         return true;
                     }

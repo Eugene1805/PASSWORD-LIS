@@ -1,15 +1,15 @@
-﻿using Data.DAL.Implementations;
-using Data.DAL.Interfaces;
+﻿using Data.DAL.Interfaces;
 using Data.Model;
 using log4net;
 using Services.Contracts;
 using Services.Contracts.DTOs;
+using Services.Contracts.Enums;
+using Services.Util;
 using Services.Wrappers;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.Common;
-using System.Data.Entity.Core.Mapping;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.ServiceModel;
@@ -39,7 +39,7 @@ namespace Services.Services
             try
             {
                 log.InfoFormat("Iniciando GetFriendsAsync para UserAccountId: {0}", userAccountId);
-                var friendAccounts = await Task.Run(() => friendshipRepository.GetFriendsByUserAccountId(userAccountId));
+                var friendAccounts = await friendshipRepository.GetFriendsByUserAccountIdAsync(userAccountId);
 
                 var friendDTOs = friendAccounts.Select(acc => new FriendDTO
                 {
@@ -53,17 +53,13 @@ namespace Services.Services
             catch (DbException dbEx)
             {
                 log.Error($"DbException en GetFriendsAsync (UserAccountId: {userAccountId})", dbEx);
-                var errorDetail = new ServiceErrorDetailDTO { ErrorCode = "DATABASE_ERROR", Message = "Error al consultar la lista de amigos." };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "Error al consultar la lista de amigos.");
             } 
             catch (Exception ex)
             {
                 log.Fatal($"Error inesperado en GetFriendsAsync (UserAccountId: {userAccountId})", ex);
-                var errorDetail = new ServiceErrorDetailDTO { ErrorCode = "UNEXPECTED_ERROR", Message = "Error inesperado al obtener la lista de amigos." };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
-
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Error inesperado al obtener la lista de amigos.");
             }
-            
         }
 
         public async Task<bool> DeleteFriendAsync(int currentUserId, int friendToDeleteId)
@@ -71,7 +67,7 @@ namespace Services.Services
             try
             {
                 log.InfoFormat("Iniciando DeleteFriendAsync: User={0}, Friend={1}", currentUserId, friendToDeleteId);
-                bool success = await Task.Run(() => friendshipRepository.DeleteFriendship(currentUserId, friendToDeleteId));
+                bool success = await friendshipRepository.DeleteFriendshipAsync(currentUserId, friendToDeleteId);
 
                 if (success)
                 {
@@ -87,20 +83,17 @@ namespace Services.Services
             catch (DbUpdateException dbUpEx)
             {
                 log.Error($"DbUpdateException en DeleteFriendAsync: User={currentUserId}, Friend={friendToDeleteId}", dbUpEx);
-                var errorDetail = new ServiceErrorDetailDTO { ErrorCode = "DATABASE_ERROR", Message = "Error al guardar la eliminación del amigo." };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "Error al guardar la eliminación del amigo.");
             }
             catch (DbException dbEx) 
             {
                 log.Error($"DbException en DeleteFriendAsync: User={currentUserId}, Friend={friendToDeleteId}", dbEx);
-                var errorDetail = new ServiceErrorDetailDTO { ErrorCode = "DATABASE_ERROR", Message = "Error de base de datos al eliminar al amigo." };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "Error de base de datos al eliminar al amigo.");
             }
             catch (Exception ex)
             {
                 log.Fatal($"Error inesperado en DeleteFriendAsync: User={currentUserId}, Friend={friendToDeleteId}", ex);
-                var errorDetail = new ServiceErrorDetailDTO { ErrorCode = "UNEXPECTED_ERROR", Message = "Error inesperado al eliminar al amigo." };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Error inesperado al eliminar al amigo.");
             }
         }
 
@@ -111,10 +104,10 @@ namespace Services.Services
 
             var communicationObject = (ICommunicationObject)callbackChannel;
             communicationObject.Faulted += (sender, e) => {
-                connectedClients.TryRemove(userAccountId, out _); 
+                connectedClients.TryRemove(userAccountId, out _);
             };
             communicationObject.Closed += (sender, e) => {
-                connectedClients.TryRemove(userAccountId, out _); 
+                connectedClients.TryRemove(userAccountId, out _);
             };
 
             log.InfoFormat("Cliente suscrito a FriendsManager. UserAccountId: {0}", userAccountId);
@@ -138,20 +131,17 @@ namespace Services.Services
             catch (DbUpdateException dbUpEx)
             {
                 log.Error($"DbUpdateException en SendFriendRequestAsync: RequesterId={requesterUserAccountId}, Email={addresseeEmail}", dbUpEx);
-                var errorDetail = new ServiceErrorDetailDTO { ErrorCode = "DATABASE_ERROR", Message = "Error al guardar la solicitud de amistad." };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "Error al guardar la solicitud de amistad.");
             }
             catch (DbException dbEx)
             {
                 log.Error($"DbException en SendFriendRequestAsync: RequesterId={requesterUserAccountId}, Email={addresseeEmail}", dbEx);
-                var errorDetail = new ServiceErrorDetailDTO { ErrorCode = "DATABASE_ERROR", Message = "Error de base de datos al enviar la solicitud." };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "Error de base de datos al enviar la solicitud.");
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 log.Fatal($"Error inesperado en SendFriendRequestAsync: RequesterId={requesterUserAccountId}, Email={addresseeEmail}", ex);
-                var errorDetail = new ServiceErrorDetailDTO { ErrorCode = "UNEXPECTED_ERROR", Message = "Error inesperado al enviar la solicitud." };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Error inesperado al enviar la solicitud.");
             }
         }
 
@@ -167,7 +157,7 @@ namespace Services.Services
             try
             {
                 log.InfoFormat("Iniciando GetPendingRequestsAsync para UserAccountId: {0}", userAccountId);
-                var requests = await Task.Run(() => friendshipRepository.GetPendingRequests(userAccountId));
+                var requests = await friendshipRepository.GetPendingRequestsAsync(userAccountId);
 
                 var requestDTOs = requests.Select(req => new FriendDTO
                 {
@@ -181,14 +171,12 @@ namespace Services.Services
             catch (DbException dbEx)
             {
                 log.Error($"DbException en GetPendingRequestsAsync (UserAccountId: {userAccountId})", dbEx);
-                var errorDetail = new ServiceErrorDetailDTO { ErrorCode = "DATABASE_ERROR", Message = "Error al consultar las solicitudes pendientes." };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "Error al consultar las solicitudes pendientes.");
             }
             catch (Exception ex)
             {
                 log.Fatal($"Error inesperado en GetPendingRequestsAsync (UserAccountId: {userAccountId})", ex);
-                var errorDetail = new ServiceErrorDetailDTO { ErrorCode = "UNEXPECTED_ERROR", Message = "Error inesperado al obtener solicitudes." };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Error inesperado al obtener solicitudes.");
             }
         }
 
@@ -205,17 +193,17 @@ namespace Services.Services
             {
                 log.InfoFormat("Iniciando RespondToFriendRequestAsync: AddresseeId={0}, RequesterId={1}, Accepted={2}", addresseeUserAccountId, requesterPlayerId, accepted);
 
-                var addresseeAccount = await Task.Run(() => accountRepository.GetUserByUserAccountId(addresseeUserAccountId));
+                var addresseeAccount = await accountRepository.GetUserByUserAccountIdAsync(addresseeUserAccountId);
 
                 if (addresseeAccount == null || !addresseeAccount.Player.Any())
                 {
                     log.Warn($"RespondToFriendRequestAsync: No se encontró la cuenta o el jugador del destinatario (Id: {addresseeUserAccountId})");
-                    return; 
+                    return;
                 }
 
                 int addresseePlayerId = addresseeAccount.Player.First().Id;
 
-                bool success = await Task.Run(() => friendshipRepository.RespondToFriendRequest(requesterPlayerId, addresseePlayerId, accepted));
+                bool success = await friendshipRepository.RespondToFriendRequestAsync(requesterPlayerId, addresseePlayerId, accepted);
 
                 if (success && accepted)
                 {
@@ -230,20 +218,17 @@ namespace Services.Services
             catch (DbUpdateException dbUpEx)
             {
                 log.Error($"DbUpdateException en RespondToFriendRequestAsync: AddresseeId={addresseeUserAccountId}, RequesterId={requesterPlayerId}", dbUpEx);
-                var errorDetail = new ServiceErrorDetailDTO { ErrorCode = "DATABASE_ERROR", Message = "Error al guardar la respuesta a la solicitud." };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "Error al guardar la respuesta a la solicitud.");
             }
             catch (DbException dbEx)
             {
                 log.Error($"DbException en RespondToFriendRequestAsync: AddresseeId={addresseeUserAccountId}, RequesterId={requesterPlayerId}", dbEx);
-                var errorDetail = new ServiceErrorDetailDTO { ErrorCode = "DATABASE_ERROR", Message = "Error de base de datos al responder a la solicitud." };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "Error de base de datos al responder a la solicitud.");
             }
             catch (Exception ex)
             {
                 log.Fatal($"Error inesperado en RespondToFriendRequestAsync: AddresseeId={addresseeUserAccountId}, RequesterId={requesterPlayerId}", ex);
-                var errorDetail = new ServiceErrorDetailDTO { ErrorCode = "UNEXPECTED_ERROR", Message = "Error inesperado al responder a la solicitud." };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Error inesperado al responder a la solicitud.");
             }
         }
 
@@ -251,7 +236,6 @@ namespace Services.Services
         {
             connectedClients.TryRemove(userAccountId, out _);
             log.InfoFormat("Cliente desuscrito de FriendsManager. UserAccountId: {0}", userAccountId);
-            
             return Task.CompletedTask;
         }
 
@@ -259,14 +243,13 @@ namespace Services.Services
         {
             var callback = operationContext.GetCallbackChannel<IFriendsCallback>();
             var entry = connectedClients.FirstOrDefault(pair => pair.Value == callback);
-            
             return entry.Key;
         }
 
         private async Task<FriendRequestResult> TrySendFriendRequestAsync(int requesterUserAccountId, string addresseeEmail)
         {
-            var requesterAccount = await Task.Run(() => accountRepository.GetUserByUserAccountId(requesterUserAccountId));
-            var addresseeAccount = await Task.Run(() => accountRepository.GetUserByEmail(addresseeEmail));
+            var requesterAccount = await accountRepository.GetUserByUserAccountIdAsync(requesterUserAccountId);
+            var addresseeAccount = await accountRepository.GetUserByEmailAsync(addresseeEmail);
 
             if (addresseeAccount == null)
             {
@@ -303,19 +286,19 @@ namespace Services.Services
             int requesterPlayerId = requesterAccount.Player.First().Id;
             int addresseePlayerId = addresseeAccount.Player.First().Id;
 
-            var friends = await Task.Run(() => friendshipRepository.GetFriendsByUserAccountId(requesterAccount.Id));
+            var friends = await friendshipRepository.GetFriendsByUserAccountIdAsync(requesterAccount.Id);
             if (friends.Any(f => f.Player.Any(p => p.Id == addresseePlayerId)))
             {
                 return FriendRequestResult.AlreadyFriends;
             }
 
-            var addresseeRequests = await Task.Run(() => friendshipRepository.GetPendingRequests(addresseeAccount.Id));
+            var addresseeRequests = await friendshipRepository.GetPendingRequestsAsync(addresseeAccount.Id);
             if (addresseeRequests.Any(req => req.RequesterId == requesterPlayerId))
             {
                 return FriendRequestResult.RequestAlreadySent;
             }
 
-            var requesterRequests = await Task.Run(() => friendshipRepository.GetPendingRequests(requesterAccount.Id));
+            var requesterRequests = await friendshipRepository.GetPendingRequestsAsync(requesterAccount.Id);
             if (requesterRequests.Any(req => req.RequesterId == addresseePlayerId))
             {
                 return FriendRequestResult.RequestAlreadyReceived;
@@ -329,7 +312,7 @@ namespace Services.Services
             int requesterPlayerId = requesterAccount.Player.First().Id;
             int addresseePlayerId = addresseeAccount.Player.First().Id;
 
-            bool success = await Task.Run(() => friendshipRepository.CreateFriendRequest(requesterPlayerId, addresseePlayerId));
+            bool success = await friendshipRepository.CreateFriendRequestAsync(requesterPlayerId, addresseePlayerId);
 
             if (!success)
             {
@@ -351,7 +334,7 @@ namespace Services.Services
 
         private async Task NotifyOnRequestAcceptedAsync(int requesterPlayerId, UserAccount addresseeAccount)
         {
-            var requesterAccount = await Task.Run(() => accountRepository.GetUserByPlayerId(requesterPlayerId));
+            var requesterAccount = await accountRepository.GetUserByPlayerIdAsync(requesterPlayerId);
             if (requesterAccount == null || !requesterAccount.Player.Any())
             {
                 log.WarnFormat("NotifyOnRequestAcceptedAsync: No se encontró la cuenta o el jugador del solicitante (PlayerId: {0})", requesterPlayerId);
@@ -383,8 +366,8 @@ namespace Services.Services
 
         private async Task NotifyFriendRemovedAsync(int currentUserId, int friendToDeleteId)
         {
-            var currentUserAccount = await Task.Run(() => accountRepository.GetUserByPlayerId(currentUserId));
-            var friendAccount = await Task.Run(() => accountRepository.GetUserByPlayerId(friendToDeleteId));
+            var currentUserAccount = await accountRepository.GetUserByPlayerIdAsync(currentUserId);
+            var friendAccount = await accountRepository.GetUserByPlayerIdAsync(friendToDeleteId);
 
             if (friendAccount != null && connectedClients.TryGetValue(friendAccount.Id, out var friendCallback))
             {

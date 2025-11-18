@@ -9,8 +9,6 @@ namespace Services.Contracts.DTOs
         public int PlayerId { get; set; }
         [DataMember]
         public string Nickname { get; set; }
-        
-        // TBD: ADD picture field
 
     }
 }

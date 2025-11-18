@@ -4,12 +4,14 @@ using log4net;
 using Services.Contracts;
 using Services.Contracts.DTOs;
 using Services.Contracts.Enums;
+using Services.Util;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.ServiceModel;
+using System.Threading.Tasks;
 
 namespace Services.Services
 {
@@ -24,7 +26,7 @@ namespace Services.Services
             repository = accountRepository;
         }
 
-        public UserDTO UpdateProfile(UserDTO updatedProfileData)
+        public async Task<UserDTO> UpdateProfileAsync(UserDTO updatedProfileData)
         {
             if (updatedProfileData == null || updatedProfileData.PlayerId <= 0)
             {
@@ -39,7 +41,7 @@ namespace Services.Services
                 var accountData = MapToUserAccount(updatedProfileData);
                 var socialData = MapToSocialAccounts(updatedProfileData.SocialAccounts);
 
-                bool updateSuccess = repository.UpdateUserProfile(
+                bool updateSuccess = await repository.UpdateUserProfileAsync(
                     updatedProfileData.PlayerId,
                     accountData,
                     socialData
@@ -59,35 +61,17 @@ namespace Services.Services
             catch (DbUpdateException dbUpEx)
             {
                 log.Error($"Error DbUpdateException al actualizar perfil PlayerId: {updatedProfileData.PlayerId}. Ex: {dbUpEx.Message}", dbUpEx);
-                var errorDetail = new ServiceErrorDetailDTO
-                {
-                    Code = ServiceErrorCode.DatabaseError,
-                    ErrorCode = "DATABASE_ERROR",
-                    Message = "Ocurrió un error al intentar guardar los cambios en la base de datos."
-                };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "Ocurrió un error al intentar guardar los cambios en la base de datos.");
             }
             catch (DbException dbEx)
             {
                 log.Error($"Error DbException al actualizar perfil PlayerId: {updatedProfileData.PlayerId}. Ex: {dbEx.Message}", dbEx);
-                var errorDetail = new ServiceErrorDetailDTO
-                {
-                    Code = ServiceErrorCode.DatabaseError,
-                    ErrorCode = "DATABASE_ERROR",
-                    Message = "Ocurrió un error de comunicación con la base de datos."
-                };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+                throw FaultExceptionFactory.Create( ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "Ocurrió un error de comunicación con la base de datos.");
             }
             catch (Exception ex)
             {
                 log.Fatal($"Error inesperado en UpdateProfile para PlayerId: {updatedProfileData.PlayerId}. Ex: {ex.Message}", ex);
-                var errorDetail = new ServiceErrorDetailDTO
-                {
-                    Code = ServiceErrorCode.UnexpectedError,
-                    ErrorCode = "UNEXPECTED_ERROR",
-                    Message = "Ocurrió un error inesperado en el servidor al actualizar el perfil."
-                };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Ocurrió un error inesperado en el servidor al actualizar el perfil.");
             }
         }
 

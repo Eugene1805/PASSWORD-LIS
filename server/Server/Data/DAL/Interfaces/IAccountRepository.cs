@@ -8,12 +8,12 @@ namespace Data.DAL.Interfaces
     {
         Task CreateAccountAsync(UserAccount account);
         bool AccountAlreadyExist(string email);
-        UserAccount GetUserByEmail(string email);
+        Task<UserAccount> GetUserByEmailAsync (string email);
         bool VerifyEmail(string email);
         bool ResetPassword(string email, string passwordHash);
-        bool UpdateUserProfile(int playerId, UserAccount updatedAccountData, List<SocialAccount> updatedSocialsAccounts);
-        UserAccount GetUserByPlayerId(int playerId);
-        UserAccount GetUserByUserAccountId(int userAccountId);
+        Task<bool> UpdateUserProfileAsync(int playerId, UserAccount updatedAccountData, List<SocialAccount> updatedSocialsAccounts);
+        Task <UserAccount> GetUserByPlayerIdAsync(int playerId);
+        Task<UserAccount> GetUserByUserAccountIdAsync(int userAccountId);
         Task<bool> IsNicknameInUse(string nickname);
 
     }

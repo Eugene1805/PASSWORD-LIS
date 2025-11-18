@@ -1,5 +1,6 @@
 ﻿using Services.Contracts.DTOs;
 using System.ServiceModel;
+using System.Threading.Tasks;
 
 namespace Services.Contracts
 {
@@ -16,6 +17,6 @@ namespace Services.Contracts
         /// <returns>The persisted updated user profile.</returns>
         [OperationContract]
         [FaultContract(typeof(ServiceErrorDetailDTO))]
-        UserDTO UpdateProfile(UserDTO updatedProfileData);
+        Task <UserDTO> UpdateProfileAsync(UserDTO updatedProfileData);
     }
 }
