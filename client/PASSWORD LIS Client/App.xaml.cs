@@ -1,4 +1,6 @@
-﻿using PASSWORD_LIS_Client.Services;
+﻿using log4net;
+using log4net.Config;
+using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.ViewModels;
 using PASSWORD_LIS_Client.Views;
@@ -26,9 +28,10 @@ namespace PASSWORD_LIS_Client
         public static IWaitingRoomManagerService WaitRoomManagerService { get; private set; }
         public static IReportManagerService ReportManagerService { get; private set; }
         public static IGameManagerService GameManagerService { get; private set; }
-
+        private static readonly ILog log = LogManager.GetLogger(typeof(App));
         protected override void OnStartup(StartupEventArgs e)
         {
+            XmlConfigurator.Configure();
             base.OnStartup(e);
 
             var lang = PASSWORD_LIS_Client.Properties.Settings.Default.languageCode;
@@ -60,6 +63,8 @@ namespace PASSWORD_LIS_Client
             var loginWindow = new LoginWindow { DataContext = loginViewModel };
             loginWindow.Show();
 
+            
+            log.Info("App started");
         }
 
         protected override void OnExit(ExitEventArgs e)

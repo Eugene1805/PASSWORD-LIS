@@ -459,6 +459,8 @@ namespace Test.ServicesTests
             await sut.SubmitValidationVotesAsync("GAME8",1, emptyVotes); // Red Clue
             await sut.SubmitValidationVotesAsync("GAME8",3, emptyVotes); // Red Guess
 
+            await Task.Delay(100); // Allow async processing to complete
+
             // After all votes, validation should complete and either start new round or end (with TOTAL_ROUNDS=1 it ends)
             redClue.Verify(c => c.OnValidationComplete(It.Is<ValidationResultDTO>(v => v.TotalPenaltyApplied == 3)), Times.Once);
             redGuess.Verify(c => c.OnValidationComplete(It.IsAny<ValidationResultDTO>()), Times.Once);

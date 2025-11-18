@@ -4,6 +4,7 @@ using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
 using System.Threading.Tasks;
@@ -374,11 +375,15 @@ namespace PASSWORD_LIS_Client.ViewModels
             });
         }
 
-        private void OnBeginRoundValidation(TurnHistoryDTO[] turns)
+        private void OnBeginRoundValidation(List<TurnHistoryDTO> turns)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                windowService.NavigateToValidationPage(turns, gameCode, currentPlayer.Id, currentLanguage);
+                var validationViewModel = new RoundValidationViewModel(
+                turns, gameManagerService, windowService, gameCode, currentPlayer.Id, currentLanguage);
+                var validationPage = new RoundValidationPage { DataContext = validationViewModel };
+
+                windowService.NavigateTo(validationPage);
 
             });
         }

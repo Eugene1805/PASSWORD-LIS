@@ -1,7 +1,10 @@
-﻿using PASSWORD_LIS_Client.GameManagerServiceReference;
+﻿using log4net;
+using PASSWORD_LIS_Client.GameManagerServiceReference;
 using PASSWORD_LIS_Client.ViewModels;
 using PASSWORD_LIS_Client.Views;
 using PASSWORD_LIS_Client.WaitingRoomManagerServiceReference;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,13 +25,13 @@ namespace PASSWORD_LIS_Client.Utils
         void ShowReportWindow(WaitingRoomManagerServiceReference.PlayerDTO reportedPlayer);
         void ShowMainWindow();
         void CloseMainWindow();
-        void NavigateToValidationPage(TurnHistoryDTO[] turns, string gameCode, int playerId, string language);
 
     }
 
     public class WindowService : IWindowService
     {
         private Frame mainFrame;
+        private static readonly ILog log = LogManager.GetLogger(typeof(WindowService));
 
         public void Initialize(Frame frame)
         {
@@ -36,15 +39,62 @@ namespace PASSWORD_LIS_Client.Utils
         }
         public void GoBack()
         {
-            if (mainFrame?.NavigationService.CanGoBack == true)
+            try
             {
-                mainFrame.NavigationService.GoBack();
+                log.Info("WindowService.GoBack called");
+
+                if (Application.Current.MainWindow != null)
+                {
+                    var mainWindow = Application.Current.MainWindow;
+                    if (mainWindow.Content is Frame frame && frame.CanGoBack)
+                    {
+                        log.Info("Navigating frame back");
+                        frame.GoBack();
+                        log.Info("Frame navigation completed");
+                    }
+                    else
+                    {
+                        log.Warn("Cannot navigate back - no frame or CanGoBack is false");
+                    }
+                }
+                else
+                {
+                    log.Warn("Application.Current.MainWindow is null");
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Error in WindowService.GoBack: {ex.Message}", ex);
             }
         }
 
         public void NavigateTo(Page page)
         {
-            mainFrame?.NavigationService.Navigate(page);
+            try
+            {
+                log.InfoFormat("NavigateTo called - Page: {0}, mainFrame null: {1}", page.GetType().Name, mainFrame == null);
+
+                if (mainFrame != null)
+                {
+                    mainFrame.NavigationService.Navigate(page);
+                    log.InfoFormat("Navigation completed - CanGoBack: {0}", mainFrame.CanGoBack);
+                }
+                else
+                {
+                    log.Error("mainFrame is null in NavigateTo!");
+
+                    // Fallback: usar el Frame de MainWindow directamente
+                    if (Application.Current.MainWindow is MainWindow mainWindow && mainWindow.mainFrame != null)
+                    {
+                        log.Info("Using MainWindow's mainFrame as fallback");
+                        mainWindow.mainFrame.Navigate(page);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Error in NavigateTo: {ex.Message}", ex);
+            }
         }
         public void ShowVerifyCodeWindow(string email, VerificationReason reason)
         {
@@ -115,14 +165,6 @@ namespace PASSWORD_LIS_Client.Utils
             {
                 mainWindow.Close();
             }
-        }
-
-        public void NavigateToValidationPage(TurnHistoryDTO[] turns, string gameCode, int playerId, string language)
-        {
-            var validationViewModel = new RoundValidationViewModel(turns, App.GameManagerService, App.WindowService,
-                gameCode, playerId, language);
-            var validationPage = new RoundValidationPage { DataContext = validationViewModel };
-            mainFrame?.NavigationService.Navigate(validationPage);
         }
     }
 }
