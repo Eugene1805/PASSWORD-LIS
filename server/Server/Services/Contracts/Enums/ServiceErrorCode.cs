@@ -23,7 +23,6 @@ namespace Services.Contracts.Enums
          PlayerNotFound,
          [EnumMember(Value = "ALREADY_IN_ROOM")]
          AlreadyInRoom,
-         // --- Added for Report/Ban flows ---
          [EnumMember(Value = "INVALID_REPORT_PAYLOAD")]
          InvalidReportPayload,
          [EnumMember(Value = "REPORTER_NOT_FOUND")]
@@ -37,6 +36,12 @@ namespace Services.Contracts.Enums
          [EnumMember(Value = "SUBSCRIPTION_ERROR")]
          SubscriptionError,
          [EnumMember(Value = "UNSUBSCRIPTION_ERROR")]
-         UnsubscriptionError
+         UnsubscriptionError,
+        [EnumMember(Value = "NULL_ARGUMENT")]
+         NullArgument,
+        [EnumMember(Value = "EMAIL_SENDING_ERROR")]
+         EmailSendingError,
+        [EnumMember(Value = "EMAIL_CONFIGURATION_ERROR")]
+         EmailConfigurationError
     }
 }

@@ -1,11 +1,13 @@
 ﻿using Data.DAL.Interfaces;
+using log4net;
 using Services.Contracts;
 using Services.Contracts.DTOs;
-using Services.Util;
-using System.ServiceModel;
-using log4net;
 using Services.Contracts.Enums;
+using Services.Util;
 using System;
+using System.Configuration;
+using System.Net.Mail;
+using System.ServiceModel;
 
 namespace Services.Services
 {
@@ -28,17 +30,53 @@ namespace Services.Services
         {
             try
             {
+                if (emailVerificationDTO == null || string.IsNullOrWhiteSpace(emailVerificationDTO.Email))
+                {
+                    throw FaultExceptionFactory.Create(
+                        ServiceErrorCode.NullArgument,
+                        "NULL_ARGUMENT",
+                        "Email verification DTO or email is null/empty"
+                    );
+                }
+
                 if (!repository.AccountAlreadyExist(emailVerificationDTO.Email) ||
                     !codeService.CanRequestCode(emailVerificationDTO.Email, CodeType.PasswordReset))
                 {
                     log.WarnFormat("Password reset code request denied for '{0}'. Account missing or rate-limited.", emailVerificationDTO.Email);
                     return false;
                 }
-                var code = codeService.GenerateAndStoreCode(emailVerificationDTO.Email, CodeType.PasswordReset);
-                _ = notification.SendPasswordResetEmailAsync(emailVerificationDTO.Email, code);
-                log.InfoFormat("Password reset code sent to '{0}'.", emailVerificationDTO.Email);
+                SendEmailVerification(emailVerificationDTO.Email);
 
                 return true;
+            }
+            catch (ArgumentNullException ex)
+            {
+                log.Error("Null argument provided to RequestPasswordResetCode.", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.NullArgument, "NULL_ARGUMENT", "A null argument was received occurred.");
+            }
+            catch (ConfigurationErrorsException)
+            {
+                throw FaultExceptionFactory.Create(
+                    ServiceErrorCode.EmailConfigurationError,
+                    "EMAIL_CONFIGURATION_ERROR",
+                    "Email service configuration error"
+                );
+            }
+            catch (FormatException)
+            {
+                throw FaultExceptionFactory.Create(
+                    ServiceErrorCode.EmailConfigurationError,
+                    "EMAIL_CONFIGURATION_ERROR",
+                    "Invalid email service configuration"
+                );
+            }
+            catch (SmtpException)
+            {
+                throw FaultExceptionFactory.Create(
+                    ServiceErrorCode.EmailSendingError,
+                    "EMAIL_SENDING_ERROR",
+                    $"Failed to send email"
+                );
             }
             catch (Exception ex)
             {
@@ -51,6 +89,14 @@ namespace Services.Services
         {   
             try
             {
+                if (passwordResetDTO == null || string.IsNullOrWhiteSpace(passwordResetDTO.Email))
+                {
+                    throw FaultExceptionFactory.Create(
+                        ServiceErrorCode.NullArgument,
+                        "NULL_ARGUMENT",
+                        "Email verification DTO or email is null/empty"
+                    );
+                }
                 if (!codeService.ValidateCode(passwordResetDTO.Email, passwordResetDTO.ResetCode, CodeType.PasswordReset))
                 {
                     log.WarnFormat("Password reset failed for '{0}': invalid or expired code.", passwordResetDTO.Email);
@@ -68,10 +114,21 @@ namespace Services.Services
                 }
                 return result;
             }
+            catch (ArgumentNullException ex)
+            {
+                log.Error("Null argument provided to CreateAccountAsync.", ex);
+                throw FaultExceptionFactory.Create(
+                    ServiceErrorCode.NullArgument, 
+                    "NULL_ARGUMENT", 
+                    "A null argument was received occurred.");
+            }
             catch (Exception ex)
             {
                 log.Error("Unexpected error resetting password.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Unexpected error resetting password.");
+                throw FaultExceptionFactory.Create(
+                    ServiceErrorCode.UnexpectedError,
+                    "UNEXPECTED_ERROR", 
+                    "Unexpected error resetting password.");
             }
         }
 
@@ -79,6 +136,14 @@ namespace Services.Services
         {
             try
             {
+                if (emailVerificationDTO == null || string.IsNullOrWhiteSpace(emailVerificationDTO.Email))
+                {
+                    throw FaultExceptionFactory.Create(
+                        ServiceErrorCode.NullArgument,
+                        "NULL_ARGUMENT",
+                        "Email verification DTO or email is null/empty"
+                    );
+                }
                 var ok = codeService.ValidateCode(emailVerificationDTO.Email, emailVerificationDTO.VerificationCode, 
                     CodeType.PasswordReset, consume:false);
                 if (!ok)
@@ -91,11 +156,23 @@ namespace Services.Services
                 }
                 return ok;
             }
+            catch (ArgumentNullException ex)
+            {
+                log.Error("Null argument provided to CreateAccountAsync.", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.NullArgument, "NULL_ARGUMENT", "A null argument was received occurred.");
+            }
             catch (Exception ex)
             {
                 log.Error("Unexpected error validating password reset code.", ex);
                 throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Unexpected error validating password reset code.");
             }
+        }
+
+        private void SendEmailVerification(string email)
+        {
+            var code = codeService.GenerateAndStoreCode(email, CodeType.PasswordReset);
+            _ = notification.SendPasswordResetEmailAsync(email, code);
+            log.InfoFormat("Password reset code sent to '{0}'.", email);
         }
     }
 }

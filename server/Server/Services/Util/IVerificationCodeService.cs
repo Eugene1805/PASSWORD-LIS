@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Services.Util
 {
@@ -28,8 +30,15 @@ namespace Services.Util
         private readonly object lockObject = new object();
         private readonly Dictionary<string, CodeInfo> codes = new Dictionary<string, CodeInfo>();
         private readonly Random random = new Random();
+        private const int CodeLength = 6;
+        private const int CodeValidityMinutes = 5;
+        public const int RequestColdownSeconds = 60;
         private static string GetKey(string identifier, CodeType type)
         {
+            if (string.IsNullOrWhiteSpace(identifier))
+            {
+                throw new ArgumentException("Identifier cannot be null or empty", nameof(identifier));
+            }
             return $"{type}:{identifier}";
         }
         public string GenerateAndStoreCode(string identifier, CodeType type)
@@ -37,13 +46,13 @@ namespace Services.Util
             var key = GetKey(identifier, type);
             lock (lockObject)
             {
-                var code = random.Next(100000, 999999).ToString();
+                var code = GenerateRandomCode(CodeLength);
                 var now = DateTime.UtcNow;
                 var codeInfo = new CodeInfo
                 {
                     Code = code,
                     CreationTime = now,
-                    ExpirationTime = now.AddMinutes(5),
+                    ExpirationTime = now.AddMinutes(CodeValidityMinutes),
                     Type = type
                 };
                 codes[key] = codeInfo;
@@ -88,10 +97,34 @@ namespace Services.Util
             {
                 if (codes.TryGetValue(GetKey(identifier, type), out CodeInfo existingCode) && existingCode.Type == type)
                 {
-                    return DateTime.UtcNow.Subtract(existingCode.CreationTime).TotalSeconds >= 60;
+                    return DateTime.UtcNow.Subtract(existingCode.CreationTime).TotalSeconds >= RequestColdownSeconds;
                 }
                 return true; 
             }
+        }
+
+        private string GenerateRandomCode(int length)
+        {
+            if (length <= 0)
+            {
+                return random.Next(100000, 999999).ToString();
+            }
+            const string AllowedDigits = "0123456789";
+
+            var chars = new char[length];
+            var buffer = new byte[length];
+
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(buffer);
+            }
+
+            for (int i = 0; i < length; i++)
+            {
+                chars[i] = AllowedDigits[buffer[i] % AllowedDigits.Length];
+            }
+
+            return new string(chars);
         }
     }
 }
