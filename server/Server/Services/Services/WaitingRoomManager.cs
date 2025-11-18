@@ -26,6 +26,7 @@ namespace Services.Services
             public string GameCode { get; set; }
             public int HostPlayerId { get; set; }
             public ConcurrentDictionary<int, (IWaitingRoomCallback, PlayerDTO)> Players { get; } = new ConcurrentDictionary<int, (IWaitingRoomCallback, PlayerDTO)>();
+            public object Lock { get; } = new object();
         }
 
         private static readonly ILog log = LogManager.GetLogger(typeof(WaitingRoomManager));
@@ -114,14 +115,6 @@ namespace Services.Services
                 Nickname = playerEntity.UserAccount.Nickname
             };
 
-            AssignTeamAndRole(playerDto, game.Players.Count);
-            if (game.Players.ContainsKey(playerDto.Id))
-            {
-                var alreadyIn = new ServiceErrorDetailDTO { Code = ServiceErrorCode.AlreadyInRoom, ErrorCode = "ALREADY_IN_ROOM", Message = "Player is already in the room." };
-                log.WarnFormat("Join as registered failed: player {0} already in room '{1}'.", playerDto.Id, gameCode);
-                throw new FaultException<ServiceErrorDetailDTO>(alreadyIn, new FaultReason(alreadyIn.Message));
-            }
-
             var success = await TryAddPlayerAsync(game, playerDto, callback);
             if (!success)
             {
@@ -158,15 +151,6 @@ namespace Services.Services
                 Id = guestId,
                 Nickname = nickname
             };
-
-            AssignTeamAndRole(playerDto, game.Players.Count);
-
-            if (game.Players.ContainsKey(playerDto.Id))
-            {
-                var alreadyIn = new ServiceErrorDetailDTO { Code = ServiceErrorCode.AlreadyInRoom, ErrorCode = "ALREADY_IN_ROOM", Message = "Player is already in the room." };
-                log.WarnFormat("Join as guest failed: generated guest id {0} already in room '{1}'.", playerDto.Id, gameCode);
-                throw new FaultException<ServiceErrorDetailDTO>(alreadyIn, new FaultReason(alreadyIn.Message));
-            }
 
             var added = await TryAddPlayerAsync(game, playerDto, callback);
             if (added)
@@ -282,38 +266,65 @@ namespace Services.Services
                 return false;
             }
 
-            if (!game.Players.TryAdd(player.Id, (callback, player)))
+            lock (game.Lock)
             {
-                log.WarnFormat("TryAddPlayer failed: could not add player {0} to room '{1}'.", player.Id, game.GameCode);
-                return false;
+                if (game.Players.ContainsKey(player.Id))
+                {
+                    log.WarnFormat("TryAddPlayer failed: player {0} already in room '{1}'.", player.Id, game.GameCode);
+                    return false;
+                }
+
+                // Asignación determinista basada solo en jugadores conectados
+                var assigned = AssignTeamAndRole(game, player);
+                if (!assigned)
+                {
+                    // No hay slot disponible según los roles actualmente en la sala
+                    log.WarnFormat("TryAddPlayer failed: no available team/role slot for player {0} in room '{1}'.", player.Id, game.GameCode);
+                    return false;
+                }
+
+                if (!game.Players.TryAdd(player.Id, (callback, player)))
+                {
+                    log.WarnFormat("TryAddPlayer failed: could not add player {0} to room '{1}'.", player.Id, game.GameCode);
+                    return false;
+                }
             }
 
+            // fuera del lock notificamos
             await BroadcastAsync(game, client => client.Item1.OnPlayerJoined(player));
             return true;
         }
 
-        private static void AssignTeamAndRole(PlayerDTO player, int playerCountInRoom)
+        private static bool AssignTeamAndRole(Room game, PlayerDTO player)
         {
-            switch (playerCountInRoom)
+            // Determina qué slots están ocupados por los jugadores conectados actualmente
+            var occupied = new HashSet<(MatchTeam team, PlayerRole role)>(
+                game.Players.Values.Select(p => (p.Item2.Team, p.Item2.Role))
+            );
+
+            // Orden determinista de preferencia
+            var desired = new List<(MatchTeam team, PlayerRole role)>
+    {
+        (MatchTeam.RedTeam, PlayerRole.ClueGuy),
+        (MatchTeam.BlueTeam, PlayerRole.ClueGuy),
+        (MatchTeam.RedTeam, PlayerRole.Guesser),
+        (MatchTeam.BlueTeam, PlayerRole.Guesser)
+    };
+
+            // Si no hay ningún slot libre, devolvemos false
+            if (!desired.Any(d => !occupied.Contains(d)))
             {
-                case 0:
-                    player.Team = MatchTeam.RedTeam;
-                    player.Role = PlayerRole.ClueGuy;
-                    break;
-                case 1:
-                    player.Team = MatchTeam.BlueTeam;
-                    player.Role = PlayerRole.ClueGuy;
-                    break;
-                case 2:
-                    player.Team = MatchTeam.RedTeam;
-                    player.Role = PlayerRole.Guesser;
-                    break;
-                case 3:
-                    player.Team = MatchTeam.BlueTeam;
-                    player.Role = PlayerRole.Guesser;
-                    break;
+                return false;
             }
+
+            // Elegimos el primer par libre (sabemos que existe porque lo comprobamos arriba)
+            var chosen = desired.First(d => !occupied.Contains(d));
+
+            player.Team = chosen.team;
+            player.Role = chosen.role;
+            return true;
         }
+
         private async Task BroadcastAsync(Room game, Action<(IWaitingRoomCallback, PlayerDTO)> action)
         {
             // Snapshot the current players to avoid concurrent modification issues during iteration
