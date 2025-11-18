@@ -1,11 +1,13 @@
 ﻿using Data.DAL.Interfaces;
+using log4net;
 using Services.Contracts;
 using Services.Contracts.DTOs;
-using Services.Util;
-using System.ServiceModel;
-using log4net;
 using Services.Contracts.Enums;
+using Services.Util;
 using System;
+using System.Configuration;
+using System.Net.Mail;
+using System.ServiceModel;
 
 namespace Services.Services
 {
@@ -46,7 +48,11 @@ namespace Services.Services
             catch (Exception ex)
             {
                 log.Error("Unexpected error verifying email.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Unexpected error during email verification.");
+                throw FaultExceptionFactory.Create(
+                    ServiceErrorCode.UnexpectedError,
+                    "UNEXPECTED_ERROR", 
+                    "Unexpected error during email verification."
+                );
             }
         }
 
@@ -67,10 +73,38 @@ namespace Services.Services
 
                 return true;
             }
+            catch (ConfigurationErrorsException)
+            {
+                throw FaultExceptionFactory.Create(
+                    ServiceErrorCode.EmailConfigurationError,
+                    "EMAIL_CONFIGURATION_ERROR",
+                    "Email service configuration error"
+                );
+            }
+            catch (FormatException)
+            {
+                throw FaultExceptionFactory.Create(
+                    ServiceErrorCode.EmailConfigurationError,
+                    "EMAIL_CONFIGURATION_ERROR",
+                    "Invalid email service configuration"
+                );
+            }
+            catch (SmtpException)
+            {
+                throw FaultExceptionFactory.Create(
+                    ServiceErrorCode.EmailSendingError,
+                    "EMAIL_SENDING_ERROR",
+                    $"Failed to send email"
+                );
+            }
             catch (Exception ex)
             {
                 log.Error("Unexpected error resending verification code.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Unexpected error resending verification code.");
+                throw FaultExceptionFactory.Create(
+                    ServiceErrorCode.UnexpectedError,
+                    "UNEXPECTED_ERROR", 
+                    "Unexpected error resending verification code."
+                );
             }
         }
     }

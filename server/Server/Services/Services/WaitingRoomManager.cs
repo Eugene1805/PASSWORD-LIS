@@ -8,6 +8,7 @@ using Services.Wrappers;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Net.Mail;
 using System.Security.Cryptography;
@@ -385,12 +386,29 @@ namespace Services.Services
                 await notificationService.SendGameInvitationEmailAsync(email, gameCode, inviterNickname);
                 log.InfoFormat("Invitación por correo enviada a {0} para la sala {1} por {2}", email, gameCode, inviterNickname);
             }
-            catch (SmtpException ex)
+            catch (ConfigurationErrorsException)
             {
-                log.Error($"Error de SMTP al enviar invitación a {email}", ex);
-                throw new FaultException<ServiceErrorDetailDTO>(
-                    new ServiceErrorDetailDTO { Message = "No se pudo enviar el correo de invitación. Revisa la dirección.", ErrorCode = "EMAIL_SEND_FAILED" },
-                    new FaultReason("Error del servidor al enviar correo."));
+                throw FaultExceptionFactory.Create(
+                    ServiceErrorCode.EmailConfigurationError,
+                    "EMAIL_CONFIGURATION_ERROR",
+                    "Email service configuration error"
+                );
+            }
+            catch (FormatException)
+            {
+                throw FaultExceptionFactory.Create(
+                    ServiceErrorCode.EmailConfigurationError,
+                    "EMAIL_CONFIGURATION_ERROR",
+                    "Invalid email service configuration"
+                );
+            }
+            catch (SmtpException)
+            {
+                throw FaultExceptionFactory.Create(
+                    ServiceErrorCode.EmailSendingError,
+                    "EMAIL_SENDING_ERROR",
+                    $"Failed to send email"
+                );
             }
             catch (Exception ex)
             {

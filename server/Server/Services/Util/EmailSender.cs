@@ -17,15 +17,16 @@ namespace Services.Util
     public class EmailSender : IEmailSender
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(EmailSender));
+        private const string DisplayName = "PASSWORD LIS";
         public async Task SendEmailAsync(string recipientEmail, string subject, string body)
         {
             try
             {
                 var (smtpUser, smtpPass, smtpHost, smtpPort) = LoadSmtpConfiguration();
-
+                
                 var message = new MailMessage
                 {
-                    From = new MailAddress(smtpUser, "PASSWORD LIS"),
+                    From = new MailAddress(smtpUser, DisplayName),
                     Subject = subject,
                     IsBodyHtml = true,
                     Body = body
@@ -43,38 +44,22 @@ namespace Services.Util
             catch (ConfigurationErrorsException ex)
             {
                 log.Error("SMTP configuration error", ex);
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.EmailConfigurationError,
-                    "EMAIL_CONFIGURATION_ERROR",
-                    "Email service configuration error"
-                );
+                throw ;
             }
             catch (FormatException ex)
             {
                 log.Error("Invalid SMTP configuration format", ex);
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.EmailConfigurationError,
-                    "EMAIL_CONFIGURATION_ERROR",
-                    "Invalid email service configuration"
-                );
+                throw;
             }
             catch (SmtpException ex)
             {
                 log.Error($"SMTP error sending to {recipientEmail}", ex);
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.EmailSendingError,
-                    "EMAIL_SENDING_ERROR",
-                    $"Failed to send email: {ex.StatusCode}"
-                );
+                throw;
             }
             catch (Exception ex)
             {
                 log.Error($"Unexpected error sending email to {recipientEmail}", ex);
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.EmailSendingError,
-                    "EMAIL_SENDING_ERROR",
-                    "Failed to send email"
-                );
+                throw;
             }
         }
 
