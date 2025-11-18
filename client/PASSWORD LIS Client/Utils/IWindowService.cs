@@ -43,23 +43,38 @@ namespace PASSWORD_LIS_Client.Utils
             {
                 log.Info("WindowService.GoBack called");
 
-                if (Application.Current.MainWindow != null)
+                if (mainFrame != null)
                 {
-                    var mainWindow = Application.Current.MainWindow;
-                    if (mainWindow.Content is Frame frame && frame.CanGoBack)
+                    if (mainFrame.CanGoBack)
                     {
-                        log.Info("Navigating frame back");
-                        frame.GoBack();
-                        log.Info("Frame navigation completed");
+                        log.Info("Navigating mainFrame back");
+                        mainFrame.GoBack();
                     }
                     else
                     {
-                        log.Warn("Cannot navigate back - no frame or CanGoBack is false");
+                        log.Warn("mainFrame exists but Cannot GoBack (History is empty)");
                     }
+                    return;
                 }
-                else
+
+                if (Application.Current.MainWindow != null)
                 {
-                    log.Warn("Application.Current.MainWindow is null");
+                    var window = Application.Current.MainWindow;
+
+                    if (window is MainWindow myWindow && myWindow.mainFrame != null && myWindow.mainFrame.CanGoBack)
+                    {
+                        log.Info("Navigating MainWindow.mainFrame back via Fallback");
+                        myWindow.mainFrame.GoBack();
+                    }
+                    else if (window.Content is Frame frame && frame.CanGoBack)
+                    {
+                        log.Info("Navigating window content frame back");
+                        frame.GoBack();
+                    }
+                    else
+                    {
+                        log.Warn("Cannot navigate back - Frame not found or CanGoBack is false");
+                    }
                 }
             }
             catch (Exception ex)
