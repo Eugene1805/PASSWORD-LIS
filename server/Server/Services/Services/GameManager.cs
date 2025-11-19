@@ -252,7 +252,6 @@ namespace Services.Services
                 }
                 catch (Exception)
                 {
-                    // Si falla al enviar la palabra específica, revisamos ambos por simplicidad
                     if (clueGuy.Callback != null) await HandlePlayerDisconnectionIfFailed(session, clueGuy.Player.Id);
                     if (guesser.Callback != null) await HandlePlayerDisconnectionIfFailed(session, guesser.Player.Id);
                 }
@@ -525,7 +524,6 @@ namespace Services.Services
         {
             try
             {
-                log.InfoFormat("Starting ProcessVotesAsync for game '{0}'", session.GameCode);
                 session.StopTimers();
 
                 var (redPenalty, bluePenalty) = RulesEngine.CalculateValidationPenalties(session.ReceivedVotes);
@@ -541,7 +539,6 @@ namespace Services.Services
                 log.InfoFormat("Before BroadcastAsync - sending ValidationComplete for game '{0}'",
                     session.GameCode);
                 await BroadcastAndHandleDisconnectsAsync(session, cb => cb.OnValidationComplete(validationResult));
-                log.Info("After BroadcastAsync - all callbacks completed");
                 if (session.CurrentRound >= TotalRounds)
                 {
                     await EndGameAsync(session);
@@ -646,13 +643,12 @@ namespace Services.Services
 
             foreach (var playerId in disconnectedIds)
             {
-                log.Info($"Processing disconnection for player {playerId} found during broadcast.");
+                log.InfoFormat("Processing disconnection for player {0} found during broadcast.",playerId);
                 await HandlePlayerDisconnectionAsync(session, playerId);
             }
         }
         private async Task HandlePlayerDisconnectionIfFailed(MatchSession session, int playerId)
         {
-            // Verificamos si sigue conectado antes de intentar "matarlo"
             if (session.ActivePlayers.ContainsKey(playerId))
             {
                 await HandlePlayerDisconnectionAsync(session, playerId);
@@ -682,9 +678,8 @@ namespace Services.Services
                 {
                     try
                     {
-                        // Execute the callback synchronously within the task
                         action(playerEntry.Value.Callback);
-                        await Task.CompletedTask; // To keep the method async
+                        await Task.CompletedTask;
                     }
                     catch (CommunicationException ex)
                     {

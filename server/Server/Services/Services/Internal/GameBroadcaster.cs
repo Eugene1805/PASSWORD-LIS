@@ -25,21 +25,16 @@ namespace Services.Services.Internal
                     action(playerEntry.Value.Callback);
                     await Task.CompletedTask;
                 }
-                catch (Exception ex) // Atrapamos CommunicationException, Timeout, etc.
+                catch (Exception ex)
                 {
                     log.WarnFormat("Failed to contact player {0}: {1}", playerEntry.Key, ex.Message);
-                    // Agregamos el ID a la bolsa de desconectados
                     disconnectedPlayers.Add(playerEntry.Key);
                 }
             });
 
             await Task.WhenAll(tasks);
-
-            // Devolvemos la lista de IDs caídos al GameManager
             return disconnectedPlayers;
         }
-
-        // Sobrecarga para enviar solo a un subconjunto (ej. solo un equipo)
         public async Task BroadcastToGroupAsync(
             System.Collections.Generic.IEnumerable<(IGameManagerCallback Callback, PlayerDTO Player)> targets,
             Action<IGameManagerCallback> action)
@@ -58,7 +53,6 @@ namespace Services.Services.Internal
             await Task.WhenAll(tasks);
         }
 
-        // Helper para enviar a un solo jugador con seguridad
         public void SendToPlayer((IGameManagerCallback Callback, PlayerDTO Player) player, Action<IGameManagerCallback> action)
         {
             if (player.Callback == null) return;
@@ -69,7 +63,6 @@ namespace Services.Services.Internal
             catch (Exception ex)
             {
                 log.Warn($"Failed to send to player {player.Player.Id}: {ex.Message}");
-                // Aquí podrías lanzar una excepción custom si quieres que el GameManager desconecte al jugador
                 throw;
             }
         }

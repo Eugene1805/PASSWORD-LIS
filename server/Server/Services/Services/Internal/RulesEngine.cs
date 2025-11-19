@@ -21,13 +21,11 @@ namespace Services.Services.Internal
             {
                 foreach (var vote in voteList)
                 {
-                    // Si vota el equipo Rojo, está penalizando al Azul
                     if (voterTeam == MatchTeam.RedTeam)
                     {
                         if (vote.PenalizeMultiword) blueTurnsToPenalizeMultiword.Add(vote.TurnId);
                         if (vote.PenalizeSynonym) blueTurnsToPenalizeSynonym.Add(vote.TurnId);
                     }
-                    // Si vota el equipo Azul, está penalizando al Rojo
                     else
                     {
                         if (vote.PenalizeMultiword) redTurnsToPenalizeMultiword.Add(vote.TurnId);

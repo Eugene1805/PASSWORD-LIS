@@ -65,19 +65,19 @@ namespace TestsEF.DataTests
         }
 
         [Fact]
-        public void GetUserByEmail_WhenUserExists_ReturnsUserWithIncludes()
+        public async Task GetUserByEmail_WhenUserExists_ReturnsUserWithIncludes()
         {
             var user = CreateValidUser("user@test.com", "TestUser");
             Context.UserAccount.Add(user);
-            Context.SaveChanges();
+            await Context.SaveChangesAsync();
 
             var player = new Player { Id = 10, UserAccountId = user.Id };
             var social = new SocialAccount { Provider = "GitHub", Username = "TestUser", UserAccountId = user.Id };
             Context.Player.Add(player);
             Context.SocialAccount.Add(social);
-            Context.SaveChanges();
+            await Context.SaveChangesAsync();
 
-            var result = _repository.GetUserByEmail("user@test.com");
+            var result = await _repository.GetUserByEmailAsync("user@test.com");
 
             Assert.NotNull(result);
             Assert.Equal("user@test.com", result.Email);
@@ -91,7 +91,7 @@ namespace TestsEF.DataTests
         [Fact]
         public void GetUserByEmail_WhenUserDoesNotExist_ReturnsNull()
         {
-            var result = _repository.GetUserByEmail("nouser@test.com");
+            var result = _repository.GetUserByEmailAsync("nouser@test.com");
             Assert.Null(result);
         }
 
@@ -120,7 +120,7 @@ namespace TestsEF.DataTests
         }
 
         [Fact]
-        public void UpdateUserProfile_WhenUserExists_UpdatesDataAndManagesSocials()
+        public async Task UpdateUserProfile_WhenUserExists_UpdatesDataAndManagesSocials()
         {
             var user = CreateValidUser("user@test.com", "OldUser");
             user.FirstName = "OldFirst";
@@ -133,7 +133,7 @@ namespace TestsEF.DataTests
 
             var player = new Player { Id = 10, UserAccount = user };
             Context.Player.Add(player);
-            Context.SaveChanges();
+            await Context.SaveChangesAsync();
 
             var savedPlayerId = player.Id;
 
@@ -149,7 +149,7 @@ namespace TestsEF.DataTests
                 new SocialAccount { Provider = "LinkedIn", Username = "NewLinkedIn" }
             };
 
-            var result = _repository.UpdateUserProfile(savedPlayerId, updatedUserData, updatedSocials);
+            var result = await _repository.UpdateUserProfileAsync(savedPlayerId, updatedUserData, updatedSocials);
 
             Assert.True(result);
 
