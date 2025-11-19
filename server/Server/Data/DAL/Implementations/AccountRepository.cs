@@ -27,8 +27,6 @@ namespace Data.DAL.Implementations
                     context.UserAccount.Add(account);
                     context.Player.Add(new Player { UserAccount = account });
                     await context.SaveChangesAsync();
-            
-
         }
 
         public bool AccountAlreadyExist(string email)
@@ -88,7 +86,8 @@ namespace Data.DAL.Implementations
                 return true;
             
         }
-        public async Task<bool> UpdateUserProfileAsync(int playerId, UserAccount updatedAccountData, List<SocialAccount> updatedSocialsAccounts)
+        public async Task<bool> UpdateUserProfileAsync(int playerId, UserAccount updatedAccountData,
+            List<SocialAccount> updatedSocialsAccounts)
         {
             using (var context = contextFactory.CreateDbContext())
             {
@@ -147,7 +146,8 @@ namespace Data.DAL.Implementations
             }
         }
 
-        private static void UpdateSocialAccounts(PasswordLISEntities context, UserAccount userAccountToUpdate, List<SocialAccount> updatedSocialsAccounts)
+        private static void UpdateSocialAccounts(PasswordLISEntities context, UserAccount userAccountToUpdate,
+            List<SocialAccount> updatedSocialsAccounts)
         {
             var existingSocialsLookup = userAccountToUpdate.SocialAccount.ToDictionary(s => s.Provider);
             var providersToKeep = new HashSet<string>(updatedSocialsAccounts.Select(s => s.Provider));

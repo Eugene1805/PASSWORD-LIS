@@ -52,7 +52,8 @@ namespace Data.DAL.Implementations
                     {
                         var foundIds = new HashSet<int>(playersFromDb.Select(p => p.Id));
                         var missing = allRegisteredPlayerIds.Where(id => !foundIds.Contains(id)).ToList();
-                        throw new InvalidOperationException($"Some player IDs were not found: {string.Join(", ", missing)}");
+                        throw new InvalidOperationException($"Some player IDs were not found: " +
+                            $"{string.Join(", ", missing)}");
                     }
 
                     var playerById = playersFromDb.ToDictionary(p => p.Id);
