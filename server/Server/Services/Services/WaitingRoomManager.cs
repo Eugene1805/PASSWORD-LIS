@@ -25,7 +25,8 @@ namespace Services.Services
         {
             public string GameCode { get; set; }
             public int HostPlayerId { get; set; }
-            public ConcurrentDictionary<int, (IWaitingRoomCallback, PlayerDTO)> Players { get; } = new ConcurrentDictionary<int, (IWaitingRoomCallback, PlayerDTO)>();
+            public ConcurrentDictionary<int, (IWaitingRoomCallback, PlayerDTO)> Players { get; } =
+                new ConcurrentDictionary<int, (IWaitingRoomCallback, PlayerDTO)>();
             public object Lock { get; } = new object();
         }
 
@@ -60,7 +61,8 @@ namespace Services.Services
             if (!rooms.TryAdd(gameCode, newGame))
             {
                 // Rare collision, try again
-                log.WarnFormat("Game code collision for '{0}', retrying game creation for email '{1}'.", gameCode, email);
+                log.WarnFormat("Game code collision for '{0}', retrying game creation for email '{1}'.", 
+                    gameCode, email);
                 return await CreateRoomAsync(email);
             }
 
@@ -74,19 +76,22 @@ namespace Services.Services
 
             rooms.TryRemove(gameCode, out _);
             log.ErrorFormat("Failed to create game for email '{0}'. Returning fault COULD_NOT_CREATE_ROOM.", email);
-            throw FaultExceptionFactory.Create(ServiceErrorCode.CouldNotCreateRoom, "COULD_NOT_CREATE_ROOM", "Could not create room.");
+            throw FaultExceptionFactory.Create(ServiceErrorCode.CouldNotCreateRoom, "COULD_NOT_CREATE_ROOM",
+                "Could not create room.");
         }
         public async Task<int> JoinRoomAsRegisteredPlayerAsync(string gameCode, string email)
         {
             if (!rooms.TryGetValue(gameCode, out var game))
             {
                 log.WarnFormat("Join as registered failed: game '{0}' not found for email '{1}'.", gameCode, email);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.RoomNotFound, "ROOM_NOT_FOUND", "The room does not exist.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.RoomNotFound, "ROOM_NOT_FOUND", 
+                    "The room does not exist.");
             }
             if (game.Players.Count >= MaxPlayersPerGame)
             {
                 log.WarnFormat("Join as registered failed: room '{0}' is full for email '{1}'.", gameCode, email);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.RoomFull, "ROOM_FULL", "Could not join room. The room is full.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.RoomFull, "ROOM_FULL",
+                    "Could not join room. The room is full.");
             }
 
             // Capture the callback channel before any awaits to avoid losing OperationContext
@@ -95,8 +100,18 @@ namespace Services.Services
             var playerEntity = await repository.GetPlayerByEmailAsync(email);
             if (playerEntity == null || playerEntity.Id < 0)
             {
-                log.WarnFormat("Join as registered failed: player not found for email '{0}' in game '{1}'.", email, gameCode);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.PlayerNotFound, "PLAYER_NOT_FOUND", "The player was not found in the database.");
+                log.WarnFormat("Join as registered failed: player not found for email '{0}' in game '{1}'.",
+                    email, gameCode);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.PlayerNotFound, "PLAYER_NOT_FOUND", 
+                    "The player was not found in the database.");
+            }
+
+            if (game.Players.ContainsKey(playerEntity.Id))
+            {
+                log.WarnFormat("Join as registered failed: player {0} already in room '{1}'.", playerEntity.Id, 
+                    gameCode);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.AlreadyInRoom, "ALREADY_IN_ROOM",
+                    "Player already in the room.");
             }
 
             var playerDto = new PlayerDTO
@@ -122,12 +137,14 @@ namespace Services.Services
             if (!rooms.TryGetValue(gameCode, out var game))
             {
                 log.WarnFormat("Join as guest failed: game '{0}' not found for nickname '{1}'.", gameCode, nickname);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.RoomNotFound, "ROOM_NOT_FOUND", "The room does not exist.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.RoomNotFound, "ROOM_NOT_FOUND",
+                    "The room does not exist.");
             }
             if (game.Players.Count >= MaxPlayersPerGame)
             {
                 log.WarnFormat("Join as guest failed: room '{0}' is full for nickname '{1}'.", gameCode, nickname);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.RoomFull, "ROOM_FULL", "Could not join room. The room is full.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.RoomFull, "ROOM_FULL", 
+                    "Could not join room. The room is full.");
             }
 
             // Capture the callback channel at the start of the operation
@@ -201,19 +218,22 @@ namespace Services.Services
         {
             if (!rooms.TryGetValue(gameCode, out var game))
             {
-                throw FaultExceptionFactory.Create(ServiceErrorCode.RoomNotFound, "WAITING_ROOM_NOT_FOUND", "Waiting room not found.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.RoomNotFound, "WAITING_ROOM_NOT_FOUND", 
+                    "Waiting room not found.");
             }
 
             if (game.Players.Count != MaxPlayersPerGame)
             {
-                throw FaultExceptionFactory.Create(ServiceErrorCode.CouldNotCreateRoom, "NOT_ENOUGH_PLAYERS", "Four players are required to start a game.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.CouldNotCreateRoom, "NOT_ENOUGH_PLAYERS",
+                    "Four players are required to start a game.");
             }
             var playerList = game.Players.Values.Select(p => p.Item2).ToList();
             bool matchCreated = gameManager.CreateMatch(gameCode, playerList);
 
             if (!matchCreated)
             {
-                throw FaultExceptionFactory.Create(ServiceErrorCode.CouldNotCreateRoom, "COULD_NOT_CREATE_GAME", "Could not create the game.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.CouldNotCreateRoom, "COULD_NOT_CREATE_GAME",
+                    "Could not create the game.");
             }
 
             log.InfoFormat("Starting game for room '{0}'. Notifying clients and removing room.", gameCode);
@@ -251,7 +271,8 @@ namespace Services.Services
         {
             if (callback == null)
             {
-                log.WarnFormat("TryAddPlayer failed: no callback channel for player {0} in room '{1}'.", player.Id, game.GameCode);
+                log.WarnFormat("TryAddPlayer failed: no callback channel for player {0} in room '{1}'.",
+                    player.Id, game.GameCode);
                 return false;
             }
 
@@ -259,7 +280,8 @@ namespace Services.Services
             {
                 if (game.Players.ContainsKey(player.Id))
                 {
-                    log.WarnFormat("TryAddPlayer failed: player {0} already in room '{1}'.", player.Id, game.GameCode);
+                    log.WarnFormat("TryAddPlayer duplicate detected for player {0} in room '{1}'.", 
+                        player.Id, game.GameCode);
                     return false;
                 }
 
@@ -268,13 +290,15 @@ namespace Services.Services
                 if (!assigned)
                 {
                     // No hay slot disponible según los roles actualmente en la sala
-                    log.WarnFormat("TryAddPlayer failed: no available team/role slot for player {0} in room '{1}'.", player.Id, game.GameCode);
+                    log.WarnFormat("TryAddPlayer failed: no available team/role slot for player {0} in room '{1}'.",
+                        player.Id, game.GameCode);
                     return false;
                 }
 
                 if (!game.Players.TryAdd(player.Id, (callback, player)))
                 {
-                    log.WarnFormat("TryAddPlayer failed: could not add player {0} to room '{1}'.", player.Id, game.GameCode);
+                    log.WarnFormat("TryAddPlayer failed: could not add player {0} to room '{1}'.", player.Id, 
+                        game.GameCode);
                     return false;
                 }
             }
@@ -332,7 +356,7 @@ namespace Services.Services
                 catch (CommunicationObjectFaultedException ex)
                 {
                     log.WarnFormat("Callback channel faulted for player {0}. Removing from game {1}. \n {2}",
-                        playerEntry.Key, game.GameCode,ex);
+                        playerEntry.Key, game.GameCode, ex);
                     await LeaveRoomAsync(game.GameCode, playerEntry.Key);
                 }
                 catch (CommunicationException ex)
@@ -343,20 +367,20 @@ namespace Services.Services
                 }
                 catch (ObjectDisposedException ex)
                 {
-                    log.WarnFormat("Callback disposed for player {0}. Removing from game {1}.\n {2}", 
-                        playerEntry.Key, game.GameCode,ex);
+                    log.WarnFormat("Callback disposed for player {0}. Removing from game {1}.\n {2}",
+                        playerEntry.Key, game.GameCode, ex);
                     await LeaveRoomAsync(game.GameCode, playerEntry.Key);
                 }
                 catch (TimeoutException ex)
                 {
-                    log.WarnFormat("Timeout notifying player {0}. Removing from game {1}. \n {2}", 
-                        playerEntry.Key, game.GameCode,ex);
+                    log.WarnFormat("Timeout notifying player {0}. Removing from game {1}. \n {2}",
+                        playerEntry.Key, game.GameCode, ex);
                     await LeaveRoomAsync(game.GameCode, playerEntry.Key);
                 }
                 catch (Exception ex)
                 {
-                    log.ErrorFormat("Unexpected error broadcasting to player {0} in game {1}. \n {2}", 
-                        playerEntry.Key, game.GameCode,ex);
+                    log.ErrorFormat("Unexpected error broadcasting to player {0} in game {1}. \n {2}",
+                        playerEntry.Key, game.GameCode, ex);
                     await LeaveRoomAsync(game.GameCode, playerEntry.Key);
                 }
             });
@@ -393,7 +417,7 @@ namespace Services.Services
             {
                 throw FaultExceptionFactory.Create(
                     ServiceErrorCode.EmailConfigurationError,
-                    "EMAIL_CONFIGURATION_ERROR",
+                    "EMAIL_SERVICE_CONFIGURATION_ERROR",
                     "Invalid email service configuration"
                 );
             }
@@ -423,7 +447,8 @@ namespace Services.Services
                 var userAccount = await accountRepository.GetUserByPlayerIdAsync(friendPlayerId);
                 if (userAccount == null || string.IsNullOrEmpty(userAccount.Email))
                 {
-                    log.WarnFormat("SendGameInvitationToFriendAsync failed: Could not find email for PlayerId {0}", friendPlayerId);
+                    log.WarnFormat("SendGameInvitationToFriendAsync failed: Could not find email for PlayerId {0}",
+                        friendPlayerId);
                     throw FaultExceptionFactory.Create(
                         ServiceErrorCode.PlayerNotFound,
                         "FRIEND_NOT_FOUND",
@@ -432,7 +457,8 @@ namespace Services.Services
                 }
 
                 await notificationService.SendGameInvitationEmailAsync(userAccount.Email, gameCode, inviterNickname);
-                log.InfoFormat("Invitation to friend sent to {0} (PlayerId {1}) for room {2}", userAccount.Email, friendPlayerId, gameCode);
+                log.InfoFormat("Invitation to friend sent to {0} (PlayerId {1}) for room {2}", userAccount.Email,
+                    friendPlayerId, gameCode);
             }
             catch (ConfigurationErrorsException)
             {

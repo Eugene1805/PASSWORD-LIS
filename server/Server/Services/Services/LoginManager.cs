@@ -54,12 +54,14 @@ namespace Services.Services
             catch (DbException dbEx)
             {
                 log.Error("Database error (DbException) during login.", dbEx);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "An error occurred while querying the database. Please try again later.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, 
+                    "DATABASE_ERROR", "An error occurred while querying the database. Please try again later.");
             }
             catch (Exception ex)
             {
                 log.Fatal("Unexpected fatal error in Login.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "An unexpected server error occurred.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError,
+                    "UNEXPECTED_ERROR", "An unexpected server error occurred.");
             }
         }
         private UserDTO MapUserToDTO(UserAccount userAccount, Player player)

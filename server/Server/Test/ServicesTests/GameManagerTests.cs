@@ -160,7 +160,7 @@ namespace Test.ServicesTests
             var (sut, _) = CreateSut();
 
             // Act + Assert
-            await Assert.ThrowsAsync<FaultException>(async () => await sut.SubscribeToMatchAsync("NOPE",1));
+            await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(async () => await sut.SubscribeToMatchAsync("NOPE",1));
         }
 
         [Fact]
@@ -173,7 +173,7 @@ namespace Test.ServicesTests
             queue.Enqueue(new Mock<IGameManagerCallback>());
 
             // Act + Assert
-            await Assert.ThrowsAsync<FaultException>(async () => await sut.SubscribeToMatchAsync("GAME2",999));
+            await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(async () => await sut.SubscribeToMatchAsync("GAME2",999));
         }
 
         [Fact]
@@ -216,7 +216,7 @@ namespace Test.ServicesTests
             await sut.SubscribeToMatchAsync("GAME4",4); // match starts
 
             // Act + Assert: now status is InProgress
-            await Assert.ThrowsAsync<FaultException>(async () => await sut.SubscribeToMatchAsync("GAME4",1));
+            await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(async () => await sut.SubscribeToMatchAsync("GAME4",1));
         }
 
         [Fact]
@@ -418,11 +418,11 @@ namespace Test.ServicesTests
 
             // Access private state via reflection
             var matchesField = typeof(GameManager).GetField("matches", BindingFlags.NonPublic | BindingFlags.Instance);
-            var dictObj = matchesField.GetValue(sut);
-            var dictType = dictObj.GetType();
-            var tryGetValue = dictType.GetMethod("TryGetValue", new[] { typeof(string), dictType.GetGenericArguments()[1].MakeByRefType() });
+            var dictObj = matchesField?.GetValue(sut);
+            var dictType = dictObj?.GetType();
+            var tryGetValue = dictType?.GetMethod("TryGetValue", new[] { typeof(string), dictType.GetGenericArguments()[1].MakeByRefType() });
             var args = new object[] { "GAME8", null };
-            var found = (bool)tryGetValue.Invoke(dictObj, args);
+            var found = (bool?)tryGetValue?.Invoke(dictObj, args);
             Assert.True(found);
             var matchStateObj = args[1];
 
@@ -436,11 +436,11 @@ namespace Test.ServicesTests
                 new TurnHistoryDTO { TurnId = 0, Password = new PasswordWordDTO{ EnglishWord = "WORD1", SpanishWord = "PALABRA1"}, ClueUsed = "clue-0" },
                 new TurnHistoryDTO { TurnId = 1, Password = new PasswordWordDTO{ EnglishWord = "WORD2", SpanishWord = "PALABRA2"}, ClueUsed = "clue-1" },
             };
-            redHistoryProp.SetValue(matchStateObj, history);
+            redHistoryProp?.SetValue(matchStateObj, history);
 
             // Call StartValidationPhaseAsync via reflection
             var startValidation = typeof(GameManager).GetMethod("StartValidationPhaseAsync", BindingFlags.NonPublic | BindingFlags.Instance);
-            var task = (Task)startValidation.Invoke(sut, new object[] { matchStateObj });
+            var task = (Task?)startValidation?.Invoke(sut, new object[] { matchStateObj });
             await task;
 
             // Opposite team (Blue) should receive history
@@ -500,12 +500,12 @@ namespace Test.ServicesTests
 
             // Force validation phase with empty histories to trigger immediate processing and tie -> sudden death
             var matchesField = typeof(GameManager).GetField("matches", BindingFlags.NonPublic | BindingFlags.Instance);
-            var dictObj = matchesField.GetValue(sut);
-            var dictType = dictObj.GetType();
-            var indexer = dictType.GetProperty("Item");
-            var matchStateObj = indexer.GetValue(dictObj, new object[] { "GAME9" });
+            var dictObj = matchesField?.GetValue(sut);
+            var dictType = dictObj?.GetType();
+            var indexer = dictType?.GetProperty("Item");
+            var matchStateObj = indexer?.GetValue(dictObj, new object[] { "GAME9" });
             var startValidation = typeof(GameManager).GetMethod("StartValidationPhaseAsync", BindingFlags.NonPublic | BindingFlags.Instance);
-            await (Task)startValidation.Invoke(sut, new object[] { matchStateObj });
+            await (Task?)startValidation?.Invoke(sut, new object[] { matchStateObj });
 
             // All four vote empty to finish validation quickly
             await sut.SubmitValidationVotesAsync("GAME9",1, new List<ValidationVoteDTO>());
@@ -632,10 +632,20 @@ namespace Test.ServicesTests
         public async Task PassTurnAsync_ShouldComplete()
         {
             // Arrange
-            var (sut, _) = CreateSut();
+            var (sut, queue) = CreateSut();
 
             // Act + Assert
             await sut.PassTurnAsync("ANY",1);
+
+            // Arrange: provide a callback to ensure no unintended invocations occur for missing match
+            var cb = new Mock<IGameManagerCallback>();
+            queue.Enqueue(cb);
+
+            // Act
+            await sut.PassTurnAsync("ANY",1); // match does not exist -> noop
+
+            // Assert: no callbacks should have been invoked
+            cb.VerifyNoOtherCalls();
         }
     }
 }

@@ -62,7 +62,8 @@ namespace Services.Services
             {
                 if (!codeService.CanRequestCode(email, CodeType.EmailVerification))
                 {
-                    log.WarnFormat("Resend verification code denied for '{0}': rate limited or existing valid code.", email);
+                    log.WarnFormat("Resend verification code denied for '{0}': rate limited or existing valid code.", 
+                        email);
                     return false;
                 }
 

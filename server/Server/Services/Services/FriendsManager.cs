@@ -25,7 +25,8 @@ namespace Services.Services
         private readonly IAccountRepository accountRepository;
         private readonly IOperationContextWrapper operationContext;
         private static readonly ILog log = LogManager.GetLogger(typeof(FriendsManager));
-        public FriendsManager(IFriendshipRepository friendshipRepository, IAccountRepository accountRepository, IOperationContextWrapper operationContext)
+        public FriendsManager(IFriendshipRepository friendshipRepository, IAccountRepository accountRepository, 
+            IOperationContextWrapper operationContext)
         {
             connectedClients = new ConcurrentDictionary<int, IFriendsCallback>();
             this.friendshipRepository = friendshipRepository;
@@ -38,7 +39,7 @@ namespace Services.Services
         {
             try
             {
-                log.InfoFormat("Iniciando GetFriendsAsync para UserAccountId: {0}", userAccountId);
+                log.InfoFormat("Starting GetFriendsAsync for UserAccountId: {0}", userAccountId);
                 var friendAccounts = await friendshipRepository.GetFriendsByUserAccountIdAsync(userAccountId);
 
                 var friendDTOs = friendAccounts.Select(acc => new FriendDTO
@@ -47,53 +48,59 @@ namespace Services.Services
                     Nickname = acc.Nickname,
                 }).ToList();
 
-                log.InfoFormat("GetFriendsAsync completado. {0} amigos encontrados.", friendDTOs.Count);
+                log.InfoFormat("GetFriendsAsync completed. {0} friends found.", friendDTOs.Count);
                 return friendDTOs;
             } 
             catch (DbException dbEx)
             {
-                log.Error($"DbException en GetFriendsAsync (UserAccountId: {userAccountId})", dbEx);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "Error al consultar la lista de amigos.");
+                log.Error($"DbException in GetFriendsAsync (UserAccountId: {userAccountId})", dbEx);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError,
+                    "DATABASE_ERROR", "Error querying friends list.");
             } 
             catch (Exception ex)
             {
-                log.Fatal($"Error inesperado en GetFriendsAsync (UserAccountId: {userAccountId})", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Error inesperado al obtener la lista de amigos.");
+                log.Fatal($"Unexpected error in GetFriendsAsync (UserAccountId: {userAccountId})", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, 
+                    "UNEXPECTED_ERROR", "Unexpected error retrieving friends list.");
             }
         }
 
-        public async Task<bool> DeleteFriendAsync(int currentUserId, int friendToDeleteId)
+        public async Task<bool> DeleteFriendAsync(int currentPlayerId, int friendToDeleteId)
         {
             try
             {
-                log.InfoFormat("Iniciando DeleteFriendAsync: User={0}, Friend={1}", currentUserId, friendToDeleteId);
-                bool success = await friendshipRepository.DeleteFriendshipAsync(currentUserId, friendToDeleteId);
+                log.InfoFormat("Starting DeleteFriendAsync: User={0}, Friend={1}", currentPlayerId, friendToDeleteId);
+                bool success = await friendshipRepository.DeleteFriendshipAsync(currentPlayerId, friendToDeleteId);
 
                 if (success)
                 {
-                    log.InfoFormat("Amistad eliminada. Notificando... User={0}, Friend={1}", currentUserId, friendToDeleteId);
-                    await NotifyFriendRemovedAsync(currentUserId, friendToDeleteId);
+                    log.InfoFormat("Friendship deleted User={0}, Friend={1}", currentPlayerId, friendToDeleteId);
+                    await NotifyFriendRemovedAsync(currentPlayerId, friendToDeleteId);
                 }
                 else
                 {
-                    log.WarnFormat("DeleteFriendAsync falló (repositorio devolvió false): User={0}, Friend={1}", currentUserId, friendToDeleteId);
+                    log.WarnFormat("DeleteFriendAsync failed: User={0}, Friend={1}", currentPlayerId, friendToDeleteId);
                 }
                 return success;
             }
             catch (DbUpdateException dbUpEx)
             {
-                log.Error($"DbUpdateException en DeleteFriendAsync: User={currentUserId}, Friend={friendToDeleteId}", dbUpEx);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "Error al guardar la eliminación del amigo.");
+                log.Error($"DbUpdateException in DeleteFriendAsync: User={currentPlayerId}, " +
+                    $"Friend={friendToDeleteId}", dbUpEx);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError,
+                    "DATABASE_ERROR", "Error saving friend removal.");
             }
             catch (DbException dbEx) 
             {
-                log.Error($"DbException en DeleteFriendAsync: User={currentUserId}, Friend={friendToDeleteId}", dbEx);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "Error de base de datos al eliminar al amigo.");
+                log.Error($"DbException in DeleteFriendAsync: User={currentPlayerId}, Friend={friendToDeleteId}", dbEx);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError,
+                    "DATABASE_ERROR", "Database error deleting friend.");
             }
             catch (Exception ex)
             {
-                log.Fatal($"Error inesperado en DeleteFriendAsync: User={currentUserId}, Friend={friendToDeleteId}", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Error inesperado al eliminar al amigo.");
+                log.Fatal($"Unexpected error in DeleteFriendAsync: User={currentPlayerId}, Friend={friendToDeleteId}", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError,
+                    "UNEXPECTED_ERROR", "Unexpected error removing friend.");
             }
         }
 
@@ -110,7 +117,7 @@ namespace Services.Services
                 connectedClients.TryRemove(userAccountId, out _);
             };
 
-            log.InfoFormat("Cliente suscrito a FriendsManager. UserAccountId: {0}", userAccountId);
+            log.InfoFormat("Client subscribed to FriendsManager. UserAccountId: {0}", userAccountId);
             return Task.CompletedTask;
         }
 
@@ -119,29 +126,36 @@ namespace Services.Services
             int requesterUserAccountId = GetUserAccountIdFromCallback();
             if (requesterUserAccountId == 0)
             {
-                log.Warn("SendFriendRequestAsync falló: No se pudo obtener UserAccountId del callback.");
+                log.Warn("SendFriendRequestAsync failed: Could not obtain UserAccountId from callback.");
                 return FriendRequestResult.Failed;
             }
 
             try
             {
-                log.InfoFormat("Iniciando SendFriendRequestAsync: RequesterId={0}, AddresseeEmail={1}", requesterUserAccountId, addresseeEmail);
+                log.InfoFormat("Starting SendFriendRequestAsync: RequesterId={0}, AddresseeEmail={1}",
+                    requesterUserAccountId, addresseeEmail);
                 return await TrySendFriendRequestAsync(requesterUserAccountId, addresseeEmail);
             }
             catch (DbUpdateException dbUpEx)
             {
-                log.Error($"DbUpdateException en SendFriendRequestAsync: RequesterId={requesterUserAccountId}, Email={addresseeEmail}", dbUpEx);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "Error al guardar la solicitud de amistad.");
+                log.Error($"DbUpdateException in SendFriendRequestAsync: RequesterId={requesterUserAccountId}," +
+                    $" Email={addresseeEmail}", dbUpEx);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR",
+                    "Error saving friend request.");
             }
             catch (DbException dbEx)
             {
-                log.Error($"DbException en SendFriendRequestAsync: RequesterId={requesterUserAccountId}, Email={addresseeEmail}", dbEx);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "Error de base de datos al enviar la solicitud.");
+                log.Error($"DbException in SendFriendRequestAsync: RequesterId={requesterUserAccountId}, " +
+                    $"Email={addresseeEmail}", dbEx);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", 
+                    "Database error sending friend request.");
             }
             catch (Exception ex)
             {
-                log.Fatal($"Error inesperado en SendFriendRequestAsync: RequesterId={requesterUserAccountId}, Email={addresseeEmail}", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Error inesperado al enviar la solicitud.");
+                log.Fatal($"Unexpected error in SendFriendRequestAsync: RequesterId={requesterUserAccountId}," +
+                    $" Email={addresseeEmail}", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR",
+                    "Unexpected error sending friend request.");
             }
         }
 
@@ -150,13 +164,13 @@ namespace Services.Services
             int userAccountId = GetUserAccountIdFromCallback();
             if (userAccountId == 0)
             {
-                log.Warn("GetPendingRequestsAsync falló: No se pudo obtener UserAccountId del callback.");
+                log.Warn("GetPendingRequestsAsync failed: Could not obtain UserAccountId from callback.");
                 return new List<FriendDTO>();
             }
 
             try
             {
-                log.InfoFormat("Iniciando GetPendingRequestsAsync para UserAccountId: {0}", userAccountId);
+                log.InfoFormat("Starting GetPendingRequestsAsync for UserAccountId: {0}", userAccountId);
                 var requests = await friendshipRepository.GetPendingRequestsAsync(userAccountId);
 
                 var requestDTOs = requests.Select(req => new FriendDTO
@@ -165,18 +179,20 @@ namespace Services.Services
                     Nickname = req.Player1.UserAccount.Nickname,
                 }).ToList();
 
-                log.InfoFormat("GetPendingRequestsAsync completado. {0} solicitudes encontradas.", requestDTOs.Count);
+                log.InfoFormat("GetPendingRequestsAsync completed. {0} requests found.", requestDTOs.Count);
                 return requestDTOs;
             }
             catch (DbException dbEx)
             {
-                log.Error($"DbException en GetPendingRequestsAsync (UserAccountId: {userAccountId})", dbEx);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "Error al consultar las solicitudes pendientes.");
+                log.Error($"DbException in GetPendingRequestsAsync (UserAccountId: {userAccountId})", dbEx);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR",
+                    "Error querying pending requests.");
             }
             catch (Exception ex)
             {
-                log.Fatal($"Error inesperado en GetPendingRequestsAsync (UserAccountId: {userAccountId})", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Error inesperado al obtener solicitudes.");
+                log.Fatal($"Unexpected error in GetPendingRequestsAsync (UserAccountId: {userAccountId})", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR",
+                    "Unexpected error retrieving pending requests.");
             }
         }
 
@@ -185,57 +201,68 @@ namespace Services.Services
             int addresseeUserAccountId = GetUserAccountIdFromCallback();
             if (addresseeUserAccountId == 0)
             {
-                log.Warn("RespondToFriendRequestAsync falló: No se pudo obtener UserAccountId del callback.");
+                log.Warn("RespondToFriendRequestAsync failed: Could not obtain UserAccountId from callback.");
                 return;
             }
 
             try
             {
-                log.InfoFormat("Iniciando RespondToFriendRequestAsync: AddresseeId={0}, RequesterId={1}, Accepted={2}", addresseeUserAccountId, requesterPlayerId, accepted);
+                log.InfoFormat("Starting RespondToFriendRequestAsync: AddresseeId={0}, RequesterId={1}, Accepted={2}",
+                    addresseeUserAccountId, requesterPlayerId, accepted);
 
                 var addresseeAccount = await accountRepository.GetUserByUserAccountIdAsync(addresseeUserAccountId);
 
                 if (addresseeAccount == null || !addresseeAccount.Player.Any())
                 {
-                    log.Warn($"RespondToFriendRequestAsync: No se encontró la cuenta o el jugador del destinatario (Id: {addresseeUserAccountId})");
+                    log.WarnFormat("RespondToFriendRequestAsync: Account or Player not found for addressee (Id: {0})",
+                        addresseeUserAccountId);
                     return;
                 }
 
                 int addresseePlayerId = addresseeAccount.Player.First().Id;
 
-                bool success = await friendshipRepository.RespondToFriendRequestAsync(requesterPlayerId, addresseePlayerId, accepted);
+                bool success = await friendshipRepository.RespondToFriendRequestAsync(requesterPlayerId,
+                    addresseePlayerId, accepted);
 
                 if (success && accepted)
                 {
-                    log.InfoFormat("Solicitud aceptada. Notificando... RequesterId={0}, AddresseeId={1}", requesterPlayerId, addresseePlayerId);
+                    log.InfoFormat("Friend request accepted. Notifying... RequesterId={0}, AddresseeId={1}", 
+                        requesterPlayerId, addresseePlayerId);
                     await NotifyOnRequestAcceptedAsync(requesterPlayerId, addresseeAccount);
                 }
                 else if (!success)
                 {
-                    log.WarnFormat("RespondToFriendRequestAsync falló (repositorio devolvió false). RequesterId={0}, AddresseeId={1}", requesterPlayerId, addresseePlayerId);
+                    log.WarnFormat("RespondToFriendRequestAsync failed (repository returned false). RequesterId={0}, " +
+                        "AddresseeId={1}", requesterPlayerId, addresseePlayerId);
                 }
             }
             catch (DbUpdateException dbUpEx)
             {
-                log.Error($"DbUpdateException en RespondToFriendRequestAsync: AddresseeId={addresseeUserAccountId}, RequesterId={requesterPlayerId}", dbUpEx);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "Error al guardar la respuesta a la solicitud.");
+                log.Error($"DbUpdateException in RespondToFriendRequestAsync: AddresseeId={addresseeUserAccountId}," +
+                    $" RequesterId={requesterPlayerId}", dbUpEx);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", 
+                    "Error saving request response.");
             }
             catch (DbException dbEx)
             {
-                log.Error($"DbException en RespondToFriendRequestAsync: AddresseeId={addresseeUserAccountId}, RequesterId={requesterPlayerId}", dbEx);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "Error de base de datos al responder a la solicitud.");
+                log.Error($"DbException in RespondToFriendRequestAsync: AddresseeId={addresseeUserAccountId}," +
+                    $" RequesterId={requesterPlayerId}", dbEx);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", 
+                    "Database error responding to request.");
             }
             catch (Exception ex)
             {
-                log.Fatal($"Error inesperado en RespondToFriendRequestAsync: AddresseeId={addresseeUserAccountId}, RequesterId={requesterPlayerId}", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Error inesperado al responder a la solicitud.");
+                log.Fatal($"Unexpected error in RespondToFriendRequestAsync: AddresseeId={addresseeUserAccountId}, " +
+                    $"RequesterId={requesterPlayerId}", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR",
+                    "Unexpected error responding to request.");
             }
         }
 
         public Task UnsubscribeFromFriendUpdatesAsync(int userAccountId)
         {
             connectedClients.TryRemove(userAccountId, out _);
-            log.InfoFormat("Cliente desuscrito de FriendsManager. UserAccountId: {0}", userAccountId);
+            log.InfoFormat("Client unsubscribed from FriendsManager. UserAccountId: {0}", userAccountId);
             return Task.CompletedTask;
         }
 
@@ -246,7 +273,8 @@ namespace Services.Services
             return entry.Key;
         }
 
-        private async Task<FriendRequestResult> TrySendFriendRequestAsync(int requesterUserAccountId, string addresseeEmail)
+        private async Task<FriendRequestResult> TrySendFriendRequestAsync(int requesterUserAccountId,
+            string addresseeEmail)
         {
             var requesterAccount = await accountRepository.GetUserByUserAccountIdAsync(requesterUserAccountId);
             var addresseeAccount = await accountRepository.GetUserByEmailAsync(addresseeEmail);
@@ -257,7 +285,8 @@ namespace Services.Services
             }
             if (requesterAccount == null || !requesterAccount.Player.Any())
             {
-                log.Warn($"TrySendFriendRequestAsync: No se encontró la cuenta o el jugador del solicitante (Id: {requesterUserAccountId})");
+                log.WarnFormat("TrySendFriendRequestAsync: Account or Player not found for requester (Id: {0})",
+                    requesterUserAccountId);
                 return FriendRequestResult.Failed;
             }
             if (requesterAccount.Id == addresseeAccount.Id)
@@ -266,7 +295,8 @@ namespace Services.Services
             }
             if (!addresseeAccount.Player.Any())
             {
-                log.Warn($"TrySendFriendRequestAsync: El destinatario no tiene un Player asociado (Email: {addresseeEmail})");
+                log.WarnFormat("TrySendFriendRequestAsync: Addressee has no associated Player (Email: {0})",
+                    addresseeEmail);
                 return FriendRequestResult.UserNotFound;
             }
 
@@ -337,7 +367,7 @@ namespace Services.Services
             var requesterAccount = await accountRepository.GetUserByPlayerIdAsync(requesterPlayerId);
             if (requesterAccount == null || !requesterAccount.Player.Any())
             {
-                log.WarnFormat("NotifyOnRequestAcceptedAsync: No se encontró la cuenta o el jugador del solicitante (PlayerId: {0})", requesterPlayerId);
+                log.WarnFormat("NotifyOnRequestAcceptedAsync: Account or Player not found for requester (PlayerId: {0})", requesterPlayerId);
                 return;
             }
 

@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using Data.DAL.Implementations;
 using Xunit;
 
@@ -15,12 +16,12 @@ namespace TestsEF.DataTests
         }
 
         [Fact]
-        public void CreateFriendRequest_NewRequest_ReturnsTrue()
+        public async Task CreateFriendRequest_NewRequest_ReturnsTrue()
         {
             var (p1, _) = GetPlayerByEmail("user1@test.com");
             var (p2, _) = GetPlayerByEmail("user2@test.com");
 
-            var result = _repository.CreateFriendRequest(p1, p2);
+            var result = await _repository.CreateFriendRequestAsync(p1, p2);
             Assert.True(result);
 
             using (var verify = NewContext())
@@ -30,23 +31,23 @@ namespace TestsEF.DataTests
         }
 
         [Fact]
-        public void CreateFriendRequest_Duplicate_ReturnsFalse()
+        public async Task CreateFriendRequest_Duplicate_ReturnsFalse()
         {
             var (p1, _) = GetPlayerByEmail("user1@test.com");
             var (p2, _) = GetPlayerByEmail("user2@test.com");
-            Assert.True(_repository.CreateFriendRequest(p1, p2));
-            var duplicate = _repository.CreateFriendRequest(p1, p2);
+            Assert.True(await _repository.CreateFriendRequestAsync(p1, p2));
+            var duplicate = await _repository.CreateFriendRequestAsync(p1, p2);
             Assert.False(duplicate);
         }
 
         [Fact]
-        public void GetPendingRequests_ForAddressee_ReturnsList()
+        public async Task GetPendingRequests_ForAddressee_ReturnsList()
         {
             var (requesterId, _) = GetPlayerByEmail("user1@test.com");
             var (addresseePlayerId, addresseeUserAccountId) = GetPlayerByEmail("user2@test.com");
-            _repository.CreateFriendRequest(requesterId, addresseePlayerId);
+            await _repository.CreateFriendRequestAsync(requesterId, addresseePlayerId);
 
-            var pending = _repository.GetPendingRequests(addresseeUserAccountId);
+            var pending = await _repository.GetPendingRequestsAsync(addresseeUserAccountId);
             Assert.Single(pending);
             Assert.Equal(requesterId, pending[0].RequesterId);
             Assert.Equal(addresseePlayerId, pending[0].AddresseeId);
@@ -54,12 +55,12 @@ namespace TestsEF.DataTests
         }
 
         [Fact]
-        public void RespondToFriendRequest_Accept_SetsStatusToAccepted()
+        public async Task RespondToFriendRequest_Accept_SetsStatusToAccepted()
         {
             var (p1, _) = GetPlayerByEmail("user1@test.com");
             var (p2, _) = GetPlayerByEmail("user2@test.com");
-            _repository.CreateFriendRequest(p1, p2);
-            var responded = _repository.RespondToFriendRequest(p1, p2, true);
+            await _repository.CreateFriendRequestAsync(p1, p2);
+            var responded = await  _repository.RespondToFriendRequestAsync(p1, p2, true);
             Assert.True(responded);
 
             using (var verify = NewContext())
@@ -71,12 +72,12 @@ namespace TestsEF.DataTests
         }
 
         [Fact]
-        public void RespondToFriendRequest_Reject_RemovesRequest()
+        public async Task RespondToFriendRequest_Reject_RemovesRequest()
         {
             var (p1, _) = GetPlayerByEmail("user1@test.com");
             var (p2, _) = GetPlayerByEmail("user2@test.com");
-            _repository.CreateFriendRequest(p1, p2);
-            var responded = _repository.RespondToFriendRequest(p1, p2, false);
+            await _repository.CreateFriendRequestAsync(p1, p2);
+            var responded = await _repository.RespondToFriendRequestAsync(p1, p2, false);
             Assert.True(responded);
 
             using (var verify = NewContext())
@@ -86,15 +87,15 @@ namespace TestsEF.DataTests
         }
 
         [Fact]
-        public void GetFriendsByUserAccountId_AfterAcceptance_ReturnsBothSides()
+        public async Task GetFriendsByUserAccountId_AfterAcceptance_ReturnsBothSides()
         {
             var (p1, u1) = GetPlayerByEmail("user1@test.com");
             var (p2, u2) = GetPlayerByEmail("user2@test.com");
-            _repository.CreateFriendRequest(p1, p2);
-            _repository.RespondToFriendRequest(p1, p2, true);
+            await _repository.CreateFriendRequestAsync(p1, p2);
+            await _repository.RespondToFriendRequestAsync(p1, p2, true);
 
-            var friendsOfUser1 = _repository.GetFriendsByUserAccountId(u1);
-            var friendsOfUser2 = _repository.GetFriendsByUserAccountId(u2);
+            var friendsOfUser1 = await _repository.GetFriendsByUserAccountIdAsync(u1);
+            var friendsOfUser2 = await _repository.GetFriendsByUserAccountIdAsync(u2);
 
             Assert.Single(friendsOfUser1);
             Assert.Single(friendsOfUser2);
@@ -103,14 +104,14 @@ namespace TestsEF.DataTests
         }
 
         [Fact]
-        public void DeleteFriendship_Existing_ReturnsTrueAndRemoves()
+        public async Task DeleteFriendship_Existing_ReturnsTrueAndRemoves()
         {
             var (p1, _) = GetPlayerByEmail("user1@test.com");
             var (p2, _) = GetPlayerByEmail("user2@test.com");
-            _repository.CreateFriendRequest(p1, p2);
-            _repository.RespondToFriendRequest(p1, p2, true);
+            await _repository.CreateFriendRequestAsync(p1, p2);
+            await _repository.RespondToFriendRequestAsync(p1, p2, true);
 
-            var deleted = _repository.DeleteFriendship(p1, p2);
+            var deleted = await _repository.DeleteFriendshipAsync(p1, p2);
             Assert.True(deleted);
 
             using (var verify = NewContext())
@@ -120,11 +121,11 @@ namespace TestsEF.DataTests
         }
 
         [Fact]
-        public void DeleteFriendship_NonExisting_ReturnsFalse()
+        public async Task DeleteFriendship_NonExisting_ReturnsFalse()
         {
             var (p1, _) = GetPlayerByEmail("user1@test.com");
             var (p3, _) = GetPlayerByEmail("user3@test.com");
-            var deleted = _repository.DeleteFriendship(p1, p3);
+            var deleted = await _repository.DeleteFriendshipAsync(p1, p3);
             Assert.False(deleted);
         }
     }

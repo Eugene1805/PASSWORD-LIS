@@ -126,6 +126,10 @@
     <Compile Include="Services\AccountManager.cs" />
     <Compile Include="Services\FriendsManager.cs" />
     <Compile Include="Services\GameManager.cs" />
+    <Compile Include="Services\Internal\DTOMapper.cs" />
+    <Compile Include="Services\Internal\GameBroadcaster.cs" />
+    <Compile Include="Services\Internal\MatchSession.cs" />
+    <Compile Include="Services\Internal\RulesEngine.cs" />
     <Compile Include="Services\LoginManager.cs" />
     <Compile Include="Services\ProfileManager.cs" />
     <Compile Include="Services\PasswordResetManager.cs" />

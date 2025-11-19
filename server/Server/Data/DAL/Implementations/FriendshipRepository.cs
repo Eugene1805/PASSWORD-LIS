@@ -28,7 +28,6 @@ namespace Data.DAL.Implementations
 
                 int playerId = player.Id;
 
-                // Consultas asíncronas separadas para obtener los IDs
                 var friendIdsFromRequesters = await context.Friendship
                     .Where(f => f.AddresseeId == playerId && f.Status == 1)
                     .Select(f => f.RequesterId)
@@ -46,7 +45,6 @@ namespace Data.DAL.Implementations
                     return new List<UserAccount>();
                 }
 
-                // Carga asíncrona de los amigos
                 var friends = await context.UserAccount
                     .Where(u => u.Player.Any(p => allFriendIds.Contains(p.Id)))
                     .Include(u => u.Player)

@@ -61,7 +61,6 @@ namespace Services.Services
             catch (DuplicateAccountException ex)
             {
                 log.WarnFormat("Duplicated registry attempt for the email: {0}", newAccount.Email);
-                log.Warn("DuplicateAccountException thrown while creating account.", ex);
                 throw FaultExceptionFactory.Create(
                     ServiceErrorCode.UserAlreadyExists, 
                     "USER_ALREADY_EXISTS", 

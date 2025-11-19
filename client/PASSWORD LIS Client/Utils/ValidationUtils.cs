@@ -7,7 +7,8 @@ namespace PASSWORD_LIS_Client.Utils
     public static class ValidationUtils
     {
         private static readonly Regex OnlyLettersRegex = new Regex(@"[^a-zA-Z\sñÑáéíóúÁÉÍÓÚüÜ]");
-        private static readonly Regex PasswordRequirementsRegex = new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,15}$");
+        private static readonly Regex PasswordRequirementsRegex = 
+            new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,15}$");
         private static readonly Regex EmailRegex = new Regex(@"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
         public static bool ContainsOnlyLetters(string text)
         {
