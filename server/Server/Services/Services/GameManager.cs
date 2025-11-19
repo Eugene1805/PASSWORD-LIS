@@ -5,6 +5,7 @@ using Services.Contracts;
 using Services.Contracts.DTOs;
 using Services.Contracts.Enums;
 using Services.Wrappers;
+using Services.Util;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -287,10 +288,10 @@ namespace Services.Services
         {
             try
             {
-                log.InfoFormat("SubmitValidationVotesAsync called - GameCode: {0}, PlayerId: {1}, VotesCount: {2}", gameCode, senderPlayerId, votes?.Count);
+                log.InfoFormat("SubmitValidationVotesAsync called - GameCode: {0}, PlayerId: {1}, VotesCount: {2}", gameCode, senderPlayerId, votes == null ? 0 : votes.Count);
                 if (votes == null)
                 {
-                    log.Warn("Votes list is null");
+                    log.WarnFormat("Votes list is null for game '{0}', player {1}", gameCode, senderPlayerId);
                     return;
                 }
                 if (!matches.TryGetValue(gameCode, out MatchState matchState) || matchState.Status != MatchStatus.Validating)
@@ -325,11 +326,12 @@ namespace Services.Services
                     matchState.ValidationTimer = null;
                     await Task.Run(async () => await ProcessVotesAsync(matchState));
                 }
-                log.Info("Votes processed successfully");
+                log.InfoFormat("Votes processing scheduled or stored successfully for game '{0}'", gameCode);
             }
             catch (Exception ex)
             {
-                log.Error($"Error in SubmitValidationVotesAsync: {ex.Message}", ex);
+                var msg = string.Format("Error in SubmitValidationVotesAsync: {0}", ex.Message);
+                log.Error(msg, ex);
                 log.DebugFormat("Stack Trace: {0}", ex.StackTrace);
                 throw;
             }
@@ -338,17 +340,33 @@ namespace Services.Services
 
         public async Task SubscribeToMatchAsync(string gameCode, int playerId)
         {
-            if (!matches.TryGetValue(gameCode, out MatchState matchState)) throw new FaultException("The match does not exist or has already ended.");
-            if (matchState.Status != MatchStatus.WaitingForPlayers) throw new FaultException("The match has already started or is finishing.");
+            if (!matches.TryGetValue(gameCode, out MatchState matchState))
+            {
+                log.WarnFormat("SubscribeToMatchAsync failed - game '{0}' not found or already ended.", gameCode);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError, "MATCH_NOT_FOUND_OR_ENDED", "The match does not exist or has already ended.");
+            }
+            if (matchState.Status != MatchStatus.WaitingForPlayers)
+            {
+                log.WarnFormat("SubscribeToMatchAsync failed - game '{0}' already started or finishing.", gameCode);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError, "MATCH_ALREADY_STARTED_OR_FINISHING", "The match has already started or is finishing.");
+            }
             var expectedPlayer = matchState.ExpectedPlayers.FirstOrDefault(p => p.Id == playerId);
-            if (expectedPlayer == null) throw new FaultException("You are not authorized to join this match.");
+            if (expectedPlayer == null)
+            {
+                log.WarnFormat("SubscribeToMatchAsync unauthorized join attempt for player {0} in game '{1}'.", playerId, gameCode);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError, "NOT_AUTHORIZED_TO_JOIN", "You are not authorized to join this match.");
+            }
             if (matchState.ActivePlayers.ContainsKey(playerId))
             {
-                var errorDetail = new ServiceErrorDetailDTO { Code = ServiceErrorCode.AlreadyInRoom, ErrorCode = "PLAYER_ALREADY_IN_MATCH" };
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.ErrorCode));
+                log.WarnFormat("SubscribeToMatchAsync duplicate join for player {0} in game '{1}'.", playerId, gameCode);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.AlreadyInRoom, "PLAYER_ALREADY_IN_MATCH", "Player is already in the match.");
             }
             var callback = operationContext.GetCallbackChannel<IGameManagerCallback>();
-            if (!matchState.ActivePlayers.TryAdd(playerId, (callback, expectedPlayer))) throw new FaultException("Internal error while joining the match.");
+            if (!matchState.ActivePlayers.TryAdd(playerId, (callback, expectedPlayer)))
+            {
+                log.ErrorFormat("SubscribeToMatchAsync internal error adding player {0} to game '{1}'.", playerId, gameCode);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError, "JOIN_INTERNAL_ERROR", "Internal error while joining the match.");
+            }
             if (matchState.ActivePlayers.Count == matchState.ExpectedPlayers.Count) await StartGameInternalAsync(matchState);
         }
 
@@ -361,8 +379,8 @@ namespace Services.Services
                 await StartNewRoundAsync(matchState);
             }
             catch (Exception ex)
-            {
-                log.Error($"Error starting match {matchState.GameCode}", ex);
+            {                
+                log.ErrorFormat("Error starting match {0} \n {1}", matchState.GameCode, ex);
                 await BroadcastAsync(matchState, callback => callback.OnMatchCancelled("Error starting the match."));
                 matches.TryRemove(matchState.GameCode, out _);
             }
@@ -492,7 +510,7 @@ namespace Services.Services
         {
             try
             {
-                log.Info("Starting ProcessVotesAsync");
+                log.InfoFormat("Starting ProcessVotesAsync for game '{0}'", matchState.GameCode);
                 matchState.ValidationTimer?.Dispose();
                 matchState.ValidationTimer = null;
 
@@ -534,7 +552,7 @@ namespace Services.Services
                     NewRedTeamScore = matchState.RedTeamScore,
                     NewBlueTeamScore = matchState.BlueTeamScore,
                 };
-                log.Info("Before BroadcastAsync");
+                log.InfoFormat("Before BroadcastAsync - sending ValidationComplete for game '{0}'", matchState.GameCode);
                 await BroadcastAsync(matchState, cb => cb.OnValidationComplete(validationResult));
                 log.Info("After BroadcastAsync - all callbacks completed");
                 if (matchState.CurrentRound >= TotalRounds)
@@ -545,12 +563,13 @@ namespace Services.Services
                 {
                     await StartNewRoundAsync(matchState);
                 }
-                log.Info("ProcessVotesAsync completed successfully");
+                log.InfoFormat("ProcessVotesAsync completed successfully for game '{0}'", matchState.GameCode);
 
             }
             catch (Exception ex)
             {
-                log.Error($"Error in ProcessVotesAsync: {ex.Message}", ex);
+                var msg = string.Format("Error in ProcessVotesAsync: {0}", ex.Message);
+                log.Error(msg, ex);
                 throw;
             }
         }
@@ -565,7 +584,7 @@ namespace Services.Services
                 matchState.ValidationTimer?.Dispose();
                 matchState.RoundTimer = null;
                 matchState.ValidationTimer = null;
-                await BroadcastAsync(matchState, cb => cb.OnMatchCancelled($"Player {disconnectedPlayer.Player.Nickname} has disconnected."));
+                await BroadcastAsync(matchState, cb => cb.OnMatchCancelled(string.Format("Player {0} has disconnected.", disconnectedPlayer.Player.Nickname)));
                 matches.TryRemove(matchState.GameCode, out _);
             }
         }
@@ -665,41 +684,41 @@ namespace Services.Services
                 {
                     try
                     {
-                        // Ejecutar el callback de manera síncrona dentro del task
+                        // Execute the callback synchronously within the task
                         action(playerEntry.Value.Callback);
-                        await Task.CompletedTask; // Para hacer el método async
+                        await Task.CompletedTask; // To keep the method async
                     }
                     catch (CommunicationException ex)
                     {
-                        log.Warn($"CommunicationException in callback for player {playerEntry.Key}: {ex.Message}");
+                        log.WarnFormat("CommunicationException in callback for player {0}: {1}", playerEntry.Key, ex.Message);
                         disconnectedPlayers.Add(playerEntry.Key);
                     }
                     catch (TimeoutException ex)
                     {
-                        log.Warn($"TimeoutException in callback for player {playerEntry.Key}: {ex.Message}");
+                        log.WarnFormat("TimeoutException in callback for player {0}: {1}", playerEntry.Key, ex.Message);
                         disconnectedPlayers.Add(playerEntry.Key);
                     }
                     catch (Exception ex)
                     {
-                        log.Error($"Unexpected error in callback for player {playerEntry.Key}: {ex.Message}", ex);
+                        var msg = string.Format("Unexpected error in callback for player {0}: {1}", playerEntry.Key, ex.Message);
+                        log.Error(msg, ex);
                         disconnectedPlayers.Add(playerEntry.Key);
                     }
                 });
 
                 await Task.WhenAll(tasks);
-
-                // Remover jugadores desconectados
                 foreach (var playerId in disconnectedPlayers)
                 {
                     if (game.ActivePlayers.TryRemove(playerId, out _))
                     {
-                        log.Info($"Successfully removed disconnected player: {playerId}");
+                        log.InfoFormat("Successfully removed disconnected player: {0}", playerId);
                     }
                 }
             }
             catch (Exception ex)
             {
-                log.Error($"Error in BroadcastAsync: {ex.Message}", ex);
+                var msg = string.Format("Error in BroadcastAsync: {0}", ex.Message);
+                log.Error(msg, ex);
                 throw;
             }
         }
@@ -710,8 +729,10 @@ namespace Services.Services
                 try 
                 { 
                     action(playerEntry.Callback); 
-                } catch 
-                { /* Ignore disconnection here */ 
+                } 
+                catch 
+                { 
+                    // Ignore disconnection here
                 }
             }));
             await Task.WhenAll(tasks);

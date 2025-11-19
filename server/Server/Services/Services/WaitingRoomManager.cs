@@ -73,28 +73,20 @@ namespace Services.Services
             }
 
             rooms.TryRemove(gameCode, out _);
-            var errorDetail = new ServiceErrorDetailDTO
-            {
-                Code = ServiceErrorCode.CouldNotCreateRoom,
-                ErrorCode = "COULD_NOT_CREATE_ROOM",
-                Message = "Could not create room."
-            };
             log.ErrorFormat("Failed to create game for email '{0}'. Returning fault COULD_NOT_CREATE_ROOM.", email);
-            throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message));
+            throw FaultExceptionFactory.Create(ServiceErrorCode.CouldNotCreateRoom, "COULD_NOT_CREATE_ROOM", "Could not create room.");
         }
         public async Task<int> JoinRoomAsRegisteredPlayerAsync(string gameCode, string email)
         {
             if (!rooms.TryGetValue(gameCode, out var game))
             {
-                var notFound = new ServiceErrorDetailDTO { Code = ServiceErrorCode.RoomNotFound, ErrorCode = "ROOM_NOT_FOUND", Message = "The room does not exist." };
                 log.WarnFormat("Join as registered failed: game '{0}' not found for email '{1}'.", gameCode, email);
-                throw new FaultException<ServiceErrorDetailDTO>(notFound, new FaultReason(notFound.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.RoomNotFound, "ROOM_NOT_FOUND", "The room does not exist.");
             }
             if (game.Players.Count >= MaxPlayersPerGame)
             {
-                var full = new ServiceErrorDetailDTO { Code = ServiceErrorCode.RoomFull, ErrorCode = "ROOM_FULL", Message = "Could not join room. The room is full." };
                 log.WarnFormat("Join as registered failed: room '{0}' is full for email '{1}'.", gameCode, email);
-                throw new FaultException<ServiceErrorDetailDTO>(full, new FaultReason(full.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.RoomFull, "ROOM_FULL", "Could not join room. The room is full.");
             }
 
             // Capture the callback channel before any awaits to avoid losing OperationContext
@@ -103,9 +95,8 @@ namespace Services.Services
             var playerEntity = await repository.GetPlayerByEmailAsync(email);
             if (playerEntity == null || playerEntity.Id < 0)
             {
-                var notFoundPlayer = new ServiceErrorDetailDTO { Code = ServiceErrorCode.PlayerNotFound, ErrorCode = "PLAYER_NOT_FOUND", Message = "The player was not found in the database." };
                 log.WarnFormat("Join as registered failed: player not found for email '{0}' in game '{1}'.", email, gameCode);
-                throw new FaultException<ServiceErrorDetailDTO>(notFoundPlayer, new FaultReason(notFoundPlayer.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.PlayerNotFound, "PLAYER_NOT_FOUND", "The player was not found in the database.");
             }
 
             var playerDto = new PlayerDTO
@@ -130,15 +121,13 @@ namespace Services.Services
         {
             if (!rooms.TryGetValue(gameCode, out var game))
             {
-                var notFound = new ServiceErrorDetailDTO { Code = ServiceErrorCode.RoomNotFound, ErrorCode = "ROOM_NOT_FOUND", Message = "The room does not exist." };
                 log.WarnFormat("Join as guest failed: game '{0}' not found for nickname '{1}'.", gameCode, nickname);
-                throw new FaultException<ServiceErrorDetailDTO>(notFound, new FaultReason(notFound.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.RoomNotFound, "ROOM_NOT_FOUND", "The room does not exist.");
             }
             if (game.Players.Count >= MaxPlayersPerGame)
             {
-                var full = new ServiceErrorDetailDTO { Code = ServiceErrorCode.RoomFull, ErrorCode = "ROOM_FULL", Message = "Could not join room. The room is full." };
                 log.WarnFormat("Join as guest failed: room '{0}' is full for nickname '{1}'.", gameCode, nickname);
-                throw new FaultException<ServiceErrorDetailDTO>(full, new FaultReason(full.Message));
+                throw FaultExceptionFactory.Create(ServiceErrorCode.RoomFull, "ROOM_FULL", "Could not join room. The room is full.");
             }
 
             // Capture the callback channel at the start of the operation
@@ -212,19 +201,19 @@ namespace Services.Services
         {
             if (!rooms.TryGetValue(gameCode, out var game))
             {
-                throw new FaultException("Waiting room not found");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.RoomNotFound, "WAITING_ROOM_NOT_FOUND", "Waiting room not found.");
             }
 
             if (game.Players.Count != MaxPlayersPerGame)
             {
-                throw new FaultException("4 players are required in order to start a game.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.CouldNotCreateRoom, "NOT_ENOUGH_PLAYERS", "Four players are required to start a game.");
             }
             var playerList = game.Players.Values.Select(p => p.Item2).ToList();
             bool matchCreated = gameManager.CreateMatch(gameCode, playerList);
 
             if (!matchCreated)
             {
-                throw new FaultException("Could not create the game.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.CouldNotCreateRoom, "COULD_NOT_CREATE_GAME", "Could not create the game.");
             }
 
             log.InfoFormat("Starting game for room '{0}'. Notifying clients and removing room.", gameCode);
@@ -297,27 +286,22 @@ namespace Services.Services
 
         private static bool AssignTeamAndRole(Room game, PlayerDTO player)
         {
-            // Determina qué slots están ocupados por los jugadores conectados actualmente
             var occupied = new HashSet<(MatchTeam team, PlayerRole role)>(
                 game.Players.Values.Select(p => (p.Item2.Team, p.Item2.Role))
             );
 
-            // Orden determinista de preferencia
             var desired = new List<(MatchTeam team, PlayerRole role)>
-    {
-        (MatchTeam.RedTeam, PlayerRole.ClueGuy),
-        (MatchTeam.BlueTeam, PlayerRole.ClueGuy),
-        (MatchTeam.RedTeam, PlayerRole.Guesser),
-        (MatchTeam.BlueTeam, PlayerRole.Guesser)
-    };
+            {
+                (MatchTeam.RedTeam, PlayerRole.ClueGuy),
+                (MatchTeam.BlueTeam, PlayerRole.ClueGuy),
+                (MatchTeam.RedTeam, PlayerRole.Guesser),
+                (MatchTeam.BlueTeam, PlayerRole.Guesser)
+            };
 
-            // Si no hay ningún slot libre, devolvemos false
             if (!desired.Any(d => !occupied.Contains(d)))
             {
                 return false;
             }
-
-            // Elegimos el primer par libre (sabemos que existe porque lo comprobamos arriba)
             var chosen = desired.First(d => !occupied.Contains(d));
 
             player.Team = chosen.team;
@@ -347,32 +331,32 @@ namespace Services.Services
                 }
                 catch (CommunicationObjectFaultedException ex)
                 {
-                    log.WarnFormat("Callback channel faulted for player {0}. Removing from game {1}.", playerEntry.Key, game.GameCode);
-                    log.Warn("Callback channel faulted exception.", ex);
+                    log.WarnFormat("Callback channel faulted for player {0}. Removing from game {1}. \n {2}",
+                        playerEntry.Key, game.GameCode,ex);
                     await LeaveRoomAsync(game.GameCode, playerEntry.Key);
                 }
                 catch (CommunicationException ex)
                 {
-                    log.WarnFormat("Communication error when notifying player {0}. Removing from game {1}.", playerEntry.Key, game.GameCode);
-                    log.Warn("Communication exception.", ex);
+                    log.WarnFormat("Communication error when notifying player {0}. Removing from game {1}. \n {2}",
+                        playerEntry.Key, game.GameCode, ex);
                     await LeaveRoomAsync(game.GameCode, playerEntry.Key);
                 }
                 catch (ObjectDisposedException ex)
                 {
-                    log.WarnFormat("Callback disposed for player {0}. Removing from game {1}.", playerEntry.Key, game.GameCode);
-                    log.Warn("Callback disposed exception.", ex);
+                    log.WarnFormat("Callback disposed for player {0}. Removing from game {1}.\n {2}", 
+                        playerEntry.Key, game.GameCode,ex);
                     await LeaveRoomAsync(game.GameCode, playerEntry.Key);
                 }
                 catch (TimeoutException ex)
                 {
-                    log.WarnFormat("Timeout notifying player {0}. Removing from game {1}.", playerEntry.Key, game.GameCode);
-                    log.Warn("Callback timeout exception.", ex);
+                    log.WarnFormat("Timeout notifying player {0}. Removing from game {1}. \n {2}", 
+                        playerEntry.Key, game.GameCode,ex);
                     await LeaveRoomAsync(game.GameCode, playerEntry.Key);
                 }
                 catch (Exception ex)
                 {
-                    log.ErrorFormat("Unexpected error broadcasting to player {0} in game {1}.", playerEntry.Key, game.GameCode);
-                    log.Error("Unexpected broadcast exception.", ex);
+                    log.ErrorFormat("Unexpected error broadcasting to player {0} in game {1}. \n {2}", 
+                        playerEntry.Key, game.GameCode,ex);
                     await LeaveRoomAsync(game.GameCode, playerEntry.Key);
                 }
             });
@@ -395,7 +379,7 @@ namespace Services.Services
             try
             {
                 await notificationService.SendGameInvitationEmailAsync(email, gameCode, inviterNickname);
-                log.InfoFormat("Invitación por correo enviada a {0} para la sala {1} por {2}", email, gameCode, inviterNickname);
+                log.InfoFormat("Invitation email sent to {0} for room {1} by {2}", email, gameCode, inviterNickname);
             }
             catch (ConfigurationErrorsException)
             {
@@ -418,15 +402,17 @@ namespace Services.Services
                 throw FaultExceptionFactory.Create(
                     ServiceErrorCode.EmailSendingError,
                     "EMAIL_SENDING_ERROR",
-                    $"Failed to send email"
+                    "Failed to send email"
                 );
             }
             catch (Exception ex)
             {
-                log.Error($"Error inesperado en SendGameInvitationByEmailAsync a {email}", ex);
-                throw new FaultException<ServiceErrorDetailDTO>(
-                    new ServiceErrorDetailDTO { Message = "Error inesperado en el servidor.", ErrorCode = "UNEXPECTED_ERROR" },
-                    new FaultReason("Error inesperado."));
+                log.ErrorFormat("Unexpected error in SendGameInvitationByEmailAsync to {0}.\n{1}", email, ex);
+                throw FaultExceptionFactory.Create(
+                    ServiceErrorCode.UnexpectedError,
+                    "UNEXPECTED_ERROR",
+                    "Unexpected server error."
+                );
             }
         }
 
@@ -437,14 +423,16 @@ namespace Services.Services
                 var userAccount = await accountRepository.GetUserByPlayerIdAsync(friendPlayerId);
                 if (userAccount == null || string.IsNullOrEmpty(userAccount.Email))
                 {
-                    log.WarnFormat("SendGameInvitationToFriendAsync falló: No se pudo encontrar el correo para el PlayerId {0}", friendPlayerId);
-                    throw new FaultException<ServiceErrorDetailDTO>(
-                        new ServiceErrorDetailDTO { Message = "No se pudo encontrar al amigo o su correo.", ErrorCode = "FRIEND_NOT_FOUND" },
-                        new FaultReason("Amigo no encontrado."));
+                    log.WarnFormat("SendGameInvitationToFriendAsync failed: Could not find email for PlayerId {0}", friendPlayerId);
+                    throw FaultExceptionFactory.Create(
+                        ServiceErrorCode.PlayerNotFound,
+                        "FRIEND_NOT_FOUND",
+                        "Friend not found or email missing."
+                    );
                 }
 
                 await notificationService.SendGameInvitationEmailAsync(userAccount.Email, gameCode, inviterNickname);
-                log.InfoFormat("Invitación a amigo enviada a {0} (PlayerId {1}) para la sala {2}", userAccount.Email, friendPlayerId, gameCode);
+                log.InfoFormat("Invitation to friend sent to {0} (PlayerId {1}) for room {2}", userAccount.Email, friendPlayerId, gameCode);
             }
             catch (ConfigurationErrorsException)
             {
@@ -464,18 +452,21 @@ namespace Services.Services
             }
             catch (SmtpException)
             {
+                log.WarnFormat("Could not send invitation to {0}", friendPlayerId);
                 throw FaultExceptionFactory.Create(
                     ServiceErrorCode.EmailSendingError,
                     "EMAIL_SENDING_ERROR",
-                    $"Failed to send email"
+                    "Failed to send email"
                 );
             }
             catch (Exception ex)
             {
-                log.Error($"Error inesperado en SendGameInvitationToFriendAsync a {friendPlayerId}", ex);
-                throw new FaultException<ServiceErrorDetailDTO>(
-                    new ServiceErrorDetailDTO { Message = "Error inesperado en el servidor.", ErrorCode = "UNEXPECTED_ERROR" },
-                    new FaultReason("Error inesperado."));
+                log.ErrorFormat("Unexpected error in SendGameInvitationToFriendAsync for {0}.\n{1}", friendPlayerId, ex);
+                throw FaultExceptionFactory.Create(
+                    ServiceErrorCode.UnexpectedError,
+                    "UNEXPECTED_ERROR",
+                    "Unexpected error at SendGameInvitationToFriendAsync"
+                    );
             }
         }
     }
