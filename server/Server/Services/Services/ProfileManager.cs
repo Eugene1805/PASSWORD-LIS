@@ -30,13 +30,14 @@ namespace Services.Services
         {
             if (updatedProfileData == null || updatedProfileData.PlayerId <= 0)
             {
-                log.WarnFormat("UpdateProfile llamado con datos nulos o PlayerId inválido {0}" ,updatedProfileData?.PlayerId);
+                log.WarnFormat("UpdateProfile called with null data or invalid PlayerId {0}",
+                    updatedProfileData?.PlayerId);
                 return null;
             }
 
             try
             {
-                log.InfoFormat("Intentando actualizar perfil para PlayerId: {0}", updatedProfileData.PlayerId);
+                log.InfoFormat("Attempting to update profile for PlayerId: {0}", updatedProfileData.PlayerId);
 
                 var accountData = MapToUserAccount(updatedProfileData);
                 var socialData = MapToSocialAccounts(updatedProfileData.SocialAccounts);
@@ -49,29 +50,36 @@ namespace Services.Services
 
                 if (updateSuccess)
                 {
-                    log.InfoFormat("Perfil actualizado exitosamente para PlayerId: {0}", updatedProfileData.PlayerId);
+                    log.InfoFormat("Profile updated successfully for PlayerId: {0}", updatedProfileData.PlayerId);
                     return updatedProfileData;
                 }
                 else
                 {
-                    log.WarnFormat("Falló la actualización del perfil (repositorio devolvió false) para PlayerId: {0}", updatedProfileData.PlayerId);
+                    log.WarnFormat("Profile update failed (repository returned false) for PlayerId: {0}",
+                        updatedProfileData.PlayerId);
                     return null;
                 }
             }
             catch (DbUpdateException dbUpEx)
             {
-                log.Error($"Error DbUpdateException al actualizar perfil PlayerId: {updatedProfileData.PlayerId}. Ex: {dbUpEx.Message}", dbUpEx);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "Ocurrió un error al intentar guardar los cambios en la base de datos.");
+                log.Error($"DbUpdateException updating profile PlayerId: {updatedProfileData.PlayerId}." +
+                    $" Ex: {dbUpEx.Message}", dbUpEx);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR",
+                    "An error occurred while trying to save the changes to the database.");
             }
             catch (DbException dbEx)
             {
-                log.Error($"Error DbException al actualizar perfil PlayerId: {updatedProfileData.PlayerId}. Ex: {dbEx.Message}", dbEx);
-                throw FaultExceptionFactory.Create( ServiceErrorCode.DatabaseError, "DATABASE_ERROR", "Ocurrió un error de comunicación con la base de datos.");
+                log.Error($"DbException updating profile PlayerId: {updatedProfileData.PlayerId}. " +
+                    $"Ex: {dbEx.Message}", dbEx);
+                throw FaultExceptionFactory.Create( ServiceErrorCode.DatabaseError, "DATABASE_ERROR", 
+                    "A database communication error occurred while updating the profile.");
             }
             catch (Exception ex)
             {
-                log.Fatal($"Error inesperado en UpdateProfile para PlayerId: {updatedProfileData.PlayerId}. Ex: {ex.Message}", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Ocurrió un error inesperado en el servidor al actualizar el perfil.");
+                log.Fatal($"Unexpected error in UpdateProfile for PlayerId: {updatedProfileData.PlayerId}. " +
+                    $"Ex: {ex.Message}", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", 
+                    "An unexpected server error occurred while updating the profile.");
             }
         }
 

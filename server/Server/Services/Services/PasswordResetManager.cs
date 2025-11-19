@@ -42,7 +42,8 @@ namespace Services.Services
                 if (!repository.AccountAlreadyExist(emailVerificationDTO.Email) ||
                     !codeService.CanRequestCode(emailVerificationDTO.Email, CodeType.PasswordReset))
                 {
-                    log.WarnFormat("Password reset code request denied for '{0}'. Account missing or rate-limited.", emailVerificationDTO.Email);
+                    log.WarnFormat("Password reset code request denied for '{0}'. Account missing or rate-limited.",
+                        emailVerificationDTO.Email);
                     return false;
                 }
                 SendEmailVerification(emailVerificationDTO.Email);
@@ -52,7 +53,8 @@ namespace Services.Services
             catch (ArgumentNullException ex)
             {
                 log.Error("Null argument provided to RequestPasswordResetCode.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.NullArgument, "NULL_ARGUMENT", "A null argument was received occurred.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.NullArgument, "NULL_ARGUMENT",
+                    "A null argument was received occurred.");
             }
             catch (ConfigurationErrorsException)
             {
@@ -81,7 +83,8 @@ namespace Services.Services
             catch (Exception ex)
             {
                 log.Error("Unexpected error requesting password reset code.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Unexpected error requesting password reset code.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR",
+                    "Unexpected error requesting password reset code.");
             }
         }
 
@@ -97,9 +100,11 @@ namespace Services.Services
                         "Email verification DTO or email is null/empty"
                     );
                 }
-                if (!codeService.ValidateCode(passwordResetDTO.Email, passwordResetDTO.ResetCode, CodeType.PasswordReset))
+                if (!codeService.ValidateCode(passwordResetDTO.Email, passwordResetDTO.ResetCode,
+                    CodeType.PasswordReset))
                 {
-                    log.WarnFormat("Password reset failed for '{0}': invalid or expired code.", passwordResetDTO.Email);
+                    log.WarnFormat("Password reset failed for '{0}': invalid or expired code.", 
+                        passwordResetDTO.Email);
                     return false;
                 }
                 var hashedPassword = BCrypt.Net.BCrypt.HashPassword(passwordResetDTO.NewPassword);
@@ -159,12 +164,14 @@ namespace Services.Services
             catch (ArgumentNullException ex)
             {
                 log.Error("Null argument provided to CreateAccountAsync.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.NullArgument, "NULL_ARGUMENT", "A null argument was received occurred.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.NullArgument, 
+                    "NULL_ARGUMENT", "A null argument was received occurred.");
             }
             catch (Exception ex)
             {
                 log.Error("Unexpected error validating password reset code.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Unexpected error validating password reset code.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError,
+                    "UNEXPECTED_ERROR", "Unexpected error validating password reset code.");
             }
         }
 

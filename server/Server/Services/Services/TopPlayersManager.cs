@@ -4,6 +4,7 @@ using log4net;
 using Services.Contracts;
 using Services.Contracts.DTOs;
 using Services.Contracts.Enums;
+using Services.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,16 +41,9 @@ namespace Services.Services
             catch (Exception ex)
             {
                 log.Error("Error retrieving top teams statistics.", ex);
-                var errorDetail = new ServiceErrorDetailDTO
-                {
-                    Code = ServiceErrorCode.StatisticsError,
-                    ErrorCode = "STATISTICS_ERROR",
-                    Message = "An error occurred while fetching statistics. Please try again later."
-                };
-
-                throw new FaultException<ServiceErrorDetailDTO>(errorDetail, new FaultReason(errorDetail.Message)); 
+                throw FaultExceptionFactory.Create(ServiceErrorCode.StatisticsError,
+                    "STATISTICS_ERROR", "An error occurred while fetching statistics. Please try again later.");
             }
-            
         }
     }
 }

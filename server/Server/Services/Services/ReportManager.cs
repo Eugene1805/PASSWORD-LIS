@@ -27,8 +27,8 @@ namespace Services.Services
         private readonly IOperationContextWrapper operationContext;
         private static readonly ILog log = LogManager.GetLogger(typeof(ReportManager));
 
-        public ReportManager(IReportRepository reportRepository, IPlayerRepository playerRepository, IBanRepository banRepository,
-            IOperationContextWrapper operationContext)
+        public ReportManager(IReportRepository reportRepository, IPlayerRepository playerRepository,
+            IBanRepository banRepository,IOperationContextWrapper operationContext)
         {
             this.reportRepository = reportRepository;
             this.playerRepository = playerRepository;
@@ -47,7 +47,8 @@ namespace Services.Services
             catch (Exception ex)
             {
                 log.Error("Error checking ban status.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Error checking ban status.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError,
+                    "UNEXPECTED_ERROR", "Error checking ban status.");
             }
         }
 
@@ -55,7 +56,8 @@ namespace Services.Services
         {
             if (reportDTO == null || reportDTO.ReporterPlayerId <= 0 || reportDTO.ReportedPlayerId <= 0)
             {
-                throw FaultExceptionFactory.Create(ServiceErrorCode.InvalidReportPayload, "INVALID_REPORT_PAYLOAD", "Invalid report payload.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.InvalidReportPayload, 
+                    "INVALID_REPORT_PAYLOAD", "Invalid report payload.");
             }
 
             try
@@ -67,7 +69,8 @@ namespace Services.Services
                     Reason = reportDTO.Reason
                 };
                 await reportRepository.AddReportAsync(newReport);
-                log.InfoFormat("Report submitted: reporter={0}, reported={1}.", reportDTO.ReporterPlayerId, reportDTO.ReportedPlayerId);
+                log.InfoFormat("Report submitted: reporter={0}, reported={1}.", reportDTO.ReporterPlayerId,
+                    reportDTO.ReportedPlayerId);
 
                 var totalReports = await reportRepository.GetReportCountForPlayerAsync(reportDTO.ReportedPlayerId);
                 log.InfoFormat("Reported player {0} now has {1} report(s).", reportDTO.ReportedPlayerId, totalReports);
@@ -77,7 +80,8 @@ namespace Services.Services
                     var reporter = await playerRepository.GetPlayerByIdAsync(reportDTO.ReporterPlayerId);
                     if (reporter == null || reporter.Id <= 0)
                     {
-                        throw FaultExceptionFactory.Create(ServiceErrorCode.ReporterNotFound, "REPORTER_NOT_FOUND", "Reporter player not found.");
+                        throw FaultExceptionFactory.Create(ServiceErrorCode.ReporterNotFound,
+                            "REPORTER_NOT_FOUND", "Reporter player not found.");
                     }
                     client.Callback.OnReportReceived(reporter.UserAccount.Nickname, reportDTO.Reason);
                     client.Callback.OnReportCountUpdated(totalReports);
@@ -99,13 +103,13 @@ namespace Services.Services
             }
             catch (FaultException<ServiceErrorDetailDTO>)
             {
-                // Already a controlled fault, just rethrow
                 throw;
             }
             catch (Exception ex)
             {
                 log.Error("Error while submitting report.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Unexpected error while submitting report.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, 
+                    "UNEXPECTED_ERROR", "Unexpected error while submitting report.");
             }
         }
 
@@ -129,14 +133,16 @@ namespace Services.Services
                 {
                     client.Callback.OnPlayerBanned(endTime);
 
-                    var banTimer = new Timer(_ => NotifyPlayerUnbanned(playerId), null, BanDuration, Timeout.InfiniteTimeSpan);
+                    var banTimer = new Timer(_ => NotifyPlayerUnbanned(playerId), null, 
+                        BanDuration, Timeout.InfiniteTimeSpan);
                     connectedClients[playerId] = (client.Callback, banTimer);
                 }
             }
             catch (Exception ex)
             {
                 log.Error("Error banning player.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.BanPersistenceError, "BAN_PERSISTENCE_ERROR", "Failed to persist ban information.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.BanPersistenceError, 
+                    "BAN_PERSISTENCE_ERROR", "Failed to persist ban information.");
             }
         }
 
@@ -173,7 +179,8 @@ namespace Services.Services
             catch (Exception ex)
             {
                 log.Error("Error subscribing to report updates.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError, "SUBSCRIPTION_ERROR", "Failed to subscribe player to report updates.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError, 
+                    "SUBSCRIPTION_ERROR", "Failed to subscribe player to report updates.");
             }
             return Task.CompletedTask;
         }
@@ -191,7 +198,8 @@ namespace Services.Services
             catch (Exception ex)
             {
                 log.Error("Error unsubscribing from report updates.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnsubscriptionError, "UNSUBSCRIPTION_ERROR", "Failed to unsubscribe player from report updates.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnsubscriptionError,
+                    "UNSUBSCRIPTION_ERROR", "Failed to unsubscribe player from report updates.");
             }
             return Task.CompletedTask;
         }
@@ -205,7 +213,8 @@ namespace Services.Services
             catch (Exception ex)
             {
                 log.Error("Error getting current report count.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR", "Error retrieving report count.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, 
+                    "UNEXPECTED_ERROR", "Error retrieving report count.");
             }
         }
     }
