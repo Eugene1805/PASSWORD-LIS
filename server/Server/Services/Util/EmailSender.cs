@@ -1,10 +1,8 @@
-﻿using log4net;
-using Services.Contracts.Enums;
+﻿using Services.Contracts.Enums;
 using System;
 using System.Configuration;
 using System.Net;
 using System.Net.Mail;
-using System.ServiceModel;
 using System.Threading.Tasks;
 
 namespace Services.Util
@@ -16,50 +14,26 @@ namespace Services.Util
 
     public class EmailSender : IEmailSender
     {
-        private static readonly ILog log = LogManager.GetLogger(typeof(EmailSender));
         private const string DisplayName = "PASSWORD LIS";
         public async Task SendEmailAsync(string recipientEmail, string subject, string body)
         {
-            try
-            {
-                var (smtpUser, smtpPass, smtpHost, smtpPort) = LoadSmtpConfiguration();
+            var (smtpUser, smtpPass, smtpHost, smtpPort) = LoadSmtpConfiguration();
                 
-                var message = new MailMessage
-                {
-                    From = new MailAddress(smtpUser, DisplayName),
-                    Subject = subject,
-                    IsBodyHtml = true,
-                    Body = body
-                };
-                message.To.Add(recipientEmail);
+            var message = new MailMessage
+            {
+                From = new MailAddress(smtpUser, DisplayName),
+                Subject = subject,
+                IsBodyHtml = true,
+                Body = body
+            };
+            message.To.Add(recipientEmail);
 
-                using (var smtpClient = new SmtpClient(smtpHost, smtpPort))
-                {
-                    smtpClient.Credentials = new NetworkCredential(smtpUser, smtpPass);
-                    smtpClient.EnableSsl = true;
+            using (var smtpClient = new SmtpClient(smtpHost, smtpPort))
+            {
+                smtpClient.Credentials = new NetworkCredential(smtpUser, smtpPass);
+                smtpClient.EnableSsl = true;
 
-                    await smtpClient.SendMailAsync(message);
-                }
-            }
-            catch (ConfigurationErrorsException ex)
-            {
-                log.Error("SMTP configuration error", ex);
-                throw ;
-            }
-            catch (FormatException ex)
-            {
-                log.Error("Invalid SMTP configuration format", ex);
-                throw;
-            }
-            catch (SmtpException ex)
-            {
-                log.Error($"SMTP error sending to {recipientEmail}", ex);
-                throw;
-            }
-            catch (Exception ex)
-            {
-                log.Error($"Unexpected error sending email to {recipientEmail}", ex);
-                throw;
+                await smtpClient.SendMailAsync(message);
             }
         }
 

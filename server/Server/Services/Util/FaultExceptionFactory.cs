@@ -4,10 +4,6 @@ using System.ServiceModel;
 
 namespace Services.Util
 {
-    /// <summary>
-    /// Factory for building strongly-typed FaultException<ServiceErrorDetailDTO> instances.
-    /// Use this from services to ensure consistent faults across the application.
-    /// </summary>
     public static class FaultExceptionFactory
     {
         public static FaultException<ServiceErrorDetailDTO> Create(ServiceErrorCode code, string errorCode, string message)
