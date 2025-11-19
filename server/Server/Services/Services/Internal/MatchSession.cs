@@ -35,8 +35,9 @@ namespace Services.Services.Internal
         public int RedTeamWordIndex { get; set; }
         public int BlueTeamWordIndex { get; set; }
 
-        public List<TurnHistoryDTO> RedTeamTurnHistory { get; } = new List<TurnHistoryDTO>();
-        public List<TurnHistoryDTO> BlueTeamTurnHistory { get; } = new List<TurnHistoryDTO>();
+        // Setters added so tests can inject histories via reflection
+        public List<TurnHistoryDTO> RedTeamTurnHistory { get; set; } = new List<TurnHistoryDTO>();
+        public List<TurnHistoryDTO> BlueTeamTurnHistory { get; set; } = new List<TurnHistoryDTO>();
 
         public bool RedTeamPassedThisRound { get; set; }
         public bool BlueTeamPassedThisRound { get; set; }

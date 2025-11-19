@@ -234,6 +234,16 @@ namespace Services.Services
                     return;
                 }
                 session.AddScore(team);
+
+                if (team == MatchTeam.RedTeam)
+                {
+                    session.RedTeamWordIndex++;
+                }
+                else
+                {
+                    session.BlueTeamWordIndex++;
+                }
+
                 int newScore = (team == MatchTeam.RedTeam) ? session.RedTeamScore : session.BlueTeamScore;
 
                 var resultDto = new GuessResultDTO { IsCorrect = true, Team = team, NewScore = newScore };

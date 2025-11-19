@@ -160,7 +160,7 @@ namespace Test.ServicesTests
             var (sut, _) = CreateSut();
 
             // Act + Assert
-            await Assert.ThrowsAsync<FaultException>(async () => await sut.SubscribeToMatchAsync("NOPE",1));
+            await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(async () => await sut.SubscribeToMatchAsync("NOPE",1));
         }
 
         [Fact]
@@ -173,7 +173,7 @@ namespace Test.ServicesTests
             queue.Enqueue(new Mock<IGameManagerCallback>());
 
             // Act + Assert
-            await Assert.ThrowsAsync<FaultException>(async () => await sut.SubscribeToMatchAsync("GAME2",999));
+            await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(async () => await sut.SubscribeToMatchAsync("GAME2",999));
         }
 
         [Fact]
@@ -216,7 +216,7 @@ namespace Test.ServicesTests
             await sut.SubscribeToMatchAsync("GAME4",4); // match starts
 
             // Act + Assert: now status is InProgress
-            await Assert.ThrowsAsync<FaultException>(async () => await sut.SubscribeToMatchAsync("GAME4",1));
+            await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(async () => await sut.SubscribeToMatchAsync("GAME4",1));
         }
 
         [Fact]

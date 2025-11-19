@@ -336,7 +336,7 @@ namespace Test.ServicesTests
             var (sut, _, _) = CreateSut(mockPlayerRepo, mockOperationContext);
 
             // Act + Assert
-            await Assert.ThrowsAsync<FaultException>(async () => await sut.StartGameAsync("XXXXX"));
+            await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(async () => await sut.StartGameAsync("XXXXX"));
         }
 
         [Fact]
@@ -350,7 +350,7 @@ namespace Test.ServicesTests
             var gameCode = await sut.CreateRoomAsync(host.UserAccount.Email);
 
             // Act + Assert
-            await Assert.ThrowsAsync<FaultException>(async () => await sut.StartGameAsync(gameCode));
+            await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(async () => await sut.StartGameAsync(gameCode));
         }
 
         [Fact]
