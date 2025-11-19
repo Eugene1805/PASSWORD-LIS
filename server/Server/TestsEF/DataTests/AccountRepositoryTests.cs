@@ -82,32 +82,37 @@ namespace TestsEF.DataTests
             Assert.NotNull(result);
             Assert.Equal("user@test.com", result.Email);
             Assert.NotNull(result.Player);
-            Assert.True(result.Player.Any(p => p.Id == player.Id));
+            Assert.Contains(result.Player, p => p.Id == player.Id);
             Assert.NotNull(result.SocialAccount);
-            Assert.Equal(1, result.SocialAccount.Count);
+            Assert.Single(result.SocialAccount);
             Assert.Equal("GitHub", result.SocialAccount.First().Provider);
         }
 
         [Fact]
-        public void GetUserByEmail_WhenUserDoesNotExist_ReturnsNull()
+        public async Task GetUserByEmail_WhenUserDoesNotExist_ReturnsNull()
         {
-            var result = _repository.GetUserByEmailAsync("nouser@test.com");
+            var result = await _repository.GetUserByEmailAsync("nouser@test.com");
             Assert.Null(result);
         }
 
         [Fact]
-        public void VerifyEmail_WhenUserExists_UpdatesEmailVerifiedAndReturnsTrue()
+        public async Task VerifyEmail_WhenUserExists_UpdatesEmailVerifiedAndReturnsTrue()
         {
+            // Arrange: create the account using the repository's context to avoid cross-context tracking issues
             var user = CreateValidUser("verify@test.com", "VerifyUser");
             user.EmailVerified = false;
-            Context.UserAccount.Add(user);
-            Context.SaveChanges();
+            await _repository.CreateAccountAsync(user);
 
+            // Act
             var result = _repository.VerifyEmail("verify@test.com");
 
+            // Assert
             Assert.True(result);
-            var userInDb = Context.UserAccount.First(u => u.Email == "verify@test.com");
-            Assert.True(userInDb.EmailVerified);
+            using (var verifyCtx = NewContext())
+            {
+                var userInDb = verifyCtx.UserAccount.First(u => u.Email == "verify@test.com");
+                Assert.True(userInDb.EmailVerified);
+            }
         }
 
         [Fact]
@@ -153,15 +158,19 @@ namespace TestsEF.DataTests
 
             Assert.True(result);
 
-            var userInDb = Context.UserAccount.Include("SocialAccount").First(u => u.Id == user.Id);
+            // Use a fresh context to avoid stale tracked entity from the shared Context
+            using (var verifyCtx = NewContext())
+            {
+                var userInDb = verifyCtx.UserAccount.Include("SocialAccount").First(u => u.Id == user.Id);
 
-            Assert.Equal("NewFirst", userInDb.FirstName);
-            Assert.Equal("NewLast", userInDb.LastName);
-            Assert.Equal((byte?)123, userInDb.PhotoId);
-            Assert.Equal(2, userInDb.SocialAccount.Count);
-            Assert.True(userInDb.SocialAccount.Any(s => s.Provider == "LinkedIn" && s.Username == "NewLinkedIn"));
-            Assert.True(userInDb.SocialAccount.Any(s => s.Provider == "GitHub" && s.Username == "NewGitHub"));
-            Assert.False(userInDb.SocialAccount.Any(s => s.Provider == "Twitter"));
+                Assert.Equal("NewFirst", userInDb.FirstName);
+                Assert.Equal("NewLast", userInDb.LastName);
+                Assert.Equal((byte?)123, userInDb.PhotoId);
+                Assert.Equal(2, userInDb.SocialAccount.Count);
+                Assert.Contains(userInDb.SocialAccount, s => s.Provider == "LinkedIn" && s.Username == "NewLinkedIn");
+                Assert.Contains(userInDb.SocialAccount, s => s.Provider == "GitHub" && s.Username == "NewGitHub");
+                Assert.DoesNotContain(userInDb.SocialAccount, s => s.Provider == "Twitter");
+            }
         }
     }
 }

@@ -38,7 +38,7 @@ namespace TestsEF.DataTests
             return factory.Object;
         }
 
-        protected AccountRepository CreateAccountRepository() => new AccountRepository(MockFactory.Object);
+        protected AccountRepository CreateAccountRepository() => new AccountRepository(CreatePerRequestFactory());
 
         protected BanRepository CreateBanRepository() => new BanRepository(CreatePerRequestFactory());
 

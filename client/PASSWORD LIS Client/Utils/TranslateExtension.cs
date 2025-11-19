@@ -16,7 +16,6 @@ namespace PASSWORD_LIS_Client.Utils
 
         public override object ProvideValue(IServiceProvider serviceProvider)
         {
-            // Creamos un Binding que apunta al indizador del TranslationProvider
             var binding = new Binding($"[{Key}]")
             {
                 Source = TranslationProvider.Instance,

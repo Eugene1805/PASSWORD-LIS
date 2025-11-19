@@ -6,13 +6,16 @@ namespace PASSWORD_LIS_Client.Utils
     public static class PasswordBoxHelper
     {
         public static readonly DependencyProperty BoundPasswordProperty =
-            DependencyProperty.RegisterAttached("BoundPassword", typeof(string), typeof(PasswordBoxHelper), new PropertyMetadata(string.Empty, OnBoundPasswordChanged));
+            DependencyProperty.RegisterAttached("BoundPassword", typeof(string),
+                typeof(PasswordBoxHelper), new PropertyMetadata(string.Empty, OnBoundPasswordChanged));
 
         public static readonly DependencyProperty BindPasswordProperty =
-            DependencyProperty.RegisterAttached("BindPassword", typeof(bool), typeof(PasswordBoxHelper), new PropertyMetadata(false, OnBindPasswordChanged));
+            DependencyProperty.RegisterAttached("BindPassword", typeof(bool),
+                typeof(PasswordBoxHelper), new PropertyMetadata(false, OnBindPasswordChanged));
 
         private static readonly DependencyProperty UpdatingPasswordProperty =
-            DependencyProperty.RegisterAttached("UpdatingPassword", typeof(bool), typeof(PasswordBoxHelper), new PropertyMetadata(false));
+            DependencyProperty.RegisterAttached("UpdatingPassword", typeof(bool),
+                typeof(PasswordBoxHelper), new PropertyMetadata(false));
 
 
         public static void SetBindPassword(DependencyObject dp, bool value)

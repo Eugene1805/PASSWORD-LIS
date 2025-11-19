@@ -99,6 +99,12 @@ namespace Services.Services
                 throw FaultExceptionFactory.Create(ServiceErrorCode.PlayerNotFound, "PLAYER_NOT_FOUND", "The player was not found in the database.");
             }
 
+            if (game.Players.ContainsKey(playerEntity.Id))
+            {
+                log.WarnFormat("Join as registered failed: player {0} already in room '{1}'.", playerEntity.Id, gameCode);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.AlreadyInRoom, "ALREADY_IN_ROOM", "Player already in the room.");
+            }
+
             var playerDto = new PlayerDTO
             {
                 Id = playerEntity.Id,
@@ -259,7 +265,7 @@ namespace Services.Services
             {
                 if (game.Players.ContainsKey(player.Id))
                 {
-                    log.WarnFormat("TryAddPlayer failed: player {0} already in room '{1}'.", player.Id, game.GameCode);
+                    log.WarnFormat("TryAddPlayer duplicate detected for player {0} in room '{1}'.", player.Id, game.GameCode);
                     return false;
                 }
 
@@ -332,7 +338,7 @@ namespace Services.Services
                 catch (CommunicationObjectFaultedException ex)
                 {
                     log.WarnFormat("Callback channel faulted for player {0}. Removing from game {1}. \n {2}",
-                        playerEntry.Key, game.GameCode,ex);
+                        playerEntry.Key, game.GameCode, ex);
                     await LeaveRoomAsync(game.GameCode, playerEntry.Key);
                 }
                 catch (CommunicationException ex)
@@ -343,20 +349,20 @@ namespace Services.Services
                 }
                 catch (ObjectDisposedException ex)
                 {
-                    log.WarnFormat("Callback disposed for player {0}. Removing from game {1}.\n {2}", 
-                        playerEntry.Key, game.GameCode,ex);
+                    log.WarnFormat("Callback disposed for player {0}. Removing from game {1}.\n {2}",
+                        playerEntry.Key, game.GameCode, ex);
                     await LeaveRoomAsync(game.GameCode, playerEntry.Key);
                 }
                 catch (TimeoutException ex)
                 {
-                    log.WarnFormat("Timeout notifying player {0}. Removing from game {1}. \n {2}", 
-                        playerEntry.Key, game.GameCode,ex);
+                    log.WarnFormat("Timeout notifying player {0}. Removing from game {1}. \n {2}",
+                        playerEntry.Key, game.GameCode, ex);
                     await LeaveRoomAsync(game.GameCode, playerEntry.Key);
                 }
                 catch (Exception ex)
                 {
-                    log.ErrorFormat("Unexpected error broadcasting to player {0} in game {1}. \n {2}", 
-                        playerEntry.Key, game.GameCode,ex);
+                    log.ErrorFormat("Unexpected error broadcasting to player {0} in game {1}. \n {2}",
+                        playerEntry.Key, game.GameCode, ex);
                     await LeaveRoomAsync(game.GameCode, playerEntry.Key);
                 }
             });
@@ -393,7 +399,7 @@ namespace Services.Services
             {
                 throw FaultExceptionFactory.Create(
                     ServiceErrorCode.EmailConfigurationError,
-                    "EMAIL_CONFIGURATION_ERROR",
+                    "EMAIL_SERVICE_CONFIGURATION_ERROR",
                     "Invalid email service configuration"
                 );
             }

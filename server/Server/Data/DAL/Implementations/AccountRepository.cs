@@ -151,41 +151,43 @@ namespace Data.DAL.Implementations
         {
             var existingSocialsLookup = userAccountToUpdate.SocialAccount.ToDictionary(s => s.Provider);
             var providersToKeep = new HashSet<string>(updatedSocialsAccounts.Select(s => s.Provider));
-           
+
+            // Remove socials not in updated list
             var socialsToDelete = userAccountToUpdate.SocialAccount
-                                    .Where(s => !providersToKeep.Contains(s.Provider))
-                                    .ToList();
+                .Where(s => !providersToKeep.Contains(s.Provider))
+                .ToList();
 
             foreach (var social in socialsToDelete)
             {
                 context.SocialAccount.Remove(social);
             }
 
+            // Handle updates and additions
             foreach (var updatedSocial in updatedSocialsAccounts)
             {
-                if (!string.IsNullOrWhiteSpace(updatedSocial.Username))
+                if (string.IsNullOrWhiteSpace(updatedSocial.Username))
                 {
-                    if (existingSocialsLookup.TryGetValue(updatedSocial.Provider, out var existingSocial))
-                    {
-                        if (existingSocial.Username != updatedSocial.Username)
-                        {
-                            existingSocial.Username = updatedSocial.Username.Trim();
-                            context.Entry(existingSocial).State = EntityState.Modified;
-                        }
-                    }
-                    else
-                    {
-                        updatedSocial.UserAccountId = userAccountToUpdate.Id;
-                        updatedSocial.Username = updatedSocial.Username.Trim();
-                        context.SocialAccount.Add(updatedSocial);
-                    }
-                }
-                else
-                {
+                    // Remove socials with empty username
                     if (existingSocialsLookup.TryGetValue(updatedSocial.Provider, out var existingSocial))
                     {
                         context.SocialAccount.Remove(existingSocial);
                     }
+                    continue;
+                }
+
+                if (existingSocialsLookup.TryGetValue(updatedSocial.Provider, out var existingSocialToUpdate))
+                {
+                    if (existingSocialToUpdate.Username != updatedSocial.Username)
+                    {
+                        existingSocialToUpdate.Username = updatedSocial.Username.Trim();
+                        context.Entry(existingSocialToUpdate).State = EntityState.Modified;
+                    }
+                }
+                else
+                {
+                    updatedSocial.UserAccountId = userAccountToUpdate.Id;
+                    updatedSocial.Username = updatedSocial.Username.Trim();
+                    context.SocialAccount.Add(updatedSocial);
                 }
             }
         }
