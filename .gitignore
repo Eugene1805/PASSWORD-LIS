@@ -427,7 +427,6 @@ FodyWeavers.xsd
 *.msm
 *.msp
 
-
 # Copilot (algunos entornos crean estas carpetas)
 **/.copilot/
 **/copilot/
@@ -437,3 +436,6 @@ FodyWeavers.xsd
 **/.vscode/**/globalStorage/
 # Historiales locales comunes
 .history/
+
+#SonarQube
+.SonarQube/
