@@ -1,4 +1,5 @@
-﻿using PASSWORD_LIS_Client.FriendsManagerServiceReference;
+﻿using log4net;
+using PASSWORD_LIS_Client.FriendsManagerServiceReference;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,68 +29,87 @@ namespace PASSWORD_LIS_Client.Services
         public event Action<FriendDTO> FriendAdded;
         public event Action<int> FriendRemoved;
 
-        private readonly IFriendsManager proxy;
+        private readonly DuplexChannelFactory<IFriendsManager> factory;
+        private IFriendsManager proxy;
+        private static readonly ILog log = LogManager.GetLogger(typeof(WcfFriendsManagerService));
+        //        private static readonly ILog log = LogManager.GetLogger(typeof(WcfGameManagerService));
+
 
         public WcfFriendsManagerService()
         {
             var context = new InstanceContext(this);
-            var factory = new DuplexChannelFactory<IFriendsManager>(context, "*"); //"NetTcpBinding_IFriendsManager"
-            proxy = factory.CreateChannel();
+            factory = new DuplexChannelFactory<IFriendsManager>(context, "*"); //"NetTcpBinding_IFriendsManager"
+            proxy = GetProxy();
         }
+        private IFriendsManager GetProxy()
+        {
+            ICommunicationObject channel = proxy as ICommunicationObject;
 
+            if (proxy == null || channel == null ||
+                channel.State == CommunicationState.Closed ||
+                channel.State == CommunicationState.Faulted)
+            {
+                try
+                {
+                    if (channel != null && channel.State == CommunicationState.Faulted)
+                    {
+                        channel.Abort();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    log.Warn($"Error al abortar canal antiguo: {ex.Message}");
+                }
+                proxy = factory.CreateChannel();
+            }
+            return proxy;
+        }
 
         public async Task<List<FriendDTO>> GetFriendsAsync(int userAccountId)
         {
-            var result = await proxy.GetFriendsAsync(userAccountId);
+            var result = await GetProxy().GetFriendsAsync(userAccountId);
             return result.ToList();
         }
         public Task<bool> DeleteFriendAsync(int currentUserId, int friendToDeleteId)
         {
-            return proxy.DeleteFriendAsync(currentUserId, friendToDeleteId);
+            return GetProxy().DeleteFriendAsync(currentUserId, friendToDeleteId);
         }
 
         public Task<FriendRequestResult> SendFriendRequestAsync(string addresseeEmail)
         {
-            return proxy.SendFriendRequestAsync(addresseeEmail);
+            return GetProxy().SendFriendRequestAsync(addresseeEmail);
         }
 
         public Task SubscribeToFriendUpdatesAsync(int userAccountId)
         {
-            return proxy.SubscribeToFriendUpdatesAsync(userAccountId);
+            return GetProxy().SubscribeToFriendUpdatesAsync(userAccountId);
         }
 
         public async Task<List<FriendDTO>> GetPendingRequestsAsync()
         {
-            var result = await proxy.GetPendingRequestsAsync();
+            var result = await GetProxy().GetPendingRequestsAsync();
             return result.ToList();
         }
         public Task RespondToFriendRequestAsync(int requesterPlayerId, bool accepted)
         {
-            return proxy.RespondToFriendRequestAsync(requesterPlayerId, accepted);
+            return GetProxy().RespondToFriendRequestAsync(requesterPlayerId, accepted);
         }
 
         public Task UnsubscribeFromFriendUpdatesAsync(int userAccountId)
         {
-            var channel = proxy as ICommunicationObject;
             try
             {
-                if (channel == null || channel.State == CommunicationState.Faulted)
+                var channel = proxy as ICommunicationObject;
+                if (channel != null && channel.State == CommunicationState.Opened)
                 {
-                    channel?.Abort();
-                    return Task.CompletedTask;
+                    return proxy.UnsubscribeFromFriendUpdatesAsync(userAccountId);
                 }
-                return proxy.UnsubscribeFromFriendUpdatesAsync(userAccountId);
             }
-            catch (CommunicationException)
-            {
-                channel?.Abort();
-                return Task.CompletedTask; 
-            } 
             catch (Exception)
             {
-                channel?.Abort();
-                return Task.CompletedTask;
+                (proxy as ICommunicationObject)?.Abort();
             }
+            return Task.CompletedTask;
         }
 
         public void OnFriendRequestReceived(FriendDTO requester)
