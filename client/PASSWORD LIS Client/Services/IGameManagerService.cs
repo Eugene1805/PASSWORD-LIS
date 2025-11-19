@@ -23,6 +23,7 @@ namespace PASSWORD_LIS_Client.Services
         event Action<string> MatchCancelled;
         event Action<RoundStartStateDTO> NewRoundStarted;
         event Action<int> ValidationTimerTick;
+        event Action SuddenDeathStarted;
 
         Task SubscribeToMatchAsync(string gameCode, int playerId);
         Task SubmitClueAsync(string gameCode, int senderPlayerId, string clue);
@@ -46,6 +47,7 @@ namespace PASSWORD_LIS_Client.Services
         public event Action<string> MatchCancelled;
         public event Action<RoundStartStateDTO> NewRoundStarted;
         public event Action<int> ValidationTimerTick;
+        public event Action SuddenDeathStarted;
 
         private readonly GameManagerClient client;
         private static readonly ILog log = LogManager.GetLogger(typeof(WcfGameManagerService));
@@ -184,7 +186,18 @@ namespace PASSWORD_LIS_Client.Services
 
         public void OnSuddenDeathStarted()
         {
-            throw new NotImplementedException();
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    log.Info("OnSuddenDeathStarted received");
+                    SuddenDeathStarted?.Invoke();
+                }
+                catch (Exception ex)
+                {
+                    log.Error($"Error in OnSuddenDeathStarted callback: {ex.Message}", ex);
+                }
+            }));
         }
     }
 }

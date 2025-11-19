@@ -153,6 +153,14 @@ namespace PASSWORD_LIS_Client.ViewModels
             get => isHintVisible;
             set => SetProperty(ref isHintVisible, value);
         }
+
+        private bool isSuddenDeathVisible;
+        public bool IsSuddenDeathVisible
+        {
+            get => isSuddenDeathVisible;
+            set => SetProperty(ref isSuddenDeathVisible, value);
+        }
+
         public ICommand SubmitClueCommand { get; }
         public ICommand SubmitGuessCommand { get; }
         public ICommand PassTurnCommand { get; }
@@ -165,10 +173,10 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private int currentWordIndex = 1;
         private int currentRoundIndex = 1;
-        private const int MaxRounds = 5;  // Rondas totales
         private const int MaxWordsPerRound = 5; // Palabras por ronda
         private readonly string currentLanguage;
         private PasswordWordDTO currentPasswordDto;
+        private bool isSuddenDeathActive = false;
         public GameViewModel(IGameManagerService gameManagerService, IWindowService windowService, string gameCode, WaitingRoomManagerServiceReference.PlayerDTO waitingRoomPlayer)
         {
             this.gameManagerService = gameManagerService;
@@ -197,6 +205,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             gameManagerService.BeginRoundValidation += OnBeginRoundValidation;
             gameManagerService.MatchOver += OnMatchOver;
             gameManagerService.NewRoundStarted += OnNewRoundStarted;
+            gameManagerService.SuddenDeathStarted += OnSuddenDeathStarted;
 
             SubmitClueCommand = new RelayCommand(async (_) => await SendClueAsync(), (_) => CanSendClue && !string.IsNullOrWhiteSpace(CurrentClueText));
             SubmitGuessCommand = new RelayCommand(async (_) => await SendGuessAsync(), (_) => CanSendGuess && !string.IsNullOrWhiteSpace(CurrentGuessText));
@@ -312,11 +321,19 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
+                if (isSuddenDeathActive)
+                {
+                    CurrentClue = clue;
+                    CanSendGuess = true;
+                    return;
+                }
+
                 if (currentPasswordDto == null || currentPasswordDto.EnglishWord == "END" ||
                     currentPasswordDto.SpanishWord == "END")
                 {
                     return;
                 }
+
                 CurrentClue = clue;
                 CanSendGuess = true;
             });
@@ -396,11 +413,18 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
 
                 currentWordIndex = 1;
-
                 CurrentRoundText = string.Format(Properties.Langs.Lang.currentRoundText, currentRoundIndex);
                 CurrentWordCountText = string.Format(Properties.Langs.Lang.currentWordText, currentWordIndex);
 
-                CanPassTurn = true;
+                if (!isSuddenDeathActive)
+                {
+                    CanPassTurn = true;
+                }
+                else
+                {
+                    CanPassTurn = false;
+                }
+
                 CanRequestHint = true;
             });
         }
@@ -455,6 +479,25 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
             });
         }
+        private void OnSuddenDeathStarted()
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                isSuddenDeathActive = true;
+                IsSuddenDeathVisible = true;
+                CanPassTurn = false;
+                currentPasswordDto = null;
+
+                if (CurrentPlayerRole == PlayerRole.Guesser)
+                {
+                    CurrentClue = Properties.Langs.Lang.waitingAClueText;
+                    CurrentGuessText = string.Empty;
+                    CanSendGuess = false;
+                }
+
+                ShowSnackbar("¡Muerte Súbita! El primero en acertar gana.");
+            });
+        }
 
         private async Task SendClueAsync()
         {
@@ -500,8 +543,14 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             CanRequestHint = false;
 
-            if (currentPasswordDto == null ||
-                (string.IsNullOrEmpty(currentPasswordDto.SpanishDescription) && string.IsNullOrEmpty(currentPasswordDto.EnglishDescription)))
+            if (currentPasswordDto == null)
+            {
+                ShowSnackbar(Properties.Langs.Lang.noClueAvailableText);
+                CanRequestHint = true;
+                return;
+            }
+
+            if ((string.IsNullOrEmpty(currentPasswordDto.SpanishDescription) && string.IsNullOrEmpty(currentPasswordDto.EnglishDescription)))
             {
                 ShowSnackbar(Properties.Langs.Lang.noClueAvailableText);
                 CanRequestHint = true;

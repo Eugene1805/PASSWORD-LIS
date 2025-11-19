@@ -11,7 +11,7 @@ namespace PASSWORD_LIS_Client.Views
         public GamePage()
         {
             InitializeComponent();
-            GameContentFrame.Navigated += GameContentFrameNavigated;
+            gameContentFrame.Navigated += GameContentFrameNavigated;
         }
 
         private void GameContentFrameNavigated(object sender, NavigationEventArgs e)

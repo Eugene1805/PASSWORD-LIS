@@ -48,6 +48,9 @@
 
         <Border Grid.Column="1" Grid.Row="0" Style="{StaticResource floatingBorderStyle}" Margin="20">
             <StackPanel>
+                <TextBlock Text="MUERTE SÚBITA"
+                           Style="{StaticResource titleTextBlockStyle}" Foreground="Red"
+                           Visibility="{Binding IsSuddenDeathVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                 <TextBlock Style="{StaticResource titleTextBlockStyle}" 
                            Text="{utils:Translate clueGuyText}"
                            Margin="20" Cursor="Hand"/>
