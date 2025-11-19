@@ -218,7 +218,7 @@ namespace Services.Services
             }
 
             if (!matches.TryGetValue(gameCode, out MatchState matchState) 
-                || matchState.Status != MatchStatus.InProgress)
+                || (matchState.Status != MatchStatus.InProgress && matchState.Status != MatchStatus.SuddenDeath))
             {
                 return;
             }
