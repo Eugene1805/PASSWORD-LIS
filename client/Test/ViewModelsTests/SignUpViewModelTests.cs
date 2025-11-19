@@ -34,14 +34,18 @@ namespace Test.ViewModelsTests
             viewModel.Password = "ValidPass1!";
             viewModel.ConfirmPassword = "ValidPass1!";
 
+            // Mock IsNicknameInUseAsync to return false (nickname is available)
+            mockAccountService.Setup(s => s.IsNicknameInUseAsync(It.IsAny<string>()))
+                               .ReturnsAsync(false);
+
             mockAccountService.Setup(s => s.CreateAccountAsync(It.IsAny<NewAccountDTO>()))
                                .Returns(Task.CompletedTask);
 
             // Act
-            await Task.Delay(10); // Small delay to ensure async context
-            viewModel.SignUpCommand.Execute(null);
+            await viewModel.SignUpAsync();
 
             // Assert
+            mockAccountService.Verify(s => s.IsNicknameInUseAsync(It.IsAny<string>()), Times.Once);
             mockAccountService.Verify(s => s.CreateAccountAsync(It.IsAny<NewAccountDTO>()), Times.Once);
             mockWindowService.Verify(w => w.ShowVerifyCodeWindow(viewModel.Email, It.IsAny<VerificationReason>()), Times.Once);
             mockWindowService.Verify(w => w.CloseWindow(viewModel), Times.Once);
@@ -58,12 +62,15 @@ namespace Test.ViewModelsTests
             viewModel.Password = "ValidPass1!";
             viewModel.ConfirmPassword = "ValidPass1!";
 
+            // Mock IsNicknameInUseAsync to return false (nickname is available)
+            mockAccountService.Setup(s => s.IsNicknameInUseAsync(It.IsAny<string>()))
+                               .ReturnsAsync(false);
+
             mockAccountService.Setup(s => s.CreateAccountAsync(It.IsAny<NewAccountDTO>()))
                                .ThrowsAsync(new FaultException<ServiceErrorDetailDTO>(new ServiceErrorDetailDTO()));
 
             // Act
-            await Task.Delay(10); // Small delay to ensure async context
-            viewModel.SignUpCommand.Execute(null);
+            await viewModel.SignUpAsync();
 
             // Assert
             mockWindowService.Verify(w => w.ShowPopUp(It.IsAny<string>(), PASSWORD_LIS_Client.Properties.Langs.Lang.userAlreadyExistText, It.IsAny<PopUpIcon>()), Times.Once);

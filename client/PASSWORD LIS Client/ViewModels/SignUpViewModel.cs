@@ -16,7 +16,6 @@ namespace PASSWORD_LIS_Client.ViewModels
     public class SignUpViewModel : BaseViewModel
     {
         private readonly IAccountManagerService client;
-
         private readonly IWindowService windowService;
 
         private string firstName;
@@ -46,6 +45,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             get => email;
             set { email = value; OnPropertyChanged(); }
         }
+
         private string password;
         public string Password
         {
@@ -73,7 +73,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand NavigateToLoginCommand { get; }
         public ICommand OpenTermsAndConditionsCommand { get; }
 
-        public SignUpViewModel(IAccountManagerService accountManager,IWindowService windowService)
+        public SignUpViewModel(IAccountManagerService accountManager, IWindowService windowService)
         {
             this.client = accountManager;
             this.windowService = windowService;
@@ -83,7 +83,8 @@ namespace PASSWORD_LIS_Client.ViewModels
             OpenTermsAndConditionsCommand = new RelayCommand(OpenTermsAndConditions);
         }
 
-        private async Task SignUpAsync()
+        // Made public so unit tests can deterministically await the workflow.
+        public async Task SignUpAsync()
         {
             if (!await IsInputValid())
             {
@@ -128,7 +129,6 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private bool CanExecuteSignUp()
         {
-
             return !IsSigningUp &&
                    !string.IsNullOrEmpty(Email) &&
                    !string.IsNullOrEmpty(FirstName) &&
@@ -169,7 +169,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             catch (Exception)
             {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.unknownErrorTitle, 
+                this.windowService.ShowPopUp(Properties.Langs.Lang.unknownErrorTitle,
                     Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
             }
         }
@@ -197,7 +197,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             try
             {
-                if (await ValidationUtils.IsNicknameInUseAsync(nickname))
+                if (await client.IsNicknameInUseAsync(nickname))
                 {
                     windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
                         Properties.Langs.Lang.nicknameInUseText, PopUpIcon.Warning);
@@ -210,7 +210,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                     Properties.Langs.Lang.networkErrorTitleText, PopUpIcon.Error);
                 return false;
             }
-            
+
             if (!ValidationUtils.IsValidEmail(Email))
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
@@ -220,7 +220,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             if (!ValidationUtils.PasswordsMatch(Password, ConfirmPassword))
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
-                    Properties.Langs.Lang.matchingPasswordErrorText,PopUpIcon.Warning);
+                    Properties.Langs.Lang.matchingPasswordErrorText, PopUpIcon.Warning);
                 return false;
             }
             if (!ValidationUtils.ArePasswordRequirementsMet(Password))
@@ -230,6 +230,6 @@ namespace PASSWORD_LIS_Client.ViewModels
                 return false;
             }
             return true;
-        }    
+        }
     }
 }

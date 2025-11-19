@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\PASSWORD LIS Client\packages\Microsoft.NET.Test.Sdk.18.0.1\build\net462\Microsoft.NET.Test.Sdk.props" Condition="Exists('..\PASSWORD LIS Client\packages\Microsoft.NET.Test.Sdk.18.0.1\build\net462\Microsoft.NET.Test.Sdk.props')" />
+  <Import Project="..\PASSWORD LIS Client\packages\Microsoft.CodeCoverage.18.0.1\build\netstandard2.0\Microsoft.CodeCoverage.props" Condition="Exists('..\PASSWORD LIS Client\packages\Microsoft.CodeCoverage.18.0.1\build\netstandard2.0\Microsoft.CodeCoverage.props')" />
   <Import Project="..\PASSWORD LIS Client\packages\xunit.runner.visualstudio.3.1.5\build\net472\xunit.runner.visualstudio.props" Condition="Exists('..\PASSWORD LIS Client\packages\xunit.runner.visualstudio.3.1.5\build\net472\xunit.runner.visualstudio.props')" />
-  <Import Project="..\PASSWORD LIS Client\packages\Microsoft.NET.Test.Sdk.18.0.0\build\net462\Microsoft.NET.Test.Sdk.props" Condition="Exists('..\PASSWORD LIS Client\packages\Microsoft.NET.Test.Sdk.18.0.0\build\net462\Microsoft.NET.Test.Sdk.props')" />
-  <Import Project="..\PASSWORD LIS Client\packages\Microsoft.CodeCoverage.18.0.0\build\netstandard2.0\Microsoft.CodeCoverage.props" Condition="Exists('..\PASSWORD LIS Client\packages\Microsoft.CodeCoverage.18.0.0\build\netstandard2.0\Microsoft.CodeCoverage.props')" />
   <Import Project="..\PASSWORD LIS Client\packages\xunit.core.2.9.3\build\xunit.core.props" Condition="Exists('..\PASSWORD LIS Client\packages\xunit.core.2.9.3\build\xunit.core.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -40,27 +40,17 @@
     <Reference Include="Castle.Core, Version=5.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
       <HintPath>..\PASSWORD LIS Client\packages\Castle.Core.5.2.1\lib\net462\Castle.Core.dll</HintPath>
     </Reference>
-    <Reference Include="FlaUI.Core, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\PASSWORD LIS Client\packages\FlaUI.Core.4.0.0\lib\netstandard2.0\FlaUI.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="FlaUI.UIA3, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\PASSWORD LIS Client\packages\FlaUI.UIA3.4.0.0\lib\netstandard2.0\FlaUI.UIA3.dll</HintPath>
-    </Reference>
-    <Reference Include="Interop.UIAutomationClient, Version=10.0.19041.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\PASSWORD LIS Client\packages\Interop.UIAutomationClient.10.19041.0\lib\net45\Interop.UIAutomationClient.dll</HintPath>
-      <EmbedInteropTypes>False</EmbedInteropTypes>
-    </Reference>
     <Reference Include="Microsoft.TestPlatform.CoreUtilities, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\PASSWORD LIS Client\packages\Microsoft.TestPlatform.ObjectModel.17.13.0\lib\net462\Microsoft.TestPlatform.CoreUtilities.dll</HintPath>
+      <HintPath>..\PASSWORD LIS Client\packages\Microsoft.TestPlatform.ObjectModel.18.0.1\lib\net462\Microsoft.TestPlatform.CoreUtilities.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.TestPlatform.PlatformAbstractions, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\PASSWORD LIS Client\packages\Microsoft.TestPlatform.ObjectModel.17.13.0\lib\net462\Microsoft.TestPlatform.PlatformAbstractions.dll</HintPath>
+      <HintPath>..\PASSWORD LIS Client\packages\Microsoft.TestPlatform.ObjectModel.18.0.1\lib\net462\Microsoft.TestPlatform.PlatformAbstractions.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.CodeCoverage.Shim, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\PASSWORD LIS Client\packages\Microsoft.CodeCoverage.18.0.0\lib\net462\Microsoft.VisualStudio.CodeCoverage.Shim.dll</HintPath>
+      <HintPath>..\PASSWORD LIS Client\packages\Microsoft.CodeCoverage.18.0.1\lib\net462\Microsoft.VisualStudio.CodeCoverage.Shim.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.TestPlatform.ObjectModel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\PASSWORD LIS Client\packages\Microsoft.TestPlatform.ObjectModel.17.13.0\lib\net462\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll</HintPath>
+      <HintPath>..\PASSWORD LIS Client\packages\Microsoft.TestPlatform.ObjectModel.18.0.1\lib\net462\Microsoft.VisualStudio.TestPlatform.ObjectModel.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Win32.Registry, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\PASSWORD LIS Client\packages\Microsoft.Win32.Registry.5.0.0\lib\net461\Microsoft.Win32.Registry.dll</HintPath>
@@ -69,24 +59,38 @@
       <HintPath>..\PASSWORD LIS Client\packages\Moq.4.20.72\lib\net462\Moq.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Collections.Immutable, Version=1.2.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\PASSWORD LIS Client\packages\System.Collections.Immutable.1.5.0\lib\netstandard2.0\System.Collections.Immutable.dll</HintPath>
+    <Reference Include="System.Buffers, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\PASSWORD LIS Client\packages\System.Buffers.4.6.1\lib\net462\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.CodeDom, Version=10.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\PASSWORD LIS Client\packages\System.CodeDom.10.0.0\lib\net462\System.CodeDom.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Collections.Immutable, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\PASSWORD LIS Client\packages\System.Collections.Immutable.10.0.0\lib\net462\System.Collections.Immutable.dll</HintPath>
     </Reference>
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.OracleClient" />
-    <Reference Include="System.Diagnostics.PerformanceCounter, Version=5.0.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\PASSWORD LIS Client\packages\System.Diagnostics.PerformanceCounter.5.0.1\lib\net461\System.Diagnostics.PerformanceCounter.dll</HintPath>
+    <Reference Include="System.Diagnostics.PerformanceCounter, Version=10.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\PASSWORD LIS Client\packages\System.Diagnostics.PerformanceCounter.10.0.0\lib\net462\System.Diagnostics.PerformanceCounter.dll</HintPath>
     </Reference>
+    <Reference Include="System.DirectoryServices" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Drawing.Common, Version=4.0.0.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\PASSWORD LIS Client\packages\System.Drawing.Common.5.0.2\lib\net461\System.Drawing.Common.dll</HintPath>
+    <Reference Include="System.Drawing.Common, Version=10.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\PASSWORD LIS Client\packages\System.Drawing.Common.10.0.0\lib\net462\System.Drawing.Common.dll</HintPath>
     </Reference>
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.Management" />
+    <Reference Include="System.Memory, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\PASSWORD LIS Client\packages\System.Memory.4.6.3\lib\net462\System.Memory.dll</HintPath>
+    </Reference>
     <Reference Include="System.Net" />
-    <Reference Include="System.Reflection.Metadata, Version=1.4.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\PASSWORD LIS Client\packages\System.Reflection.Metadata.1.6.0\lib\netstandard2.0\System.Reflection.Metadata.dll</HintPath>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.6.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\PASSWORD LIS Client\packages\System.Numerics.Vectors.4.6.1\lib\net462\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reflection.Metadata, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\PASSWORD LIS Client\packages\System.Reflection.Metadata.10.0.0\lib\net462\System.Reflection.Metadata.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.3.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -94,24 +98,24 @@
     </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
-    <Reference Include="System.Security.AccessControl, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\PASSWORD LIS Client\packages\System.Security.AccessControl.5.0.0\lib\net461\System.Security.AccessControl.dll</HintPath>
+    <Reference Include="System.Security.AccessControl, Version=6.0.0.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\PASSWORD LIS Client\packages\System.Security.AccessControl.6.0.1\lib\net461\System.Security.AccessControl.dll</HintPath>
     </Reference>
-    <Reference Include="System.Security.Permissions, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\PASSWORD LIS Client\packages\System.Security.Permissions.5.0.0\lib\net461\System.Security.Permissions.dll</HintPath>
+    <Reference Include="System.Security.Permissions, Version=10.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\PASSWORD LIS Client\packages\System.Security.Permissions.10.0.0\lib\net462\System.Security.Permissions.dll</HintPath>
     </Reference>
     <Reference Include="System.Security.Principal.Windows, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\PASSWORD LIS Client\packages\System.Security.Principal.Windows.5.0.0\lib\net461\System.Security.Principal.Windows.dll</HintPath>
     </Reference>
     <Reference Include="System.ServiceModel" />
-    <Reference Include="System.ServiceModel.Duplex, Version=8.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\PASSWORD LIS Client\packages\System.ServiceModel.Primitives.8.1.2\lib\net462\System.ServiceModel.Duplex.dll</HintPath>
+    <Reference Include="System.ServiceModel.Duplex, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\PASSWORD LIS Client\packages\System.ServiceModel.Primitives.10.0.652802\lib\net462\System.ServiceModel.Duplex.dll</HintPath>
     </Reference>
-    <Reference Include="System.ServiceModel.Primitives, Version=8.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\PASSWORD LIS Client\packages\System.ServiceModel.Primitives.8.1.2\lib\net462\System.ServiceModel.Primitives.dll</HintPath>
+    <Reference Include="System.ServiceModel.Primitives, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\PASSWORD LIS Client\packages\System.ServiceModel.Primitives.10.0.652802\lib\net462\System.ServiceModel.Primitives.dll</HintPath>
     </Reference>
-    <Reference Include="System.ServiceModel.Security, Version=8.1.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\PASSWORD LIS Client\packages\System.ServiceModel.Primitives.8.1.2\lib\net462\System.ServiceModel.Security.dll</HintPath>
+    <Reference Include="System.ServiceModel.Security, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\PASSWORD LIS Client\packages\System.ServiceModel.Primitives.10.0.652802\lib\net462\System.ServiceModel.Security.dll</HintPath>
     </Reference>
     <Reference Include="System.ServiceProcess" />
     <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.4.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -140,9 +144,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\LoginWindowTests.cs" />
-    <Compile Include="UI\SignUpWindowTests.cs" />
-    <Compile Include="UI\UITestBase.cs" />
     <Compile Include="ViewModelsTests\ChangePasswordViewModelTests.cs" />
     <Compile Include="ViewModelsTests\LobbyViewModelTests.cs" />
     <Compile Include="ViewModelsTests\ReportViewModelTests.cs" />
@@ -157,14 +158,14 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Analyzer Include="..\PASSWORD LIS Client\packages\xunit.analyzers.1.24.0\analyzers\dotnet\cs\xunit.analyzers.dll" />
-    <Analyzer Include="..\PASSWORD LIS Client\packages\xunit.analyzers.1.24.0\analyzers\dotnet\cs\xunit.analyzers.fixes.dll" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\PASSWORD LIS Client\PASSWORD LIS Client.csproj">
       <Project>{46b3f08e-567c-4635-9864-a0b0d888c8a3}</Project>
       <Name>PASSWORD LIS Client</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\PASSWORD LIS Client\packages\xunit.analyzers.1.25.0\analyzers\dotnet\cs\xunit.analyzers.dll" />
+    <Analyzer Include="..\PASSWORD LIS Client\packages\xunit.analyzers.1.25.0\analyzers\dotnet\cs\xunit.analyzers.fixes.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
@@ -173,15 +174,13 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\PASSWORD LIS Client\packages\xunit.core.2.9.3\build\xunit.core.props')" Text="$([System.String]::Format('$(ErrorText)', '..\PASSWORD LIS Client\packages\xunit.core.2.9.3\build\xunit.core.props'))" />
     <Error Condition="!Exists('..\PASSWORD LIS Client\packages\xunit.core.2.9.3\build\xunit.core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\PASSWORD LIS Client\packages\xunit.core.2.9.3\build\xunit.core.targets'))" />
-    <Error Condition="!Exists('..\PASSWORD LIS Client\packages\Microsoft.CodeCoverage.18.0.0\build\netstandard2.0\Microsoft.CodeCoverage.props')" Text="$([System.String]::Format('$(ErrorText)', '..\PASSWORD LIS Client\packages\Microsoft.CodeCoverage.18.0.0\build\netstandard2.0\Microsoft.CodeCoverage.props'))" />
-    <Error Condition="!Exists('..\PASSWORD LIS Client\packages\Microsoft.CodeCoverage.18.0.0\build\netstandard2.0\Microsoft.CodeCoverage.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\PASSWORD LIS Client\packages\Microsoft.CodeCoverage.18.0.0\build\netstandard2.0\Microsoft.CodeCoverage.targets'))" />
-    <Error Condition="!Exists('..\PASSWORD LIS Client\packages\Microsoft.NET.Test.Sdk.18.0.0\build\net462\Microsoft.NET.Test.Sdk.props')" Text="$([System.String]::Format('$(ErrorText)', '..\PASSWORD LIS Client\packages\Microsoft.NET.Test.Sdk.18.0.0\build\net462\Microsoft.NET.Test.Sdk.props'))" />
-    <Error Condition="!Exists('..\PASSWORD LIS Client\packages\Microsoft.NET.Test.Sdk.18.0.0\build\net462\Microsoft.NET.Test.Sdk.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\PASSWORD LIS Client\packages\Microsoft.NET.Test.Sdk.18.0.0\build\net462\Microsoft.NET.Test.Sdk.targets'))" />
     <Error Condition="!Exists('..\PASSWORD LIS Client\packages\xunit.runner.visualstudio.3.1.5\build\net472\xunit.runner.visualstudio.props')" Text="$([System.String]::Format('$(ErrorText)', '..\PASSWORD LIS Client\packages\xunit.runner.visualstudio.3.1.5\build\net472\xunit.runner.visualstudio.props'))" />
-    <Error Condition="!Exists('..\PASSWORD LIS Client\packages\Interop.UIAutomationClient.10.19041.0\build\Interop.UIAutomationClient.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\PASSWORD LIS Client\packages\Interop.UIAutomationClient.10.19041.0\build\Interop.UIAutomationClient.targets'))" />
+    <Error Condition="!Exists('..\PASSWORD LIS Client\packages\Microsoft.CodeCoverage.18.0.1\build\netstandard2.0\Microsoft.CodeCoverage.props')" Text="$([System.String]::Format('$(ErrorText)', '..\PASSWORD LIS Client\packages\Microsoft.CodeCoverage.18.0.1\build\netstandard2.0\Microsoft.CodeCoverage.props'))" />
+    <Error Condition="!Exists('..\PASSWORD LIS Client\packages\Microsoft.CodeCoverage.18.0.1\build\netstandard2.0\Microsoft.CodeCoverage.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\PASSWORD LIS Client\packages\Microsoft.CodeCoverage.18.0.1\build\netstandard2.0\Microsoft.CodeCoverage.targets'))" />
+    <Error Condition="!Exists('..\PASSWORD LIS Client\packages\Microsoft.NET.Test.Sdk.18.0.1\build\net462\Microsoft.NET.Test.Sdk.props')" Text="$([System.String]::Format('$(ErrorText)', '..\PASSWORD LIS Client\packages\Microsoft.NET.Test.Sdk.18.0.1\build\net462\Microsoft.NET.Test.Sdk.props'))" />
+    <Error Condition="!Exists('..\PASSWORD LIS Client\packages\Microsoft.NET.Test.Sdk.18.0.1\build\net462\Microsoft.NET.Test.Sdk.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\PASSWORD LIS Client\packages\Microsoft.NET.Test.Sdk.18.0.1\build\net462\Microsoft.NET.Test.Sdk.targets'))" />
   </Target>
   <Import Project="..\PASSWORD LIS Client\packages\xunit.core.2.9.3\build\xunit.core.targets" Condition="Exists('..\PASSWORD LIS Client\packages\xunit.core.2.9.3\build\xunit.core.targets')" />
-  <Import Project="..\PASSWORD LIS Client\packages\Microsoft.CodeCoverage.18.0.0\build\netstandard2.0\Microsoft.CodeCoverage.targets" Condition="Exists('..\PASSWORD LIS Client\packages\Microsoft.CodeCoverage.18.0.0\build\netstandard2.0\Microsoft.CodeCoverage.targets')" />
-  <Import Project="..\PASSWORD LIS Client\packages\Microsoft.NET.Test.Sdk.18.0.0\build\net462\Microsoft.NET.Test.Sdk.targets" Condition="Exists('..\PASSWORD LIS Client\packages\Microsoft.NET.Test.Sdk.18.0.0\build\net462\Microsoft.NET.Test.Sdk.targets')" />
-  <Import Project="..\PASSWORD LIS Client\packages\Interop.UIAutomationClient.10.19041.0\build\Interop.UIAutomationClient.targets" Condition="Exists('..\PASSWORD LIS Client\packages\Interop.UIAutomationClient.10.19041.0\build\Interop.UIAutomationClient.targets')" />
+  <Import Project="..\PASSWORD LIS Client\packages\Microsoft.CodeCoverage.18.0.1\build\netstandard2.0\Microsoft.CodeCoverage.targets" Condition="Exists('..\PASSWORD LIS Client\packages\Microsoft.CodeCoverage.18.0.1\build\netstandard2.0\Microsoft.CodeCoverage.targets')" />
+  <Import Project="..\PASSWORD LIS Client\packages\Microsoft.NET.Test.Sdk.18.0.1\build\net462\Microsoft.NET.Test.Sdk.targets" Condition="Exists('..\PASSWORD LIS Client\packages\Microsoft.NET.Test.Sdk.18.0.1\build\net462\Microsoft.NET.Test.Sdk.targets')" />
 </Project>
