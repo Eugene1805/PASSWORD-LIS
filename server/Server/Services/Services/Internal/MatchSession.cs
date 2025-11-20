@@ -78,7 +78,7 @@ namespace Services.Services.Internal
             var index = (team == MatchTeam.RedTeam) ? RedTeamWordIndex : BlueTeamWordIndex;
 
             if (index < list.Count) return list[index];
-            return new PasswordWord { Id = -1 }; 
+            return null; 
         }
 
         public (IGameManagerCallback Callback, PlayerDTO Player) GetPlayerById(int id)

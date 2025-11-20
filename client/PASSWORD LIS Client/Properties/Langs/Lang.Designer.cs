@@ -1882,6 +1882,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a Word Passed.
+        /// </summary>
+        public static string wordPassedText {
+            get {
+                return ResourceManager.GetString("wordPassedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a Write a clue for your teammate:.
         /// </summary>
         public static string writeClueText {

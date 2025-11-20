@@ -30,7 +30,7 @@ namespace Services.Services
         private static readonly ILog log = LogManager.GetLogger(typeof(GameManager));
 
         private const int RoundDurationSeconds = 120; // CAMBIADO PARA PRUEBAS de 60 a 180
-        private const int ValidationDurationSeconds = 60; //Cambiado para pruebas de 20 a 60
+        private const int ValidationDurationSeconds = 30; //Cambiado para pruebas de 20 a 60
         private const int SuddenDeathDurationSeconds = 30;
         private const int WordsPerRound = 5; // Change from 5 to 3 for testing
         private const int TotalRounds = 3; //CAMBIADO DE 5 A 1
@@ -149,7 +149,7 @@ namespace Services.Services
             }
 
             if (!matches.TryGetValue(gameCode, out MatchSession session) 
-                || session.Status != MatchStatus.InProgress)
+                || session.Status != MatchStatus.InProgress && session.Status != MatchStatus.SuddenDeath)
             {
                 return;
             }
@@ -481,8 +481,14 @@ namespace Services.Services
             await BroadcastAndHandleDisconnectsAsync(session, cb => cb.OnTimerTick(newTime));
             if (newTime <= 0)
             {
-                session.StopTimers();
-                await StartValidationPhaseAsync(session);
+                if (session.Status == MatchStatus.SuddenDeath)
+                {
+                    await StartSuddenDeathAsync(session);
+                }
+                else
+                {
+                    await StartValidationPhaseAsync(session);
+                }
             }
         }
 

@@ -756,4 +756,7 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="errorPassingTurnText" xml:space="preserve">
     <value>Error when passing turn</value>
   </data>
+  <data name="wordPassedText" xml:space="preserve">
+    <value>Word Passed</value>
+  </data>
 </root>

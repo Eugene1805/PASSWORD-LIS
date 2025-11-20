@@ -177,6 +177,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         private readonly string currentLanguage;
         private PasswordWordDTO currentPasswordDto;
         private bool isSuddenDeathActive = false;
+        private bool isMatchEnding = false;
         public GameViewModel(IGameManagerService gameManagerService, IWindowService windowService, string gameCode, WaitingRoomManagerServiceReference.PlayerDTO waitingRoomPlayer)
         {
             this.gameManagerService = gameManagerService;
@@ -266,6 +267,11 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
+                if (isMatchEnding)
+                {
+                    return;
+                }
+
                 windowService.ShowPopUp(Properties.Langs.Lang.matchCancelledText, reason, PopUpIcon.Warning);
                 gameManagerService.Cleanup();
                 windowService.GoBack();
@@ -278,42 +284,44 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 currentPasswordDto = password;
 
-                if (password.EnglishWord == "END" || password.SpanishWord == "END")
+                bool isRoundEnded = password.EnglishWord == "END" || password.SpanishWord == "END";
+                                    
+
+                if (isRoundEnded && !isSuddenDeathActive)
                 {
                     string roundOverMsg = Properties.Langs.Lang.roundCompleted;
-                    CurrentPasswordWord = roundOverMsg; // Para el Pistero
-                    CurrentClue = roundOverMsg; // Para el Adivinador
+                    CurrentPasswordWord = roundOverMsg;
+                    CurrentClue = roundOverMsg;
 
                     CanSendClue = false;
                     CanSendGuess = false;
                     CanPassTurn = false;
-                    CanRequestHint = false;
+                    CanRequestHint = false;
 
                     IsHintVisible = false;
                     CurrentHintText = string.Empty;
                     CurrentClueText = string.Empty;
-                    CurrentGuessText = string.Empty; 
+                    CurrentGuessText = string.Empty;
                     return;
                 }
 
                 if (CurrentPlayerRole == PlayerRole.ClueGuy)
                 {
-                    if (currentLanguage.StartsWith("es"))
-                    {
-                        CurrentPasswordWord = password.SpanishWord;
-                    }
-                    else
-                    {
-                        CurrentPasswordWord = password.EnglishWord;
-                    }
+                    CurrentPasswordWord = currentLanguage.StartsWith("es") ? password.SpanishWord : password.EnglishWord;
+                }
+                else
+                {
+                    CurrentPasswordWord = "...";
                 }
 
                 CurrentClue = Properties.Langs.Lang.waitingAClueText;
                 CanSendClue = true;
                 CanSendGuess = false;
+
                 CurrentWordCountText = string.Format(Properties.Langs.Lang.currentWordText, currentWordIndex);
                 IsHintVisible = false;
                 CurrentHintText = string.Empty;
+                CurrentGuessText = string.Empty;
             });
         }
 
@@ -335,7 +343,17 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
 
                 CurrentClue = clue;
-                CanSendGuess = true;
+
+                bool isPassMessage = clue.ToLower().Contains("passed") || clue.ToLower().Contains("pasó") ;
+
+                if (isPassMessage)
+                {
+                    CanSendGuess = false;
+                }
+                else
+                {
+                    CanSendGuess = true;
+                }
             });
         }
 
@@ -407,23 +425,8 @@ namespace PASSWORD_LIS_Client.ViewModels
                 int myNewScore = (currentPlayer.Team == MatchTeam.RedTeam) ? result.NewRedTeamScore : result.NewBlueTeamScore;
                 TeamPointsText = string.Format(Properties.Langs.Lang.teamPointsText, myNewScore);
 
-                if (result.TeamThatWasValidated == MatchTeam.BlueTeam)
-                {
-                    currentRoundIndex++;
-                }
-
                 currentWordIndex = 1;
-                CurrentRoundText = string.Format(Properties.Langs.Lang.currentRoundText, currentRoundIndex);
                 CurrentWordCountText = string.Format(Properties.Langs.Lang.currentWordText, currentWordIndex);
-
-                if (!isSuddenDeathActive)
-                {
-                    CanPassTurn = true;
-                }
-                else
-                {
-                    CanPassTurn = false;
-                }
 
                 CanRequestHint = true;
             });
@@ -433,7 +436,9 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                bool didIWin = summary.WinnerTeam.HasValue && summary.WinnerTeam.Value == currentPlayer.Team;
+                isMatchEnding = true;
+
+                bool didIWin = summary.WinnerTeam.HasValue && summary.WinnerTeam.Value == currentPlayer.Team;
                 var gameEndViewModel = new GameEndViewModel(summary.RedScore, summary.BlueScore, windowService);
                 Page endPage;
 
@@ -456,6 +461,9 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
+                currentRoundIndex = state.CurrentRound;
+                CurrentRoundText = string.Format(Properties.Langs.Lang.currentRoundText, currentRoundIndex);
+
                 var thisPlayer = state.PlayersWithNewRoles.FirstOrDefault(p => p.Id == currentPlayer.Id);
                 if (thisPlayer != null)
                 {
@@ -477,6 +485,8 @@ namespace PASSWORD_LIS_Client.ViewModels
                 {
                     CurrentPasswordWord = "...";
                 }
+
+                CanPassTurn = !isSuddenDeathActive;
             });
         }
         private void OnSuddenDeathStarted()
@@ -509,12 +519,24 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             catch (Exception ex)
             {
+                if (isMatchEnding)
+                {
+                    return;
+                }
                 HandleConnectionError(ex, Properties.Langs.Lang.errorSendingClueText);
                 CanSendClue = true;
             }
         }
         private async Task SendGuessAsync()
         {
+            if (string.IsNullOrWhiteSpace(CurrentClue) ||
+                CurrentClue == Properties.Langs.Lang.waitingAClueText ||
+                CurrentClue.ToLower().Contains("passed") ||
+                CurrentClue.ToLower().Contains("pasó"))
+            {
+                return;
+            }
+
             CanSendGuess = false;
             try
             {
@@ -522,6 +544,10 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             catch (Exception ex)
             {
+                if (isMatchEnding)
+                {
+                    return;
+                }
                 HandleConnectionError(ex, Properties.Langs.Lang.errorSendingRiddleText);
                 CanSendGuess = true;
             }
@@ -550,7 +576,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 return;
             }
 
-            if ((string.IsNullOrEmpty(currentPasswordDto.SpanishDescription) && string.IsNullOrEmpty(currentPasswordDto.EnglishDescription)))
+            if (string.IsNullOrEmpty(currentPasswordDto.SpanishDescription) && string.IsNullOrEmpty(currentPasswordDto.EnglishDescription))
             {
                 ShowSnackbar(Properties.Langs.Lang.noClueAvailableText);
                 CanRequestHint = true;
