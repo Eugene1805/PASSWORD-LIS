@@ -34,13 +34,13 @@ namespace Test.ServicesTests
 
         private static List<PlayerDTO> MakePlayers()
         {
-            return new List<PlayerDTO>
-            {
+            return
+            [
                 new PlayerDTO{ Id =1, Nickname = "RedClue", Team = MatchTeam.RedTeam, Role = PlayerRole.ClueGuy },
                 new PlayerDTO{ Id =2, Nickname = "BlueClue", Team = MatchTeam.BlueTeam, Role = PlayerRole.ClueGuy },
                 new PlayerDTO{ Id =3, Nickname = "RedGuess", Team = MatchTeam.RedTeam, Role = PlayerRole.Guesser },
                 new PlayerDTO{ Id =4, Nickname = "BlueGuess", Team = MatchTeam.BlueTeam, Role = PlayerRole.Guesser }
-            };
+            ];
         }
 
         private static List<PasswordWord> MakeWords(int count =5)

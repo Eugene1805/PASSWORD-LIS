@@ -24,8 +24,8 @@ namespace Services.Services.Internal
         public int BlueTeamScore { get; private set; }
 
         public int CurrentRound { get; set; }
-        public int SecondsLeft;
-        public int ValidationSecondsLeft;
+        public int SecondsLeft { get; set; }
+        public int ValidationSecondsLeft { get; set; }
 
         private Timer roundTimer;
         private Timer validationTimer;
@@ -35,7 +35,6 @@ namespace Services.Services.Internal
         public int RedTeamWordIndex { get; set; }
         public int BlueTeamWordIndex { get; set; }
 
-        // Setters added so tests can inject histories via reflection
         public List<TurnHistoryDTO> RedTeamTurnHistory { get; set; } = new List<TurnHistoryDTO>();
         public List<TurnHistoryDTO> BlueTeamTurnHistory { get; set; } = new List<TurnHistoryDTO>();
 
@@ -46,6 +45,8 @@ namespace Services.Services.Internal
             = new List<(MatchTeam, List<ValidationVoteDTO>)>();
         public HashSet<int> PlayersWhoVoted { get; } = new HashSet<int>();
 
+        private readonly object lockObj = new object();
+        private bool disposed;
         public MatchSession(string gameCode, List<PlayerDTO> expectedPlayers)
         {
             GameCode = gameCode;
@@ -56,7 +57,7 @@ namespace Services.Services.Internal
 
         public void AddScore(MatchTeam team, int points = 1)
         {
-            lock (this)
+            lock (lockObj)
             {
                 if (team == MatchTeam.RedTeam) RedTeamScore += points;
                 else BlueTeamScore += points;
@@ -65,7 +66,7 @@ namespace Services.Services.Internal
 
         public void ApplyPenalties(int redPenalty, int bluePenalty)
         {
-            lock (this)
+            lock (lockObj)
             {
                 RedTeamScore = Math.Max(0, RedTeamScore - redPenalty);
                 BlueTeamScore = Math.Max(0, BlueTeamScore - bluePenalty);
@@ -125,10 +126,22 @@ namespace Services.Services.Internal
             roundTimer = null;
             validationTimer = null;
         }
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    StopTimers();
+                }
+                disposed = true;
+            }
+        }
 
         public void Dispose()
         {
-            StopTimers();
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

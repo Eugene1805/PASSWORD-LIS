@@ -28,10 +28,8 @@ namespace Test.DataTests
             };
 
             // Act & Assert
-            using (var ctx = new PasswordLISEntities(entityBuilder.ToString()))
-            {
-                Assert.True(ctx.Database.Exists(), "La conexión a la base de datos no se pudo establecer.");
-            }
+            using var ctx = new PasswordLISEntities(entityBuilder.ToString());
+            Assert.True(ctx.Database.Exists(), "La conexión a la base de datos no se pudo establecer.");
         }
     }
 }

@@ -213,7 +213,6 @@ namespace Services.Services
                 log.DebugFormat("SendMessage ignored: game '{0}' not found.", gameCode);
             }
         }
-        // TODO ADD fault exception for game not found or not enough players
         public async Task StartGameAsync(string gameCode)
         {
             if (!rooms.TryGetValue(gameCode, out var game))
@@ -266,7 +265,6 @@ namespace Services.Services
                 log.DebugFormat("HostLeft ignored: room '{0}' not found.", gameCode);
             }
         }
-        // TODO: ADD Fault exception for the nullable callback
         private async Task<bool> TryAddPlayerAsync(Room game, PlayerDTO player, IWaitingRoomCallback callback)
         {
             if (callback == null)
@@ -285,11 +283,9 @@ namespace Services.Services
                     return false;
                 }
 
-                // Asignación determinista basada solo en jugadores conectados
                 var assigned = AssignTeamAndRole(game, player);
                 if (!assigned)
                 {
-                    // No hay slot disponible según los roles actualmente en la sala
                     log.WarnFormat("TryAddPlayer failed: no available team/role slot for player {0} in room '{1}'.",
                         player.Id, game.GameCode);
                     return false;
@@ -302,8 +298,6 @@ namespace Services.Services
                     return false;
                 }
             }
-
-            // fuera del lock notificamos
             await BroadcastAsync(game, client => client.Item1.OnPlayerJoined(player));
             return true;
         }

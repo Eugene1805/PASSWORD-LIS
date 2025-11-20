@@ -439,3 +439,6 @@ FodyWeavers.xsd
 
 #SonarQube
 .SonarQube/
+# --- Scripts ---
+analizar_todo.ps1
+*.ps1
