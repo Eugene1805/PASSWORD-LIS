@@ -16,6 +16,20 @@ namespace PASSWORD_LIS_Client.ViewModels
 {
     public class GameViewModel : BaseViewModel
     {
+        private readonly IGameManagerService gameManagerService;
+        private readonly IWindowService windowService;
+        private readonly string gameCode;
+        private readonly PlayerDTO currentPlayer;
+
+        private int currentWordIndex = 1;
+        private int currentRoundIndex = 1;
+        private readonly string currentLanguage;
+        private PasswordWordDTO currentPasswordDto;
+        private bool isSuddenDeathActive = false;
+        private bool isMatchEnding = false;
+
+        private const int MaxWordsPerRound = 5; // Palabras por ronda
+
         private bool isLoading = true;
         public bool IsLoading
         {
@@ -166,18 +180,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand PassTurnCommand { get; }
         public ICommand RequestHintCommand { get; }
 
-        private readonly IGameManagerService gameManagerService;
-        private readonly IWindowService windowService;
-        private readonly string gameCode;
-        private readonly PlayerDTO currentPlayer;
 
-        private int currentWordIndex = 1;
-        private int currentRoundIndex = 1;
-        private const int MaxWordsPerRound = 5; // Palabras por ronda
-        private readonly string currentLanguage;
-        private PasswordWordDTO currentPasswordDto;
-        private bool isSuddenDeathActive = false;
-        private bool isMatchEnding = false;
         public GameViewModel(IGameManagerService gameManagerService, IWindowService windowService, string gameCode, WaitingRoomManagerServiceReference.PlayerDTO waitingRoomPlayer)
         {
             this.gameManagerService = gameManagerService;
@@ -234,7 +237,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                     currentWordIndex = 1;
                     currentRoundIndex = 1;
 
-                    var thisPlayer = state.Players.FirstOrDefault(p => p.Id == currentPlayer.Id);
+                    var thisPlayer = state.Players.FirstOrDefault(player => player.Id == currentPlayer.Id);
                     if (thisPlayer != null)
                     {
                         CurrentPlayerRole = thisPlayer.Role;
