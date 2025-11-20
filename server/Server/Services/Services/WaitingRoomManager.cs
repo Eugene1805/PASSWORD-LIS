@@ -320,10 +320,10 @@ namespace Services.Services
             {
                 return false;
             }
-            var chosen = desired.First(d => !occupied.Contains(d));
+            var (team, role) = desired.First(d => !occupied.Contains(d));
 
-            player.Team = chosen.team;
-            player.Role = chosen.role;
+            player.Team = team;
+            player.Role = role;
             return true;
         }
 
