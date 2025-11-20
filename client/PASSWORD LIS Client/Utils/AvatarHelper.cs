@@ -4,22 +4,15 @@ namespace PASSWORD_LIS_Client.Utils
 {
     public static class AvatarHelper
     {
-
         public static Uri GetAvatarUriById(int photoId)
         {
-            string fileName;
-            if (photoId >= 1 && photoId <= 6)
-            {
-                fileName = $"Avatar{photoId}.png";
-            }
-            else
-            {
-                fileName = "AvatarDefault.png";
-            }
+            int normalizedId = (photoId >= 1 && photoId <= 6) ? photoId : 0;
+            string fileName = normalizedId == 0 ? "AvatarDefault.png" : $"Avatar{normalizedId}.png";
 
-            string resourcePath = $"/Resources/{fileName}";
+            string relativePath = $"Resources/{fileName}";
 
-            return new Uri($"pack://application:,,,{resourcePath}", UriKind.Absolute);
+            var baseUri = new Uri("pack://application:,,,/", UriKind.Absolute);
+            return new Uri(baseUri, relativePath); // Absolute pack URI result
         }
     }
 }

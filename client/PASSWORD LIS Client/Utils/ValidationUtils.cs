@@ -1,5 +1,4 @@
-﻿using System;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace PASSWORD_LIS_Client.Utils
@@ -21,6 +20,10 @@ namespace PASSWORD_LIS_Client.Utils
         }
         public static bool ArePasswordRequirementsMet(string password)
         {
+            if (string.IsNullOrWhiteSpace(password)) 
+            {
+                return false; 
+            }
             return PasswordRequirementsRegex.IsMatch(password);
         }
 
