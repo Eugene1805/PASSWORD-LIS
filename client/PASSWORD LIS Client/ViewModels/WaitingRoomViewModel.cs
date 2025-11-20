@@ -354,6 +354,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             finally
             {
+                UnsubscribeFromRoomEvents();
                 windowService.GoBack();
             }
         }
@@ -396,6 +397,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
         private void OnGameStarted()
         {
+            UnsubscribeFromRoomEvents();
             if (!IsGuest)
             {
                 _ = CleanupAndUnsubscribeAsync();
@@ -638,6 +640,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(async () =>
             {
+                UnsubscribeFromRoomEvents();
                 if (!isHost)
                 {
                     windowService.ShowPopUp(
@@ -651,6 +654,18 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
                 windowService.GoBack();
             });
+        }
+
+        private void UnsubscribeFromRoomEvents()
+        {
+            if (roomManagerClient is WcfWaitingRoomManagerService wcfService)
+            {
+                wcfService.MessageReceived -= OnMessageReceived;
+                wcfService.PlayerJoined -= OnPlayerJoined;
+                wcfService.PlayerLeft -= OnPlayerLeft;
+                wcfService.GameStarted -= OnGameStarted;
+                wcfService.HostLeft -= OnHostLeft;
+            }
         }
     }
 }
