@@ -477,7 +477,7 @@ namespace Services.Services
             {
                 return;
             }
-            int newTime = Interlocked.Decrement(ref session.SecondsLeft);
+            int newTime = session.DecrementSecondsLeft();
             await BroadcastAndHandleDisconnectsAsync(session, cb => cb.OnTimerTick(newTime));
             if (newTime <= 0)
             {
@@ -511,7 +511,6 @@ namespace Services.Services
                 await gameBroadcaster.BroadcastToGroupAsync(redPlayers,
                     cb => cb.OnBeginRoundValidation(session.BlueTeamTurnHistory));
             }
-
             if (session.RedTeamTurnHistory.Count == 0 && session.BlueTeamTurnHistory.Count == 0)
             {
                 await ProcessVotesAsync(session);
@@ -526,7 +525,7 @@ namespace Services.Services
             {
                 return;
             }
-            int newTime = Interlocked.Decrement(ref session.ValidationSecondsLeft);
+            int newTime = session.DecrementValidationSecondsLeft();
             await BroadcastAndHandleDisconnectsAsync(session, cb => cb.OnValidationTimerTick(newTime));
 
             if (newTime <= 0)
