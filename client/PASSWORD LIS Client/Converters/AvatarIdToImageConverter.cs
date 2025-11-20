@@ -1,5 +1,7 @@
-﻿using PASSWORD_LIS_Client.Utils;
+﻿using log4net;
+using PASSWORD_LIS_Client.Utils;
 using System;
+using System.Configuration;
 using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
@@ -13,6 +15,7 @@ namespace PASSWORD_LIS_Client.Converters
             if (value is int photoId)
             {
                 Uri avatarUri = AvatarHelper.GetAvatarUriById(photoId);
+                
                 if (avatarUri != null)
                 {
                     return new BitmapImage(avatarUri);

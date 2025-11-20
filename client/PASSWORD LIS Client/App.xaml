@@ -263,7 +263,6 @@
             </Style.Triggers>
         </Style>
 
-        <!-- Estilo para encabezados de columnas -->
         <Style x:Key="cleanDataGridColumnHeaderStyle" TargetType="DataGridColumnHeader">
             <Setter Property="HorizontalContentAlignment" Value="Center"/>
             <Setter Property="FontWeight" Value="Bold"/>
@@ -277,7 +276,6 @@
             <Setter Property="SeparatorVisibility" Value="Visible"/>
         </Style>
 
-        <!-- Estilo general del DataGrid -->
         <Style x:Key="cleanDataGridStyle" TargetType="DataGrid">
             <Setter Property="AutoGenerateColumns" Value="False"/>
             <Setter Property="IsReadOnly" Value="True"/>
@@ -299,10 +297,8 @@
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="FontSize" Value="16"/>
-            <!-- SelectionUnit y SelectionMode sí pertenecen al DataGrid y se pueden poner aquí -->
             <Setter Property="SelectionMode" Value="Single"/>
             <Setter Property="SelectionUnit" Value="Cell"/>
-            <!-- RowStyle para controlar visual de selección/hover -->
             <Setter Property="RowStyle">
                 <Setter.Value>
                     <Style TargetType="DataGridRow">
@@ -312,11 +308,9 @@
                         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
                         <Setter Property="SnapsToDevicePixels" Value="True"/>
                         <Style.Triggers>
-                            <!-- Hover -->
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="#3E444A"/>
                             </Trigger>
-                            <!-- Sin efecto al seleccionar -->
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter Property="Background" Value="#343A40"/>
                                 <Setter Property="Foreground" Value="White"/>
