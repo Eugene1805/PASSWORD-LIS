@@ -49,38 +49,66 @@ namespace PASSWORD_LIS_Client.Services
         public event Action<int> ValidationTimerTick;
         public event Action SuddenDeathStarted;
 
-        private readonly GameManagerClient client;
+        private readonly DuplexChannelFactory<IGameManager> factory;
+        private IGameManager proxy;
         private static readonly ILog log = LogManager.GetLogger(typeof(WcfGameManagerService));
         public WcfGameManagerService()
         {
             var context = new InstanceContext(this);
-            client = new GameManagerClient(context);
+            factory = new DuplexChannelFactory<IGameManager>(context, "*");
+            proxy = GetProxy();
+        }
+        private IGameManager GetProxy()
+        {
+            ICommunicationObject channel = proxy as ICommunicationObject;
+
+            if (proxy == null || channel == null ||
+                channel.State == CommunicationState.Closed ||
+                channel.State == CommunicationState.Faulted)
+            {
+                try
+                {
+                    if (channel != null && channel.State == CommunicationState.Faulted)
+                    {
+                        channel.Abort();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    log.Warn($"Error al abortar canal antiguo: {ex.Message}");
+                }
+
+                proxy = factory.CreateChannel();
+            }
+
+            return proxy;
         }
 
         public void Cleanup()
         {
             try
             {
-                if (client.State == CommunicationState.Opened)
+                var channel = proxy as ICommunicationObject;
+                if (channel != null)
                 {
-                    client.Close();
+                    if (channel.State == CommunicationState.Opened)
+                    {
+                        channel.Close();
+                    }
+                    else
+                    {
+                        channel.Abort();
+                    }
                 }
             }
-            catch (CommunicationException)
+            catch (Exception ex)
             {
-                client.Abort();
-            }
-            catch (TimeoutException)
-            {
-                client.Abort();
-            }
-            catch (Exception)
-            {
-                client.Abort();
+                log.Error($"Error during Cleanup: {ex.Message}");
+                (proxy as ICommunicationObject)?.Abort();
             }
         }
 
-        public void OnBeginRoundValidation(List<TurnHistoryDTO> turns)
+        public void OnBeginRoundValidation(List<TurnHistoryDTO> turns)  
         {
             BeginRoundValidation?.Invoke(turns);
         }
@@ -124,28 +152,28 @@ namespace PASSWORD_LIS_Client.Services
 
         public Task PassTurnAsync(string gameCode, int senderPlayerId)
         {
-            return client.PassTurnAsync(gameCode, senderPlayerId);
+            return GetProxy().PassTurnAsync(gameCode, senderPlayerId);
         }
 
         public Task SubmitClueAsync(string gameCode, int senderPlayerId, string clue)
         {
-            return client.SubmitClueAsync(gameCode, senderPlayerId, clue);
+            return GetProxy().SubmitClueAsync(gameCode, senderPlayerId, clue);
         }
 
         public Task SubmitGuessAsync(string gameCode, int senderPlayerId, string guess)
         {
-            return client.SubmitGuessAsync(gameCode, senderPlayerId, guess);
+            return GetProxy().SubmitGuessAsync(gameCode, senderPlayerId, guess);
         }
 
         public Task SubmitValidationVotesAsync(string gameCode, int senderPlayerId, List<ValidationVoteDTO> votes)
         {
             log.Info($"SubmitValidationVotesAsync called - GameCode: {gameCode}, PlayerId: {senderPlayerId}, VotesCount: {votes?.Count}");
-            return client.SubmitValidationVotesAsync(gameCode, senderPlayerId, votes);
+            return GetProxy().SubmitValidationVotesAsync(gameCode, senderPlayerId, votes);
         }
 
         public Task SubscribeToMatchAsync(string gameCode, int playerId)
         {
-            return client.SubscribeToMatchAsync(gameCode, playerId);
+            return GetProxy().SubscribeToMatchAsync(gameCode, playerId);
         }
 
         public void OnValidationComplete(ValidationResultDTO result)

@@ -33,7 +33,7 @@ namespace Services.Services
         private const int ValidationDurationSeconds = 60; //Cambiado para pruebas de 20 a 60
         private const int SuddenDeathDurationSeconds = 30;
         private const int WordsPerRound = 5; // Change from 5 to 3 for testing
-        private const int TotalRounds = 1; //CAMBIADO DE 5 A 1
+        private const int TotalRounds = 3; //CAMBIADO DE 5 A 1
         private const int PointsPerWin = 10;
         private const int PlayersPerMatch = 4;
         
