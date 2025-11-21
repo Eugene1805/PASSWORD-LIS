@@ -63,18 +63,25 @@ namespace PASSWORD_LIS_Client.ViewModels
             try
             {
                 var loggedInUser = await loginManagerService.LoginAsync(Email, Password);
-                if (loggedInUser != null) 
+                bool isAccountVerified = false;
+
+                if (loggedInUser.UserAccountId > 0) 
                 {
-                    ProcessSuccessfulLogin(loggedInUser);
-                } else
-                {
-                    windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
-                        Properties.Langs.Lang.wrongCredentialsText,
-                        PopUpIcon.Warning);
+                    isAccountVerified = await loginManagerService.IsAccountVerifiedAsync(Email);
                 }
 
-            }catch (FaultException<LoginManagerServiceReference.ServiceErrorDetailDTO> ex)
-            {
+                if (loggedInUser.UserAccountId > 0 && isAccountVerified)
+                {
+                    ProcessSuccessfulLogin(loggedInUser);
+                }
+                else if (loggedInUser.UserAccountId > 0 && !isAccountVerified)
+                {
+                    await loginManagerService.SendVerificationCodeAsync(loggedInUser.Email);
+                    VerifyAccount(loggedInUser.Email);
+                }
+            }
+            catch (FaultException<ServiceErrorDetailDTO> ex)
+            {// TODO Check lang message here
                 windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
                     ex.Detail.Message, PopUpIcon.Error);
             }
@@ -152,6 +159,12 @@ namespace PASSWORD_LIS_Client.ViewModels
             var retreivePasswordViewModel = new RetrievePasswordViewModel(App.PasswordResetManagerService, windowService);
             var retrievePasswordWindow = new RetrievePasswordWindow { DataContext = retreivePasswordViewModel};
             retrievePasswordWindow.ShowDialog();
+        }
+
+        private void VerifyAccount(string email)
+        {
+            windowService.ShowVerifyCodeWindow(email, VerificationReason.AccountActivation);
+            windowService.CloseWindow(this);
         }
     }
 }

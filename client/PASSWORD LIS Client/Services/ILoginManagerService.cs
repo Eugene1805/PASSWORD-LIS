@@ -1,4 +1,5 @@
 ﻿using PASSWORD_LIS_Client.LoginManagerServiceReference;
+using System.ServiceModel;
 using System.Threading.Tasks;
 
 namespace PASSWORD_LIS_Client.Services
@@ -6,7 +7,8 @@ namespace PASSWORD_LIS_Client.Services
     public interface ILoginManagerService
     {
         Task<UserDTO> LoginAsync(string email, string password);
-
+        Task<bool> IsAccountVerifiedAsync(string email);
+        Task SendVerificationCodeAsync(string email);
     }
 
     public class WcfLoginManagerService : ILoginManagerService
@@ -21,6 +23,37 @@ namespace PASSWORD_LIS_Client.Services
                 return result;
             }
             catch
+            {
+                wcfClient.Abort();
+                throw;
+            }
+        }
+
+        public async Task<bool> IsAccountVerifiedAsync(string email)
+        {
+            var wcfClient = new LoginManagerClient();
+            try
+            {
+                bool result = await wcfClient.IsAccountVerifiedAsync(email);
+                wcfClient.Close();
+                return result;
+            }
+            catch
+            {
+                wcfClient.Abort();
+                throw;
+            }
+        }
+
+        public async Task SendVerificationCodeAsync(string email)
+        {
+            var wcfClient = new LoginManagerClient();
+            try
+            {
+                await wcfClient.SendVerificationCodeAsync(email);
+                wcfClient.Close();
+            }
+            catch 
             {
                 wcfClient.Abort();
                 throw;

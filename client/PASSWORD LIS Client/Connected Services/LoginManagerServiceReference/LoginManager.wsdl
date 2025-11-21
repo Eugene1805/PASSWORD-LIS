@@ -47,11 +47,35 @@
   <wsdl:message name="ILoginManager_Login_ServiceErrorDetailDTOFault_FaultMessage">
     <wsdl:part xmlns:q1="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q1:ServiceErrorDetailDTO" />
   </wsdl:message>
+  <wsdl:message name="ILoginManager_IsAccountVerified_InputMessage">
+    <wsdl:part name="parameters" element="tns:IsAccountVerified" />
+  </wsdl:message>
+  <wsdl:message name="ILoginManager_IsAccountVerified_OutputMessage">
+    <wsdl:part name="parameters" element="tns:IsAccountVerifiedResponse" />
+  </wsdl:message>
+  <wsdl:message name="ILoginManager_IsAccountVerified_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q2="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q2:ServiceErrorDetailDTO" />
+  </wsdl:message>
+  <wsdl:message name="ILoginManager_SendVerificationCode_InputMessage">
+    <wsdl:part name="parameters" element="tns:SendVerificationCode" />
+  </wsdl:message>
+  <wsdl:message name="ILoginManager_SendVerificationCode_OutputMessage">
+    <wsdl:part name="parameters" element="tns:SendVerificationCodeResponse" />
+  </wsdl:message>
   <wsdl:portType name="ILoginManager">
     <wsdl:operation name="Login">
       <wsdl:input wsaw:Action="http://tempuri.org/ILoginManager/Login" message="tns:ILoginManager_Login_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/ILoginManager/LoginResponse" message="tns:ILoginManager_Login_OutputMessage" />
       <wsdl:fault wsaw:Action="http://tempuri.org/ILoginManager/LoginServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:ILoginManager_Login_ServiceErrorDetailDTOFault_FaultMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="IsAccountVerified">
+      <wsdl:input wsaw:Action="http://tempuri.org/ILoginManager/IsAccountVerified" message="tns:ILoginManager_IsAccountVerified_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/ILoginManager/IsAccountVerifiedResponse" message="tns:ILoginManager_IsAccountVerified_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/ILoginManager/IsAccountVerifiedServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:ILoginManager_IsAccountVerified_ServiceErrorDetailDTOFault_FaultMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="SendVerificationCode">
+      <wsdl:input wsaw:Action="http://tempuri.org/ILoginManager/SendVerificationCode" message="tns:ILoginManager_SendVerificationCode_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/ILoginManager/SendVerificationCodeResponse" message="tns:ILoginManager_SendVerificationCode_OutputMessage" />
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="NetTcpBinding_ILoginManager" type="tns:ILoginManager">
@@ -69,6 +93,27 @@
         <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
       </wsdl:fault>
     </wsdl:operation>
+    <wsdl:operation name="IsAccountVerified">
+      <soap12:operation soapAction="http://tempuri.org/ILoginManager/IsAccountVerified" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="SendVerificationCode">
+      <soap12:operation soapAction="http://tempuri.org/ILoginManager/SendVerificationCode" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
   </wsdl:binding>
   <wsdl:service name="LoginManager">
     <wsdl:port name="NetTcpBinding_ILoginManager" binding="tns:NetTcpBinding_ILoginManager">
@@ -76,7 +121,7 @@
       <wsa10:EndpointReference>
         <wsa10:Address>net.tcp://localhost:8093/LoginManager</wsa10:Address>
         <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
-          <Upn>LAPTOP-LF36UFJ4\artcu</Upn>
+          <Upn>SURFACE\eugen</Upn>
         </Identity>
       </wsa10:EndpointReference>
     </wsdl:port>
