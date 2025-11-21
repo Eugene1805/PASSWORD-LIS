@@ -275,9 +275,15 @@ namespace PASSWORD_LIS_Client.ViewModels
                     return;
                 }
 
+
                 windowService.ShowPopUp(Properties.Langs.Lang.matchCancelledText, reason, PopUpIcon.Warning);
+                UnsubscribeFromEvents();
                 gameManagerService.Cleanup();
-                windowService.GoBack();
+
+                var lobbyViewModel = new LobbyViewModel(windowService, App.FriendsManagerService, App.WaitRoomManagerService, 
+                    App.ReportManagerService);
+                var lobbyPage = new LobbyPage { DataContext = lobbyViewModel };
+                windowService.NavigateTo(lobbyPage);
             });
         }
 
@@ -440,21 +446,13 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 isMatchEnding = true;
 
+                UnsubscribeFromEvents();
+
                 bool didIWin = summary.WinnerTeam.HasValue && summary.WinnerTeam.Value == currentPlayer.Team;
                 var gameEndViewModel = new GameEndViewModel(summary.RedScore, summary.BlueScore, windowService);
-                Page endPage;
-
-                if (didIWin)
-                {
-                    endPage = new WinnersPage();
-                }
-                else
-                {
-                    endPage = new LosersPage();
-                }
+                Page endPage = didIWin ? (Page)new WinnersPage() : new LosersPage();
                 endPage.DataContext = gameEndViewModel;
                 windowService.NavigateTo(endPage);
-
                 gameManagerService.Cleanup();
             });
         }
@@ -600,6 +598,21 @@ namespace PASSWORD_LIS_Client.ViewModels
             IsSnackbarVisible = false;
         }
 
+        private void UnsubscribeFromEvents()
+        {
+            gameManagerService.MatchInitialized -= OnMatchInitialized;
+            gameManagerService.TimerTick -= OnTimerTick;
+            gameManagerService.MatchCancelled -= OnMatchCancelled;
+            gameManagerService.NewPasswordReceived -= OnNewPasswordReceived;
+            gameManagerService.ClueReceived -= OnClueReceived;
+            gameManagerService.GuessResult -= OnGuessResult;
+            gameManagerService.ValidationComplete -= OnValidationComplete;
+            gameManagerService.BeginRoundValidation -= OnBeginRoundValidation;
+            gameManagerService.MatchOver -= OnMatchOver;
+            gameManagerService.NewRoundStarted -= OnNewRoundStarted;
+            gameManagerService.SuddenDeathStarted -= OnSuddenDeathStarted;
+        }
+
         private void HandleConnectionError(Exception ex, string customMessage)
         {
             Application.Current.Dispatcher.Invoke(() =>
@@ -624,6 +637,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
 
                 windowService.ShowPopUp(title, message, PopUpIcon.Error);
+                UnsubscribeFromEvents();
                 gameManagerService.Cleanup();
                 windowService.GoBack();
             });

@@ -54,6 +54,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             gameManagerService.ValidationTimerTick += OnValidationTimerTick;
             gameManagerService.ValidationComplete += OnValidationComplete;
+            gameManagerService.MatchCancelled += OnMatchCancelled;
 
             var groupedTurns = turns.Where(turn => turn.Password.EnglishWord != "END" && turn.Password.SpanishWord != "END")
                 .GroupBy(turn => turn.TurnId)
@@ -90,6 +91,20 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 log.Error($"Error in OnValidationComplete: {ex.Message}", ex);
             }
+        }
+
+        private void OnMatchCancelled(string reason)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                windowService.ShowPopUp(Properties.Langs.Lang.matchCancelledText,
+                    reason, PopUpIcon.Warning);
+                Cleanup();
+                gameManagerService.Cleanup();
+                var lobbyViewModel = new LobbyViewModel(windowService, App.FriendsManagerService, App.WaitRoomManagerService, App.ReportManagerService);
+                var lobbyPage = new LobbyPage { DataContext = lobbyViewModel };
+                windowService.NavigateTo(lobbyPage);
+            });
         }
 
         private async Task SubmitVotesAsync()
@@ -153,10 +168,12 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             try
             {
-                log.InfoFormat("Starting cleanup - unsubscribing from events");
+                log.Info("Starting cleanup - unsubscribing from events");
                 gameManagerService.ValidationTimerTick -= OnValidationTimerTick;
                 gameManagerService.ValidationComplete -= OnValidationComplete;
-                log.InfoFormat("Cleanup completed successfully");
+                gameManagerService.MatchCancelled -= OnMatchCancelled;
+
+                log.Info("Cleanup completed successfully");
             }
             catch (Exception ex)
             {
@@ -188,9 +205,16 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
 
                 windowService.ShowPopUp(title, message, PopUpIcon.Error);
-
                 Cleanup();
-                windowService.GoBack();
+                gameManagerService.Cleanup();
+
+                var lobbyViewModel = new LobbyViewModel(
+                   windowService,
+                   App.FriendsManagerService,
+                   App.WaitRoomManagerService,
+                   App.ReportManagerService);
+                var lobbyPage = new LobbyPage { DataContext = lobbyViewModel };
+                windowService.NavigateTo(lobbyPage);
             });
         }
     }
