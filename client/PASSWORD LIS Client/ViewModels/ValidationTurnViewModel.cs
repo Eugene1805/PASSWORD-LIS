@@ -42,7 +42,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             var cluesList = turnGroup.Select(t => t.ClueUsed).ToList();
 
-            IsPassed = cluesList.Contains("[]") || cluesList.Contains("[PASSED]");
+            IsPassed = cluesList.Contains("[]");
 
             if (IsPassed)
             {

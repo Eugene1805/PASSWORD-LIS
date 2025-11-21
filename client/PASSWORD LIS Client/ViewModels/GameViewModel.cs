@@ -287,14 +287,13 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 currentPasswordDto = password;
 
-                bool isRoundEnded = password.EnglishWord == "END" || password.SpanishWord == "END";
-                                    
+                bool isRoundEnded = password.EnglishWord == "END" || password.SpanishWord == "END" ;
 
                 if (isRoundEnded && !isSuddenDeathActive)
                 {
                     string roundOverMsg = Properties.Langs.Lang.roundCompleted;
                     CurrentPasswordWord = roundOverMsg;
-                    CurrentClue = roundOverMsg;
+                    CurrentClue = roundOverMsg; 
 
                     CanSendClue = false;
                     CanSendGuess = false;
@@ -340,7 +339,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
 
                 if (currentPasswordDto == null || currentPasswordDto.EnglishWord == "END" ||
-                    currentPasswordDto.SpanishWord == "END")
+                            currentPasswordDto.SpanishWord == "END")
                 {
                     return;
                 }

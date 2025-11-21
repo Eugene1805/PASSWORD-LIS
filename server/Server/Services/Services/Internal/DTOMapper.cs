@@ -7,7 +7,7 @@ namespace Services.Services.Internal
     {
         public static PasswordWordDTO ToWordDTO(PasswordWord entity)
         {
-            if (entity == null)
+            if (entity == null || entity.Id == -1)
             {
                 return new PasswordWordDTO { SpanishWord = "END", EnglishWord = "END" };
             }
@@ -22,7 +22,7 @@ namespace Services.Services.Internal
 
         public static PasswordWordDTO ToMaskedWordDTO(PasswordWord entity)
         {
-            if (entity == null)
+            if (entity == null || entity.Id == -1)
             {
                 return new PasswordWordDTO { SpanishWord = "END", EnglishWord = "END" };
             }
