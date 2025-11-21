@@ -152,7 +152,6 @@ namespace Data.DAL.Implementations
             var existingSocialsLookup = userAccountToUpdate.SocialAccount.ToDictionary(s => s.Provider);
             var providersToKeep = new HashSet<string>(updatedSocialsAccounts.Select(s => s.Provider));
 
-            // Remove socials not in updated list
             var socialsToDelete = userAccountToUpdate.SocialAccount
                 .Where(s => !providersToKeep.Contains(s.Provider))
                 .ToList();
@@ -162,12 +161,10 @@ namespace Data.DAL.Implementations
                 context.SocialAccount.Remove(social);
             }
 
-            // Handle updates and additions
             foreach (var updatedSocial in updatedSocialsAccounts)
             {
                 if (string.IsNullOrWhiteSpace(updatedSocial.Username))
                 {
-                    // Remove socials with empty username
                     if (existingSocialsLookup.TryGetValue(updatedSocial.Provider, out var existingSocial))
                     {
                         context.SocialAccount.Remove(existingSocial);

@@ -19,6 +19,20 @@ namespace Services.Contracts
         [OperationContract]
         [FaultContract(typeof(ServiceErrorDetailDTO))]
         Task<UserDTO> LoginAsync(string email, string password);
-
+        /// <summary>
+        /// Checks if the account associated with the given email is verified.
+        /// </summary>
+        /// <param name="email">The user email.</param>
+        /// <returns>True if the account is verified; otherwise, false.</returns>
+        [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
+        Task<bool> IsAccountVerifiedAsync(string email);
+        /// <summary>
+        /// Sends a verification code to the specified email address.
+        /// </summary>
+        /// <param name="email">The email address to send the verification code to.</param>
+        /// <returns>A task representing the asynchronous operation.</returns>
+        [OperationContract]
+        Task SendVerificationCodeAsync(string email);
     }
 }
