@@ -79,6 +79,11 @@ namespace PASSWORD_LIS_Client.ViewModels
                     await loginManagerService.SendVerificationCodeAsync(loggedInUser.Email);
                     VerifyAccount(loggedInUser.Email);
                 }
+                else
+                {
+                    windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
+                        Properties.Langs.Lang.wrongCredentialsText, PopUpIcon.Warning);
+                }
             }
             catch (FaultException<ServiceErrorDetailDTO> ex)
             {// TODO Check lang message here
