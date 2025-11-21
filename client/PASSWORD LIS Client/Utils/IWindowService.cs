@@ -25,6 +25,7 @@ namespace PASSWORD_LIS_Client.Utils
         void ShowReportWindow(WaitingRoomManagerServiceReference.PlayerDTO reportedPlayer);
         void ShowMainWindow();
         void CloseMainWindow();
+        void GoToLobby();
 
     }
 
@@ -129,7 +130,7 @@ namespace PASSWORD_LIS_Client.Utils
         public void ShowLoginWindow()
         {
             var loginViewModel = new LoginViewModel(App.LoginManagerService, App.WindowService);
-            var loginWindow = new LoginWindow { DataContext = loginViewModel};
+            var loginWindow = new LoginWindow { DataContext = loginViewModel };
             loginWindow.Show();
         }
 
@@ -169,8 +170,8 @@ namespace PASSWORD_LIS_Client.Utils
 
         public void ShowMainWindow()
         {
-            var mainWindowViewModel = new MainWindowViewModel(this,App.BackgroundMusicService);
-            var mainWindow = new MainWindow { DataContext = mainWindowViewModel};
+            var mainWindowViewModel = new MainWindowViewModel(this, App.BackgroundMusicService);
+            var mainWindow = new MainWindow { DataContext = mainWindowViewModel };
             Application.Current.MainWindow = mainWindow;
             mainWindow.Show();
         }
@@ -180,6 +181,13 @@ namespace PASSWORD_LIS_Client.Utils
             {
                 mainWindow.Close();
             }
+        }
+
+        public void GoToLobby()
+        {
+            var lobbyViewModel = new LobbyViewModel(this, App.FriendsManagerService, App.WaitRoomManagerService, App.ReportManagerService);
+            var lobbyPage = new LobbyPage { DataContext = lobbyViewModel };
+            NavigateTo(lobbyPage);
         }
     }
 }

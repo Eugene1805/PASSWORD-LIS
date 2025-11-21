@@ -101,9 +101,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                     reason, PopUpIcon.Warning);
                 Cleanup();
                 gameManagerService.Cleanup();
-                var lobbyViewModel = new LobbyViewModel(windowService, App.FriendsManagerService, App.WaitRoomManagerService, App.ReportManagerService);
-                var lobbyPage = new LobbyPage { DataContext = lobbyViewModel };
-                windowService.NavigateTo(lobbyPage);
+                windowService.GoToLobby();
             });
         }
 
@@ -208,13 +206,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 Cleanup();
                 gameManagerService.Cleanup();
 
-                var lobbyViewModel = new LobbyViewModel(
-                   windowService,
-                   App.FriendsManagerService,
-                   App.WaitRoomManagerService,
-                   App.ReportManagerService);
-                var lobbyPage = new LobbyPage { DataContext = lobbyViewModel };
-                windowService.NavigateTo(lobbyPage);
+                windowService.GoToLobby();
             });
         }
     }

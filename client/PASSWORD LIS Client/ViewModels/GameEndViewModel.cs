@@ -35,14 +35,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void BackToLobby(object obj)
         {
-            var lobbyViewModel = new LobbyViewModel(
-            windowService,
-            App.FriendsManagerService,
-            App.WaitRoomManagerService,
-            App.ReportManagerService);
-
-            var lobbyPage = new LobbyPage { DataContext = lobbyViewModel };
-            windowService.NavigateTo(lobbyPage);
+            windowService.GoToLobby();
         }
     }
 }

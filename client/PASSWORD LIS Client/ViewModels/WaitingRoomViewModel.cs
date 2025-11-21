@@ -355,7 +355,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             finally
             {
                 UnsubscribeFromRoomEvents();
-                windowService.GoBack();
+                windowService.GoToLobby();
             }
         }
         private void UpdatePlayerCount()
@@ -408,7 +408,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 {
                     windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
                         Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
-                    windowService.GoBack();
+                    windowService.GoToLobby();
                     return;
                 }              
                 var gameViewModel = new GameViewModel(App.GameManagerService, windowService, gameCode, currentPlayer);
@@ -652,7 +652,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 {
                     await CleanupAndUnsubscribeAsync();
                 }
-                windowService.GoBack();
+                windowService.GoToLobby();
             });
         }
 
