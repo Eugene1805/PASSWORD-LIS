@@ -72,6 +72,11 @@ namespace PASSWORD_LIS_Client.ViewModels
                         Properties.Langs.Lang.couldNotSummitReportText, PopUpIcon.Error);
                 }
             }
+            catch (FaultException<ReportManagerServiceReference.ServiceErrorDetailDTO>)
+            {//TODO add a personalized lang for no more than one report per player ban
+                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.couldNotSummitReportText, PopUpIcon.Error);
+            }
             catch (TimeoutException)
             {
                 this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,

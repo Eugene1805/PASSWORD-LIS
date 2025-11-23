@@ -83,7 +83,7 @@ namespace Test.ServicesTests
             );
 
             Assert.Equal(ServiceErrorCode.DatabaseError, faultEx.Detail.Code);
-            Assert.Contains("guardar los cambios", faultEx.Detail.Message);
+            Assert.Equal("DATABASE_ERROR", faultEx.Detail.ErrorCode);
             mockRepo.Verify(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(), It.IsAny<List<SocialAccount>>()), Times.Once);
         }
 
@@ -108,7 +108,7 @@ namespace Test.ServicesTests
             );
 
             Assert.Equal(ServiceErrorCode.DatabaseError, faultEx.Detail.Code);
-            Assert.Contains("comunicación con la base de datos", faultEx.Detail.Message);
+            Assert.Equal("DATABASE_ERROR", faultEx.Detail.ErrorCode);
             mockRepo.Verify(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(), It.IsAny<List<SocialAccount>>()), Times.Once);
         }
 
@@ -128,7 +128,7 @@ namespace Test.ServicesTests
             );
 
             Assert.Equal(ServiceErrorCode.UnexpectedError, faultEx.Detail.Code);
-            Assert.Contains("error inesperado", faultEx.Detail.Message);
+            Assert.Equal("UNEXPECTED_ERROR", faultEx.Detail.ErrorCode);
             mockRepo.Verify(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(), It.IsAny<List<SocialAccount>>()), Times.Once);
         }
 

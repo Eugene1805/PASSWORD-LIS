@@ -54,7 +54,8 @@ namespace Services.Services
 
         public async Task<bool> SubmitReportAsync(ReportDTO reportDTO)
         {
-            if (reportDTO == null || reportDTO.ReporterPlayerId <= 0 || reportDTO.ReportedPlayerId <= 0)
+            if (reportDTO == null || reportDTO.ReporterPlayerId <= 0 || reportDTO.ReportedPlayerId <= 0
+                || reportDTO.ReporterPlayerId == reportDTO.ReportedPlayerId)
             {
                 throw FaultExceptionFactory.Create(ServiceErrorCode.InvalidReportPayload, 
                     "INVALID_REPORT_PAYLOAD", "Invalid report payload.");
@@ -62,27 +63,45 @@ namespace Services.Services
 
             try
             {
+                var reporter = await playerRepository.GetPlayerByIdAsync(reportDTO.ReporterPlayerId);
+                if (reporter == null || reporter.Id <= 0)
+                {
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.ReporterNotFound,
+                        "REPORTER_NOT_FOUND", "Reporter player not found.");
+                }
+                var reported = await playerRepository.GetPlayerByIdAsync(reportDTO.ReportedPlayerId);
+                if (reported == null || reported.Id <= 0)
+                {
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.ReportedPlayerNotFound,
+                        "REPORTED_PLAYER_NOT_FOUND", "Reported player not found.");
+                }
+
+                var since = await banRepository.GetLastBanEndTimeAsync(reportDTO.ReportedPlayerId);
+
+                var alreadyReported = await reportRepository.HasReporterReportedSinceAsync(
+                    reportDTO.ReporterPlayerId, reportDTO.ReportedPlayerId, since);
+                if (alreadyReported)
+                {
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.InvalidReportPayload,
+                        "INVALID_REPORT_PAYLOAD", "You have already reported this player. You can report again after they are banned.");
+                }
+
                 var newReport = new Report
                 {
                     ReporterPlayerId = reportDTO.ReporterPlayerId,
                     ReportedPlayerId = reportDTO.ReportedPlayerId,
-                    Reason = reportDTO.Reason
+                    Reason = reportDTO.Reason,
+                    CreatedAt = DateTime.UtcNow
                 };
                 await reportRepository.AddReportAsync(newReport);
                 log.InfoFormat("Report submitted: reporter={0}, reported={1}.", reportDTO.ReporterPlayerId,
                     reportDTO.ReportedPlayerId);
 
-                var totalReports = await reportRepository.GetReportCountForPlayerAsync(reportDTO.ReportedPlayerId);
-                log.InfoFormat("Reported player {0} now has {1} report(s).", reportDTO.ReportedPlayerId, totalReports);
+                var totalReports = await reportRepository.GetReportCountForPlayerSinceAsync(reportDTO.ReportedPlayerId, since);
+                log.InfoFormat("Reported player {0} now has {1} report(s) since last ban.", reportDTO.ReportedPlayerId, totalReports);
 
                 if (connectedClients.TryGetValue(reportDTO.ReportedPlayerId, out var client))
                 {
-                    var reporter = await playerRepository.GetPlayerByIdAsync(reportDTO.ReporterPlayerId);
-                    if (reporter == null || reporter.Id <= 0)
-                    {
-                        throw FaultExceptionFactory.Create(ServiceErrorCode.ReporterNotFound,
-                            "REPORTER_NOT_FOUND", "Reporter player not found.");
-                    }
                     client.Callback.OnReportReceived(reporter.UserAccount.Nickname, reportDTO.Reason);
                     client.Callback.OnReportCountUpdated(totalReports);
                 }
@@ -172,9 +191,11 @@ namespace Services.Services
                 connectedClients[playerId] = (callbackChannel, null);
                 log.InfoFormat("Player {0} subscribed to report updates.", playerId);
 
-                var commObject = (ICommunicationObject)callbackChannel;
-                commObject.Faulted += (s, e) => UnsubscribeFromReportUpdatesAsync(playerId);
-                commObject.Closed += (s, e) => UnsubscribeFromReportUpdatesAsync(playerId);
+                if (callbackChannel is ICommunicationObject commObject)
+                {
+                    commObject.Faulted += (s, e) => UnsubscribeFromReportUpdatesAsync(playerId);
+                    commObject.Closed += (s, e) => UnsubscribeFromReportUpdatesAsync(playerId);
+                }
             }
             catch (Exception ex)
             {
@@ -208,7 +229,8 @@ namespace Services.Services
         {
             try
             {
-                return await reportRepository.GetReportCountForPlayerAsync(playerId);
+                var since = await banRepository.GetLastBanEndTimeAsync(playerId);
+                return await reportRepository.GetReportCountForPlayerSinceAsync(playerId, since);
             }
             catch (Exception ex)
             {
