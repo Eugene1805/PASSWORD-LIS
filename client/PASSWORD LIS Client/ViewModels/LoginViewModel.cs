@@ -157,6 +157,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             var signUpWindow = new SignUpWindow { DataContext = signUpViewModel };
             signUpWindow.Show();
             windowService.CloseWindow(this);
+            windowService.CloseMainWindow();
         }
 
         private void NavigateToForgotPassword(object parameter)
@@ -164,12 +165,14 @@ namespace PASSWORD_LIS_Client.ViewModels
             var retreivePasswordViewModel = new RetrievePasswordViewModel(App.PasswordResetManagerService, windowService);
             var retrievePasswordWindow = new RetrievePasswordWindow { DataContext = retreivePasswordViewModel};
             retrievePasswordWindow.ShowDialog();
+            windowService.CloseWindow(this);
         }
 
         private void VerifyAccount(string email)
         {
             windowService.ShowVerifyCodeWindow(email, VerificationReason.AccountActivation);
             windowService.CloseWindow(this);
+            windowService.CloseMainWindow();
         }
     }
 }
