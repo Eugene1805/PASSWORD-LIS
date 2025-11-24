@@ -14,21 +14,30 @@ using System.Threading.Tasks;
 namespace Services.Services
 {
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single) ]
-    public class TopPlayersManager : ITopPlayersManager
+    public class TopPlayersManager : ServiceBase, ITopPlayersManager
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(TopPlayersManager));
         private readonly IStatisticsRepository repository;
-        public TopPlayersManager(IStatisticsRepository statisticsRepository)
+        public TopPlayersManager(IStatisticsRepository statisticsRepository) :base(log)
         {
             repository = statisticsRepository;
         }
         public async Task<List<TeamDTO>> GetTopAsync(int numberOfTeams)
         {
-            try
+            return await ExecuteAsync( async () =>
             {
+                List<Team> topTeamsFromDb;
                 log.InfoFormat("Requesting top {0} teams", numberOfTeams);
-                List<Team> topTeamsFromDb = await repository.GetTopTeamsAsync(numberOfTeams);
-
+                try
+                {
+                    topTeamsFromDb = await repository.GetTopTeamsAsync(numberOfTeams);
+                }
+                catch
+                {
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.StatisticsError,
+                        "STATISTICS_ERROR", "An error occurred while fetching statistics. Please try again later.");
+                }
+                
                 List<TeamDTO> topTeamsDto = topTeamsFromDb.Select(team => new TeamDTO
                 {
                     Score = team.TotalPoints,
@@ -37,13 +46,7 @@ namespace Services.Services
                                      .ToList()
                 }).ToList();
                 return topTeamsDto;
-            }
-            catch (Exception ex)
-            {
-                log.Error("Error retrieving top teams statistics.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.StatisticsError,
-                    "STATISTICS_ERROR", "An error occurred while fetching statistics. Please try again later.");
-            }
+            }, context:"TopPlayersManager: GetTopAsync ");
         }
     }
 }
