@@ -105,16 +105,33 @@ namespace Services.Services
             {
                 return func();
             }
+            catch (FaultException<ServiceErrorDetailDTO> faultEx)
+            {
+                logger.WarnFormat("{0} - Service produced a fault: {1}", faultEx, faultEx.Detail?.ErrorCode);
+                throw;
+            }
+            catch (FaultException faultEx)
+            {
+                logger.WarnFormat("{0} - Service produced a generic FaultException.", faultEx);
+                throw;
+            }
             catch (ArgumentNullException ex)
             {
                 logger.Error($"{context} - Null argument.", ex);
                 throw FaultExceptionFactory.Create(ServiceErrorCode.NullArgument,
                     "NULL_ARGUMENT", "A null argument was received occurred.");
             }
+            catch (InvalidOperationException ex)
+            {
+                logger.Error($"{context} - Invalid operation", ex);
+                throw FaultExceptionFactory.Create(
+                    ServiceErrorCode.InvalidOperation,
+                    "INVALID_OPERATION", ex.Message);
+            }
             catch (DuplicateAccountException ex)
             {
                 logger.Warn($"{context} - Duplicate.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UserAlreadyExists, 
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UserAlreadyExists,
                     "USER_ALREADY_EXISTS", ex.Message);
             }
             catch (SecurityException ex)
@@ -126,7 +143,7 @@ namespace Services.Services
             catch (DbUpdateException ex)
             {
                 logger.Error($"{context} - Database update error.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, 
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError,
                     "DATABASE_ERROR", "An error occurred while processing the request.");
             }
             catch (ConfigurationErrorsException ex)
@@ -138,8 +155,8 @@ namespace Services.Services
             catch (FormatException ex)
             {
                 logger.Error($"{context} - Email config format.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.EmailConfigurationError,
-                    "EMAIL_CONFIGURATION_ERROR", "Invalid email service configuration");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.FormatError,
+                    "FORMAT_ERROR", "Invalid email service configuration");
             }
             catch (SmtpException ex)
             {
@@ -150,7 +167,7 @@ namespace Services.Services
             catch (Exception ex)
             {
                 logger.Fatal($"{context} - Unexpected error.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, 
+                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError,
                     "UNEXPECTED_ERROR", "An unexpected server error occurred.");
             }
         }
