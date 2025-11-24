@@ -83,7 +83,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             OpenTermsAndConditionsCommand = new RelayCommand(OpenTermsAndConditions);
         }
 
-        // Made public so unit tests can deterministically await the workflow.
         public async Task SignUpAsync()
         {
             if (!await IsInputValid())
@@ -96,8 +95,9 @@ namespace PASSWORD_LIS_Client.ViewModels
                 await TryCreateAccountOnServerAsync();
                 ProcessSuccessfulSignUp();
             }
-            catch (FaultException<ServiceErrorDetailDTO>)
+            catch (FaultException<ServiceErrorDetailDTO> ex)
             {
+                ShowDetailedError(ex);
                 this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
                     Properties.Langs.Lang.userAlreadyExistText, PopUpIcon.Warning);
             }
@@ -205,7 +205,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
             }
             catch
-            {
+            {//TODO add personalized message
                 windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
                     Properties.Langs.Lang.networkErrorTitleText, PopUpIcon.Error);
                 return false;

@@ -1,22 +1,16 @@
 ﻿using Data.DAL.Interfaces;
-using Data.Exceptions;
 using Data.Model;
 using log4net;
 using Services.Contracts;
 using Services.Contracts.DTOs;
-using Services.Contracts.Enums;
 using Services.Util;
-using System;
-using System.Configuration;
-using System.Data.Entity.Infrastructure;
-using System.Net.Mail;
 using System.ServiceModel;
 using System.Threading.Tasks;
 
 namespace Services.Services
 {
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
-    public class AccountManager : IAccountManager
+    public class AccountManager : ServiceBase, IAccountManager
     {
         private readonly IAccountRepository repository;
         private readonly INotificationService notification;
@@ -26,7 +20,7 @@ namespace Services.Services
 
 
         public AccountManager(IAccountRepository accountRepository, INotificationService notificationService,
-            IVerificationCodeService verificationCodeService)
+            IVerificationCodeService verificationCodeService) : base(log)
         {
             repository = accountRepository;
             notification = notificationService;
@@ -35,7 +29,7 @@ namespace Services.Services
 
         public async Task CreateAccountAsync(NewAccountDTO newAccount)
         {
-            try
+            await ExecuteAsync(async () =>
             {
                 log.InfoFormat("Trying to create account for the email: {0}", newAccount.Email);
                 var userAccount = new UserAccount
@@ -49,64 +43,7 @@ namespace Services.Services
                 await repository.CreateAccountAsync(userAccount);
                 log.InfoFormat("Account succesfully created for: '{0}'", userAccount.Email);
                 SendEmailVerification(userAccount.Email);
-            }
-            catch(ArgumentNullException ex)
-            {
-                log.Error("Null argument provided to CreateAccountAsync.", ex);
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.NullArgument, 
-                    "NULL_ARGUMENT", 
-                    "A null argument was received occurred.");
-            }
-            catch (DuplicateAccountException ex)
-            {
-                log.WarnFormat("Duplicated registry attempt for the email: {0}", newAccount.Email);
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.UserAlreadyExists, 
-                    "USER_ALREADY_EXISTS", 
-                    ex.Message);
-            }
-            catch (DbUpdateException dbEx)
-            {
-                log.Error("Error at the dababase when creating the account.", dbEx);
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.DatabaseError,
-                    "DATABASE_ERROR",
-                    "An error occurred while processing the request.");
-            }
-            catch (ConfigurationErrorsException)
-            {
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.EmailConfigurationError,
-                    "EMAIL_CONFIGURATION_ERROR",
-                    "Email service configuration error"
-                );
-            }
-            catch (FormatException)
-            {
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.EmailConfigurationError,
-                    "EMAIL_CONFIGURATION_ERROR",
-                    "Invalid email service configuration"
-                );
-            }
-            catch (SmtpException)
-            {
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.EmailSendingError,
-                    "EMAIL_SENDING_ERROR",
-                    $"Failed to send email"
-                );
-            }
-            catch (Exception ex)
-            {
-                log.Fatal("Unexpected fatal error in CreateAccount.", ex);
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.UnexpectedError,
-                    "UNEXPECTED_ERROR", 
-                    "An unexpected server error occurred.");
-            }
-
+            }, context: "AccountManager: CreateAccountAsync");
         }
 
         public async Task<bool> IsNicknameInUse(string nickname)
@@ -115,27 +52,10 @@ namespace Services.Services
             {
                 return false;
             }
-            try
+            return await ExecuteAsync(() =>
             {
-                return await repository.IsNicknameInUse(nickname);
-            }
-            catch(InvalidOperationException ex)
-            {
-                log.Error("Invalid operation error in IsNickNameInUse.", ex);
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.DatabaseError,
-                    "DATABASE_ERROR",
-                    "An error occurred while querying the database");
-            }
-            catch (Exception ex)
-            {
-                log.Fatal("Unexpected fatal error in IsNickNameInUse.", ex);
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.UnexpectedError,
-                    "UNEXPECTED_ERROR", 
-                    "An unexpected server error occurred.");
-            }
-            
+                return repository.IsNicknameInUse(nickname);
+            }, context: "AccountManager: IsNickNameInUse");
         }
 
         private void SendEmailVerification(string email)
