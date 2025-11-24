@@ -2,25 +2,21 @@
 using log4net;
 using Services.Contracts;
 using Services.Contracts.DTOs;
-using Services.Contracts.Enums;
 using Services.Util;
-using System;
-using System.Configuration;
-using System.Net.Mail;
 using System.ServiceModel;
 
 namespace Services.Services
 {
 
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
-    public class VerificationCodeManager : IAccountVerificationManager
+    public class VerificationCodeManager : ServiceBase,IAccountVerificationManager
     {
         private readonly IAccountRepository repository;
         private readonly INotificationService notification;
         private readonly IVerificationCodeService codeService;
         private static readonly ILog log = LogManager.GetLogger(typeof(VerificationCodeManager));
         public VerificationCodeManager(IAccountRepository accountRepository, INotificationService notificationService,
-            IVerificationCodeService verificationCodeService)
+            IVerificationCodeService verificationCodeService) : base(log)
         {
             repository = accountRepository;
             notification = notificationService;
@@ -28,8 +24,8 @@ namespace Services.Services
         }
         public bool VerifyEmail(EmailVerificationDTO emailVerificationDTO)
         {
-            try
-            {
+            return Execute(()=>
+                {
                 bool isCodeValid = codeService.ValidateCode(
                     emailVerificationDTO.Email,
                     emailVerificationDTO.VerificationCode,
@@ -44,25 +40,16 @@ namespace Services.Services
 
                 log.WarnFormat("Email verification failed: invalid code for '{0}'.", emailVerificationDTO.Email);
                 return false;
-            }
-            catch (Exception ex)
-            {
-                log.Error("Unexpected error verifying email.", ex);
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.UnexpectedError,
-                    "UNEXPECTED_ERROR", 
-                    "Unexpected error during email verification."
-                );
-            }
+                }, context: "VerifyEmail: VerificationCodeManager");
         }
 
         public bool ResendVerificationCode(string email)
         {
-            try
+            return Execute(()=>
             {
                 if (!codeService.CanRequestCode(email, CodeType.EmailVerification))
                 {
-                    log.WarnFormat("Resend verification code denied for '{0}': rate limited or existing valid code.", 
+                    log.WarnFormat("Resend verification code denied for '{0}': rate limited or existing valid code.",
                         email);
                     return false;
                 }
@@ -73,40 +60,7 @@ namespace Services.Services
                 log.InfoFormat("Verification code resent to '{0}'.", email);
 
                 return true;
-            }
-            catch (ConfigurationErrorsException)
-            {
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.EmailConfigurationError,
-                    "EMAIL_CONFIGURATION_ERROR",
-                    "Email service configuration error"
-                );
-            }
-            catch (FormatException)
-            {
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.EmailConfigurationError,
-                    "EMAIL_CONFIGURATION_ERROR",
-                    "Invalid email service configuration"
-                );
-            }
-            catch (SmtpException)
-            {
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.EmailSendingError,
-                    "EMAIL_SENDING_ERROR",
-                    $"Failed to send email"
-                );
-            }
-            catch (Exception ex)
-            {
-                log.Error("Unexpected error resending verification code.", ex);
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.UnexpectedError,
-                    "UNEXPECTED_ERROR", 
-                    "Unexpected error resending verification code."
-                );
-            }
+            }, context: "ResendVerificationCode: VerificationCodeManager");
         }
     }
 }
