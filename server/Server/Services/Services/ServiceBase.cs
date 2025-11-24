@@ -1,5 +1,6 @@
 ﻿using Data.Exceptions;
 using log4net;
+using Services.Contracts.DTOs;
 using Services.Contracts.Enums;
 using Services.Util;
 using System;
@@ -7,6 +8,7 @@ using System.Configuration;
 using System.Data.Entity.Infrastructure;
 using System.Net.Mail;
 using System.Security;
+using System.ServiceModel;
 using System.Threading.Tasks;
 
 namespace Services.Services
@@ -24,6 +26,16 @@ namespace Services.Services
             try
             {
                 return await func();
+            }
+            catch (FaultException<ServiceErrorDetailDTO> faultEx)
+            {
+                logger.WarnFormat("{0} - Service produced a fault: {1}", faultEx, faultEx.Detail?.ErrorCode);
+                throw;
+            }
+            catch (FaultException faultEx)
+            {
+                logger.WarnFormat("{0} - Service produced a generic FaultException.", faultEx);
+                throw;
             }
             catch (ArgumentNullException ex)
             {
