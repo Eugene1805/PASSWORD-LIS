@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 namespace Services.Services
 {
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Multiple)]
-    public class WaitingRoomManager : IWaitingRoomManager
+    public class WaitingRoomManager : ServiceBase, IWaitingRoomManager
     {
         sealed class Room
         {
@@ -43,8 +43,9 @@ namespace Services.Services
         private static readonly Random random = new Random();
         private static readonly TimeSpan CallbackTimeout = TimeSpan.FromSeconds(5);
 
-        public WaitingRoomManager(IPlayerRepository playerRepository, IOperationContextWrapper operationContextWrapper, IGameManager gameManager,
-            IAccountRepository accountRepository, INotificationService notificationService)
+        public WaitingRoomManager(IPlayerRepository playerRepository, IOperationContextWrapper operationContextWrapper,
+            IGameManager gameManager,IAccountRepository accountRepository, INotificationService notificationService)
+            : base(log)
         {
             repository = playerRepository;
             operationContext = operationContextWrapper;
@@ -55,81 +56,90 @@ namespace Services.Services
 
         public async Task<string> CreateRoomAsync(string email)
         {
-            var gameCode = GenerateGameCode();
-            var newGame = new Room { GameCode = gameCode };
-
-            if (!rooms.TryAdd(gameCode, newGame))
+            return await ExecuteAsync(async () =>
             {
-                log.WarnFormat("Game code collision for '{0}', retrying game creation for email '{1}'.", 
-                    gameCode, email);
-                return await CreateRoomAsync(email);
-            }
+                var gameCode = GenerateGameCode();
+                var newGame = new Room { GameCode = gameCode };
 
-            var playerId = await JoinRoomAsRegisteredPlayerAsync(gameCode, email);
-            if (playerId > 0)
-            {
-                newGame.HostPlayerId = playerId;
-                log.InfoFormat("Game '{0}' created. Host player id: {1}.", gameCode, playerId);
-                return gameCode;
-            }
+                if (!rooms.TryAdd(gameCode, newGame))
+                {
+                    log.WarnFormat("Game code collision for '{0}', retrying game creation for email '{1}'.",
+                        gameCode, email);
+                    return await CreateRoomAsync(email);
+                }
 
-            rooms.TryRemove(gameCode, out _);
-            log.ErrorFormat("Failed to create game for email '{0}'. Returning fault COULD_NOT_CREATE_ROOM.", email);
-            throw FaultExceptionFactory.Create(ServiceErrorCode.CouldNotCreateRoom, "COULD_NOT_CREATE_ROOM",
-                "Could not create room.");
+                var playerId = await JoinRoomAsRegisteredPlayerAsync(gameCode, email);
+                if (playerId > 0)
+                {
+                    newGame.HostPlayerId = playerId;
+                    log.InfoFormat("Game '{0}' created. Host player id: {1}.", gameCode, playerId);
+                    return gameCode;
+                }
+
+                rooms.TryRemove(gameCode, out _);
+                log.ErrorFormat("Failed to create game for email '{0}'. Returning fault COULD_NOT_CREATE_ROOM.", email);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.CouldNotCreateRoom, "COULD_NOT_CREATE_ROOM",
+                    "Could not create room.");
+            }, "WaitingRoomManager : CreateRoomAsync");
         }
+
         public async Task<int> JoinRoomAsRegisteredPlayerAsync(string gameCode, string email)
         {
-            if (!rooms.TryGetValue(gameCode, out var game))
+            return await ExecuteAsync(async () =>
             {
-                log.WarnFormat("Join as registered failed: game '{0}' not found for email '{1}'.", gameCode, email);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.RoomNotFound, "ROOM_NOT_FOUND", 
-                    "The room does not exist.");
-            }
-            if (game.Players.Count >= MaxPlayersPerGame)
-            {
-                log.WarnFormat("Join as registered failed: room '{0}' is full for email '{1}'.", gameCode, email);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.RoomFull, "ROOM_FULL",
-                    "Could not join room. The room is full.");
-            }
+                if (!rooms.TryGetValue(gameCode, out var game))
+                {
+                    log.WarnFormat("Join as registered failed: game '{0' not found for email '{1}'.", gameCode, email);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.RoomNotFound, "ROOM_NOT_FOUND",
+                        "The room does not exist.");
+                }
+                if (game.Players.Count >= MaxPlayersPerGame)
+                {
+                    log.WarnFormat("Join as registered failed: room '{0}' is full for email '{1}'.", gameCode, email);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.RoomFull, "ROOM_FULL",
+                        "Could not join room. The room is full.");
+                }
 
-            var callback = operationContext.GetCallbackChannel<IWaitingRoomCallback>();
+                var callback = operationContext.GetCallbackChannel<IWaitingRoomCallback>();
 
-            var playerEntity = await repository.GetPlayerByEmailAsync(email);
-            if (playerEntity == null || playerEntity.Id < 0)
-            {
-                log.WarnFormat("Join as registered failed: player not found for email '{0}' in game '{1}'.",
-                    email, gameCode);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.PlayerNotFound, "PLAYER_NOT_FOUND", 
-                    "The player was not found in the database.");
-            }
+                var playerEntity = await repository.GetPlayerByEmailAsync(email);
+                if (playerEntity == null || playerEntity.Id < 0)
+                {
+                    log.WarnFormat("Join as registered failed: player not found for email '{0}' in game '{1}'.",
+                        email, gameCode);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.PlayerNotFound, "PLAYER_NOT_FOUND",
+                        "The player was not found in the database.");
+                }
 
-            if (game.Players.ContainsKey(playerEntity.Id))
-            {
-                log.WarnFormat("Join as registered failed: player {0} already in room '{1}'.", playerEntity.Id, 
-                    gameCode);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.AlreadyInRoom, "ALREADY_IN_ROOM",
-                    "Player already in the room.");
-            }
+                if (game.Players.ContainsKey(playerEntity.Id))
+                {
+                    log.WarnFormat("Join as registered failed: player {0} already in room '{1}'.", playerEntity.Id,
+                        gameCode);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.AlreadyInRoom, "ALREADY_IN_ROOM",
+                        "Player already in the room.");
+                }
 
-            var playerDto = new PlayerDTO
-            {
-                Id = playerEntity.Id,
-                PhotoId = playerEntity.UserAccount.PhotoId ?? 0,
-                Nickname = playerEntity.UserAccount.Nickname
-            };
+                var playerDto = new PlayerDTO
+                {
+                    Id = playerEntity.Id,
+                    PhotoId = playerEntity.UserAccount.PhotoId ?? 0,
+                    Nickname = playerEntity.UserAccount.Nickname
+                };
 
-            var success = await TryAddPlayerAsync(game, playerDto, callback);
-            if (!success)
-            {
-                log.WarnFormat("Join as registered failed to add player {0} to room '{1}'.", playerDto.Id, gameCode);
-            }
-            else
-            {
-                log.InfoFormat("Player {0} joined room '{1}' as registered.", playerDto.Id, gameCode);
-            }
-            return success ? playerDto.Id : -1;
+                var success = await TryAddPlayerAsync(game, playerDto, callback);
+                if (!success)
+                {
+                    log.WarnFormat("Join as registered failed to add player {0} to room '{1}'.", playerDto.Id,
+                        gameCode);
+                }
+                else
+                {
+                    log.InfoFormat("Player {0} joined room '{1}' as registered.", playerDto.Id, gameCode);
+                }
+                return success ? playerDto.Id : -1;
+            }, context:"WaitingRoomManager: JoinAsRegisteredPlayerAsync" );
         }
+
         public async Task<bool> JoinRoomAsGuestAsync(string gameCode, string nickname)
         {
             if (!rooms.TryGetValue(gameCode, out var game))
@@ -169,99 +179,175 @@ namespace Services.Services
 
         public async Task LeaveRoomAsync(string gameCode, int playerId)
         {
-            if (!rooms.TryGetValue(gameCode, out var game))
+            await ExecuteAsync(async () =>
             {
-                log.DebugFormat("LeaveGame ignored: game '{0}' not found for player {1}.", gameCode, playerId);
-                return;
-            }
-
-            if (game.HostPlayerId == playerId)
-            {
-                log.InfoFormat("Host (player {0}) leaving room '{1}'. Notifying clients.", playerId, gameCode);
-                await HostLeftAsync(gameCode);
-                return;
-            }
-
-            if (game.Players.TryRemove(playerId, out _))
-            {
-                log.InfoFormat("Player {0} left room '{1}'. Notifying others.", playerId, gameCode);
-                await BroadcastAsync(game, client => client.Item1.OnPlayerLeft(playerId));
-
-                if (game.Players.IsEmpty)
+                if (!rooms.TryGetValue(gameCode, out var game))
                 {
-                    rooms.TryRemove(gameCode, out _);
-                    log.InfoFormat("Room '{0}' removed after last player left.", gameCode);
+                    log.DebugFormat("LeaveGame ignored: game '{0}' not found for player {1}.", gameCode, playerId);
+                    return;
                 }
-            }
-            else
-            {
-                log.DebugFormat("LeaveGame: player {0} not found in room '{1}'.", playerId, gameCode);
-            }
+
+                if (game.HostPlayerId == playerId)
+                {
+                    log.InfoFormat("Host (player {0}) leaving room '{1}'. Notifying clients.", playerId, gameCode);
+                    await HostLeftAsync(gameCode);
+                    return;
+                }
+
+                if (game.Players.TryRemove(playerId, out _))
+                {
+                    log.InfoFormat("Player {0} left room '{1}'. Notifying others.", playerId, gameCode);
+                    await BroadcastAsync(game, client => client.Item1.OnPlayerLeft(playerId));
+
+                    if (game.Players.IsEmpty)
+                    {
+                        rooms.TryRemove(gameCode, out _);
+                        log.InfoFormat("Room '{0}' removed after last player left.", gameCode);
+                    }
+                }
+                else
+                {
+                    log.DebugFormat("LeaveGame: player {0} not found in room '{1}'.", playerId, gameCode);
+                }
+            }, context: "WaitingRoomManager: LeaveRoomAsync");
         }
 
         public async Task SendMessageAsync(string gameCode, ChatMessageDTO message)
         {
-            if (rooms.TryGetValue(gameCode, out var game))
+            await ExecuteAsync(async () => 
             {
-                await BroadcastAsync(game, client => client.Item1.OnMessageReceived(message));
-            }
-            else
-            {
-                log.DebugFormat("SendMessage ignored: game '{0}' not found.", gameCode);
-            }
+                if (rooms.TryGetValue(gameCode, out var game))
+                {
+                    await BroadcastAsync(game, client => client.Item1.OnMessageReceived(message));
+                }
+                else
+                {
+                    log.DebugFormat("SendMessage ignored: game '{0}' not found.", gameCode);
+                }
+            }, context: "WaitingRoomManager: SendMessageAsync");
         }
+
         public async Task StartGameAsync(string gameCode)
         {
-            if (!rooms.TryGetValue(gameCode, out var game))
+            await ExecuteAsync(async () =>
             {
-                throw FaultExceptionFactory.Create(ServiceErrorCode.RoomNotFound, "WAITING_ROOM_NOT_FOUND", 
-                    "Waiting room not found.");
-            }
+                if (!rooms.TryGetValue(gameCode, out var game))
+                {
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.RoomNotFound, "WAITING_ROOM_NOT_FOUND",
+                        "Waiting room not found.");
+                }
 
-            if (game.Players.Count != MaxPlayersPerGame)
-            {
-                throw FaultExceptionFactory.Create(ServiceErrorCode.CouldNotCreateRoom, "NOT_ENOUGH_PLAYERS",
-                    "Four players are required to start a game.");
-            }
-            var playerList = game.Players.Values.Select(p => p.Item2).ToList();
-            bool matchCreated = gameManager.CreateMatch(gameCode, playerList);
+                if (game.Players.Count != MaxPlayersPerGame)
+                {
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.CouldNotCreateRoom, "NOT_ENOUGH_PLAYERS",
+                        "Four players are required to start a game.");
+                }
+                var playerList = game.Players.Values.Select(p => p.Item2).ToList();
+                bool matchCreated = gameManager.CreateMatch(gameCode, playerList);
 
-            if (!matchCreated)
-            {
-                throw FaultExceptionFactory.Create(ServiceErrorCode.CouldNotCreateRoom, "COULD_NOT_CREATE_GAME",
-                    "Could not create the game.");
-            }
+                if (!matchCreated)
+                {
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.CouldNotCreateRoom, "COULD_NOT_CREATE_GAME",
+                        "Could not create the game.");
+                }
 
-            log.InfoFormat("Starting game for room '{0}'. Notifying clients and removing room.", gameCode);
-            await BroadcastAsync(game, client => client.Item1.OnGameStarted());
-
-            rooms.TryRemove(gameCode, out _);
-        }
-
-        public Task<List<PlayerDTO>> GetPlayersInRoomAsync(string gameCode)
-        {
-            if (rooms.TryGetValue(gameCode, out var game))
-            {
-                var players = game.Players.Values.Select(p => p.Item2).ToList();
-                return Task.FromResult(players);
-            }
-
-            return Task.FromResult(new List<PlayerDTO>());
-        }
-        public async Task HostLeftAsync(string gameCode)
-        {
-            if (rooms.TryGetValue(gameCode, out var game))
-            {
-                log.InfoFormat("HostLeft for room '{0}'. Notifying clients and removing room.", gameCode);
-                await BroadcastAsync(game, client => client.Item1.OnHostLeft());
+                log.InfoFormat("Starting game for room '{0}'. Notifying clients and removing room.", gameCode);
+                await BroadcastAsync(game, client => client.Item1.OnGameStarted());
 
                 rooms.TryRemove(gameCode, out _);
-            }
-            else
-            {
-                log.DebugFormat("HostLeft ignored: room '{0}' not found.", gameCode);
-            }
+            }, context:"WaitingRoomManager: StartGameAsync");
         }
+
+        public async Task<List<PlayerDTO>> GetPlayersInRoomAsync(string gameCode)
+        {
+            return await ExecuteAsync(async () =>
+            {
+                if (rooms.TryGetValue(gameCode, out var game))
+                {
+                    var players = game.Players.Values.Select(p => p.Item2).ToList();
+                    return await Task.FromResult(players);
+                }
+
+                return await Task.FromResult(new List<PlayerDTO>());
+            }, context: "WaitingRoomManager: GetPlayersInRoomAsync");
+            
+        }
+
+        public async Task HostLeftAsync(string gameCode)
+        {
+            await ExecuteAsync(async () => 
+            {
+                if (rooms.TryGetValue(gameCode, out var game))
+                {
+                    log.InfoFormat("HostLeft for room '{0}'. Notifying clients and removing room.", gameCode);
+                    await BroadcastAsync(game, client => client.Item1.OnHostLeft());
+
+                    rooms.TryRemove(gameCode, out _);
+                }
+                else
+                {
+                    log.DebugFormat("HostLeft ignored: room '{0}' not found.", gameCode);
+                }
+            }, context: "WaitingRoomManager: HostLeftAsync");
+            
+        }
+
+        public async Task SendGameInvitationByEmailAsync(string email, string gameCode, string inviterNickname)
+        {
+            await ExecuteAsync(async () =>
+            {
+                var user = await accountRepository.GetUserByEmailAsync(email);
+                if (user.Nickname != inviterNickname)
+                {
+
+                    await notificationService.SendGameInvitationEmailAsync(email, gameCode, inviterNickname);
+                    log.InfoFormat("Invitation email sent to {0} for room {1} by {2}", email, gameCode,
+                        inviterNickname);
+                }
+                else
+                {
+                    log.WarnFormat("SendGameInvitationByEmailAsync skipped:" +
+                           " user not found or self-invitation for email '{0}'", email);
+                    throw FaultExceptionFactory.Create(
+                        ServiceErrorCode.SeflInvitation,
+                        "SELF_INVITATION",
+                        "Self-invitation."
+                    );
+                }
+            }, context: "WaitingRoomManager: SendGameInvitationByEmailAsync");
+        }
+
+        public async Task SendGameInvitationToFriendAsync(int friendPlayerId, string gameCode, string inviterNickname)
+        {
+            await ExecuteAsync(async () => 
+            {
+                var userAccount = await accountRepository.GetUserByPlayerIdAsync(friendPlayerId);
+                if (userAccount == null || string.IsNullOrEmpty(userAccount.Email))
+                {
+                    log.WarnFormat("SendGameInvitationToFriendAsync failed: Could not find email for PlayerId {0}",
+                        friendPlayerId);
+                    throw FaultExceptionFactory.Create(
+                        ServiceErrorCode.PlayerNotFound,
+                        "FRIEND_NOT_FOUND",
+                        "Friend not found or email missing."
+                    );
+                }
+
+                if (userAccount.Nickname == inviterNickname)
+                {
+                    throw FaultExceptionFactory.Create(
+                        ServiceErrorCode.SeflInvitation,
+                        "SELF_INVITATION",
+                        "Cannot invite yourself."
+                    );
+                }
+
+                await notificationService.SendGameInvitationEmailAsync(userAccount.Email, gameCode, inviterNickname);
+                log.InfoFormat("Invitation to friend sent to {0} (PlayerId {1}) for room {2}", userAccount.Email,
+                    friendPlayerId, gameCode);
+            }, context: "WaitingRoomManager: SendGameInvitationToFriendAsync");
+        }
+
         private async Task<bool> TryAddPlayerAsync(Room game, PlayerDTO player, IWaitingRoomCallback callback)
         {
             if (callback == null)
@@ -383,129 +469,6 @@ namespace Services.Services
             {
                 return new string(Enumerable.Repeat(chars, 5)
                     .Select(s => chars[random.Next(chars.Length)]).ToArray());
-            }
-        }
-
-        public async Task SendGameInvitationByEmailAsync(string email, string gameCode, string inviterNickname)
-        {
-            try
-            {
-                var user = await accountRepository.GetUserByEmailAsync(email);
-                if (user.Nickname != inviterNickname)
-                {
-                    
-                    await notificationService.SendGameInvitationEmailAsync(email, gameCode, inviterNickname);
-                    log.InfoFormat("Invitation email sent to {0} for room {1} by {2}", email, gameCode,
-                        inviterNickname);
-                }
-                else
-                {
-                    log.WarnFormat("SendGameInvitationByEmailAsync skipped:" +
-                           " user not found or self-invitation for email '{0}'", email);
-                    throw FaultExceptionFactory.Create(
-                        ServiceErrorCode.SeflInvitation,
-                        "SELF_INVITATION",
-                        "Self-invitation."
-                    );
-                }
-            }
-            catch (ConfigurationErrorsException)
-            {
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.EmailConfigurationError,
-                    "EMAIL_CONFIGURATION_ERROR",
-                    "Email service configuration error"
-                );
-            }
-            catch (FormatException)
-            {
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.EmailConfigurationError,
-                    "EMAIL_SERVICE_CONFIGURATION_ERROR",
-                    "Invalid email service configuration"
-                );
-            }
-            catch (SmtpException)
-            {
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.EmailSendingError,
-                    "EMAIL_SENDING_ERROR",
-                    "Failed to send email"
-                );
-            }
-            catch (Exception ex)
-            {
-                log.ErrorFormat("Unexpected error in SendGameInvitationByEmailAsync to {0}.\n{1}", email, ex);
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.UnexpectedError,
-                    "UNEXPECTED_ERROR",
-                    "Unexpected server error."
-                );
-            }
-        }
-
-        public async Task SendGameInvitationToFriendAsync(int friendPlayerId, string gameCode, string inviterNickname)
-        {
-            try
-            {
-                var userAccount = await accountRepository.GetUserByPlayerIdAsync(friendPlayerId);
-                if (userAccount == null || string.IsNullOrEmpty(userAccount.Email))
-                {
-                    log.WarnFormat("SendGameInvitationToFriendAsync failed: Could not find email for PlayerId {0}",
-                        friendPlayerId);
-                    throw FaultExceptionFactory.Create(
-                        ServiceErrorCode.PlayerNotFound,
-                        "FRIEND_NOT_FOUND",
-                        "Friend not found or email missing."
-                    );
-                }
-
-                if (userAccount.Nickname == inviterNickname)
-                {
-                    throw FaultExceptionFactory.Create(
-                        ServiceErrorCode.SeflInvitation,
-                        "SELF_INVITATION",
-                        "Cannot invite yourself."
-                    );
-                }
-
-                await notificationService.SendGameInvitationEmailAsync(userAccount.Email, gameCode, inviterNickname);
-                log.InfoFormat("Invitation to friend sent to {0} (PlayerId {1}) for room {2}", userAccount.Email,
-                    friendPlayerId, gameCode);
-            }
-            catch (ConfigurationErrorsException)
-            {
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.EmailConfigurationError,
-                    "EMAIL_CONFIGURATION_ERROR",
-                    "Email service configuration error"
-                );
-            }
-            catch (FormatException)
-            {
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.EmailConfigurationError,
-                    "EMAIL_CONFIGURATION_ERROR",
-                    "Invalid email service configuration"
-                );
-            }
-            catch (SmtpException)
-            {
-                log.WarnFormat("Could not send invitation to {0}", friendPlayerId);
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.EmailSendingError,
-                    "EMAIL_SENDING_ERROR",
-                    "Failed to send email"
-                );
-            }
-            catch (Exception ex)
-            {
-                log.ErrorFormat("Unexpected error in SendGameInvitationToFriendAsync for {0}.\n{1}", friendPlayerId, ex);
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.UnexpectedError,
-                    "UNEXPECTED_ERROR",
-                    "Unexpected error at SendGameInvitationToFriendAsync"
-                    );
             }
         }
     }
