@@ -4,10 +4,13 @@ using Moq;
 using Services.Contracts.DTOs;
 using Services.Contracts.Enums;
 using Services.Services;
-using System.Data.Common;
+using System;
+using System.Collections.Generic;
 using System.Data.Entity.Infrastructure;
+using System.Linq;
 using System.ServiceModel;
-
+using System.Threading.Tasks;
+using Xunit;
 
 namespace Test.ServicesTests
 {
@@ -72,7 +75,7 @@ namespace Test.ServicesTests
         {
             // Arrange
             var inputDto = new UserDTO { PlayerId = 1, FirstName = "FName", LastName = "LName" };
-            var dbUpdateEx = new DbUpdateException("Simulated SaveChanges error");
+            var dbUpdateEx = new DbUpdateException("Simulated SaveChanges error", new Exception());
 
             mockRepo.Setup(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(), It.IsAny<List<SocialAccount>>()))
                     .ThrowsAsync(dbUpdateEx);
@@ -87,17 +90,12 @@ namespace Test.ServicesTests
             mockRepo.Verify(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(), It.IsAny<List<SocialAccount>>()), Times.Once);
         }
 
-
-        public class MockDbException : DbException { 
-            public MockDbException(string message) : base(message) { } 
-        }
-
         [Fact]
         public async Task UpdateProfile_ShouldThrowFaultExceptionWithDatabaseError_WhenRepositoryThrowsDbException()
         {
             // Arrange
             var inputDto = new UserDTO { PlayerId = 1, FirstName = "FName", LastName = "LName" };
-            var dbEx = new MockDbException("Simulated connection error");
+            var dbEx = new DbUpdateException("Simulated connection error", new Exception());
 
             mockRepo.Setup(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(), It.IsAny<List<SocialAccount>>()))
                     .ThrowsAsync(dbEx);

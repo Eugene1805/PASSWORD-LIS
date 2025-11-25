@@ -43,7 +43,7 @@ namespace Test.ServicesTests
             ];
         }
 
-        private static List<PasswordWord> MakeWords(int count =5)
+        private static List<PasswordWord> MakeWords(int count = 20)
         {
             var list = new List<PasswordWord>();
             for (int i =0; i < count; i++)
