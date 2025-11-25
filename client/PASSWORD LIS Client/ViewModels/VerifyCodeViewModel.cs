@@ -72,11 +72,13 @@ namespace PASSWORD_LIS_Client.ViewModels
                             Properties.Langs.Lang.successfulSignUpText, PopUpIcon.Success);
                 this.windowService.ShowLoginWindow();
                 this.windowService.CloseWindow(this);
+                windowService.CloseMainWindow();
             }
             if(isCodeValid && this.reason == VerificationReason.PasswordReset)
             {
                 this.windowService.ShowChangePasswordWindow(this.Email, this.enteredCode);
                 this.windowService.CloseWindow(this);
+                windowService.CloseMainWindow();
             }
             this.isBusy = false;
         }

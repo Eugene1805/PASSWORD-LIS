@@ -79,6 +79,11 @@ namespace PASSWORD_LIS_Client.ViewModels
                     await loginManagerService.SendVerificationCodeAsync(loggedInUser.Email);
                     VerifyAccount(loggedInUser.Email);
                 }
+                else
+                {
+                    windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
+                        Properties.Langs.Lang.wrongCredentialsText, PopUpIcon.Warning);
+                }
             }
             catch (FaultException<ServiceErrorDetailDTO> ex)
             {// TODO Check lang message here
@@ -152,6 +157,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             var signUpWindow = new SignUpWindow { DataContext = signUpViewModel };
             signUpWindow.Show();
             windowService.CloseWindow(this);
+            windowService.CloseMainWindow();
         }
 
         private void NavigateToForgotPassword(object parameter)
@@ -159,12 +165,14 @@ namespace PASSWORD_LIS_Client.ViewModels
             var retreivePasswordViewModel = new RetrievePasswordViewModel(App.PasswordResetManagerService, windowService);
             var retrievePasswordWindow = new RetrievePasswordWindow { DataContext = retreivePasswordViewModel};
             retrievePasswordWindow.ShowDialog();
+            windowService.CloseWindow(this);
         }
 
         private void VerifyAccount(string email)
         {
             windowService.ShowVerifyCodeWindow(email, VerificationReason.AccountActivation);
             windowService.CloseWindow(this);
+            windowService.CloseMainWindow();
         }
     }
 }

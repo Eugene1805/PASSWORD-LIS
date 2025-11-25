@@ -3,14 +3,9 @@ using Data.Model;
 using log4net;
 using Services.Contracts;
 using Services.Contracts.DTOs;
-using Services.Contracts.Enums;
-using Services.Util;
 using Services.Wrappers;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data.Common;
-using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.ServiceModel;
 using System.Threading.Tasks;
@@ -18,7 +13,7 @@ using System.Threading.Tasks;
 namespace Services.Services
 {
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Multiple)]
-    public class FriendsManager : IFriendsManager
+    public class FriendsManager : ServiceBase, IFriendsManager
     {
         private readonly ConcurrentDictionary<int, IFriendsCallback> connectedClients; 
         private readonly IFriendshipRepository friendshipRepository;
@@ -26,7 +21,7 @@ namespace Services.Services
         private readonly IOperationContextWrapper operationContext;
         private static readonly ILog log = LogManager.GetLogger(typeof(FriendsManager));
         public FriendsManager(IFriendshipRepository friendshipRepository, IAccountRepository accountRepository, 
-            IOperationContextWrapper operationContext)
+            IOperationContextWrapper operationContext) :base(log)
         {
             connectedClients = new ConcurrentDictionary<int, IFriendsCallback>();
             this.friendshipRepository = friendshipRepository;
@@ -37,7 +32,7 @@ namespace Services.Services
 
         public async Task<List<FriendDTO>> GetFriendsAsync(int userAccountId)
         {
-            try
+            return await ExecuteAsync(async () =>
             {
                 log.InfoFormat("Starting GetFriendsAsync for UserAccountId: {0}", userAccountId);
                 var friendAccounts = await friendshipRepository.GetFriendsByUserAccountIdAsync(userAccountId);
@@ -50,24 +45,13 @@ namespace Services.Services
 
                 log.InfoFormat("GetFriendsAsync completed. {0} friends found.", friendDTOs.Count);
                 return friendDTOs;
-            } 
-            catch (DbException dbEx)
-            {
-                log.Error($"DbException in GetFriendsAsync (UserAccountId: {userAccountId})", dbEx);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError,
-                    "DATABASE_ERROR", "Error querying friends list.");
-            } 
-            catch (Exception ex)
-            {
-                log.Fatal($"Unexpected error in GetFriendsAsync (UserAccountId: {userAccountId})", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, 
-                    "UNEXPECTED_ERROR", "Unexpected error retrieving friends list.");
-            }
+            }, context: "FriendManager: GetFriendsAsync");
+            
         }
 
         public async Task<bool> DeleteFriendAsync(int currentPlayerId, int friendToDeleteId)
         {
-            try
+            return await ExecuteAsync(async () =>
             {
                 log.InfoFormat("Starting DeleteFriendAsync: User={0}, Friend={1}", currentPlayerId, friendToDeleteId);
                 bool success = await friendshipRepository.DeleteFriendshipAsync(currentPlayerId, friendToDeleteId);
@@ -82,26 +66,7 @@ namespace Services.Services
                     log.WarnFormat("DeleteFriendAsync failed: User={0}, Friend={1}", currentPlayerId, friendToDeleteId);
                 }
                 return success;
-            }
-            catch (DbUpdateException dbUpEx)
-            {
-                log.Error($"DbUpdateException in DeleteFriendAsync: User={currentPlayerId}, " +
-                    $"Friend={friendToDeleteId}", dbUpEx);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError,
-                    "DATABASE_ERROR", "Error saving friend removal.");
-            }
-            catch (DbException dbEx) 
-            {
-                log.Error($"DbException in DeleteFriendAsync: User={currentPlayerId}, Friend={friendToDeleteId}", dbEx);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError,
-                    "DATABASE_ERROR", "Database error deleting friend.");
-            }
-            catch (Exception ex)
-            {
-                log.Fatal($"Unexpected error in DeleteFriendAsync: User={currentPlayerId}, Friend={friendToDeleteId}", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError,
-                    "UNEXPECTED_ERROR", "Unexpected error removing friend.");
-            }
+            }, context: $"User={currentPlayerId}, Friend={friendToDeleteId}");
         }
 
         public Task SubscribeToFriendUpdatesAsync(int userAccountId)
@@ -123,53 +88,30 @@ namespace Services.Services
 
         public async Task<FriendRequestResult> SendFriendRequestAsync(string addresseeEmail)
         {
-            int requesterUserAccountId = GetUserAccountIdFromCallback();
-            if (requesterUserAccountId == 0)
+            return await ExecuteAsync(async () =>
             {
-                log.Warn("SendFriendRequestAsync failed: Could not obtain UserAccountId from callback.");
-                return FriendRequestResult.Failed;
-            }
-
-            try
-            {
+                int requesterUserAccountId = GetUserAccountIdFromCallback();
+                if (requesterUserAccountId == 0)
+                {
+                    log.Warn("SendFriendRequestAsync failed: Could not obtain UserAccountId from callback.");
+                    return FriendRequestResult.Failed;
+                }
                 log.InfoFormat("Starting SendFriendRequestAsync: RequesterId={0}, AddresseeEmail={1}",
                     requesterUserAccountId, addresseeEmail);
                 return await TrySendFriendRequestAsync(requesterUserAccountId, addresseeEmail);
-            }
-            catch (DbUpdateException dbUpEx)
-            {
-                log.Error($"DbUpdateException in SendFriendRequestAsync: RequesterId={requesterUserAccountId}," +
-                    $" Email={addresseeEmail}", dbUpEx);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR",
-                    "Error saving friend request.");
-            }
-            catch (DbException dbEx)
-            {
-                log.Error($"DbException in SendFriendRequestAsync: RequesterId={requesterUserAccountId}, " +
-                    $"Email={addresseeEmail}", dbEx);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", 
-                    "Database error sending friend request.");
-            }
-            catch (Exception ex)
-            {
-                log.Fatal($"Unexpected error in SendFriendRequestAsync: RequesterId={requesterUserAccountId}," +
-                    $" Email={addresseeEmail}", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR",
-                    "Unexpected error sending friend request.");
-            }
+            }, context: "FriendManager: SendFriendRequestAsync");
         }
 
         public async Task<List<FriendDTO>> GetPendingRequestsAsync()
         {
-            int userAccountId = GetUserAccountIdFromCallback();
-            if (userAccountId == 0)
+            return await ExecuteAsync(async () =>
             {
-                log.Warn("GetPendingRequestsAsync failed: Could not obtain UserAccountId from callback.");
-                return new List<FriendDTO>();
-            }
-
-            try
-            {
+                int userAccountId = GetUserAccountIdFromCallback();
+                if (userAccountId == 0)
+                {
+                    log.Warn("GetPendingRequestsAsync failed: Could not obtain UserAccountId from callback.");
+                    return new List<FriendDTO>();
+                }
                 log.InfoFormat("Starting GetPendingRequestsAsync for UserAccountId: {0}", userAccountId);
                 var requests = await friendshipRepository.GetPendingRequestsAsync(userAccountId);
 
@@ -181,32 +123,20 @@ namespace Services.Services
 
                 log.InfoFormat("GetPendingRequestsAsync completed. {0} requests found.", requestDTOs.Count);
                 return requestDTOs;
-            }
-            catch (DbException dbEx)
-            {
-                log.Error($"DbException in GetPendingRequestsAsync (UserAccountId: {userAccountId})", dbEx);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR",
-                    "Error querying pending requests.");
-            }
-            catch (Exception ex)
-            {
-                log.Fatal($"Unexpected error in GetPendingRequestsAsync (UserAccountId: {userAccountId})", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR",
-                    "Unexpected error retrieving pending requests.");
-            }
+
+            }, context: "FriendManager: GetPendingRequestsAsync");
         }
 
         public async Task RespondToFriendRequestAsync(int requesterPlayerId, bool accepted)
         {
-            int addresseeUserAccountId = GetUserAccountIdFromCallback();
-            if (addresseeUserAccountId == 0)
+            await ExecuteAsync(async () =>
             {
-                log.Warn("RespondToFriendRequestAsync failed: Could not obtain UserAccountId from callback.");
-                return;
-            }
-
-            try
-            {
+                int addresseeUserAccountId = GetUserAccountIdFromCallback();
+                if (addresseeUserAccountId == 0)
+                {
+                    log.Warn("RespondToFriendRequestAsync failed: Could not obtain UserAccountId from callback.");
+                    return;
+                }
                 log.InfoFormat("Starting RespondToFriendRequestAsync: AddresseeId={0}, RequesterId={1}, Accepted={2}",
                     addresseeUserAccountId, requesterPlayerId, accepted);
 
@@ -226,37 +156,17 @@ namespace Services.Services
 
                 if (success && accepted)
                 {
-                    log.InfoFormat("Friend request accepted. Notifying... RequesterId={0}, AddresseeId={1}", 
+                    log.InfoFormat("Friend request accepted. Notifying... RequesterId={0}, AddresseeId={1}",
                         requesterPlayerId, addresseePlayerId);
                     await NotifyOnRequestAcceptedAsync(requesterPlayerId, addresseeAccount);
                 }
                 else if (!success)
                 {
-                    log.WarnFormat("RespondToFriendRequestAsync failed (repository returned false). RequesterId={0}, " +
+                    log.WarnFormat("RespondToFriendRequestAsync failed (repository returned false). RequesterId={0}," +
                         "AddresseeId={1}", requesterPlayerId, addresseePlayerId);
                 }
-            }
-            catch (DbUpdateException dbUpEx)
-            {
-                log.Error($"DbUpdateException in RespondToFriendRequestAsync: AddresseeId={addresseeUserAccountId}," +
-                    $" RequesterId={requesterPlayerId}", dbUpEx);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", 
-                    "Error saving request response.");
-            }
-            catch (DbException dbEx)
-            {
-                log.Error($"DbException in RespondToFriendRequestAsync: AddresseeId={addresseeUserAccountId}," +
-                    $" RequesterId={requesterPlayerId}", dbEx);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, "DATABASE_ERROR", 
-                    "Database error responding to request.");
-            }
-            catch (Exception ex)
-            {
-                log.Fatal($"Unexpected error in RespondToFriendRequestAsync: AddresseeId={addresseeUserAccountId}, " +
-                    $"RequesterId={requesterPlayerId}", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "UNEXPECTED_ERROR",
-                    "Unexpected error responding to request.");
-            }
+
+            }, context: "FriendManager: RespondToFriendRequestAsync");
         }
 
         public Task UnsubscribeFromFriendUpdatesAsync(int userAccountId)
@@ -311,7 +221,8 @@ namespace Services.Services
             return success ? FriendRequestResult.Success : FriendRequestResult.Failed;
         }
 
-        private async Task<FriendRequestResult> ValidateFriendRequestAsync(UserAccount requesterAccount, UserAccount addresseeAccount)
+        private async Task<FriendRequestResult> ValidateFriendRequestAsync(UserAccount requesterAccount, 
+            UserAccount addresseeAccount)
         {
             int requesterPlayerId = requesterAccount.Player.First().Id;
             int addresseePlayerId = addresseeAccount.Player.First().Id;
@@ -337,7 +248,8 @@ namespace Services.Services
             return FriendRequestResult.Success;
         }
 
-        private async Task<bool> CreateAndNotifyFriendRequestAsync(UserAccount requesterAccount, UserAccount addresseeAccount)
+        private async Task<bool> CreateAndNotifyFriendRequestAsync(UserAccount requesterAccount,
+            UserAccount addresseeAccount)
         {
             int requesterPlayerId = requesterAccount.Player.First().Id;
             int addresseePlayerId = addresseeAccount.Player.First().Id;
@@ -367,7 +279,8 @@ namespace Services.Services
             var requesterAccount = await accountRepository.GetUserByPlayerIdAsync(requesterPlayerId);
             if (requesterAccount == null || !requesterAccount.Player.Any())
             {
-                log.WarnFormat("NotifyOnRequestAcceptedAsync: Account or Player not found for requester (PlayerId: {0})", requesterPlayerId);
+                log.WarnFormat("NotifyOnRequestAcceptedAsync: " +
+                    "Account or Player not found for requester (PlayerId: {0})", requesterPlayerId);
                 return;
             }
 
@@ -404,11 +317,11 @@ namespace Services.Services
                 friendCallback.OnFriendRemoved(currentUserId);
             }
 
-            if (currentUserAccount != null && connectedClients.TryGetValue(currentUserAccount.Id, out var currentCallback))
+            if (currentUserAccount != null && 
+                connectedClients.TryGetValue(currentUserAccount.Id, out var currentCallback))
             {
                 currentCallback.OnFriendRemoved(friendToDeleteId);
             }
         }
-
     }
 }

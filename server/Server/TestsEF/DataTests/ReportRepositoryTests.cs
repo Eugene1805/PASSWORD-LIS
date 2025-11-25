@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Data.DAL.Implementations;
 using Xunit;
@@ -18,13 +19,11 @@ namespace TestsEF.DataTests
         [Fact]
         public async Task AddReportAsync_ShouldPersistReport_WithAllFields()
         {
-            var now = System.DateTime.UtcNow;
             var report = new Data.Model.Report
             {
                 ReporterPlayerId = 1,
                 ReportedPlayerId = 2,
-                Reason = "Abusive language",
-                CreatedAt = now
+                Reason = "Abusive language"
             };
 
             await _repository.AddReportAsync(report);
@@ -34,61 +33,96 @@ namespace TestsEF.DataTests
                 var inDb = verifyCtx.Report.FirstOrDefault(r => r.ReportedPlayerId == 2 && r.ReporterPlayerId == 1);
                 Assert.NotNull(inDb);
                 Assert.Equal("Abusive language", inDb.Reason);
-                Assert.Equal(2, inDb.ReportedPlayerId);
-                Assert.Equal(1, inDb.ReporterPlayerId);
+                Assert.True(inDb.CreatedAt > DateTime.UtcNow.AddMinutes(-5));
             }
         }
 
         [Fact]
-        public async Task GetReportCountForPlayerAsync_ShouldReturnCorrectCount_ForSinglePlayer()
+        public async Task GetReportCountForPlayerSinceAsync_ShouldReturnFilteredCount()
+        {
+            var cutoff = DateTime.UtcNow;
+            // older report (simulate by setting CreatedAt manually)
+            await _repository.AddReportAsync(new Data.Model.Report
+            {
+                ReporterPlayerId = 1,
+                ReportedPlayerId = 3,
+                Reason = "Old",
+                CreatedAt = cutoff.AddMinutes(-10)
+            });
+            // recent reports
+            for (int i = 0; i < 2; i++)
+            {
+                await _repository.AddReportAsync(new Data.Model.Report
+                {
+                    ReporterPlayerId = 2 + i,
+                    ReportedPlayerId = 3,
+                    Reason = $"Reason {i}",
+                    CreatedAt = cutoff.AddMinutes(1 + i)
+                });
+            }
+
+            var countSince = await _repository.GetReportCountForPlayerSinceAsync(3, cutoff);
+            Assert.Equal(2, countSince);
+        }
+
+        [Fact]
+        public async Task GetReportCountForPlayerSinceAsync_NoSince_ReturnsAll()
         {
             for (int i = 0; i < 3; i++)
             {
                 await _repository.AddReportAsync(new Data.Model.Report
                 {
                     ReporterPlayerId = 1,
-                    ReportedPlayerId = 3,
-                    Reason = $"Reason {i}",
-                    CreatedAt = System.DateTime.UtcNow
+                    ReportedPlayerId = 4,
+                    Reason = $"R{i}"
                 });
             }
-
-            var count = await _repository.GetReportCountForPlayerAsync(3);
-
+            var count = await _repository.GetReportCountForPlayerSinceAsync(4, null);
             Assert.Equal(3, count);
         }
 
         [Fact]
-        public async Task GetReportCountForPlayerAsync_ShouldReturnZero_WhenNoReports()
+        public async Task HasReporterReportedSinceAsync_ShouldReturnTrue_WhenExistsAfterCutoff()
         {
-            var count = await _repository.GetReportCountForPlayerAsync(4);
-            Assert.Equal(0, count);
+            var cutoff = DateTime.UtcNow;
+            await _repository.AddReportAsync(new Data.Model.Report
+            {
+                ReporterPlayerId = 1,
+                ReportedPlayerId = 5,
+                Reason = "Before",
+                CreatedAt = cutoff.AddMinutes(-5)
+            });
+            await _repository.AddReportAsync(new Data.Model.Report
+            {
+                ReporterPlayerId = 1,
+                ReportedPlayerId = 5,
+                Reason = "After",
+                CreatedAt = cutoff.AddMinutes(2)
+            });
+
+            var result = await _repository.HasReporterReportedSinceAsync(1, 5, cutoff);
+            Assert.True(result);
         }
 
         [Fact]
-        public async Task AddReportAsync_MultiplePlayers_ShouldMaintainSeparateCounts()
+        public async Task HasReporterReportedSinceAsync_ShouldReturnFalse_WhenOnlyBeforeCutoff()
         {
-            await _repository.AddReportAsync(new Data.Model.Report { ReporterPlayerId = 1, ReportedPlayerId = 2, Reason = "r1", CreatedAt = System.DateTime.UtcNow });
-            await _repository.AddReportAsync(new Data.Model.Report { ReporterPlayerId = 1, ReportedPlayerId = 3, Reason = "r2", CreatedAt = System.DateTime.UtcNow });
-            await _repository.AddReportAsync(new Data.Model.Report { ReporterPlayerId = 2, ReportedPlayerId = 3, Reason = "r3", CreatedAt = System.DateTime.UtcNow });
-            for (int i = 0; i < 4; i++)
+            var cutoff = DateTime.UtcNow;
+            await _repository.AddReportAsync(new Data.Model.Report
             {
-                await _repository.AddReportAsync(new Data.Model.Report { ReporterPlayerId = 4, ReportedPlayerId = 5, Reason = $"rp{i}", CreatedAt = System.DateTime.UtcNow });
-            }
-
-            var c2 = await _repository.GetReportCountForPlayerAsync(2);
-            var c3 = await _repository.GetReportCountForPlayerAsync(3);
-            var c5 = await _repository.GetReportCountForPlayerAsync(5);
-
-            Assert.Equal(1, c2);
-            Assert.Equal(2, c3);
-            Assert.Equal(4, c5);
+                ReporterPlayerId = 2,
+                ReportedPlayerId = 5,
+                Reason = "Before",
+                CreatedAt = cutoff.AddMinutes(-2)
+            });
+            var result = await _repository.HasReporterReportedSinceAsync(2, 5, cutoff);
+            Assert.False(result);
         }
 
         [Fact]
         public async Task AddReportAsync_NullReport_ShouldThrow()
         {
-            await Assert.ThrowsAsync<System.ArgumentNullException>(async () => await _repository.AddReportAsync(null));
+            await Assert.ThrowsAsync<ArgumentNullException>(async () => await _repository.AddReportAsync(null));
         }
     }
 }

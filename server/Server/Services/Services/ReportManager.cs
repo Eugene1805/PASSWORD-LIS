@@ -15,7 +15,7 @@ using Services.Util;
 namespace Services.Services
 {
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Multiple)]
-    public class ReportManager : IReportManager
+    public class ReportManager : ServiceBase, IReportManager
     {
         private const int ReportsForBan = 3;
         private static readonly TimeSpan BanDuration = TimeSpan.FromHours(1);
@@ -28,7 +28,7 @@ namespace Services.Services
         private static readonly ILog log = LogManager.GetLogger(typeof(ReportManager));
 
         public ReportManager(IReportRepository reportRepository, IPlayerRepository playerRepository,
-            IBanRepository banRepository,IOperationContextWrapper operationContext)
+            IBanRepository banRepository,IOperationContextWrapper operationContext):base(log)
         {
             this.reportRepository = reportRepository;
             this.playerRepository = playerRepository;
@@ -39,83 +39,44 @@ namespace Services.Services
 
         public async Task<bool> IsPlayerBannedAsync(int playerId)
         {
-            try
+            return await ExecuteAsync(async () =>
             {
                 var activeBan = await banRepository.GetActiveBanForPlayerAsync(playerId);
                 return activeBan != null;
-            }
-            catch (Exception ex)
-            {
-                log.Error("Error checking ban status.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError,
-                    "UNEXPECTED_ERROR", "Error checking ban status.");
-            }
+            }, context:"ReportManager: IsPlayerBannedAsync");            
         }
 
         public async Task<bool> SubmitReportAsync(ReportDTO reportDTO)
         {
-            if (reportDTO == null || reportDTO.ReporterPlayerId <= 0 || reportDTO.ReportedPlayerId <= 0)
+            return await ExecuteAsync(async () =>
             {
-                throw FaultExceptionFactory.Create(ServiceErrorCode.InvalidReportPayload, 
-                    "INVALID_REPORT_PAYLOAD", "Invalid report payload.");
-            }
+                ValidateReportPayload(reportDTO);
 
-            try
-            {
-                var newReport = new Report
-                {
-                    ReporterPlayerId = reportDTO.ReporterPlayerId,
-                    ReportedPlayerId = reportDTO.ReportedPlayerId,
-                    Reason = reportDTO.Reason
-                };
-                await reportRepository.AddReportAsync(newReport);
-                log.InfoFormat("Report submitted: reporter={0}, reported={1}.", reportDTO.ReporterPlayerId,
-                    reportDTO.ReportedPlayerId);
+                var players = await GetAndValidatePlayersAsync(reportDTO.ReporterPlayerId, reportDTO.ReportedPlayerId);
 
-                var totalReports = await reportRepository.GetReportCountForPlayerAsync(reportDTO.ReportedPlayerId);
-                log.InfoFormat("Reported player {0} now has {1} report(s).", reportDTO.ReportedPlayerId, totalReports);
+                var since = await banRepository.GetLastBanEndTimeAsync(reportDTO.ReportedPlayerId);
 
-                if (connectedClients.TryGetValue(reportDTO.ReportedPlayerId, out var client))
-                {
-                    var reporter = await playerRepository.GetPlayerByIdAsync(reportDTO.ReporterPlayerId);
-                    if (reporter == null || reporter.Id <= 0)
-                    {
-                        throw FaultExceptionFactory.Create(ServiceErrorCode.ReporterNotFound,
-                            "REPORTER_NOT_FOUND", "Reporter player not found.");
-                    }
-                    client.Callback.OnReportReceived(reporter.UserAccount.Nickname, reportDTO.Reason);
-                    client.Callback.OnReportCountUpdated(totalReports);
-                }
+                await EnsureNotAlreadyReportedAsync(reportDTO.ReporterPlayerId, reportDTO.ReportedPlayerId, since);
 
-                if (totalReports >= ReportsForBan)
-                {
-                    if (await IsPlayerBannedAsync(reportDTO.ReportedPlayerId))
-                    {
-                        log.WarnFormat("Player {0} already banned; skipping ban.", reportDTO.ReportedPlayerId);
-                    }
-                    else
-                    {
-                        await BanPlayerAsync(reportDTO.ReportedPlayerId);
-                    }
-                }
+                await AddReportAndLogAsync(reportDTO);
+
+                var totalReports = await reportRepository.GetReportCountForPlayerSinceAsync(reportDTO.ReportedPlayerId,
+                    since);
+                log.InfoFormat("Reported player {0} now has {1} report(s) since last ban.", reportDTO.ReportedPlayerId,
+                    totalReports);
+
+                NotifyReportCallbacks(reportDTO.ReportedPlayerId, players.Reporter.UserAccount.Nickname, 
+                    reportDTO.Reason, totalReports);
+
+                await EvaluateBanIfThresholdReachedAsync(reportDTO.ReportedPlayerId, totalReports);
 
                 return true;
-            }
-            catch (FaultException<ServiceErrorDetailDTO>)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                log.Error("Error while submitting report.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, 
-                    "UNEXPECTED_ERROR", "Unexpected error while submitting report.");
-            }
+            }, context: "ReportManager: SubmitReportAsync");
         }
 
         private async Task BanPlayerAsync(int playerId)
         {
-            try
+            await ExecuteAsync(async () =>
             {
                 var startTime = DateTime.UtcNow;
                 var endTime = startTime.Add(BanDuration);
@@ -133,88 +94,138 @@ namespace Services.Services
                 {
                     client.Callback.OnPlayerBanned(endTime);
 
-                    var banTimer = new Timer(_ => NotifyPlayerUnbanned(playerId), null, 
+                    var banTimer = new Timer(_ => NotifyPlayerUnbanned(playerId), null,
                         BanDuration, Timeout.InfiniteTimeSpan);
                     connectedClients[playerId] = (client.Callback, banTimer);
                 }
-            }
-            catch (Exception ex)
-            {
-                log.Error("Error banning player.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.BanPersistenceError, 
-                    "BAN_PERSISTENCE_ERROR", "Failed to persist ban information.");
-            }
+            }, context: "ReportManager: BanPlayerAsync");
         }
 
-        private void NotifyPlayerUnbanned(int playerId)
+        public async Task SubscribeToReportUpdatesAsync(int playerId)
         {
-            try
-            {
-                if (connectedClients.TryGetValue(playerId, out var client))
-                {
-                    client.Callback.OnPlayerUnbanned();
-                    client.BanTimer?.Dispose();
-                    connectedClients[playerId] = (client.Callback, null);
-                    log.InfoFormat("Player {0} unbanned and timer disposed.", playerId);
-                }
-            }
-            catch (Exception ex)
-            {
-                log.Error("Error notifying player unbanned.", ex);
-            }
-        }
-
-        public Task SubscribeToReportUpdatesAsync(int playerId)
-        {
-            try
+            await ExecuteAsync(() =>
             {
                 var callbackChannel = operationContext.GetCallbackChannel<IReportManagerCallback>();
                 connectedClients[playerId] = (callbackChannel, null);
                 log.InfoFormat("Player {0} subscribed to report updates.", playerId);
 
-                var commObject = (ICommunicationObject)callbackChannel;
-                commObject.Faulted += (s, e) => UnsubscribeFromReportUpdatesAsync(playerId);
-                commObject.Closed += (s, e) => UnsubscribeFromReportUpdatesAsync(playerId);
-            }
-            catch (Exception ex)
-            {
-                log.Error("Error subscribing to report updates.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError, 
-                    "SUBSCRIPTION_ERROR", "Failed to subscribe player to report updates.");
-            }
-            return Task.CompletedTask;
+                if (callbackChannel is ICommunicationObject commObject)
+                {
+                    commObject.Faulted += async (s, e) => await UnsubscribeFromReportUpdatesAsync(playerId);
+                    commObject.Closed +=  async (s, e) =>  await UnsubscribeFromReportUpdatesAsync(playerId);
+                }
+                return Task.CompletedTask;
+            }, context: "ReportManager: SubscribeToReportUpdatesAsync");            
         }
 
-        public Task UnsubscribeFromReportUpdatesAsync(int playerId)
+        public async Task UnsubscribeFromReportUpdatesAsync(int playerId)
         {
-            try
+            await ExecuteAsync(() =>
             {
                 if (connectedClients.TryRemove(playerId, out var client))
                 {
                     client.BanTimer?.Dispose();
                     log.InfoFormat("Player {0} unsubscribed from report updates.", playerId);
                 }
-            }
-            catch (Exception ex)
-            {
-                log.Error("Error unsubscribing from report updates.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnsubscriptionError,
-                    "UNSUBSCRIPTION_ERROR", "Failed to unsubscribe player from report updates.");
-            }
-            return Task.CompletedTask;
+                return Task.CompletedTask;
+            }, context: "ReportManager: UnsubscribeFromReportUpdatesAsync");            
         }
 
         public async Task<int> GetCurrentReportCountAsync(int playerId)
         {
-            try
+            return await ExecuteAsync(async () =>
             {
-                return await reportRepository.GetReportCountForPlayerAsync(playerId);
+                var since = await banRepository.GetLastBanEndTimeAsync(playerId);
+                return await reportRepository.GetReportCountForPlayerSinceAsync(playerId, since);
+            }, context: "ReportManager: GetCurrentReportCountAsync");
+        }
+
+        private void NotifyPlayerUnbanned(int playerId)
+        {
+            if (connectedClients.TryGetValue(playerId, out var client))
+            {
+                client.Callback.OnPlayerUnbanned();
+                client.BanTimer?.Dispose();
+                connectedClients[playerId] = (client.Callback, null);
+                log.InfoFormat("Player {0} unbanned and timer disposed.", playerId);
             }
-            catch (Exception ex)
+        }
+
+        private static void ValidateReportPayload(ReportDTO reportDTO)
+        {
+            if (reportDTO == null || reportDTO.ReporterPlayerId <= 0 || reportDTO.ReportedPlayerId <= 0
+                || reportDTO.ReporterPlayerId == reportDTO.ReportedPlayerId)
             {
-                log.Error("Error getting current report count.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, 
-                    "UNEXPECTED_ERROR", "Error retrieving report count.");
+                throw FaultExceptionFactory.Create(ServiceErrorCode.InvalidReportPayload,
+                    "INVALID_REPORT_PAYLOAD", "Invalid report payload.");
+            }
+        }
+
+        private async Task<(Player Reporter, Player Reported)> GetAndValidatePlayersAsync(int reporterId,
+            int reportedId)
+        {
+            var reporter = await playerRepository.GetPlayerByIdAsync(reporterId);
+            if (reporter == null || reporter.Id <= 0)
+            {
+                throw FaultExceptionFactory.Create(ServiceErrorCode.ReporterNotFound,
+                    "REPORTER_NOT_FOUND", "Reporter player not found.");
+            }
+            var reported = await playerRepository.GetPlayerByIdAsync(reportedId);
+            if (reported == null || reported.Id <= 0)
+            {
+                throw FaultExceptionFactory.Create(ServiceErrorCode.ReportedPlayerNotFound,
+                    "REPORTED_PLAYER_NOT_FOUND", "Reported player not found.");
+            }
+            return (reporter, reported);
+        }
+
+        private async Task EnsureNotAlreadyReportedAsync(int reporterId, int reportedId, DateTime? since)
+        {
+            var alreadyReported = await reportRepository.HasReporterReportedSinceAsync(reporterId, reportedId, since);
+            if (alreadyReported)
+            {
+                throw FaultExceptionFactory.Create(ServiceErrorCode.InvalidReportPayload,
+                    "INVALID_REPORT_PAYLOAD",
+                    "You have already reported this player. You can report again after they are banned.");
+            }
+        }
+
+        private async Task AddReportAndLogAsync(ReportDTO reportDTO)
+        {
+            var newReport = new Report
+            {
+                ReporterPlayerId = reportDTO.ReporterPlayerId,
+                ReportedPlayerId = reportDTO.ReportedPlayerId,
+                Reason = reportDTO.Reason,
+                CreatedAt = DateTime.UtcNow
+            };
+            await reportRepository.AddReportAsync(newReport);
+            log.InfoFormat("Report submitted: reporter={0}, reported={1}.", reportDTO.ReporterPlayerId,
+                reportDTO.ReportedPlayerId);
+        }
+
+        private void NotifyReportCallbacks(int reportedPlayerId, string reporterNickname,
+            string reason, int totalReports)
+        {
+            if (connectedClients.TryGetValue(reportedPlayerId, out var client))
+            {
+                client.Callback.OnReportReceived(reporterNickname, reason);
+                client.Callback.OnReportCountUpdated(totalReports);
+            }
+        }
+
+        private async Task EvaluateBanIfThresholdReachedAsync(int reportedPlayerId, int totalReports)
+        {
+            if (totalReports >= ReportsForBan)
+            {
+                if (await IsPlayerBannedAsync(reportedPlayerId))
+                {
+                    log.WarnFormat("Player {0} already banned; skipping ban.", reportedPlayerId);
+                }
+                else
+                {
+                    await BanPlayerAsync(reportedPlayerId);
+                }
             }
         }
     }

@@ -14,14 +14,15 @@ using System.Threading.Tasks;
 namespace Services.Services
 {
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]
-    public class LoginManager : ILoginManager
+    public class LoginManager : ServiceBase, ILoginManager
     {
         private readonly IAccountRepository repository;
         private readonly INotificationService notification;
         private readonly IVerificationCodeService codeService;
         private static readonly ILog log = LogManager.GetLogger(typeof(LoginManager));
 
-        public LoginManager(IAccountRepository accountRepository, INotificationService notificationService, IVerificationCodeService verificationCodeService)
+        public LoginManager(IAccountRepository accountRepository, INotificationService notificationService,
+            IVerificationCodeService verificationCodeService) :base(log)
         {
             repository = accountRepository;
             notification = notificationService;
@@ -30,7 +31,7 @@ namespace Services.Services
 
         public async Task<UserDTO> LoginAsync(string email, string password)
         {
-            try
+            return await ExecuteAsync(async () =>
             {
                 log.InfoFormat("Login attempt for email: {0}", email);
                 var userAccount = await repository.GetUserByEmailAsync(email);
@@ -38,7 +39,7 @@ namespace Services.Services
                 if (userAccount == null)
                 {
                     log.WarnFormat("Login failed (user not found) for: {0}", email);
-                    return new UserDTO { UserAccountId = -1};
+                    return new UserDTO { UserAccountId = -1 };
                 }
 
                 bool isPasswordValid = BCrypt.Net.BCrypt.Verify(password, userAccount.PasswordHash);
@@ -54,24 +55,12 @@ namespace Services.Services
                 }
                 log.WarnFormat("Login failed (wrong password or no player) for: {0}", email);
                 return new UserDTO { UserAccountId = -1 };
-            }
-            catch (DbException dbEx)
-            {
-                log.Error("Database error (DbException) during login.", dbEx);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, 
-                    "DATABASE_ERROR", "An error occurred while querying the database. Please try again later.");
-            }
-            catch (Exception ex)
-            {
-                log.Fatal("Unexpected fatal error in Login.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError,
-                    "UNEXPECTED_ERROR", "An unexpected server error occurred.");
-            }
+            }, context: "LoginManager: LoginAsync");
         }
 
         public async Task<bool> IsAccountVerifiedAsync(string email)
         {
-            try
+            return await ExecuteAsync(async () =>
             {
                 log.InfoFormat("Verification check for email: {0}", email);
                 var userAccount = await repository.GetUserByEmailAsync(email);
@@ -83,19 +72,7 @@ namespace Services.Services
                 log.InfoFormat("Verification check succeeded for: {0}, IsVerified: {1}",
                     email, userAccount.EmailVerified);
                 return userAccount.EmailVerified;
-            }
-            catch (DbException dbEx)
-            {
-                log.Error("Database error (DbException) during verification check.", dbEx);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError,
-                    "DATABASE_ERROR", "An error occurred while querying the database. Please try again later.");
-            }
-            catch (Exception ex)
-            {
-                log.Fatal("Unexpected fatal error in IsAccountVerified.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError,
-                    "UNEXPECTED_ERROR", "An unexpected server error occurred.");
-            }
+            }, context: "LoginManager: IsAccountVerifiedAsync");
         }
         private UserDTO MapUserToDTO(UserAccount userAccount, Player player)
         {
@@ -113,19 +90,14 @@ namespace Services.Services
         }
         public async Task SendVerificationCodeAsync(string email)
         {
-            try
+            await ExecuteAsync(async () =>
             {
                 var userAccount = await repository.GetUserByEmailAsync(email);
                 if (userAccount != null && !userAccount.EmailVerified)
                 {
                     SendEmailVerification(email);
                 }
-            }
-            catch (Exception ex)
-            {
-                log.Error("Error sending verification code", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError, "SEND_ERROR", "Could not send code.");
-            }
+            }, context: "LoginManager: SendVerificationCodeAsync");
         }
         private void SendEmailVerification(string email)
         {

@@ -42,6 +42,14 @@ namespace Services.Contracts.Enums
         [EnumMember(Value = "EMAIL_SENDING_ERROR")]
          EmailSendingError,
         [EnumMember(Value = "EMAIL_CONFIGURATION_ERROR")]
-         EmailConfigurationError
+         EmailConfigurationError,
+        [EnumMember(Value ="SECURITY_ERROR")]
+         SecurityError,
+        [EnumMember(Value ="FORMAT_ERROR")]
+         FormatError,
+        [EnumMember(Value = "INVALID_OPERATION")]
+         InvalidOperation,
+        [EnumMember(Value = "SELF_INVITATION")]
+        SeflInvitation
     }
 }

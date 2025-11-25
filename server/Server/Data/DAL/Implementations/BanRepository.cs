@@ -33,5 +33,17 @@ namespace Data.DAL.Implementations
                     .FirstOrDefaultAsync();
             }
         }
+
+        public async Task<DateTime?> GetLastBanEndTimeAsync(int playerId)
+        {
+            using (var context = contextFactory.CreateDbContext())
+            {
+                var lastBan = await context.Ban
+                    .Where(b => b.PlayerId == playerId)
+                    .OrderByDescending(b => b.EndTime)
+                    .FirstOrDefaultAsync();
+                return lastBan?.EndTime;
+            }
+        }
     }
 }

@@ -134,6 +134,7 @@
     <Compile Include="Services\ProfileManager.cs" />
     <Compile Include="Services\PasswordResetManager.cs" />
     <Compile Include="Services\ReportManager.cs" />
+    <Compile Include="Services\ServiceBase.cs" />
     <Compile Include="Services\TopPlayersManager.cs" />
     <Compile Include="Services\VerificationCodeManager.cs" />
     <Compile Include="Services\WaitingRoomManager.cs" />

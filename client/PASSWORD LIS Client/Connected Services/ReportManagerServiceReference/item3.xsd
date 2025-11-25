@@ -18,6 +18,9 @@
       <xs:enumeration value="BAN_PERSISTENCE_ERROR" />
       <xs:enumeration value="SUBSCRIPTION_ERROR" />
       <xs:enumeration value="UNSUBSCRIPTION_ERROR" />
+      <xs:enumeration value="NULL_ARGUMENT" />
+      <xs:enumeration value="EMAIL_SENDING_ERROR" />
+      <xs:enumeration value="EMAIL_CONFIGURATION_ERROR" />
     </xs:restriction>
   </xs:simpleType>
   <xs:element name="ServiceErrorCode" nillable="true" type="tns:ServiceErrorCode" />

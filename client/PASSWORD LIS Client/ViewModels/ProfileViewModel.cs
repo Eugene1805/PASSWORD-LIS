@@ -244,9 +244,9 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void ChangePassword(object parameter)
         {
-            var retrievePasswordViewModel = new RetrievePasswordViewModel(new WcfPasswordResetManagerService(), windowService);
+            var retrievePasswordViewModel = new RetrievePasswordViewModel(App.PasswordResetManagerService, windowService);
             var retrievePasswordWindow = new RetrievePasswordWindow { DataContext = retrievePasswordViewModel};
-            retrievePasswordWindow.ShowDialog();
+            retrievePasswordWindow.Show();
         }
 
         private void BackToLobby(object parameter)
