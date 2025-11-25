@@ -518,9 +518,18 @@ namespace Test.ServicesTests
         {
             // Arrange
             var (sut, _, _) = CreateSut(mockPlayerRepo, mockOperationContext);
+
+            mockAccountRepository
+                .Setup(a => a.GetUserByEmailAsync("friend@test.com"))
+                .ReturnsAsync(new UserAccount
+                {
+                    Email = "friend@test.com",
+                    Nickname = "Friend"  
+                });
+
             mockNotificationService
-            .Setup(n => n.SendGameInvitationEmailAsync("friend@test.com", It.IsAny<string>(), It.IsAny<string>()))
-            .Returns(Task.CompletedTask);
+                .Setup(n => n.SendGameInvitationEmailAsync("friend@test.com", It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.CompletedTask);
 
             // Act
             await sut.SendGameInvitationByEmailAsync("friend@test.com", "ABCDE", "Host");

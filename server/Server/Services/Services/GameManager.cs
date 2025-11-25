@@ -28,11 +28,11 @@ namespace Services.Services
         private readonly IPlayerRepository playerRepository;
         private static readonly ILog log = LogManager.GetLogger(typeof(GameManager));
 
-        private const int RoundDurationSeconds = 30;
+        private const int RoundDurationSeconds = 60;
         private const int ValidationDurationSeconds = 30;
         private const int SuddenDeathDurationSeconds = 30;
-        private const int WordsPerRound = 2;
-        private const int TotalRounds = 2;
+        private const int WordsPerRound = 5;
+        private const int TotalRounds = 5;
         private const int PointsPerWin = 10;
         private const int PlayersPerMatch = 4;
         private const int SuddenDeathWordsBuffer = 15;
@@ -222,37 +222,28 @@ namespace Services.Services
 
         private async Task StartGameInternalAsync(MatchSession session)
         {
-            try
+
+            int regularWordsCount = TotalRounds * WordsPerRound;
+            int totalWordsToObtain = regularWordsCount + SuddenDeathWordsBuffer;
+
+            session.AllRedWords = await wordRepository.GetRandomWordsAsync(totalWordsToObtain);
+            session.AllBlueWords = await wordRepository.GetRandomWordsAsync(totalWordsToObtain);
+
+            if (session.AllRedWords.Count < totalWordsToObtain || session.AllBlueWords.Count < totalWordsToObtain)
             {
-                int regularWordsCount = TotalRounds * WordsPerRound;
-                int totalWordsToObtain = regularWordsCount + SuddenDeathWordsBuffer;
-
-                session.AllRedWords = await wordRepository.GetRandomWordsAsync(totalWordsToObtain);
-                session.AllBlueWords = await wordRepository.GetRandomWordsAsync(totalWordsToObtain);
-
-                if (session.AllRedWords.Count < totalWordsToObtain || session.AllBlueWords.Count < totalWordsToObtain)
-                {
-                    await BroadcastAndHandleDisconnectsAsync(session,
-                        cb => cb.OnMatchCancelled("Error not enough words found in the database."));
-                    matches.TryRemove(session.GameCode, out _);
-                    return;
-                }
-
-                var initState = new MatchInitStateDTO
-                {
-                    Players = session.ActivePlayers.Values.Select(p => p.Player).ToList()
-                };
-                await BroadcastAndHandleDisconnectsAsync(session, callback => callback.OnMatchInitialized(initState));
-                await StartNewRoundAsync(session);
-            }
-            catch (Exception ex)
-            {
-                log.ErrorFormat("Error starting match {0} \n {1}", session.GameCode, ex);
                 await BroadcastAndHandleDisconnectsAsync(session,
-                    callback => callback.OnMatchCancelled("Error starting the match."));
+                    cb => cb.OnMatchCancelled("Error not enough words found in the database."));
                 matches.TryRemove(session.GameCode, out _);
-                throw;
+                return;
             }
+
+            var initState = new MatchInitStateDTO
+            {
+                Players = session.ActivePlayers.Values.Select(p => p.Player).ToList()
+            };
+            await BroadcastAndHandleDisconnectsAsync(session, callback => callback.OnMatchInitialized(initState));
+            await StartNewRoundAsync(session);
+
         }
 
         private async Task StartNewRoundAsync(MatchSession session)
@@ -307,8 +298,10 @@ namespace Services.Services
                     GameBroadcaster.SendToPlayer(guesser, cb => cb.OnNewPassword(DTOMapper.ToMaskedWordDTO(word)));
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                log.WarnFormat("Player disconnected during word distribution in match {0}: {1}",
+                    session.GameCode, ex.Message);
                 if (clueGuy.Player != null)
                 {
                     await HandlePlayerDisconnectionAsync(session, clueGuy.Player.Id);
@@ -317,7 +310,6 @@ namespace Services.Services
                 {
                     await HandlePlayerDisconnectionAsync(session, guesser.Player.Id);
                 }
-                throw;
             }
         }
 
@@ -694,7 +686,7 @@ namespace Services.Services
             }
             return null;
         }
-        private static (IGameManagerCallback Callback, PlayerDTO Player) 
+        private static (IGameManagerCallback Callback, PlayerDTO Player)
             GetValidGuesser(MatchSession session, int playerId)
         {
             var sender = session.GetPlayerById(playerId);
@@ -764,7 +756,7 @@ namespace Services.Services
                 }
             }
         }
-        private async Task HandleIncorrectGuessAsync(MatchSession session, 
+        private async Task HandleIncorrectGuessAsync(MatchSession session,
             (IGameManagerCallback Callback, PlayerDTO Player) sender, MatchTeam team, int currentScore)
         {
             var resultDto = new GuessResultDTO { IsCorrect = false, Team = team, NewScore = currentScore };
@@ -798,7 +790,7 @@ namespace Services.Services
                 return null;
             }
 
-            if (!session.ActivePlayers.TryGetValue(senderId, out var sender) 
+            if (!session.ActivePlayers.TryGetValue(senderId, out var sender)
                 || sender.Player.Role != PlayerRole.ClueGuy)
             {
                 return null;
@@ -810,7 +802,7 @@ namespace Services.Services
             return (session, sender, currentPassword);
         }
 
-        private void RecordClueHistory(MatchSession session, 
+        private void RecordClueHistory(MatchSession session,
             (IGameManagerCallback Callback, PlayerDTO Player) sender, string clue, PasswordWord currentPassword)
         {
             var team = sender.Player.Team;
@@ -825,7 +817,7 @@ namespace Services.Services
             else session.BlueTeamTurnHistory.Add(historyItem);
         }
 
-        private async Task NotifyPartnerOfClueAsync(MatchSession session, (IGameManagerCallback Callback, 
+        private async Task NotifyPartnerOfClueAsync(MatchSession session, (IGameManagerCallback Callback,
             PlayerDTO Player) sender, string clue)
         {
             var partner = session.GetPartner(sender);
@@ -841,7 +833,7 @@ namespace Services.Services
             }
         }
 
-        private (MatchSession, (IGameManagerCallback Callback, PlayerDTO Player), PasswordWord)? 
+        private (MatchSession, (IGameManagerCallback Callback, PlayerDTO Player), PasswordWord)?
             ValidateAndGetGuessContext(string gameCode, int senderId, string guess)
         {
             if (string.IsNullOrWhiteSpace(guess)) return null;
@@ -858,12 +850,12 @@ namespace Services.Services
             return (session, sender, currentPassword);
         }
 
-        private (MatchSession, (IGameManagerCallback Callback, PlayerDTO Player))? 
+        private (MatchSession, (IGameManagerCallback Callback, PlayerDTO Player))?
             ValidateValidationContext(string gameCode, int senderId, List<ValidationVoteDTO> votes)
         {
             log.InfoFormat("SubmitValidationVotesAsync called - GameCode: {0}, PlayerId: {1}, VotesCount: {2}",
                         gameCode, senderId, votes == null ? 0 : votes.Count);
-            
+
             if (votes == null)
             {
                 log.WarnFormat("Votes list is null for game '{0}', player {1}", gameCode, senderId);

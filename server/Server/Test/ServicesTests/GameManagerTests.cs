@@ -43,10 +43,11 @@ namespace Test.ServicesTests
             ];
         }
 
-        private static List<PasswordWord> MakeWords(int count = 20)
+        // Updated to 40 words: TotalRounds(5) × WordsPerRound(5) + SuddenDeathWordsBuffer(15) = 25 + 15 = 40
+        private static List<PasswordWord> MakeWords(int count = 40)
         {
             var list = new List<PasswordWord>();
-            for (int i =0; i < count; i++)
+            for (int i = 0; i < count; i++)
             {
                 list.Add(new PasswordWord
                 {
@@ -428,7 +429,6 @@ namespace Test.ServicesTests
 
             var matchStateType = matchStateObj.GetType();
             var redHistoryProp = matchStateType.GetProperty("RedTeamTurnHistory");
-            var statusProp = matchStateType.GetProperty("Status");
 
             // Populate some history for Red team
             var history = new List<TurnHistoryDTO>
@@ -461,17 +461,17 @@ namespace Test.ServicesTests
 
             await Task.Delay(100); // Allow async processing to complete
 
-            // After all votes, validation should complete and either start new round or end (with TOTAL_ROUNDS=1 it ends)
+            // After all votes, validation should complete
             redClue.Verify(c => c.OnValidationComplete(It.Is<ValidationResultDTO>(v => v.TotalPenaltyApplied == 3)), Times.Once);
             redGuess.Verify(c => c.OnValidationComplete(It.IsAny<ValidationResultDTO>()), Times.Once);
             blueClue.Verify(c => c.OnValidationComplete(It.IsAny<ValidationResultDTO>()), Times.Once);
             blueGuess.Verify(c => c.OnValidationComplete(It.IsAny<ValidationResultDTO>()), Times.Once);
 
-            // Since TOTAL_ROUNDS=1 and scores tie by default, sudden death should start
-            redClue.Verify(c => c.OnSuddenDeathStarted(), Times.Once);
-            redGuess.Verify(c => c.OnSuddenDeathStarted(), Times.Once);
-            blueClue.Verify(c => c.OnSuddenDeathStarted(), Times.Once);
-            blueGuess.Verify(c => c.OnSuddenDeathStarted(), Times.Once);
+            // Since TotalRounds=5, after first round validation it should start round 2 (not sudden death)
+            redClue.Verify(c => c.OnNewRoundStarted(It.Is<RoundStartStateDTO>(r => r.CurrentRound == 2)), Times.Once);
+            redGuess.Verify(c => c.OnNewRoundStarted(It.Is<RoundStartStateDTO>(r => r.CurrentRound == 2)), Times.Once);
+            blueClue.Verify(c => c.OnNewRoundStarted(It.Is<RoundStartStateDTO>(r => r.CurrentRound == 2)), Times.Once);
+            blueGuess.Verify(c => c.OnNewRoundStarted(It.Is<RoundStartStateDTO>(r => r.CurrentRound == 2)), Times.Once);
         }
 
         [Fact]
@@ -498,12 +498,19 @@ namespace Test.ServicesTests
             await sut.SubscribeToMatchAsync("GAME9",3);
             await sut.SubscribeToMatchAsync("GAME9",4);
 
-            // Force validation phase with empty histories to trigger immediate processing and tie -> sudden death
+            // Access match state and set it to round 5 (last round) with tie score
             var matchesField = typeof(GameManager).GetField("matches", BindingFlags.NonPublic | BindingFlags.Instance);
             var dictObj = matchesField?.GetValue(sut);
             var dictType = dictObj?.GetType();
             var indexer = dictType?.GetProperty("Item");
             var matchStateObj = indexer?.GetValue(dictObj, new object[] { "GAME9" });
+            var matchStateType = matchStateObj.GetType();
+            
+            // Set current round to 5 to simulate end of regular rounds
+            var currentRoundProp = matchStateType.GetProperty("CurrentRound");
+            currentRoundProp?.SetValue(matchStateObj, 5);
+            
+            // Force validation with empty histories and tie score to trigger sudden death
             var startValidation = typeof(GameManager).GetMethod("StartValidationPhaseAsync", BindingFlags.NonPublic | BindingFlags.Instance);
             await (Task?)startValidation?.Invoke(sut, new object[] { matchStateObj });
 
@@ -513,14 +520,16 @@ namespace Test.ServicesTests
             await sut.SubmitValidationVotesAsync("GAME9",3, new List<ValidationVoteDTO>());
             await sut.SubmitValidationVotesAsync("GAME9",4, new List<ValidationVoteDTO>());
 
+            await Task.Delay(100);
+
             // Ensure sudden death started
             redClue.Verify(c => c.OnSuddenDeathStarted(), Times.Once);
 
-            // Act: Red team guesses correct sudden-death word
-            await sut.SubmitGuessAsync("GAME9",3, "WORD1");
+            // Act: Red team guesses correct sudden-death word (words start at index 26 for sudden death: 5 rounds × 5 words = 25, so WORD26)
+            await sut.SubmitGuessAsync("GAME9",3, "WORD26");
 
             // Assert: Match over broadcast
-            redClue.Verify(c => c.OnMatchOver(It.Is<MatchSummaryDTO>(s => s.WinnerTeam == MatchTeam.RedTeam || s.WinnerTeam == MatchTeam.BlueTeam)), Times.Once);
+            redClue.Verify(c => c.OnMatchOver(It.Is<MatchSummaryDTO>(s => s.WinnerTeam == MatchTeam.RedTeam)), Times.Once);
             blueClue.Verify(c => c.OnMatchOver(It.IsAny<MatchSummaryDTO>()), Times.Once);
             redGuess.Verify(c => c.OnMatchOver(It.IsAny<MatchSummaryDTO>()), Times.Once);
             blueGuess.Verify(c => c.OnMatchOver(It.IsAny<MatchSummaryDTO>()), Times.Once);
@@ -606,8 +615,8 @@ namespace Test.ServicesTests
             var redGuess = new Mock<IGameManagerCallback>();
             var blueGuess = new Mock<IGameManagerCallback>();
 
-            // Simulate throw when sending initial password to red clue -> triggers disconnection handling and cancellation
-            redClue.Setup(c => c.OnNewPassword(It.IsAny<PasswordWordDTO>())).Throws(new Exception("disconnect"));
+            // Simulate throw when sending initial password to red clue -> triggers disconnection handling
+            redClue.Setup(c => c.OnNewPassword(It.IsAny<PasswordWordDTO>())).Throws(new CommunicationException("disconnect"));
 
             queue.Enqueue(redClue);
             queue.Enqueue(blueClue);
@@ -621,6 +630,8 @@ namespace Test.ServicesTests
             await sut.SubscribeToMatchAsync("GAME11",2);
             await sut.SubscribeToMatchAsync("GAME11",3);
             await sut.SubscribeToMatchAsync("GAME11",4);
+
+            await Task.Delay(100); // Allow async exception handling to complete
 
             // Assert: Others receive cancellation
             blueClue.Verify(c => c.OnMatchCancelled(It.Is<string>(s => s.Contains("disconnected"))), Times.AtLeastOnce);
