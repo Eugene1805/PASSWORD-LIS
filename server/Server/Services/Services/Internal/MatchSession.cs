@@ -50,7 +50,7 @@ namespace Services.Services.Internal
             Status = MatchStatus.WaitingForPlayers;
             ActivePlayers = new ConcurrentDictionary<int, (IGameManagerCallback, PlayerDTO)>();
         }
-        // Atomic decrement helpers
+        
         public int DecrementSecondsLeft() => Interlocked.Decrement(ref _secondsLeft);
         public int DecrementValidationSecondsLeft() => Interlocked.Decrement(ref _validationSecondsLeft);
         public void AddScore(MatchTeam team, int points = 1)

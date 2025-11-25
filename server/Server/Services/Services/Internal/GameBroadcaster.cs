@@ -35,8 +35,7 @@ namespace Services.Services.Internal
             await Task.WhenAll(tasks);
             return disconnectedPlayers;
         }
-        public async Task BroadcastToGroupAsync(
-            System.Collections.Generic.IEnumerable<(IGameManagerCallback Callback, PlayerDTO Player)> targets,
+        public async Task BroadcastToGroupAsync(IEnumerable<(IGameManagerCallback Callback, PlayerDTO Player)> targets,
             Action<IGameManagerCallback> action)
         {
             var tasks = targets.Select(target => Task.Run(() =>
