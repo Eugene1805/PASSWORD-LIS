@@ -427,6 +427,12 @@ namespace Services.Services
 
                     await callTask;
                 }
+                catch(CommunicationObjectAbortedException ex)
+                {
+                    log.WarnFormat("Callback channel aborted for player {0}. Removing from game {1}. \n {2}",
+                        playerEntry.Key, game.GameCode, ex);
+                    await LeaveRoomAsync(game.GameCode, playerEntry.Key);
+                }
                 catch (CommunicationObjectFaultedException ex)
                 {
                     log.WarnFormat("Callback channel faulted for player {0}. Removing from game {1}. \n {2}",

@@ -50,6 +50,6 @@ namespace Services.Contracts.Enums
         [EnumMember(Value = "INVALID_OPERATION")]
          InvalidOperation,
         [EnumMember(Value = "SELF_INVITATION")]
-        SeflInvitation
+         SeflInvitation
     }
 }
