@@ -27,10 +27,13 @@ namespace Services.Services.Internal
         public int ValidationSecondsLeft { get => Volatile.Read(ref _validationSecondsLeft); private set => _validationSecondsLeft = value; }
         private Timer roundTimer;
         private Timer validationTimer;
+        public List<PasswordWord> AllRedWords { get; set; } = new List<PasswordWord>();
+        public List<PasswordWord> AllBlueWords { get; set; } = new List<PasswordWord>();
         public List<PasswordWord> RedTeamWords { get; set; } = new List<PasswordWord>();
         public List<PasswordWord> BlueTeamWords { get; set; } = new List<PasswordWord>();
         public int RedTeamWordIndex { get; set; }
         public int BlueTeamWordIndex { get; set; }
+        public int SuddenDeathWordOffset { get; set; } = 0;
         public List<TurnHistoryDTO> RedTeamTurnHistory { get; set; } = new List<TurnHistoryDTO>();
         public List<TurnHistoryDTO> BlueTeamTurnHistory { get; set; } = new List<TurnHistoryDTO>();
         public bool RedTeamPassedThisRound { get; set; }
@@ -70,7 +73,10 @@ namespace Services.Services.Internal
         {
             var list = (team == MatchTeam.RedTeam) ? RedTeamWords : BlueTeamWords;
             var index = (team == MatchTeam.RedTeam) ? RedTeamWordIndex : BlueTeamWordIndex;
-            if (index < list.Count) return list[index];
+            if (index < list.Count)
+            {
+                return list[index];
+            }
             return new PasswordWord { Id = -1 };
         }
         public (IGameManagerCallback Callback, PlayerDTO Player) GetPlayerById(int id)
@@ -92,6 +98,34 @@ namespace Services.Services.Internal
         {
             return ActivePlayers.Values.Where(p => p.Player.Team == team);
         }
+
+        public void LoadWordsForRound(int wordsPerRound)
+        {
+            int skipCount = (CurrentRound - 1) * wordsPerRound;
+            RedTeamWords = AllRedWords.Skip(skipCount).Take(wordsPerRound).ToList();
+            BlueTeamWords = AllBlueWords.Skip(skipCount).Take(wordsPerRound).ToList();
+
+            RedTeamWordIndex = 0;
+            BlueTeamWordIndex = 0;
+        }
+        public bool LoadNextSuddenDeathWord(int totalRegularWords)
+        {
+            int indexToTake = totalRegularWords + SuddenDeathWordOffset;
+
+            if (indexToTake >= AllRedWords.Count || indexToTake >= AllBlueWords.Count)
+            {
+                return false;
+            }
+            RedTeamWords = new List<PasswordWord> { AllRedWords[indexToTake] };
+            BlueTeamWords = new List<PasswordWord> { AllBlueWords[indexToTake] };
+
+            SuddenDeathWordOffset++;
+
+            RedTeamWordIndex = 0;
+            BlueTeamWordIndex = 0;
+            return true;
+        }
+
         public void StartRoundTimer(TimerCallback callback, object state, int durationSeconds)
         {
             roundTimer?.Dispose();

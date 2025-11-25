@@ -42,6 +42,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         private readonly int playerId;
         private readonly string language;
         private readonly ILog log = LogManager.GetLogger(typeof(RoundValidationViewModel));
+        private bool isMatchEnding = false;
 
         public RoundValidationViewModel(List<TurnHistoryDTO> turns, IGameManagerService gameManagerService, IWindowService windowService,
             string gameCode, int playerId, string language)
@@ -55,6 +56,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             gameManagerService.ValidationTimerTick += OnValidationTimerTick;
             gameManagerService.ValidationComplete += OnValidationComplete;
             gameManagerService.MatchCancelled += OnMatchCancelled;
+            gameManagerService.MatchOver += OnMatchOver;
 
             var groupedTurns = turns.Where(turn => turn.Password.EnglishWord != "END" && turn.Password.SpanishWord != "END")
                 .GroupBy(turn => turn.TurnId)
@@ -104,9 +106,17 @@ namespace PASSWORD_LIS_Client.ViewModels
                 windowService.GoToLobby();
             });
         }
+        private void OnMatchOver(MatchSummaryDTO summary)
+        {
+            isMatchEnding = true;
+        }
 
         private async Task SubmitVotesAsync()
         {
+            if (isMatchEnding)
+            {
+                return;
+            }
             CanSubmit = false;
             List<ValidationVoteDTO> votes = new List<ValidationVoteDTO>();
             foreach (var turn in TurnsToValidate)
@@ -133,12 +143,23 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             catch (CommunicationException ce)
             {
+                if (isMatchEnding)
+                {
+                    log.Info("CommunicationException was ignored because the game has ended (MatchOver received).");
+                    return;
+                }
+
                 log.Error($"CommunicationException in SubmitVotesAsync: {ce.Message}", ce);
                 HandleConnectionError(ce, "Error de comunicación al enviar los votos");
                 CanSubmit = true;
             }
             catch (Exception ex)
             {
+                if (isMatchEnding)
+                {
+                    log.Info("Generic Exception was ignored because the game has ended.");
+                    return;
+                }
                 log.Error($"Unexpected error in SubmitVotesAsync: {ex.Message}", ex);
                 HandleConnectionError(ex, "Error al enviar los votos");
                 CanSubmit = true;
@@ -170,6 +191,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 gameManagerService.ValidationTimerTick -= OnValidationTimerTick;
                 gameManagerService.ValidationComplete -= OnValidationComplete;
                 gameManagerService.MatchCancelled -= OnMatchCancelled;
+                gameManagerService.MatchOver -= OnMatchOver;
 
                 log.Info("Cleanup completed successfully");
             }

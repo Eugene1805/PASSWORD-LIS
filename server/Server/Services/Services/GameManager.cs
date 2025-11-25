@@ -29,13 +29,14 @@ namespace Services.Services
         private readonly GameBroadcaster gameBroadcaster;
         private static readonly ILog log = LogManager.GetLogger(typeof(GameManager));
 
-        private const int RoundDurationSeconds = 120; // CAMBIADO PARA PRUEBAS de 60 a 180
+        private const int RoundDurationSeconds = 30; // CAMBIADO PARA PRUEBAS de 60 a 180
         private const int ValidationDurationSeconds = 30; //Cambiado para pruebas de 20 a 60
         private const int SuddenDeathDurationSeconds = 30;
         private const int WordsPerRound = 5; // Change from 5 to 3 for testing
-        private const int TotalRounds = 3; //CAMBIADO DE 5 A 1
+        private const int TotalRounds = 5; //CAMBIADO DE 5 A 1
         private const int PointsPerWin = 10;
         private const int PlayersPerMatch = 4;
+        private const int SuddenDeathWordsBuffer = 15;
         
 
         public GameManager(IOperationContextWrapper contextWrapper, IWordRepository wordRepository,
@@ -392,6 +393,20 @@ namespace Services.Services
         {
             try
             {
+                int regularWordsCount = TotalRounds * WordsPerRound;
+                int totalWordsToObtain = regularWordsCount + SuddenDeathWordsBuffer;
+
+                session.AllRedWords = await wordRepository.GetRandomWordsAsync(totalWordsToObtain);
+                session.AllBlueWords = await wordRepository.GetRandomWordsAsync(totalWordsToObtain);
+
+                if (session.AllRedWords.Count < totalWordsToObtain || session.AllBlueWords.Count < totalWordsToObtain)
+                {
+                    await BroadcastAndHandleDisconnectsAsync(session,
+                        cb => cb.OnMatchCancelled("Error not enough words found in the database."));
+                    matches.TryRemove(session.GameCode, out _);
+                    return;
+                }
+
                 var initState = new MatchInitStateDTO {
                     Players = session.ActivePlayers.Values.Select(p => p.Player).ToList() 
                 };
@@ -428,23 +443,13 @@ namespace Services.Services
             };
             await BroadcastAndHandleDisconnectsAsync(session, cb => cb.OnNewRoundStarted(roundStartState));
 
-            session.RedTeamWords = await wordRepository.GetRandomWordsAsync(WordsPerRound);
-            session.BlueTeamWords = await wordRepository.GetRandomWordsAsync(WordsPerRound);
+            session.LoadWordsForRound(WordsPerRound);
 
-            session.RedTeamWordIndex = 0;
-            session.BlueTeamWordIndex = 0;
             session.RedTeamTurnHistory.Clear();
             session.BlueTeamTurnHistory.Clear();
             session.RedTeamPassedThisRound = false;
             session.BlueTeamPassedThisRound = false;
 
-            if (session.RedTeamWords.Count < WordsPerRound || session.BlueTeamWords.Count < WordsPerRound)
-            {
-                await BroadcastAndHandleDisconnectsAsync(session,
-                    cb => cb.OnMatchCancelled("Error: Not enough words found in the database."));
-                matches.TryRemove(session.GameCode, out _);
-                return;
-            }
             session.StartRoundTimer(TimerTickCallback, session, RoundDurationSeconds);
 
             await DistributeInitialWords(session, MatchTeam.RedTeam);
@@ -591,24 +596,21 @@ namespace Services.Services
 
             await BroadcastAsync(session, cb => cb.OnSuddenDeathStarted());
 
-            session.RedTeamWords = await wordRepository.GetRandomWordsAsync(1);
-            session.BlueTeamWords = await wordRepository.GetRandomWordsAsync(1);
+            int wordsUsedInRegularRounds = TotalRounds * WordsPerRound;
 
-            if (session.RedTeamWords.Count < 1 || session.BlueTeamWords.Count < 1)
+            bool succes = session.LoadNextSuddenDeathWord(wordsUsedInRegularRounds);
+            if (!succes)
             {
                 await BroadcastAndHandleDisconnectsAsync(session,
-                    cb => cb.OnMatchCancelled("Error: Could not retrieve words for sudden death."));
+                    cb => cb.OnMatchCancelled("Error: Sudden death words exhausted."));
                 matches.TryRemove(session.GameCode, out _);
                 return;
             }
 
-            session.RedTeamWordIndex = 0;
-            session.BlueTeamWordIndex = 0;
             session.RedTeamTurnHistory.Clear(); 
             session.BlueTeamTurnHistory.Clear();
             session.RedTeamPassedThisRound = true;
             session.BlueTeamPassedThisRound = true;
-
 
             session.StartRoundTimer(TimerTickCallback, session, SuddenDeathDurationSeconds);
 
