@@ -111,8 +111,8 @@ namespace Services.Services
 
                 if (callbackChannel is ICommunicationObject commObject)
                 {
-                    commObject.Faulted += (s, e) => UnsubscribeFromReportUpdatesAsync(playerId);
-                    commObject.Closed += (s, e) => UnsubscribeFromReportUpdatesAsync(playerId);
+                    commObject.Faulted += async (s, e) => await UnsubscribeFromReportUpdatesAsync(playerId);
+                    commObject.Closed +=  async (s, e) =>  await UnsubscribeFromReportUpdatesAsync(playerId);
                 }
                 return Task.CompletedTask;
             }, context: "ReportManager: SubscribeToReportUpdatesAsync");            
