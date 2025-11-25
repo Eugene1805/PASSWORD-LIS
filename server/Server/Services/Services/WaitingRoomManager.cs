@@ -391,11 +391,22 @@ namespace Services.Services
             try
             {
                 var user = await accountRepository.GetUserByEmailAsync(email);
-                if (user != null && user.Nickname != inviterNickname)
+                if (user.Nickname != inviterNickname)
                 {
+                    
                     await notificationService.SendGameInvitationEmailAsync(email, gameCode, inviterNickname);
                     log.InfoFormat("Invitation email sent to {0} for room {1} by {2}", email, gameCode,
                         inviterNickname);
+                }
+                else
+                {
+                    log.WarnFormat("SendGameInvitationByEmailAsync skipped:" +
+                           " user not found or self-invitation for email '{0}'", email);
+                    throw FaultExceptionFactory.Create(
+                        ServiceErrorCode.SeflInvitation,
+                        "SELF_INVITATION",
+                        "Self-invitation."
+                    );
                 }
             }
             catch (ConfigurationErrorsException)
@@ -446,6 +457,15 @@ namespace Services.Services
                         ServiceErrorCode.PlayerNotFound,
                         "FRIEND_NOT_FOUND",
                         "Friend not found or email missing."
+                    );
+                }
+
+                if (userAccount.Nickname == inviterNickname)
+                {
+                    throw FaultExceptionFactory.Create(
+                        ServiceErrorCode.SeflInvitation,
+                        "SELF_INVITATION",
+                        "Cannot invite yourself."
                     );
                 }
 

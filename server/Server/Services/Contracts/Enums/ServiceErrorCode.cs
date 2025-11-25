@@ -48,6 +48,8 @@ namespace Services.Contracts.Enums
         [EnumMember(Value ="FORMAT_ERROR")]
          FormatError,
         [EnumMember(Value = "INVALID_OPERATION")]
-         InvalidOperation
+         InvalidOperation,
+        [EnumMember(Value = "SELF_INVITATION")]
+        SeflInvitation
     }
 }
