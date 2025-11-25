@@ -60,7 +60,6 @@ namespace Services.Services
 
             if (!rooms.TryAdd(gameCode, newGame))
             {
-                // Rare collision, try again
                 log.WarnFormat("Game code collision for '{0}', retrying game creation for email '{1}'.", 
                     gameCode, email);
                 return await CreateRoomAsync(email);
@@ -94,7 +93,6 @@ namespace Services.Services
                     "Could not join room. The room is full.");
             }
 
-            // Capture the callback channel before any awaits to avoid losing OperationContext
             var callback = operationContext.GetCallbackChannel<IWaitingRoomCallback>();
 
             var playerEntity = await repository.GetPlayerByEmailAsync(email);
@@ -147,7 +145,6 @@ namespace Services.Services
                     "Could not join room. The room is full.");
             }
 
-            // Capture the callback channel at the start of the operation
             var callback = operationContext.GetCallbackChannel<IWaitingRoomCallback>();
 
             int guestId = Interlocked.Decrement(ref guestIdCounter);
@@ -329,14 +326,12 @@ namespace Services.Services
 
         private async Task BroadcastAsync(Room game, Action<(IWaitingRoomCallback, PlayerDTO)> action)
         {
-            // Snapshot the current players to avoid concurrent modification issues during iteration
             var snapshot = game.Players.ToArray();
 
             var tasks = snapshot.Select(async playerEntry =>
             {
                 try
                 {
-                    // Execute the callback with a timeout, so misbehaving clients don't block the broadcast
                     var callTask = Task.Run(() => action(playerEntry.Value));
                     var completed = await Task.WhenAny(callTask, Task.Delay(CallbackTimeout));
                     if (completed != callTask)
@@ -344,7 +339,6 @@ namespace Services.Services
                         throw new TimeoutException("Callback to player timed out.");
                     }
 
-                    // Ensure any exceptions from the callback are observed and handled by the catch blocks
                     await callTask;
                 }
                 catch (CommunicationObjectFaultedException ex)
@@ -396,8 +390,13 @@ namespace Services.Services
         {
             try
             {
-                await notificationService.SendGameInvitationEmailAsync(email, gameCode, inviterNickname);
-                log.InfoFormat("Invitation email sent to {0} for room {1} by {2}", email, gameCode, inviterNickname);
+                var user = await accountRepository.GetUserByEmailAsync(email);
+                if (user != null && user.Nickname != inviterNickname)
+                {
+                    await notificationService.SendGameInvitationEmailAsync(email, gameCode, inviterNickname);
+                    log.InfoFormat("Invitation email sent to {0} for room {1} by {2}", email, gameCode,
+                        inviterNickname);
+                }
             }
             catch (ConfigurationErrorsException)
             {
