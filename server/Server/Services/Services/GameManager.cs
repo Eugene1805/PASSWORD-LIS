@@ -95,60 +95,14 @@ namespace Services.Services
         {
             await ExecuteAsync(async () =>
             {
-                if (string.IsNullOrWhiteSpace(clue))
-                {
-                    return;
-                }
+                var context = ValidateAndGetClueContext(gameCode, senderPlayerId, clue);
+                if (context == null) return;
 
-                if (!matches.TryGetValue(gameCode, out MatchSession session)
-                    || session.Status != MatchStatus.InProgress && session.Status != MatchStatus.SuddenDeath)
-                {
-                    return;
-                }
-                if (!session.ActivePlayers.TryGetValue(senderPlayerId, out var sender))
-                {
-                    return;
-                }
-                if (sender.Player.Role != PlayerRole.ClueGuy)
-                {
-                    return;
-                }
+                var (session, sender, currentPassword) = context.Value;
 
-                var team = sender.Player.Team;
-                var currentPassword = session.GetCurrentPassword(team);
-                if (currentPassword == null)
-                {
-                    return;
-                }
-                var historyItem = new TurnHistoryDTO
-                {
-                    TurnId = (team == MatchTeam.RedTeam) ?
-                    session.RedTeamWordIndex : session.BlueTeamWordIndex,
-                    Password = DTOMapper.ToWordDTO(currentPassword),
-                    ClueUsed = clue
-                };
+                RecordClueHistory(session, sender, clue, currentPassword);
 
-                if (team == MatchTeam.RedTeam)
-                {
-                    session.RedTeamTurnHistory.Add(historyItem);
-                }
-                else
-                {
-                    session.BlueTeamTurnHistory.Add(historyItem);
-                }
-
-                var partner = session.GetPartner(sender);
-                if (partner.Callback != null)
-                {
-                    try
-                    {
-                        GameBroadcaster.SendToPlayer(partner, cb => cb.OnClueReceived(clue));
-                    }
-                    catch
-                    {
-                        await HandlePlayerDisconnectionAsync(session, partner.Player.Id);
-                    }
-                }
+                await NotifyPartnerOfClueAsync(session, sender, clue);
             }, context: "GameManager: SubmitClueAsync");
         }
 
@@ -156,28 +110,14 @@ namespace Services.Services
         {
             await ExecuteAsync(async () =>
             {
-                if (IsInvalidGuessInput(guess))
-                {
-                    return;
-                }
+                var context = ValidateAndGetGuessContext(gameCode, senderPlayerId, guess);
+                if (context == null) return;
 
-                var session = GetGuessableSessionOrNull(gameCode);
-                if (session == null)
-                {
-                    return;
-                }
-
-                var sender = GetValidGuesser(session, senderPlayerId);
-                if (sender.Player == null)
-                {
-                    return;
-                }
-
+                var (session, sender, currentPassword) = context.Value;
                 var team = sender.Player.Team;
-                var currentPassword = session.GetCurrentPassword(team);
-                int currentScore = (team == MatchTeam.RedTeam) ? session.RedTeamScore : session.BlueTeamScore;
 
                 bool isCorrect = IsGuessCorrect(currentPassword, guess);
+                int currentScore = (team == MatchTeam.RedTeam) ? session.RedTeamScore : session.BlueTeamScore;
 
                 if (isCorrect)
                 {
@@ -197,26 +137,10 @@ namespace Services.Services
             {
                 try
                 {
-                    log.InfoFormat("SubmitValidationVotesAsync called - GameCode: {0}, PlayerId: {1}, VotesCount: {2}",
-                        gameCode, senderPlayerId, votes == null ? 0 : votes.Count);
-                    if (votes == null)
-                    {
-                        log.WarnFormat("Votes list is null for game '{0}', player {1}", gameCode, senderPlayerId);
-                        return;
-                    }
-                    if (!matches.TryGetValue(gameCode, out MatchSession session)
-                        || session.Status != MatchStatus.Validating)
-                    {
-                        log.WarnFormat("Match not found or not in validating state: {0}", gameCode);
-                        return;
-                    }
+                    var context = ValidateValidationContext(gameCode, senderPlayerId, votes);
+                    if (context == null) return;
 
-                    if (!session.ActivePlayers.TryGetValue(senderPlayerId, out var sender))
-                    {
-                        log.WarnFormat("Player not found in match: {0}", senderPlayerId);
-                        return;
-                    }
-
+                    var (session, sender) = context.Value;
                     bool allVotesIn = false;
                     lock (session.ReceivedVotes)
                     {
@@ -296,7 +220,6 @@ namespace Services.Services
             }, context: "GameManager: SubscribeToMatchAsync");
         }
 
-        // Private methods (unchanged)
         private async Task StartGameInternalAsync(MatchSession session)
         {
             try
@@ -579,7 +502,8 @@ namespace Services.Services
             }
         }
 
-        private async Task BroadcastAndHandleDisconnectsAsync(MatchSession session, Action<IGameManagerCallback> action)
+        private async Task BroadcastAndHandleDisconnectsAsync(MatchSession session,
+            Action<IGameManagerCallback> action)
         {
             var disconnectedIds = await GameBroadcaster.BroadcastAsync(session, action);
 
@@ -666,10 +590,6 @@ namespace Services.Services
             }
         }
 
-        private static bool IsInvalidGuessInput(string guess)
-        {
-            return string.IsNullOrWhiteSpace(guess);
-        }
 
         private MatchSession GetPassTurnSession(string gameCode)
         {
@@ -774,7 +694,8 @@ namespace Services.Services
             }
             return null;
         }
-        private static (IGameManagerCallback Callback, PlayerDTO Player) GetValidGuesser(MatchSession session, int playerId)
+        private static (IGameManagerCallback Callback, PlayerDTO Player) 
+            GetValidGuesser(MatchSession session, int playerId)
         {
             var sender = session.GetPlayerById(playerId);
             if (sender.Player == null || sender.Player.Role != PlayerRole.Guesser)
@@ -843,7 +764,8 @@ namespace Services.Services
                 }
             }
         }
-        private async Task HandleIncorrectGuessAsync(MatchSession session, (IGameManagerCallback Callback, PlayerDTO Player) sender, MatchTeam team, int currentScore)
+        private async Task HandleIncorrectGuessAsync(MatchSession session, 
+            (IGameManagerCallback Callback, PlayerDTO Player) sender, MatchTeam team, int currentScore)
         {
             var resultDto = new GuessResultDTO { IsCorrect = false, Team = team, NewScore = currentScore };
             var clueGuy = session.GetPlayerByRole(team, PlayerRole.ClueGuy);
@@ -863,6 +785,104 @@ namespace Services.Services
                     await HandlePlayerDisconnectionIfFailed(session, clueGuy.Player.Id);
                 }
             }
+        }
+
+        private (MatchSession, (IGameManagerCallback Callback, PlayerDTO Player), PasswordWord)?
+            ValidateAndGetClueContext(string gameCode, int senderId, string clue)
+        {
+            if (string.IsNullOrWhiteSpace(clue)) return null;
+
+            if (!matches.TryGetValue(gameCode, out MatchSession session)
+                || (session.Status != MatchStatus.InProgress && session.Status != MatchStatus.SuddenDeath))
+            {
+                return null;
+            }
+
+            if (!session.ActivePlayers.TryGetValue(senderId, out var sender) 
+                || sender.Player.Role != PlayerRole.ClueGuy)
+            {
+                return null;
+            }
+
+            var currentPassword = session.GetCurrentPassword(sender.Player.Team);
+            if (currentPassword == null) return null;
+
+            return (session, sender, currentPassword);
+        }
+
+        private void RecordClueHistory(MatchSession session, 
+            (IGameManagerCallback Callback, PlayerDTO Player) sender, string clue, PasswordWord currentPassword)
+        {
+            var team = sender.Player.Team;
+            var historyItem = new TurnHistoryDTO
+            {
+                TurnId = (team == MatchTeam.RedTeam) ? session.RedTeamWordIndex : session.BlueTeamWordIndex,
+                Password = DTOMapper.ToWordDTO(currentPassword),
+                ClueUsed = clue
+            };
+
+            if (team == MatchTeam.RedTeam) session.RedTeamTurnHistory.Add(historyItem);
+            else session.BlueTeamTurnHistory.Add(historyItem);
+        }
+
+        private async Task NotifyPartnerOfClueAsync(MatchSession session, (IGameManagerCallback Callback, 
+            PlayerDTO Player) sender, string clue)
+        {
+            var partner = session.GetPartner(sender);
+            if (partner.Callback == null) return;
+
+            try
+            {
+                GameBroadcaster.SendToPlayer(partner, cb => cb.OnClueReceived(clue));
+            }
+            catch
+            {
+                await HandlePlayerDisconnectionAsync(session, partner.Player.Id);
+            }
+        }
+
+        private (MatchSession, (IGameManagerCallback Callback, PlayerDTO Player), PasswordWord)? 
+            ValidateAndGetGuessContext(string gameCode, int senderId, string guess)
+        {
+            if (string.IsNullOrWhiteSpace(guess)) return null;
+
+            var session = GetGuessableSessionOrNull(gameCode);
+            if (session == null) return null;
+
+            var sender = GetValidGuesser(session, senderId);
+            if (sender.Player == null) return null;
+
+            var currentPassword = session.GetCurrentPassword(sender.Player.Team);
+            if (currentPassword == null) return null;
+
+            return (session, sender, currentPassword);
+        }
+
+        private (MatchSession, (IGameManagerCallback Callback, PlayerDTO Player))? 
+            ValidateValidationContext(string gameCode, int senderId, List<ValidationVoteDTO> votes)
+        {
+            log.InfoFormat("SubmitValidationVotesAsync called - GameCode: {0}, PlayerId: {1}, VotesCount: {2}",
+                        gameCode, senderId, votes == null ? 0 : votes.Count);
+            
+            if (votes == null)
+            {
+                log.WarnFormat("Votes list is null for game '{0}', player {1}", gameCode, senderId);
+                return null;
+            }
+
+            if (!matches.TryGetValue(gameCode, out MatchSession session) || session.Status != MatchStatus.Validating)
+            {
+                log.WarnFormat("Match not found or not in validating state: {0}", gameCode);
+                return null;
+            }
+
+            if (!session.ActivePlayers.TryGetValue(senderId, out var sender))
+            {
+                log.WarnFormat("Player not found in match: {0}", senderId);
+                return null;
+            }
+
+            return (session, sender);
         }
     }
 }
