@@ -166,7 +166,7 @@ namespace Test.ServicesTests
                 FirstName = " Test ",
                 LastName = " User ",
                 PhotoId = 3,
-                SocialAccounts = new Dictionary<string, string> {
+                SocialAccounts = new Dictionary<string, string?> {
                     { "Facebook", "fbUser " },
                     { "Instagram", "" },
                     { "X", null },

@@ -243,7 +243,7 @@ namespace Test.ServicesTests
             // Arrange
             var email = "notfound@example.com";
 
-            mockRepo.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync((UserAccount)null);
+            mockRepo.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync((UserAccount?)null);
 
             // Act
             var result = await loginManager.IsAccountVerifiedAsync(email);
@@ -327,7 +327,7 @@ namespace Test.ServicesTests
         {
             // Arrange
             var email = "missing@ex.com";
-            mockRepo.Setup(r => r.GetUserByEmailAsync(email)).ReturnsAsync((UserAccount)null);
+            mockRepo.Setup(r => r.GetUserByEmailAsync(email)).ReturnsAsync((UserAccount?)null);
 
             // Act
             await loginManager.SendVerificationCodeAsync(email);
@@ -445,7 +445,7 @@ namespace Test.ServicesTests
                 Nickname = "testuser",
                 Email = email,
                 PasswordHash = hashedPassword,
-                Player = new List<Player> { null },
+                Player = new List<Player?> { null },
                 SocialAccount = new List<SocialAccount>()
             };
 

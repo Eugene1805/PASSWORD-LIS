@@ -83,8 +83,8 @@ namespace Test.ServicesTests
             var players = MakePlayers();
 
             // Act
-            var ok = sut.CreateMatch("ABCDE", players);
-            var dup = sut.CreateMatch("ABCDE", players);
+            var ok = sut?.CreateMatch("ABCDE", players);
+            var dup = sut?.CreateMatch("ABCDE", players);
 
             // Assert
             Assert.True(ok);
@@ -422,13 +422,13 @@ namespace Test.ServicesTests
             var dictObj = matchesField?.GetValue(sut);
             var dictType = dictObj?.GetType();
             var tryGetValue = dictType?.GetMethod("TryGetValue", new[] { typeof(string), dictType.GetGenericArguments()[1].MakeByRefType() });
-            var args = new object[] { "GAME8", null };
+            var args = new object?[] { "GAME8", null };
             var found = (bool?)tryGetValue?.Invoke(dictObj, args);
             Assert.True(found);
             var matchStateObj = args[1];
 
-            var matchStateType = matchStateObj.GetType();
-            var redHistoryProp = matchStateType.GetProperty("RedTeamTurnHistory");
+            var matchStateType = matchStateObj?.GetType();
+            var redHistoryProp = matchStateType?.GetProperty("RedTeamTurnHistory");
 
             // Populate some history for Red team
             var history = new List<TurnHistoryDTO>
@@ -439,8 +439,13 @@ namespace Test.ServicesTests
             redHistoryProp?.SetValue(matchStateObj, history);
 
             // Call StartValidationPhaseAsync via reflection
-            var startValidation = typeof(GameManager).GetMethod("StartValidationPhaseAsync", BindingFlags.NonPublic | BindingFlags.Instance);
-            var task = (Task?)startValidation?.Invoke(sut, new object[] { matchStateObj });
+            var startValidation = typeof(GameManager)
+    .GetMethod("StartValidationPhaseAsync", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            if (startValidation == null)
+                throw new InvalidOperationException("StartValidationPhaseAsync method not found via reflection.");
+
+            var task = (Task)startValidation.Invoke(sut, new object?[] { matchStateObj })!;
             await task;
 
             // Opposite team (Blue) should receive history
@@ -493,10 +498,10 @@ namespace Test.ServicesTests
 
             mockWordRepository.Setup(w => w.GetRandomWordsAsync(It.IsAny<int>())).ReturnsAsync(MakeWords());
 
-            await sut.SubscribeToMatchAsync("GAME9",1);
-            await sut.SubscribeToMatchAsync("GAME9",2);
-            await sut.SubscribeToMatchAsync("GAME9",3);
-            await sut.SubscribeToMatchAsync("GAME9",4);
+            await sut.SubscribeToMatchAsync("GAME9", 1);
+            await sut.SubscribeToMatchAsync("GAME9", 2);
+            await sut.SubscribeToMatchAsync("GAME9", 3);
+            await sut.SubscribeToMatchAsync("GAME9", 4);
 
             // Access match state and set it to round 5 (last round) with tie score
             var matchesField = typeof(GameManager).GetField("matches", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -504,15 +509,21 @@ namespace Test.ServicesTests
             var dictType = dictObj?.GetType();
             var indexer = dictType?.GetProperty("Item");
             var matchStateObj = indexer?.GetValue(dictObj, new object[] { "GAME9" });
-            var matchStateType = matchStateObj.GetType();
-            
+            var matchStateType = matchStateObj?.GetType();
+
             // Set current round to 5 to simulate end of regular rounds
-            var currentRoundProp = matchStateType.GetProperty("CurrentRound");
+            var currentRoundProp = matchStateType?.GetProperty("CurrentRound");
             currentRoundProp?.SetValue(matchStateObj, 5);
-            
+
             // Force validation with empty histories and tie score to trigger sudden death
-            var startValidation = typeof(GameManager).GetMethod("StartValidationPhaseAsync", BindingFlags.NonPublic | BindingFlags.Instance);
-            await (Task?)startValidation?.Invoke(sut, new object[] { matchStateObj });
+            var startValidation = typeof(GameManager)
+    .GetMethod("StartValidationPhaseAsync", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            if (startValidation == null)
+                throw new InvalidOperationException("StartValidationPhaseAsync method not found via reflection.");
+
+            var task = (Task)startValidation.Invoke(sut, new object?[] { matchStateObj })!;
+            await task;
 
             // All four vote empty to finish validation quickly
             await sut.SubmitValidationVotesAsync("GAME9",1, new List<ValidationVoteDTO>());

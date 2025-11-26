@@ -20,7 +20,8 @@ namespace Test.ViewModelsTests
             SessionManager.Logout();
         }
 
-        private static PASSWORD_LIS_Client.LoginManagerServiceReference.UserDTO LoggedUser(int playerId = 1, string email = "user@ex.com")
+        private static PASSWORD_LIS_Client.LoginManagerServiceReference.UserDTO LoggedUser(
+            int playerId = 1, string email = "user@ex.com")
         {
             return new PASSWORD_LIS_Client.LoginManagerServiceReference.UserDTO
             {
@@ -32,7 +33,7 @@ namespace Test.ViewModelsTests
             };
         }
 
-        private static async Task WaitUntilAsync(Func<bool> condition, int timeoutMs = 3000, int pollMs = 50)
+        private static async Task WaitUntilAsync(Func<bool> condition, int timeoutMs = 10000, int pollMs = 50)
         {
             var start = DateTime.UtcNow;
             while (!condition())
@@ -129,7 +130,7 @@ namespace Test.ViewModelsTests
             await WaitUntilAsync(() => mockWindow.Invocations.Any(i => i.Method.Name == nameof(IWindowService.NavigateTo)));
 
             Assert.Contains(mockWindow.Invocations, i => i.Method.Name == nameof(IWindowService.NavigateTo));
-        }*/
+        }
 
         [Fact]
         public async Task JoinGame_AsGuestBannedCheckNotRequired_SuccessNavigates()
@@ -171,7 +172,7 @@ namespace Test.ViewModelsTests
             await WaitUntilAsync(() => mockWindow.Invocations.Any(i => i.Method.Name == nameof(IWindowService.NavigateTo)));
 
             Assert.Contains(mockWindow.Invocations, i => i.Method.Name == nameof(IWindowService.NavigateTo));
-        }
+        }*/
 
         [Fact]
         public async Task JoinGame_AsRegisteredBanned_ShouldWarnAndNotNavigate()

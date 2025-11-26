@@ -273,7 +273,7 @@ namespace Test.ServicesTests
             await sut.SubscribeToFriendUpdatesAsync(300);
 
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(MakeAccount(300, 30, "A"));
-            accountRepo.Setup(a => a.GetUserByEmailAsync("x@test.com")).ReturnsAsync((UserAccount)null);
+            accountRepo.Setup(a => a.GetUserByEmailAsync("x@test.com")).ReturnsAsync((UserAccount?)null);
 
             var result = await sut.SendFriendRequestAsync("x@test.com");
             Assert.Equal(FriendRequestResult.UserNotFound, result);
@@ -387,7 +387,7 @@ namespace Test.ServicesTests
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             await sut.SubscribeToFriendUpdatesAsync(300);
 
-            accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync((UserAccount)null);
+            accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync((UserAccount?)null);
 
             await sut.RespondToFriendRequestAsync(31, true);
 
@@ -533,7 +533,7 @@ namespace Test.ServicesTests
 
             var addresseeAcc = MakeAccount(300, 30, "Addressee");
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(addresseeAcc);
-            accountRepo.Setup(a => a.GetUserByPlayerIdAsync(31)).ReturnsAsync((UserAccount)null);
+            accountRepo.Setup(a => a.GetUserByPlayerIdAsync(31)).ReturnsAsync((UserAccount?)null);
 
             friendshipRepo.Setup(r => r.RespondToFriendRequestAsync(31, 30, true)).ReturnsAsync(true);
 
@@ -574,7 +574,7 @@ namespace Test.ServicesTests
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbB.Object);
             await sut.SubscribeToFriendUpdatesAsync(110);
 
-            accountRepo.Setup(a => a.GetUserByPlayerIdAsync(10)).ReturnsAsync((UserAccount)null);
+            accountRepo.Setup(a => a.GetUserByPlayerIdAsync(10)).ReturnsAsync((UserAccount?)null);
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(11)).ReturnsAsync(MakeAccount(110, 11, "B"));
 
             var res = await sut.DeleteFriendAsync(10, 11);
@@ -592,7 +592,7 @@ namespace Test.ServicesTests
             await sut.SubscribeToFriendUpdatesAsync(100);
 
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(10)).ReturnsAsync(MakeAccount(100, 10, "A"));
-            accountRepo.Setup(a => a.GetUserByPlayerIdAsync(11)).ReturnsAsync((UserAccount)null);
+            accountRepo.Setup(a => a.GetUserByPlayerIdAsync(11)).ReturnsAsync((UserAccount?)null);
 
             var res = await sut.DeleteFriendAsync(10, 11);
 

@@ -6,7 +6,7 @@ namespace Test.ServicesTests.ServicesUtilTest
     public class NotificationServiceTests
     {
         private readonly Mock<IEmailSender> mockEmailSender;
-        private readonly INotificationService notificationService;
+        private readonly NotificationService notificationService;
 
         public NotificationServiceTests()
         {

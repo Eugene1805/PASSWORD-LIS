@@ -187,7 +187,7 @@ namespace Test.ServicesTests
         {
             // Arrange: simulate repository rejecting invalid number via exception
             mockStatisticsRepository.Setup(r => r.GetTopTeamsAsync(n))
-                                     .ThrowsAsync(new ArgumentOutOfRangeException());
+                                     .ThrowsAsync(new ArgumentOutOfRangeException(String.Format("{0}",n)));
 
             // Act
             var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
