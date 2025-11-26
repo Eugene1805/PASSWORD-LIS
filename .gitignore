@@ -442,3 +442,11 @@ FodyWeavers.xsd
 # --- Scripts ---
 analizar_todo.ps1
 *.ps1
+
+# Herramientas descargadas por scripts locales
+Tools/
+Tools
+
+# Reportes de cobertura generados
+coverage-*.xml
+*.trx

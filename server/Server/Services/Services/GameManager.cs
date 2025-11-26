@@ -253,9 +253,9 @@ namespace Services.Services
 
             if (session.CurrentRound > 1)
             {
-                foreach (var playerEntry in session.ActivePlayers.Values)
+                foreach (var playerEntry in session.ActivePlayers.Values.Select(playerEntry => playerEntry.Player))
                 {
-                    playerEntry.Player.Role = (playerEntry.Player.Role == PlayerRole.ClueGuy)
+                    playerEntry.Role = (playerEntry.Role == PlayerRole.ClueGuy)
                         ? PlayerRole.Guesser : PlayerRole.ClueGuy;
                 }
             }
