@@ -3,8 +3,6 @@ using PASSWORD_LIS_Client.PasswordResetManagerServiceReference;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
-using System;
-using System.ServiceModel;
 using System.Threading.Tasks;
 
 namespace PASSWORD_LIS_Client.ViewModels
@@ -13,8 +11,8 @@ namespace PASSWORD_LIS_Client.ViewModels
     {
         private readonly string email;
         private readonly string verificationCode;
-        private readonly IWindowService windowService;
         private readonly IPasswordResetManagerService passwordResetClient;
+
         private string newPassword;
         public string NewPassword
         {
@@ -39,14 +37,14 @@ namespace PASSWORD_LIS_Client.ViewModels
         public RelayCommand ChangePasswordCommand { get; }
 
         public ChangePasswordViewModel(string email, string code, IWindowService windowService, 
-            IPasswordResetManagerService passwordResetService)
+            IPasswordResetManagerService passwordResetService) : base(windowService)
         {
             this.email = email;
             this.verificationCode = code;
-            this.windowService = windowService;
             this.passwordResetClient = passwordResetService;
             this.ChangePasswordCommand = new RelayCommand(async (_) => await ChangePasswordAsync(), (_) => CanChangePassword());
         }
+
         private bool CanChangePassword()
         {
             return !this.IsBusy && !string.IsNullOrWhiteSpace(this.NewPassword) && 
@@ -60,86 +58,43 @@ namespace PASSWORD_LIS_Client.ViewModels
                 return;
             }
 
-            this.isBusy = false;
+            this.IsBusy = true;
             try
             {
-                bool success = await TryResetPasswordOnServerAsync();
+                await ExecuteAsync(async () =>
+                {
+                    bool success = await TryResetPasswordOnServerAsync();
 
-                if (success)
-                {
-                    ProcessSuccessfulPasswordChange();
-                }
-                else
-                {
-                    this.windowService.ShowPopUp(Properties.Langs.Lang.unexpectedErrorText,
-                        Properties.Langs.Lang.passwordChangeFailedText, PopUpIcon.Warning);
-                }
-            }
-            catch (TimeoutException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
-                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
-            }
-            catch (EndpointNotFoundException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
-                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Warning);
-            }
-            catch (CommunicationException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Warning);
-            }
-            catch (Exception)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
+                    if (success)
+                    {
+                        ProcessSuccessfulPasswordChange();
+                    }
+                    else
+                    {
+                        windowService.ShowPopUp(Properties.Langs.Lang.unexpectedErrorText,
+                            Properties.Langs.Lang.passwordChangeFailedText, PopUpIcon.Warning);
+                    }
+                });
             }
             finally
             {
-                this.isBusy = true;
+                this.IsBusy = false;
             }
         }
 
         private async Task<bool> TryResetPasswordOnServerAsync()
         {
-            try
+            var passwordResetInfo = new PasswordResetDTO
             {
-                var passwordResetInfo = new PasswordResetDTO
-                {
-                    NewPassword = this.NewPassword,
-                    Email = this.email,
-                    ResetCode = this.verificationCode
-                };
+                NewPassword = this.NewPassword,
+                Email = this.email,
+                ResetCode = this.verificationCode
+            };
 
-                bool success = await passwordResetClient.ResetPasswordAsync(passwordResetInfo);
-                return success;
-            }
-            catch (TimeoutException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
-                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
-                return false;
-            }
-            catch (EndpointNotFoundException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
-                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Warning);
-                return false;
-            }
-            catch (CommunicationException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Warning);
-                return false;
-            }
-            catch (Exception)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
-                return false;
-            }
+            bool success = await passwordResetClient.ResetPasswordAsync(passwordResetInfo);
+            return success;
         }
+
         private void ProcessSuccessfulPasswordChange()
         {
             this.windowService.ShowPopUp(Properties.Langs.Lang.succesfulPasswordChangeTitleText,
@@ -147,6 +102,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             this.windowService.ShowLoginWindow();
             this.windowService.CloseWindow(this);
         }
+
         private bool IsInputValid()
         {
             if (string.IsNullOrWhiteSpace(this.ConfirmPassword) || string.IsNullOrWhiteSpace(this.NewPassword))

@@ -3,8 +3,6 @@ using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.VerificationCodeManagerServiceReference;
 using PASSWORD_LIS_Client.Views;
-using System;
-using System.ServiceModel;
 using System.Threading.Tasks;
 
 namespace PASSWORD_LIS_Client.ViewModels
@@ -12,7 +10,6 @@ namespace PASSWORD_LIS_Client.ViewModels
     public class VerifyCodeViewModel : BaseViewModel
     {
         private readonly VerificationReason reason;
-        private readonly IWindowService windowService;
         private readonly IVerificationCodeManagerService newAccountClient;
         private readonly IPasswordResetManagerService resetPasswordClient;
 
@@ -35,17 +32,18 @@ namespace PASSWORD_LIS_Client.ViewModels
         public RelayCommand ResendCodeCommand { get; }
 
         public VerifyCodeViewModel(string email, VerificationReason reason, IWindowService windowService,
-            IVerificationCodeManagerService verificationCodeManager, IPasswordResetManagerService passwordResetManager)
+            IVerificationCodeManagerService verificationCodeManager, IPasswordResetManagerService passwordResetManager) 
+            : base(windowService)
         {
             this.Email = email;
             this.reason = reason;
-            this.windowService = windowService;
             this.newAccountClient = verificationCodeManager;
             this.resetPasswordClient = passwordResetManager;
 
             this.VerifyCodeCommand = new RelayCommand(async (_) => await VerifyCodeAsync(), (_) => CanVerify());
             this.ResendCodeCommand = new RelayCommand(async (_) => await ResendCodeAsync(), (_) => !this.IsBusy);
         }
+
         private bool CanVerify()
         {
             return !this.IsBusy && !string.IsNullOrWhiteSpace(this.EnteredCode);
@@ -59,50 +57,63 @@ namespace PASSWORD_LIS_Client.ViewModels
                             Properties.Langs.Lang.requiredFieldsText, PopUpIcon.Warning);
                 return;
             }
-            this.isBusy = true;
-            bool isCodeValid = await TryVerifyCodeAsync(this.enteredCode);
-            if (!isCodeValid)
+            this.IsBusy = true;
+            try
             {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.verificationFailedTitleText,
-                            Properties.Langs.Lang.codeIncorrectOrExpiredText, PopUpIcon.Error);
+                bool isCodeValid = await TryVerifyCodeAsync(this.enteredCode);
+                
+                if (!isCodeValid)
+                {
+                    this.windowService.ShowPopUp(Properties.Langs.Lang.verificationFailedTitleText,
+                                Properties.Langs.Lang.codeIncorrectOrExpiredText, PopUpIcon.Error);
+                }
+                if (isCodeValid && this.reason == VerificationReason.AccountActivation)
+                {
+                    this.windowService.ShowPopUp(Properties.Langs.Lang.profileUpdatedTitleText,
+                                Properties.Langs.Lang.successfulSignUpText, PopUpIcon.Success);
+                    this.windowService.ShowLoginWindow();
+                    this.windowService.CloseWindow(this);
+                    windowService.CloseMainWindow();
+                }
+                if(isCodeValid && this.reason == VerificationReason.PasswordReset)
+                {
+                    this.windowService.ShowChangePasswordWindow(this.Email, this.enteredCode);
+                    this.windowService.CloseWindow(this);
+                    windowService.CloseMainWindow();
+                }
             }
-            if (isCodeValid && this.reason == VerificationReason.AccountActivation)
+            finally
             {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.profileUpdatedTitleText,
-                            Properties.Langs.Lang.successfulSignUpText, PopUpIcon.Success);
-                this.windowService.ShowLoginWindow();
-                this.windowService.CloseWindow(this);
-                windowService.CloseMainWindow();
+                this.IsBusy = false;
             }
-            if(isCodeValid && this.reason == VerificationReason.PasswordReset)
-            {
-                this.windowService.ShowChangePasswordWindow(this.Email, this.enteredCode);
-                this.windowService.CloseWindow(this);
-                windowService.CloseMainWindow();
-            }
-            this.isBusy = false;
         }
 
         private async Task ResendCodeAsync()
         {
             this.IsBusy = true;
-            bool success = await TryResendCodeAsync();
-            if(success)
+            try
             {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.codeSentTitleText,
-                            Properties.Langs.Lang.newCodeSentText, PopUpIcon.Information);
+                bool success = await TryResendCodeAsync();
+                if(success)
+                {
+                    this.windowService.ShowPopUp(Properties.Langs.Lang.codeSentTitleText,
+                                Properties.Langs.Lang.newCodeSentText, PopUpIcon.Information);
+                }
+                else
+                {
+                    this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
+                                Properties.Langs.Lang.waitAMinuteForCodeText, PopUpIcon.Warning);
+                }
             }
-            else
+            finally
             {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
-                            Properties.Langs.Lang.waitAMinuteForCodeText, PopUpIcon.Warning);
+                this.IsBusy = false;
             }
-            this.IsBusy = false;
         }
 
         private async Task<bool> TryVerifyCodeAsync(string code)
         {
-            try
+            return await ExecuteAsync(async () =>
             {
                 bool isValid = false;
                 switch (this.reason)
@@ -113,35 +124,18 @@ namespace PASSWORD_LIS_Client.ViewModels
                         return isValid;
 
                     case VerificationReason.PasswordReset:
-                        var resetDto = new PasswordResetManagerServiceReference.EmailVerificationDTO { Email = this.Email, VerificationCode = code };
+                        var resetDto = new PasswordResetManagerServiceReference.EmailVerificationDTO 
+                        { Email = this.Email, VerificationCode = code };
                         isValid = await resetPasswordClient.ValidatePasswordResetCodeAsync(resetDto);
                         return isValid;
                 }
                 return isValid;
-            }
-            catch (TimeoutException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
-                            Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
-                return false;
-            }
-            catch (EndpointNotFoundException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
-                            Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Warning);
-                return false;
-            }
-            catch (Exception)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                            Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
-                return false;
-            }
+            });
         }
 
         private async Task<bool> TryResendCodeAsync()
         {
-            try
+            return await ExecuteAsync(async () =>
             {
                 bool success = false;
                 switch (reason)
@@ -150,30 +144,13 @@ namespace PASSWORD_LIS_Client.ViewModels
                         success = await newAccountClient.ResendVerificationCodeAsync(this.Email);
                         break;
                     case VerificationReason.PasswordReset:
-                        var resetDto = new PasswordResetManagerServiceReference.EmailVerificationDTO { Email = this.Email, VerificationCode = "" };
+                        var resetDto = new PasswordResetManagerServiceReference.EmailVerificationDTO 
+                        { Email = this.Email, VerificationCode = "" };
                         success = await resetPasswordClient.RequestPasswordResetCodeAsync(resetDto);
                         break;
                 }
                 return success;
-            }
-            catch (TimeoutException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
-                            Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
-                return false;
-            }
-            catch (EndpointNotFoundException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
-                            Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Warning);
-                return false;
-            }
-            catch (Exception)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                            Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
-                return false;
-            }
+            });
         }
     }
 }
