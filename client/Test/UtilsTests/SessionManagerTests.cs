@@ -3,8 +3,14 @@ using Xunit;
 
 namespace Test.UtilsTests
 {
+    [Collection("SessionManager Tests")]
     public class SessionManagerTests
     {
+        public SessionManagerTests()
+        {
+            SessionManager.Logout();
+        }
+
         [Fact]
         public void Login_WithValidUser_ShouldSetCurrentUser()
         {

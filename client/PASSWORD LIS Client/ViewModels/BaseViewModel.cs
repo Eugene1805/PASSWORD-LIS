@@ -83,7 +83,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             await ExecuteAsync(async () => { await func(); return true; });
         }
 
-
+        //TODO ADD lang personalized messages and whole service error codes
         private void HandleServiceError(ServiceErrorDetailDTO errorDetail)
         {
             if (windowService == null || errorDetail == null)
