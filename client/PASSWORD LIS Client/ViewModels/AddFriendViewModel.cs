@@ -4,8 +4,6 @@ using PASSWORD_LIS_Client.FriendsManagerServiceReference;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
-using System;
-using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -30,12 +28,11 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand SendRequestCommand { get; }
 
         private readonly IFriendsManagerService friendsService;
-        private readonly IWindowService windowService;
 
-        public AddFriendViewModel(IFriendsManagerService friendsService, IWindowService windowService)
+        public AddFriendViewModel(IFriendsManagerService friendsService, IWindowService windowService) 
+            : base(windowService)
         {
             this.friendsService = friendsService;
-            this.windowService = windowService;
             SendRequestCommand = new RelayCommand(async (_) => await SendRequestAsync(), (_) => !IsSending && !string.IsNullOrWhiteSpace(Email));
         }
 
@@ -44,33 +41,11 @@ namespace PASSWORD_LIS_Client.ViewModels
             IsSending = true;
             try
             {
-                var result = await friendsService.SendFriendRequestAsync(Email);
-                HandleFriendRequestResult(result);
-            }
-            catch (FaultException<ServiceErrorDetailDTO> ex)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, 
-                    ex.Detail.Message, PopUpIcon.Error);
-            }
-            catch (TimeoutException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText, 
-                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
-            }
-            catch (EndpointNotFoundException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText, 
-                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
-            }
-            catch (CommunicationException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText, 
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
-            }
-            catch (Exception) 
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
+                await ExecuteAsync(async () =>
+                {
+                    var result = await friendsService.SendFriendRequestAsync(Email);
+                    HandleFriendRequestResult(result);
+                });
             }
             finally
             {
@@ -107,7 +82,6 @@ namespace PASSWORD_LIS_Client.ViewModels
                     windowService.ShowPopUp(Properties.Langs.Lang.informationText,
                         Properties.Langs.Lang.friendRequestInboxText, PopUpIcon.Information);
                     break;
-                case FriendRequestResult.Failed:
                 default:
                     windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
                         Properties.Langs.Lang.couldNotSentRequestText, PopUpIcon.Error);
