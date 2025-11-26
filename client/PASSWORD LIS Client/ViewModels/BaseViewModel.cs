@@ -50,31 +50,31 @@ namespace PASSWORD_LIS_Client.ViewModels
             catch (FaultException<ServiceErrorDetailDTO> ex)
             {
                 HandleServiceError(ex.Detail);
-                throw;
+                return default;
             }
             catch (TimeoutException)
             {
                 windowService?.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
                     Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
-                throw;
+                return default;
             }
             catch (EndpointNotFoundException)
             {
                 windowService?.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
                     Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
-                throw;
+                return default;
             }
             catch (CommunicationException)
             {
                 windowService?.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
                     Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
-                throw;
+                return default;
             }
             catch (Exception)
             {
                 windowService?.ShowPopUp(Properties.Langs.Lang.errorTitleText,
                     Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
-                throw;
+                return default;
             }
         }
 
@@ -83,42 +83,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             await ExecuteAsync(async () => { await func(); return true; });
         }
 
-        protected T Execute<T>(Func<T> func)
-        {
-            try
-            {
-                return func();
-            }
-            catch (FaultException<ServiceErrorDetailDTO> ex)
-            {
-                HandleServiceError(ex.Detail);
-                throw;
-            }
-            catch (TimeoutException)
-            {
-                windowService?.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
-                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
-                throw;
-            }
-            catch (EndpointNotFoundException)
-            {
-                windowService?.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
-                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
-                throw;
-            }
-            catch (CommunicationException)
-            {
-                windowService?.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
-                throw;
-            }
-            catch (Exception)
-            {
-                windowService?.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
-                throw;
-            }
-        }
 
         private void HandleServiceError(ServiceErrorDetailDTO errorDetail)
         {
