@@ -17,7 +17,14 @@ namespace PASSWORD_LIS_Client.ViewModels
         public string Email
         {
             get => email;
-            set { email = value; OnPropertyChanged(); }
+            set { email = value; ValidateEmail(); OnPropertyChanged(); }
+        }
+
+        private string emailError;
+        public string EmailError
+        {
+            get => emailError;
+            set { emailError = value; OnPropertyChanged(); }
         }
 
         private bool isSending;
@@ -36,11 +43,39 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             this.friendsService = friendsService;
             this.windowService = windowService;
-            SendRequestCommand = new RelayCommand(async (_) => await SendRequestAsync(), (_) => !IsSending && !string.IsNullOrWhiteSpace(Email));
+            SendRequestCommand = new RelayCommand(async (_) => await SendRequestAsync(), (_) => !IsSending && !string.IsNullOrWhiteSpace(Email) && EmailError == null);
+        }
+
+        private void ValidateEmail()
+        {
+            if (string.IsNullOrWhiteSpace(Email))
+            {
+                EmailError = null;
+                return;
+            }
+
+            if (Email.Length > 100)
+            {
+                EmailError = Properties.Langs.Lang.emailTooLongText;
+                return;
+            }
+
+            if (!ValidationUtils.IsValidEmail(Email))
+            {
+                EmailError = Properties.Langs.Lang.invalidEmailFormatText; 
+                return;
+            }
+
+            EmailError = null;
         }
 
         private async Task SendRequestAsync()
         {
+            if (!string.IsNullOrWhiteSpace(EmailError) || string.IsNullOrWhiteSpace(Email))
+            {
+                return;
+            }
+
             IsSending = true;
             try
             {

@@ -448,6 +448,24 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a Enabled edition.
+        /// </summary>
+        public static string editingModeActiveText {
+            get {
+                return ResourceManager.GetString("editingModeActiveText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a Edition.
+        /// </summary>
+        public static string editingModeTitleText {
+            get {
+                return ResourceManager.GetString("editingModeTitleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a Type your e-mail to reset your password.
         /// </summary>
         public static string emailRetrievePasswordText {
@@ -462,6 +480,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         public static string emailText {
             get {
                 return ResourceManager.GetString("emailText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a The email cannot exceed 100 characters.
+        /// </summary>
+        public static string emailTooLongText {
+            get {
+                return ResourceManager.GetString("emailTooLongText", resourceCulture);
             }
         }
         
@@ -588,6 +615,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         public static string existingFriendshipText {
             get {
                 return ResourceManager.GetString("existingFriendshipText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a Final Teams Scores:.
+        /// </summary>
+        public static string finalScoreTeamsText {
+            get {
+                return ResourceManager.GetString("finalScoreTeamsText", resourceCulture);
             }
         }
         
@@ -759,6 +795,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         public static string invalidEmailErrorText {
             get {
                 return ResourceManager.GetString("invalidEmailErrorText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Busca una cadena traducida similar a The email format is invalid.
+        /// </summary>
+        public static string invalidEmailFormatText {
+            get {
+                return ResourceManager.GetString("invalidEmailFormatText", resourceCulture);
             }
         }
         
@@ -1756,6 +1801,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a The username must not exceed 50 characters..
+        /// </summary>
+        public static string usernameNotExceedFiftyCharacteresText {
+            get {
+                return ResourceManager.GetString("usernameNotExceedFiftyCharacteresText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a Use 8-15 characters including at least one uppercase, one lowercase, one numeric character and one symbol.
         /// </summary>
         public static string userPasswordRequirementsText {
@@ -1864,7 +1918,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
-        ///   Busca una cadena traducida similar a Congratulations you won PASSWORD.
+        ///   Busca una cadena traducida similar a Congratulations you won PASSWORD LIS.
         /// </summary>
         public static string winnersMessageText {
             get {

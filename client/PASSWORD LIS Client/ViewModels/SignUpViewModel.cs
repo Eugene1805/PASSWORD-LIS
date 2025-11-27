@@ -97,7 +97,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             catch (FaultException<ServiceErrorDetailDTO> ex)
             {
-                ShowDetailedError(ex);
+                //ShowDetailedError(ex);
                 this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
                     Properties.Langs.Lang.userAlreadyExistText, PopUpIcon.Warning);
             }
