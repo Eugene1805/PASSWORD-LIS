@@ -37,8 +37,8 @@
       <xsd:import schemaLocation="http://localhost:8104/?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts" />
     </xsd:schema>
   </wsdl:types>
-  <wsdl:message name="IFriendsManager_SubscribeToFriendUpdates_InputMessage">
-    <wsdl:part name="parameters" element="tns:SubscribeToFriendUpdates" />
+  <wsdl:message name="IFriendsManager_SubscribeToFriendUpdatesAsync_InputMessage">
+    <wsdl:part name="parameters" element="tns:SubscribeToFriendUpdatesAsync" />
   </wsdl:message>
   <wsdl:message name="IFriendsManager_GetFriends_InputMessage">
     <wsdl:part name="parameters" element="tns:GetFriends" />
@@ -86,8 +86,8 @@
     <wsdl:part name="parameters" element="tns:OnFriendRemoved" />
   </wsdl:message>
   <wsdl:portType name="IFriendsManager">
-    <wsdl:operation name="SubscribeToFriendUpdates">
-      <wsdl:input wsaw:Action="http://tempuri.org/IFriendsManager/SubscribeToFriendUpdates" message="tns:IFriendsManager_SubscribeToFriendUpdates_InputMessage" />
+    <wsdl:operation name="SubscribeToFriendUpdatesAsync">
+      <wsdl:input wsaw:Action="http://tempuri.org/IFriendsManager/SubscribeToFriendUpdatesAsync" message="tns:IFriendsManager_SubscribeToFriendUpdatesAsync_InputMessage" />
     </wsdl:operation>
     <wsdl:operation name="GetFriends">
       <wsdl:input wsaw:Action="http://tempuri.org/IFriendsManager/GetFriends" message="tns:IFriendsManager_GetFriends_InputMessage" />
@@ -126,8 +126,8 @@
   <wsdl:binding name="NetTcpBinding_IFriendsManager" type="tns:IFriendsManager">
     <wsp:PolicyReference URI="#NetTcpBinding_IFriendsManager_policy" />
     <soap12:binding transport="http://schemas.microsoft.com/soap/tcp" />
-    <wsdl:operation name="SubscribeToFriendUpdates">
-      <soap12:operation soapAction="http://tempuri.org/IFriendsManager/SubscribeToFriendUpdates" style="document" />
+    <wsdl:operation name="SubscribeToFriendUpdatesAsync">
+      <soap12:operation soapAction="http://tempuri.org/IFriendsManager/SubscribeToFriendUpdatesAsync" style="document" />
       <wsdl:input>
         <soap12:body use="literal" />
       </wsdl:input>
@@ -211,7 +211,7 @@
       <wsa10:EndpointReference>
         <wsa10:Address>net.tcp://localhost:8105/FriendsManager</wsa10:Address>
         <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
-          <Upn>LAPTOP-LF36UFJ4\artcu</Upn>
+          <Upn>SURFACE\eugen</Upn>
         </Identity>
       </wsa10:EndpointReference>
     </wsdl:port>

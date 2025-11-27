@@ -83,6 +83,38 @@ namespace PASSWORD_LIS_Client.ViewModels
             await ExecuteAsync(async () => { await func(); return true; });
         }
 
+        protected void Execute(Action action)
+        {
+            try
+            {
+                action();
+            }
+            catch (FaultException<ServiceErrorDetailDTO> ex)
+            {
+                HandleServiceError(ex.Detail);
+            }
+            catch (TimeoutException)
+            {
+                windowService?.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
+                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+            }
+            catch (EndpointNotFoundException)
+            {
+                windowService?.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
+                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
+            }
+            catch (CommunicationException)
+            {
+                windowService?.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
+                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
+            }
+            catch (Exception)
+            {
+                windowService?.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
+            }
+        }
+
         //TODO ADD lang personalized messages and whole service error codes
         private void HandleServiceError(ServiceErrorDetailDTO errorDetail)
         {

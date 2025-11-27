@@ -17,7 +17,7 @@ namespace PASSWORD_LIS_Client.Services
         Task<List<FriendDTO>> GetFriendsAsync(int userAccountId);
         Task<bool> DeleteFriendAsync(int currentUserId, int friendToDeleteId);
         Task<FriendRequestResult> SendFriendRequestAsync(string addresseeEmail);
-        Task SubscribeToFriendUpdatesAsync(int userAccountId);
+        void SubscribeToFriendUpdatesAsync(int userAccountId);
         Task<List<FriendDTO>> GetPendingRequestsAsync();
         Task RespondToFriendRequestAsync(int requesterPlayerId, bool accepted);
         Task UnsubscribeFromFriendUpdatesAsync(int userAccountId);
@@ -80,9 +80,9 @@ namespace PASSWORD_LIS_Client.Services
             return GetProxy().SendFriendRequestAsync(addresseeEmail);
         }
 
-        public Task SubscribeToFriendUpdatesAsync(int userAccountId)
+        public void SubscribeToFriendUpdatesAsync(int userAccountId)
         {
-            return GetProxy().SubscribeToFriendUpdatesAsync(userAccountId);
+            GetProxy().SubscribeToFriendUpdatesAsync(userAccountId);
         }
 
         public async Task<List<FriendDTO>> GetPendingRequestsAsync()
