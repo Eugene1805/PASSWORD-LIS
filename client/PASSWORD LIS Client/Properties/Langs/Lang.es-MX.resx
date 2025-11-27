@@ -373,7 +373,7 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
     <value>Verificar Código</value>
   </data>
   <data name="winnersMessageText" xml:space="preserve">
-    <value>¡Felicidades han ganado PASSWORD!</value>
+    <value>¡Felicidades han ganado PASSWORD LIS!</value>
   </data>
   <data name="winnersText" xml:space="preserve">
     <value>Ganadores</value>
@@ -753,10 +753,28 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
   <data name="errorSendingRiddleText" xml:space="preserve">
     <value>Error al enviar la adivinanza.</value>
   </data>
+  <data name="wordPassedText" xml:space="preserve">
+    <value>Palabra Pasada</value>
+  </data>
+  <data name="finalScoreTeamsText" xml:space="preserve">
+    <value>Puntuación Final de los Equipos:</value>
+  </data>
   <data name="errorPassingTurnText" xml:space="preserve">
     <value>Error al pasar turno.</value>
   </data>
-  <data name="wordPassedText" xml:space="preserve">
-    <value>Palabra Pasada</value>
+  <data name="editingModeTitleText" xml:space="preserve">
+    <value>Edición</value>
+  </data>
+  <data name="editingModeActiveText" xml:space="preserve">
+    <value>Edición Activada</value>
+  </data>
+  <data name="usernameNotExceedFiftyCharacteresText" xml:space="preserve">
+    <value>El usuario no debe exceder los 50 caracteres</value>
+  </data>
+  <data name="emailTooLongText" xml:space="preserve">
+    <value>El correo no puede exceder los 100 caracteres</value>
+  </data>
+  <data name="invalidEmailFormatText" xml:space="preserve">
+    <value>El formato del correo no es válido</value>
   </data>
 </root>

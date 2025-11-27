@@ -15,7 +15,14 @@ namespace PASSWORD_LIS_Client.ViewModels
         public string Email
         {
             get => email;
-            set { email = value; OnPropertyChanged(); }
+            set { email = value; ValidateEmail(); OnPropertyChanged(); }
+        }
+
+        private string emailError;
+        public string EmailError
+        {
+            get => emailError;
+            set { emailError = value; OnPropertyChanged(); }
         }
 
         private bool isSending;
@@ -38,6 +45,11 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private async Task SendRequestAsync()
         {
+            if (!string.IsNullOrWhiteSpace(EmailError) || string.IsNullOrWhiteSpace(Email))
+            {
+                return;
+            }
+
             IsSending = true;
             try
             {

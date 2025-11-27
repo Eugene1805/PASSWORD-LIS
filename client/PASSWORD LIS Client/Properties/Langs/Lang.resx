@@ -373,7 +373,7 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
     <value>Verify Code</value>
   </data>
   <data name="winnersMessageText" xml:space="preserve">
-    <value>Congratulations you won PASSWORD</value>
+    <value>Congratulations you won PASSWORD LIS</value>
   </data>
   <data name="winnersText" xml:space="preserve">
     <value>Winners</value>
@@ -753,10 +753,28 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="errorSendingRiddleText" xml:space="preserve">
     <value>Error sending the riddle.</value>
   </data>
+  <data name="wordPassedText" xml:space="preserve">
+    <value>Word Passed</value>
+  </data>
+  <data name="finalScoreTeamsText" xml:space="preserve">
+    <value>Final Teams Scores:</value>
+  </data>
   <data name="errorPassingTurnText" xml:space="preserve">
     <value>Error when passing turn</value>
   </data>
-  <data name="wordPassedText" xml:space="preserve">
-    <value>Word Passed</value>
+  <data name="editingModeTitleText" xml:space="preserve">
+    <value>Edition</value>
+  </data>
+  <data name="editingModeActiveText" xml:space="preserve">
+    <value>Enabled edition</value>
+  </data>
+  <data name="usernameNotExceedFiftyCharacteresText" xml:space="preserve">
+    <value>The username must not exceed 50 characters.</value>
+  </data>
+  <data name="emailTooLongText" xml:space="preserve">
+    <value>The email cannot exceed 100 characters</value>
+  </data>
+  <data name="invalidEmailFormatText" xml:space="preserve">
+    <value>The email format is invalid</value>
   </data>
 </root>

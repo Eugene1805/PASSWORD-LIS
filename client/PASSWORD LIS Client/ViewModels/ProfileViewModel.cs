@@ -123,6 +123,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand ChangePasswordCommand { get; }
 
         private readonly IProfileManagerService profileManagerClient;
+        private ProfileUserDTO originalState;
 
         public ProfileViewModel(IProfileManagerService profileManagerService, IWindowService windowService)
             : base(windowService)
@@ -158,6 +159,8 @@ namespace PASSWORD_LIS_Client.ViewModels
                 XSocialMedia = currentUser.SocialAccounts.ContainsKey("X") ? currentUser.SocialAccounts["X"] : "";
                 Tiktok = currentUser.SocialAccounts.ContainsKey("TikTok") ? currentUser.SocialAccounts["TikTok"] : "";
             }
+
+            SaveOriginalState();
         }
 
         private void EditProfile(object parameter)
@@ -165,8 +168,8 @@ namespace PASSWORD_LIS_Client.ViewModels
             IsEditMode = true; 
             ClearAllErrors();
 
-            windowService.ShowPopUp("Edicion",
-                "Edicion Activada", PopUpIcon.Information); //Properties.Langs.Lang.editingModeTitle, Properties.Langs.Lang.editingModeActiveText
+            windowService.ShowPopUp(Properties.Langs.Lang.editingModeTitleText,
+                Properties.Langs.Lang.editingModeActiveText, PopUpIcon.Information);
             
         }
 
@@ -182,8 +185,8 @@ namespace PASSWORD_LIS_Client.ViewModels
         private bool CanSaveChanges()
         {
             return IsEditMode && !IsSaving &&
-                   !string.IsNullOrWhiteSpace(FirstName) &&
-                   !string.IsNullOrWhiteSpace(LastName);
+                AreFieldsValid() &&
+                HasUnsavedChanges();
         }
 
         private async Task SaveChangesAsync()
@@ -220,16 +223,108 @@ namespace PASSWORD_LIS_Client.ViewModels
             var retrievePasswordWindow = new RetrievePasswordWindow { DataContext = retrievePasswordViewModel};
             retrievePasswordWindow.Show();
         }
+        private void SaveOriginalState()
+        {
+            originalState = new ProfileUserDTO
+            {
+                FirstName = this.FirstName,
+                LastName = this.LastName,
+                PhotoId = this.PhotoId,
+                SocialAccounts = new Dictionary<string, string>
+                {
+                    { "Facebook", this.Facebook },
+                    { "Instagram", this.Instagram },
+                    { "X", this.XSocialMedia },
+                    { "TikTok", this.Tiktok }
+                }
+            };
+        }
+        private bool HasUnsavedChanges()
+        {
+            if (originalState == null)
+            {
+                return false;
+            }
+            if (FirstName != originalState.FirstName)
+            {
+                return true;
+            }
+            if (LastName != originalState.LastName)
+            {
+                return true;
+            }
+            if (PhotoId != originalState.PhotoId)
+            {
+                return true;
+            }
+            string oldFacebook = originalState.SocialAccounts.ContainsKey("Facebook") ? originalState.SocialAccounts["Facebook"] : "";
+            string oldInstagram = originalState.SocialAccounts.ContainsKey("Instagram") ? originalState.SocialAccounts["Instagram"] : "";
+            string oldX = originalState.SocialAccounts.ContainsKey("X") ? originalState.SocialAccounts["X"] : "";
+            string oldTiktok = originalState.SocialAccounts.ContainsKey("TikTok") ? originalState.SocialAccounts["TikTok"] : "";
 
+            if ((Facebook ?? "") != oldFacebook)
+            {
+                return true;
+            }
+            if ((Instagram ?? "") != oldInstagram)
+            {
+                return true;
+            }
+            if ((XSocialMedia ?? "") != oldX)
+            {
+                return true;
+            }
+            if ((Tiktok ?? "") != oldTiktok)
+            {
+                return true;
+            }
+            return false;
+        }
         private void BackToLobby(object parameter)
         {
-            if (IsEditMode)
+            if (!IsEditMode)
             {
-                windowService.ShowPopUp("Modo edición Activado", "Debe guardar sus cambios para poder volver al lobby",
-                    PopUpIcon.Information);
+                windowService.GoBack();
                 return;
             }
-            windowService.GoBack();
+
+            if (HasUnsavedChanges())
+            {
+                bool discardChanges = windowService.ShowYesNoPopUp(
+                    Properties.Langs.Lang.unsavedChangesWarningTitleText,
+                    Properties.Langs.Lang.unsavedChangesWarningText
+                );
+
+                if (discardChanges)
+                {
+                    RevertChanges(); 
+                    IsEditMode = false;
+                    windowService.GoBack();
+                }
+                else
+                {
+                    return;
+                }
+            }
+            else
+            {
+                IsEditMode = false;
+                windowService.GoBack();
+            }
+        }
+        private void RevertChanges()
+        {
+            if (originalState == null)
+            {
+                return;
+            }
+            FirstName = originalState.FirstName;
+            LastName = originalState.LastName;
+            PhotoId = originalState.PhotoId;
+            Facebook = originalState.SocialAccounts["Facebook"];
+            Instagram = originalState.SocialAccounts["Instagram"];
+            XSocialMedia = originalState.SocialAccounts["X"];
+            Tiktok = originalState.SocialAccounts["TikTok"];
         }
         private void ClearAllErrors()
         {
@@ -360,6 +455,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
                 IsEditMode = false;
                 ClearAllErrors();
+                SaveOriginalState();
             }
             else
             {
