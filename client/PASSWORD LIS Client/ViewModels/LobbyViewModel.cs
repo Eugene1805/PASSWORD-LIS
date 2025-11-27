@@ -114,7 +114,11 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             if (SessionManager.IsUserLoggedIn() && !IsGuest)
             {
-                _ = friendsManagerService.SubscribeToFriendUpdatesAsync(SessionManager.CurrentUser.UserAccountId);
+                Execute(() =>
+                {
+                    friendsManagerService.SubscribeToFriendUpdatesAsync(SessionManager.CurrentUser.UserAccountId);
+                });
+                
             }
 
         }

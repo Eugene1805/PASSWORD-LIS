@@ -17,7 +17,7 @@ namespace Services.Contracts
         /// </summary>
         /// <param name="userAccountId">The user account identifier.</param>
         [OperationContract(IsOneWay = true)]
-        Task SubscribeToFriendUpdatesAsync(int userAccountId);
+        void SubscribeToFriendUpdatesAsync(int userAccountId);
 
         /// <summary>
         /// Retrieves the friend's list for a user.
@@ -70,6 +70,7 @@ namespace Services.Contracts
     /// <summary>
     /// Callback contract for friend-related real-time events.
     /// </summary>
+    [ServiceContract]
     public interface IFriendsCallback
     {
         /// <summary>

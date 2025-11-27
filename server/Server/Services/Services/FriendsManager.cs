@@ -69,7 +69,7 @@ namespace Services.Services
             }, context: $"User={currentPlayerId}, Friend={friendToDeleteId}");
         }
 
-        public Task SubscribeToFriendUpdatesAsync(int userAccountId)
+        public void SubscribeToFriendUpdatesAsync(int userAccountId)
         {
             var callbackChannel = operationContext.GetCallbackChannel<IFriendsCallback>();
             connectedClients[userAccountId] = callbackChannel;
@@ -83,7 +83,7 @@ namespace Services.Services
             };
 
             log.InfoFormat("Client subscribed to FriendsManager. UserAccountId: {0}", userAccountId);
-            return Task.CompletedTask;
+            
         }
 
         public async Task<FriendRequestResult> SendFriendRequestAsync(string addresseeEmail)
