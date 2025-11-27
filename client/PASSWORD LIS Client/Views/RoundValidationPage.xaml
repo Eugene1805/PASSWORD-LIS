@@ -13,6 +13,8 @@
       Background="#1A1A1A">
     <Page.Resources>
         <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
     </Page.Resources>
 
     <Grid Margin="20">
@@ -36,7 +38,8 @@
                        Foreground="#FFC107"/>
         </Grid>
 
-        <Grid Grid.Row="1" Margin="10,0,10,10">
+        <Grid Grid.Row="1" Margin="10,0,10,10"
+              Visibility="{Binding IsListEmpty, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*"/>
                 <ColumnDefinition Width="2*"/>
@@ -50,7 +53,8 @@
             <TextBlock Text="{utils:Translate oneMoreWordQuestionText}" Style="{StaticResource subtitleTextBlockStyle}" Grid.Column="3" TextWrapping="Wrap" HorizontalAlignment="Center"/>
         </Grid>
 
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      Visibility="{Binding IsListEmpty, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
             <ItemsControl ItemsSource="{Binding TurnsToValidate}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
@@ -91,6 +95,18 @@
             </ItemsControl>
         </ScrollViewer>
 
+        <Grid Grid.Row="2" 
+              Visibility="{Binding IsListEmpty, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <TextBlock Text="{Binding EmptyListMessage}"
+                       Style="{StaticResource subtitleTextBlockStyle}"
+                       FontSize="24"
+                       Foreground="#AAAAAA"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap"/>
+        </Grid>
+        
         <Button Content="{utils:Translate nextRoundText}"
                 Grid.Row="3"
                 Style="{StaticResource primaryButtonStyle}"

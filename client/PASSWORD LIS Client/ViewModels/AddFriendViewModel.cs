@@ -40,7 +40,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             : base(windowService)
         {
             this.friendsService = friendsService;
-            SendRequestCommand = new RelayCommand(async (_) => await SendRequestAsync(), (_) => !IsSending && !string.IsNullOrWhiteSpace(Email));
+            SendRequestCommand = new RelayCommand(async (_) => await SendRequestAsync(), (_) => !IsSending && !string.IsNullOrWhiteSpace(Email) && EmailError == null);
         }
 
         private async Task SendRequestAsync()
@@ -99,6 +99,29 @@ namespace PASSWORD_LIS_Client.ViewModels
                         Properties.Langs.Lang.couldNotSentRequestText, PopUpIcon.Error);
                     break;
             }
+        }
+
+        private void ValidateEmail()
+        {
+            if (string.IsNullOrWhiteSpace(Email))
+            {
+                EmailError = null;
+                return;
+            }
+
+            if (Email.Length > 100)
+            {
+                EmailError = Properties.Langs.Lang.emailTooLongText;
+                return;
+            }
+
+            if (!ValidationUtils.IsValidEmail(Email))
+            {
+                EmailError = Properties.Langs.Lang.invalidEmailFormatText;
+                return;
+            }
+
+            EmailError = null;
         }
     }
 }

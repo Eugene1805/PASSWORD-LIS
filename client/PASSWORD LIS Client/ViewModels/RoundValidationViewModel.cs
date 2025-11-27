@@ -34,6 +34,20 @@ namespace PASSWORD_LIS_Client.ViewModels
             set => SetProperty(ref canSubmit, value);
         }
 
+        private bool isListEmpty;
+        public bool IsListEmpty
+        {
+            get => isListEmpty;
+            set => SetProperty(ref isListEmpty, value);
+        }
+
+        private string emptyListMessage;
+        public string EmptyListMessage
+        {
+            get => emptyListMessage;
+            set => SetProperty(ref emptyListMessage, value);
+        }
+
         public ICommand SubmitVotesCommand { get; }
 
         private readonly IGameManagerService gameManagerService;
@@ -58,10 +72,21 @@ namespace PASSWORD_LIS_Client.ViewModels
             gameManagerService.MatchCancelled += OnMatchCancelled;
             gameManagerService.MatchOver += OnMatchOver;
 
-            var groupedTurns = turns.Where(turn => turn.Password.EnglishWord != "END" && turn.Password.SpanishWord != "END")
+            if (turns == null || turns.Count == 0)
+            {
+                IsListEmpty = true;
+                EmptyListMessage = "El equipo contrario no envió pistas."; //Properties.Langs.Lang.opponentNoCluesText
+                TurnsToValidate = new ObservableCollection<ValidationTurnViewModel>();
+            }
+            else
+            {
+                IsListEmpty = false;
+                EmptyListMessage = string.Empty;
+                var groupedTurns = turns.Where(turn => turn.Password.EnglishWord != "END" && turn.Password.SpanishWord != "END")
                 .GroupBy(turn => turn.TurnId)
                 .Select(group => new ValidationTurnViewModel(group, language));
-            TurnsToValidate = new ObservableCollection<ValidationTurnViewModel>(groupedTurns);
+                TurnsToValidate = new ObservableCollection<ValidationTurnViewModel>(groupedTurns);
+            }
 
             SubmitVotesCommand = new RelayCommand(async (_) => await SubmitVotesAsync(), (_) => CanSubmit);
         }

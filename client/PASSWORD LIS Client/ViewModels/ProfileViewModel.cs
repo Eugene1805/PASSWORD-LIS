@@ -170,7 +170,6 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             windowService.ShowPopUp(Properties.Langs.Lang.editingModeTitleText,
                 Properties.Langs.Lang.editingModeActiveText, PopUpIcon.Information);
-            
         }
 
         private void ChooseAnAvatar(object parameter)

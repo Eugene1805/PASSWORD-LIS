@@ -344,21 +344,12 @@ namespace Services.Services
             var redPlayers = session.GetPlayersByTeam(MatchTeam.RedTeam);
             var bluePlayers = session.GetPlayersByTeam(MatchTeam.BlueTeam);
 
-            if (session.RedTeamTurnHistory.Count > 0)
-            {
-                await GameBroadcaster.BroadcastToGroupAsync(bluePlayers,
-                    cb => cb.OnBeginRoundValidation(session.RedTeamTurnHistory));
-            }
-            if (session.BlueTeamTurnHistory.Count > 0)
-            {
-                await GameBroadcaster.BroadcastToGroupAsync(redPlayers,
+            await GameBroadcaster.BroadcastToGroupAsync(bluePlayers,
+                cb => cb.OnBeginRoundValidation(session.RedTeamTurnHistory));
+
+            await GameBroadcaster.BroadcastToGroupAsync(redPlayers,
                     cb => cb.OnBeginRoundValidation(session.BlueTeamTurnHistory));
-            }
-            if (session.RedTeamTurnHistory.Count == 0 && session.BlueTeamTurnHistory.Count == 0)
-            {
-                await ProcessVotesAsync(session);
-                return;
-            }
+
             session.StartValidationTimer(ValidationTimerTickCallback, session, ValidationDurationSeconds);
         }
 
