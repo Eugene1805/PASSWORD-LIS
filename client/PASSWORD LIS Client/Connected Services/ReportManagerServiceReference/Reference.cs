@@ -243,17 +243,29 @@ namespace PASSWORD_LIS_Client.ReportManagerServiceReference {
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
         EMAIL_CONFIGURATION_ERROR = 18,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        SECURITY_ERROR = 19,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        FORMAT_ERROR = 20,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        INVALID_OPERATION = 21,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        SELF_INVITATION = 22,
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
     [System.ServiceModel.ServiceContractAttribute(ConfigurationName="ReportManagerServiceReference.IReportManager", CallbackContract=typeof(PASSWORD_LIS_Client.ReportManagerServiceReference.IReportManagerCallback))]
     public interface IReportManager {
         
-        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IReportManager/SubscribeToReportUpdates")]
-        void SubscribeToReportUpdates(int playerId);
+        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IReportManager/SubscribeToReportUpdatesAsync")]
+        void SubscribeToReportUpdatesAsync(int playerId);
         
-        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IReportManager/SubscribeToReportUpdates")]
-        System.Threading.Tasks.Task SubscribeToReportUpdatesAsync(int playerId);
+        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IReportManager/SubscribeToReportUpdatesAsync")]
+        System.Threading.Tasks.Task SubscribeToReportUpdatesAsyncAsync(int playerId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IReportManager/SubmitReport", ReplyAction="http://tempuri.org/IReportManager/SubmitReportResponse")]
         [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.ReportManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IReportManager/SubmitReportServiceErrorDetailDTOFault", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
@@ -277,11 +289,11 @@ namespace PASSWORD_LIS_Client.ReportManagerServiceReference {
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IReportManager/IsPlayerBanned", ReplyAction="http://tempuri.org/IReportManager/IsPlayerBannedResponse")]
         System.Threading.Tasks.Task<bool> IsPlayerBannedAsync(int playerId);
         
-        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IReportManager/UnsubscribeFromReportUpdates")]
-        void UnsubscribeFromReportUpdates(int playerId);
+        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IReportManager/UnsubscribeFromReportUpdatesAsync")]
+        void UnsubscribeFromReportUpdatesAsync(int playerId);
         
-        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IReportManager/UnsubscribeFromReportUpdates")]
-        System.Threading.Tasks.Task UnsubscribeFromReportUpdatesAsync(int playerId);
+        [System.ServiceModel.OperationContractAttribute(IsOneWay=true, Action="http://tempuri.org/IReportManager/UnsubscribeFromReportUpdatesAsync")]
+        System.Threading.Tasks.Task UnsubscribeFromReportUpdatesAsyncAsync(int playerId);
     }
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "4.0.0.0")]
@@ -328,12 +340,12 @@ namespace PASSWORD_LIS_Client.ReportManagerServiceReference {
                 base(callbackInstance, binding, remoteAddress) {
         }
         
-        public void SubscribeToReportUpdates(int playerId) {
-            base.Channel.SubscribeToReportUpdates(playerId);
+        public void SubscribeToReportUpdatesAsync(int playerId) {
+            base.Channel.SubscribeToReportUpdatesAsync(playerId);
         }
         
-        public System.Threading.Tasks.Task SubscribeToReportUpdatesAsync(int playerId) {
-            return base.Channel.SubscribeToReportUpdatesAsync(playerId);
+        public System.Threading.Tasks.Task SubscribeToReportUpdatesAsyncAsync(int playerId) {
+            return base.Channel.SubscribeToReportUpdatesAsyncAsync(playerId);
         }
         
         public bool SubmitReport(PASSWORD_LIS_Client.ReportManagerServiceReference.ReportDTO reportDTO) {
@@ -360,12 +372,12 @@ namespace PASSWORD_LIS_Client.ReportManagerServiceReference {
             return base.Channel.IsPlayerBannedAsync(playerId);
         }
         
-        public void UnsubscribeFromReportUpdates(int playerId) {
-            base.Channel.UnsubscribeFromReportUpdates(playerId);
+        public void UnsubscribeFromReportUpdatesAsync(int playerId) {
+            base.Channel.UnsubscribeFromReportUpdatesAsync(playerId);
         }
         
-        public System.Threading.Tasks.Task UnsubscribeFromReportUpdatesAsync(int playerId) {
-            return base.Channel.UnsubscribeFromReportUpdatesAsync(playerId);
+        public System.Threading.Tasks.Task UnsubscribeFromReportUpdatesAsyncAsync(int playerId) {
+            return base.Channel.UnsubscribeFromReportUpdatesAsyncAsync(playerId);
         }
     }
 }

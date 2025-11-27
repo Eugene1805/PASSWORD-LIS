@@ -182,8 +182,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                     reportManagerService.ReportReceived += OnReportReceived;
                     reportManagerService.ReportCountUpdated += OnReportCountUpdated;
                     reportManagerService.PlayerBanned += OnPlayerBanned;
-                    await reportManagerService.SubscribeToReportUpdatesAsync(SessionManager.CurrentUser.PlayerId)
-                        .ConfigureAwait(false);
+                    reportManagerService.SubscribeToReportUpdatesAsync(SessionManager.CurrentUser.PlayerId);
                 }
                 else
                 {
@@ -292,7 +291,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                     }
                     if(!IsGuest)
                     {
-                        await CleanupAndUnsubscribeAsync();
+                        CleanupAndUnsubscribeAsync();
                     }
                 });
             }
@@ -324,7 +323,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             UnsubscribeFromRoomEvents();
             if (!IsGuest)
             {
-                _ = CleanupAndUnsubscribeAsync();
+                CleanupAndUnsubscribeAsync();
             }
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -486,14 +485,14 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             ShowNoFriendsMessage = !IsLoadingFriends && !Friends.Any();
         }
-        private async Task CleanupAndUnsubscribeAsync()
+        private void CleanupAndUnsubscribeAsync()
         {
             if (!IsGuest)
             {
                 reportManagerService.ReportReceived -= OnReportReceived;
                 reportManagerService.ReportCountUpdated -= OnReportCountUpdated;
                 reportManagerService.PlayerBanned -= OnPlayerBanned;
-                await reportManagerService.UnsubscribeFromReportUpdatesAsync(SessionManager.CurrentUser.PlayerId);
+                reportManagerService.UnsubscribeFromReportUpdatesAsync(SessionManager.CurrentUser.PlayerId);
             }
         }
         private void OnReportReceived(string reporterNickname, string reason)
@@ -526,7 +525,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void OnHostLeft()
         {
-            Application.Current.Dispatcher.Invoke(async () =>
+            Application.Current.Dispatcher.Invoke(() =>
             {
                 UnsubscribeFromRoomEvents();
                 if (!isHost)
@@ -538,7 +537,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
                 if (!IsGuest)
                 {
-                    await CleanupAndUnsubscribeAsync();
+                    CleanupAndUnsubscribeAsync();
                 }
                 windowService.GoToLobby();
             });

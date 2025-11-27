@@ -101,7 +101,7 @@ namespace Services.Services
             }, context: "ReportManager: BanPlayerAsync");
         }
 
-        public async Task SubscribeToReportUpdatesAsync(int playerId)
+        public async void SubscribeToReportUpdatesAsync(int playerId)
         {
             await ExecuteAsync(() =>
             {
@@ -111,14 +111,14 @@ namespace Services.Services
 
                 if (callbackChannel is ICommunicationObject commObject)
                 {
-                    commObject.Faulted += async (s, e) => await UnsubscribeFromReportUpdatesAsync(playerId);
-                    commObject.Closed +=  async (s, e) =>  await UnsubscribeFromReportUpdatesAsync(playerId);
+                    commObject.Faulted += (s, e) => UnsubscribeFromReportUpdatesAsync(playerId);
+                    commObject.Closed += (s, e) =>  UnsubscribeFromReportUpdatesAsync(playerId);
                 }
                 return Task.CompletedTask;
             }, context: "ReportManager: SubscribeToReportUpdatesAsync");            
         }
 
-        public async Task UnsubscribeFromReportUpdatesAsync(int playerId)
+        public async void UnsubscribeFromReportUpdatesAsync(int playerId)
         {
             await ExecuteAsync(() =>
             {

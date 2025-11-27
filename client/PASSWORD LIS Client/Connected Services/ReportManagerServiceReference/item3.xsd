@@ -21,6 +21,10 @@
       <xs:enumeration value="NULL_ARGUMENT" />
       <xs:enumeration value="EMAIL_SENDING_ERROR" />
       <xs:enumeration value="EMAIL_CONFIGURATION_ERROR" />
+      <xs:enumeration value="SECURITY_ERROR" />
+      <xs:enumeration value="FORMAT_ERROR" />
+      <xs:enumeration value="INVALID_OPERATION" />
+      <xs:enumeration value="SELF_INVITATION" />
     </xs:restriction>
   </xs:simpleType>
   <xs:element name="ServiceErrorCode" nillable="true" type="tns:ServiceErrorCode" />

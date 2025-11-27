@@ -115,9 +115,9 @@ namespace Test.ServicesTests
             friendshipRepo.Setup(r => r.DeleteFriendshipAsync(10, 11)).ReturnsAsync(true);
 
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(100);
+            sut.SubscribeToFriendUpdatesAsync(100);
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbB.Object);
-            await sut.SubscribeToFriendUpdatesAsync(110);
+            sut.SubscribeToFriendUpdatesAsync(110);
 
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(10)).ReturnsAsync(MakeAccount(100, 10, "A"));
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(11)).ReturnsAsync(MakeAccount(110, 11, "B"));
@@ -147,7 +147,7 @@ namespace Test.ServicesTests
             friendshipRepo.Setup(r => r.DeleteFriendshipAsync(10, 11)).ReturnsAsync(true);
 
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(100);
+            sut.SubscribeToFriendUpdatesAsync(100);
 
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(10)).ReturnsAsync(MakeAccount(100, 10, "A"));
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(11)).ReturnsAsync(MakeAccount(110, 11, "B"));
@@ -183,7 +183,7 @@ namespace Test.ServicesTests
         public async Task GetPendingRequestsAsync_ShouldMapRequests()
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(200);
+            sut.SubscribeToFriendUpdatesAsync(200);
 
             var reqAcc = MakeAccount(201, 21, "Requester");
             var friendReq = new Friendship { RequesterId = 21, Player1 = reqAcc.Player.First() };
@@ -201,7 +201,7 @@ namespace Test.ServicesTests
         public async Task GetPendingRequestsAsync_ShouldReturnEmptyList_WhenNoPendingRequests()
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(200);
+            sut.SubscribeToFriendUpdatesAsync(200);
 
             friendshipRepo.Setup(r => r.GetPendingRequestsAsync(200))
                 .ReturnsAsync(new List<Friendship>());
@@ -215,7 +215,7 @@ namespace Test.ServicesTests
         public async Task GetPendingRequestsAsync_ShouldThrowFault_WhenRepositoryThrowsException()
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(200);
+            sut.SubscribeToFriendUpdatesAsync(200);
 
             friendshipRepo.Setup(r => r.GetPendingRequestsAsync(200))
                 .ThrowsAsync(new Exception("Error"));
@@ -238,7 +238,7 @@ namespace Test.ServicesTests
         public async Task SendFriendRequestAsync_FullHappyPath_ShouldNotifyAddressee()
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(300);
+            sut.SubscribeToFriendUpdatesAsync(300);
 
             var requester = MakeAccount(300, 30, "A");
             var addressee = MakeAccount(310, 31, "B");
@@ -256,7 +256,7 @@ namespace Test.ServicesTests
 
             // Subscribe addressee before sending request
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbB.Object);
-            await sut.SubscribeToFriendUpdatesAsync(310);
+            sut.SubscribeToFriendUpdatesAsync(310);
 
             // Reset context back to requester for sending request
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
@@ -270,7 +270,7 @@ namespace Test.ServicesTests
         public async Task SendFriendRequestAsync_AddresseeNotFound_ShouldReturnUserNotFound()
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(300);
+            sut.SubscribeToFriendUpdatesAsync(300);
 
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(MakeAccount(300, 30, "A"));
             accountRepo.Setup(a => a.GetUserByEmailAsync("x@test.com")).ReturnsAsync((UserAccount?)null);
@@ -283,7 +283,7 @@ namespace Test.ServicesTests
         public async Task SendFriendRequestAsync_RequesterWithoutPlayer_ShouldReturnFailed()
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(300);
+            sut.SubscribeToFriendUpdatesAsync(300);
 
             var requesterNoPlayer = new UserAccount { Id = 300, Nickname = "A", Player = new List<Player>() };
             var addressee = MakeAccount(310, 31, "B");
@@ -298,7 +298,7 @@ namespace Test.ServicesTests
         public async Task SendFriendRequestAsync_CannotAddSelf_ShouldReturnCannotAddSelf()
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(300);
+            sut.SubscribeToFriendUpdatesAsync(300);
 
             var requester = MakeAccount(300, 30, "A");
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(requester);
@@ -312,7 +312,7 @@ namespace Test.ServicesTests
         public async Task SendFriendRequestAsync_AddresseeHasNoPlayer_ShouldReturnUserNotFound()
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(300);
+            sut.SubscribeToFriendUpdatesAsync(300);
 
             var requester = MakeAccount(300, 30, "A");
             var addresseeNoPlayer = new UserAccount { Id = 310, Nickname = "B", Player = new List<Player>() };
@@ -327,7 +327,7 @@ namespace Test.ServicesTests
         public async Task SendFriendRequestAsync_ShouldThrowFault_WhenRepositoryThrowsException()
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(300);
+            sut.SubscribeToFriendUpdatesAsync(300);
 
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300))
                 .ThrowsAsync(new Exception("Error"));
@@ -345,9 +345,9 @@ namespace Test.ServicesTests
         public async Task RespondToFriendRequestAsync_ShouldNotifyWhenAccepted(bool accept)
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(300);
+            sut.SubscribeToFriendUpdatesAsync(300);
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbB.Object);
-            await sut.SubscribeToFriendUpdatesAsync(310);
+            sut.SubscribeToFriendUpdatesAsync(310);
 
             var addresseeAcc = MakeAccount(300, 30, "Addressee");
             var requesterAcc = MakeAccount(310, 31, "Requester");
@@ -385,7 +385,7 @@ namespace Test.ServicesTests
         public async Task RespondToFriendRequestAsync_WhenAddresseeNotFound_ShouldNotNotify()
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(300);
+            sut.SubscribeToFriendUpdatesAsync(300);
 
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync((UserAccount?)null);
 
@@ -398,7 +398,7 @@ namespace Test.ServicesTests
         public async Task RespondToFriendRequestAsync_WhenAddresseeHasNoPlayer_ShouldNotNotify()
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(300);
+            sut.SubscribeToFriendUpdatesAsync(300);
 
             var addresseeNoPlayer = new UserAccount { Id = 300, Nickname = "A", Player = new List<Player>() };
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(addresseeNoPlayer);
@@ -412,7 +412,7 @@ namespace Test.ServicesTests
         public async Task RespondToFriendRequestAsync_WhenRepositoryReturnsFalse_ShouldNotNotify()
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(300);
+            sut.SubscribeToFriendUpdatesAsync(300);
 
             var addresseeAcc = MakeAccount(300, 30, "Addressee");
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(addresseeAcc);
@@ -428,7 +428,7 @@ namespace Test.ServicesTests
         public async Task RespondToFriendRequestAsync_ShouldThrowFault_WhenRepositoryThrowsException()
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(300);
+            sut.SubscribeToFriendUpdatesAsync(300);
 
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300))
                 .ThrowsAsync(new Exception("Error"));
@@ -444,7 +444,7 @@ namespace Test.ServicesTests
         public async Task ValidateFriendRequestAsync_Paths_ShouldReturnExpectedCodes()
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(300);
+            sut.SubscribeToFriendUpdatesAsync(300);
 
             var requester = MakeAccount(300, 30, "A");
             var addressee = MakeAccount(310, 31, "B");
@@ -475,7 +475,7 @@ namespace Test.ServicesTests
         public async Task CreateAndNotifyFriendRequestAsync_Failure_ShouldReturnFailed()
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(300);
+            sut.SubscribeToFriendUpdatesAsync(300);
 
             var requester = MakeAccount(300, 30, "A");
             var addressee = MakeAccount(310, 31, "B");
@@ -501,7 +501,7 @@ namespace Test.ServicesTests
             callback.As<ICommunicationObject>();
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(callback.Object);
 
-            await sut.SubscribeToFriendUpdatesAsync(500);
+            sut.SubscribeToFriendUpdatesAsync(500);
 
             // Verify client is subscribed by checking pending requests don't throw null exception
             friendshipRepo.Setup(r => r.GetPendingRequestsAsync(500))
@@ -515,7 +515,7 @@ namespace Test.ServicesTests
         public async Task UnsubscribeFromFriendUpdatesAsync_ShouldRemoveClient()
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(500);
+            sut.SubscribeToFriendUpdatesAsync(500);
 
             await sut.UnsubscribeFromFriendUpdatesAsync(500);
 
@@ -527,9 +527,9 @@ namespace Test.ServicesTests
         public async Task NotifyOnRequestAcceptedAsync_WhenRequesterNotFound_ShouldNotNotify()
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(300);
+            sut.SubscribeToFriendUpdatesAsync(300);
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbB.Object);
-            await sut.SubscribeToFriendUpdatesAsync(310);
+            sut.SubscribeToFriendUpdatesAsync(310);
 
             var addresseeAcc = MakeAccount(300, 30, "Addressee");
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(addresseeAcc);
@@ -548,9 +548,9 @@ namespace Test.ServicesTests
         public async Task NotifyOnRequestAcceptedAsync_WhenRequesterHasNoPlayer_ShouldNotNotify()
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(300);
+            sut.SubscribeToFriendUpdatesAsync(300);
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbB.Object);
-            await sut.SubscribeToFriendUpdatesAsync(310);
+            sut.SubscribeToFriendUpdatesAsync(310);
 
             var addresseeAcc = MakeAccount(300, 30, "Addressee");
             var requesterNoPlayer = new UserAccount { Id = 310, Nickname = "B", Player = new List<Player>() };
@@ -572,7 +572,7 @@ namespace Test.ServicesTests
             friendshipRepo.Setup(r => r.DeleteFriendshipAsync(10, 11)).ReturnsAsync(true);
 
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbB.Object);
-            await sut.SubscribeToFriendUpdatesAsync(110);
+            sut.SubscribeToFriendUpdatesAsync(110);
 
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(10)).ReturnsAsync((UserAccount?)null);
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(11)).ReturnsAsync(MakeAccount(110, 11, "B"));
@@ -589,7 +589,7 @@ namespace Test.ServicesTests
             friendshipRepo.Setup(r => r.DeleteFriendshipAsync(10, 11)).ReturnsAsync(true);
 
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(100);
+            sut.SubscribeToFriendUpdatesAsync(100);
 
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(10)).ReturnsAsync(MakeAccount(100, 10, "A"));
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(11)).ReturnsAsync((UserAccount?)null);
@@ -604,7 +604,7 @@ namespace Test.ServicesTests
         public async Task SendFriendRequestAsync_ShouldNotNotifyAddressee_WhenNotSubscribed()
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(300);
+            sut.SubscribeToFriendUpdatesAsync(300);
 
             var requester = MakeAccount(300, 30, "A");
             var addressee = MakeAccount(310, 31, "B");
@@ -630,7 +630,7 @@ namespace Test.ServicesTests
         public async Task RespondToFriendRequestAsync_WhenAccepted_ShouldNotifyOnlyConnectedClients()
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
-            await sut.SubscribeToFriendUpdatesAsync(300);
+            sut.SubscribeToFriendUpdatesAsync(300);
 
             var addresseeAcc = MakeAccount(300, 30, "Addressee");
             var requesterAcc = MakeAccount(310, 31, "Requester");

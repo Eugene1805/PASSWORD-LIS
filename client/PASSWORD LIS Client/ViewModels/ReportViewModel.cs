@@ -5,8 +5,6 @@ using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
 using PASSWORD_LIS_Client.WaitingRoomManagerServiceReference;
-using System;
-using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 

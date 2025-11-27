@@ -37,8 +37,8 @@
       <xsd:import schemaLocation="http://localhost:8106/?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" />
     </xsd:schema>
   </wsdl:types>
-  <wsdl:message name="IReportManager_SubscribeToReportUpdates_InputMessage">
-    <wsdl:part name="parameters" element="tns:SubscribeToReportUpdates" />
+  <wsdl:message name="IReportManager_SubscribeToReportUpdatesAsync_InputMessage">
+    <wsdl:part name="parameters" element="tns:SubscribeToReportUpdatesAsync" />
   </wsdl:message>
   <wsdl:message name="IReportManager_SubmitReport_InputMessage">
     <wsdl:part name="parameters" element="tns:SubmitReport" />
@@ -67,8 +67,8 @@
   <wsdl:message name="IReportManager_IsPlayerBanned_ServiceErrorDetailDTOFault_FaultMessage">
     <wsdl:part xmlns:q3="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q3:ServiceErrorDetailDTO" />
   </wsdl:message>
-  <wsdl:message name="IReportManager_UnsubscribeFromReportUpdates_InputMessage">
-    <wsdl:part name="parameters" element="tns:UnsubscribeFromReportUpdates" />
+  <wsdl:message name="IReportManager_UnsubscribeFromReportUpdatesAsync_InputMessage">
+    <wsdl:part name="parameters" element="tns:UnsubscribeFromReportUpdatesAsync" />
   </wsdl:message>
   <wsdl:message name="IReportManager_OnReportReceived_OutputCallbackMessage">
     <wsdl:part name="parameters" element="tns:OnReportReceived" />
@@ -83,8 +83,8 @@
     <wsdl:part name="parameters" element="tns:OnPlayerUnbanned" />
   </wsdl:message>
   <wsdl:portType name="IReportManager">
-    <wsdl:operation name="SubscribeToReportUpdates">
-      <wsdl:input wsaw:Action="http://tempuri.org/IReportManager/SubscribeToReportUpdates" message="tns:IReportManager_SubscribeToReportUpdates_InputMessage" />
+    <wsdl:operation name="SubscribeToReportUpdatesAsync">
+      <wsdl:input wsaw:Action="http://tempuri.org/IReportManager/SubscribeToReportUpdatesAsync" message="tns:IReportManager_SubscribeToReportUpdatesAsync_InputMessage" />
     </wsdl:operation>
     <wsdl:operation name="SubmitReport">
       <wsdl:input wsaw:Action="http://tempuri.org/IReportManager/SubmitReport" message="tns:IReportManager_SubmitReport_InputMessage" />
@@ -101,8 +101,8 @@
       <wsdl:output wsaw:Action="http://tempuri.org/IReportManager/IsPlayerBannedResponse" message="tns:IReportManager_IsPlayerBanned_OutputMessage" />
       <wsdl:fault wsaw:Action="http://tempuri.org/IReportManager/IsPlayerBannedServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IReportManager_IsPlayerBanned_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
-    <wsdl:operation name="UnsubscribeFromReportUpdates">
-      <wsdl:input wsaw:Action="http://tempuri.org/IReportManager/UnsubscribeFromReportUpdates" message="tns:IReportManager_UnsubscribeFromReportUpdates_InputMessage" />
+    <wsdl:operation name="UnsubscribeFromReportUpdatesAsync">
+      <wsdl:input wsaw:Action="http://tempuri.org/IReportManager/UnsubscribeFromReportUpdatesAsync" message="tns:IReportManager_UnsubscribeFromReportUpdatesAsync_InputMessage" />
     </wsdl:operation>
     <wsdl:operation name="OnReportReceived">
       <wsdl:output wsaw:Action="http://tempuri.org/IReportManager/OnReportReceived" message="tns:IReportManager_OnReportReceived_OutputCallbackMessage" />
@@ -120,8 +120,8 @@
   <wsdl:binding name="NetTcpBinding_IReportManager" type="tns:IReportManager">
     <wsp:PolicyReference URI="#NetTcpBinding_IReportManager_policy" />
     <soap12:binding transport="http://schemas.microsoft.com/soap/tcp" />
-    <wsdl:operation name="SubscribeToReportUpdates">
-      <soap12:operation soapAction="http://tempuri.org/IReportManager/SubscribeToReportUpdates" style="document" />
+    <wsdl:operation name="SubscribeToReportUpdatesAsync">
+      <soap12:operation soapAction="http://tempuri.org/IReportManager/SubscribeToReportUpdatesAsync" style="document" />
       <wsdl:input>
         <soap12:body use="literal" />
       </wsdl:input>
@@ -162,8 +162,8 @@
         <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
       </wsdl:fault>
     </wsdl:operation>
-    <wsdl:operation name="UnsubscribeFromReportUpdates">
-      <soap12:operation soapAction="http://tempuri.org/IReportManager/UnsubscribeFromReportUpdates" style="document" />
+    <wsdl:operation name="UnsubscribeFromReportUpdatesAsync">
+      <soap12:operation soapAction="http://tempuri.org/IReportManager/UnsubscribeFromReportUpdatesAsync" style="document" />
       <wsdl:input>
         <soap12:body use="literal" />
       </wsdl:input>

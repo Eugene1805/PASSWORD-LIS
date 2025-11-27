@@ -102,6 +102,7 @@ namespace Services.Contracts
     /// <summary>
     /// Callback contract for waiting room events.
     /// </summary>
+    [ServiceContract]
     public interface IWaitingRoomCallback
     {
         /// <summary>

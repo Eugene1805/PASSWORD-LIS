@@ -11,11 +11,11 @@ namespace PASSWORD_LIS_Client.Services
         event Action<int> ReportCountUpdated;
         event Action<DateTime> PlayerBanned;
         event Action PlayerUnbanned;
-        Task SubscribeToReportUpdatesAsync(int playerId);
+        void SubscribeToReportUpdatesAsync(int playerId);
         Task<bool> SubmitReportAsync(ReportDTO reportDTO);
         Task<int> GetCurrentReportCountAsync(int playerId);
         Task<bool> IsPlayerBannedAsync(int playerId);
-        Task UnsubscribeFromReportUpdatesAsync(int playerId);
+        void UnsubscribeFromReportUpdatesAsync(int playerId);
     }
 
     public class WcfReportManagerService : IReportManagerService, IReportManagerCallback
@@ -49,12 +49,12 @@ namespace PASSWORD_LIS_Client.Services
             return proxy.SubmitReportAsync(reportDTO);
         }
 
-        public Task SubscribeToReportUpdatesAsync(int playerId)
+        public void SubscribeToReportUpdatesAsync(int playerId)
         {
-            return proxy.SubscribeToReportUpdatesAsync(playerId);
+            proxy.SubscribeToReportUpdatesAsync(playerId);
         }
 
-        public Task UnsubscribeFromReportUpdatesAsync(int playerId)
+        public void UnsubscribeFromReportUpdatesAsync(int playerId)
         {
             var channel = proxy as ICommunicationObject;
             try
@@ -62,19 +62,16 @@ namespace PASSWORD_LIS_Client.Services
                 if (channel == null || channel.State == CommunicationState.Faulted)
                 {
                     channel?.Abort();
-                    return Task.CompletedTask;
                 }
-                return proxy.UnsubscribeFromReportUpdatesAsync(playerId);
+                proxy.UnsubscribeFromReportUpdatesAsync(playerId);
             }
             catch (CommunicationException)
             {
                 channel?.Abort();
-                return Task.CompletedTask;
             }
             catch (Exception)
             {
                 channel?.Abort();
-                return Task.CompletedTask;
             }
 
         }

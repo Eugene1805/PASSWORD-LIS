@@ -16,7 +16,7 @@ namespace Services.Contracts
         /// </summary>
         /// <param name="playerId">The player identifier.</param>
         [OperationContract(IsOneWay = true)]
-        Task SubscribeToReportUpdatesAsync(int playerId);
+        void SubscribeToReportUpdatesAsync(int playerId);
 
         /// <summary>
         /// Submits a new report.
@@ -50,12 +50,13 @@ namespace Services.Contracts
         /// </summary>
         /// <param name="playerId">The player identifier.</param>
         [OperationContract(IsOneWay = true)]
-        Task UnsubscribeFromReportUpdatesAsync(int playerId);
+        void UnsubscribeFromReportUpdatesAsync(int playerId);
     }
 
     /// <summary>
     /// Callback contract for receiving report status updates.
     /// </summary>
+    [ServiceContract]
     public interface IReportManagerCallback
     {
         /// <summary>
