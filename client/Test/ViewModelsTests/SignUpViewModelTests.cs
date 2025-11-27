@@ -66,14 +66,21 @@ namespace Test.ViewModelsTests
             mockAccountService.Setup(s => s.IsNicknameInUseAsync(It.IsAny<string>()))
                                .ReturnsAsync(false);
 
+            var errorDetail = new ServiceErrorDetailDTO
+            {
+                ErrorCode = "USER_ALREADY_EXISTS"
+            };
             mockAccountService.Setup(s => s.CreateAccountAsync(It.IsAny<NewAccountDTO>()))
-                               .ThrowsAsync(new FaultException<ServiceErrorDetailDTO>(new ServiceErrorDetailDTO()));
+                               .ThrowsAsync(new FaultException<ServiceErrorDetailDTO>(errorDetail));
 
             // Act
             await viewModel.SignUpAsync();
 
             // Assert
-            mockWindowService.Verify(w => w.ShowPopUp(It.IsAny<string>(), PASSWORD_LIS_Client.Properties.Langs.Lang.userAlreadyExistText, It.IsAny<PopUpIcon>()), Times.Once);
+            mockWindowService.Verify(w => w.ShowPopUp(
+                It.Is<string>(s => s == PASSWORD_LIS_Client.Properties.Langs.Lang.errorTitleText),
+                It.Is<string>(s => s == PASSWORD_LIS_Client.Properties.Langs.Lang.userAlreadyExistText),
+                PopUpIcon.Warning), Times.Once);
             mockWindowService.Verify(w => w.ShowVerifyCodeWindow(It.IsAny<string>(), It.IsAny<VerificationReason>()), Times.Never);
         }
 

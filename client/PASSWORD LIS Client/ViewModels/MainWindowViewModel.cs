@@ -8,7 +8,6 @@ namespace PASSWORD_LIS_Client.ViewModels
 {
     public class MainWindowViewModel : BaseViewModel
     {
-        private readonly IWindowService windowService;
         private readonly BackgroundMusicService musicService;
         private double volume;
 
@@ -33,8 +32,8 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
 
         public MainWindowViewModel(IWindowService windowService, BackgroundMusicService backgroudMusicService)
+            : base(windowService)
         {
-            this.windowService = windowService;
             this.musicService = backgroudMusicService;
             Messenger.UserLoggedOut += OnUserLoggedOut;
             this.volume = musicService.Volume;

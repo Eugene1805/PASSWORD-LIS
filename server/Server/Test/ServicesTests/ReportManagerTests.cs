@@ -36,7 +36,7 @@ namespace Test.ServicesTests
             sut = new ReportManager(reportRepo.Object, playerRepo.Object, banRepo.Object, ctxWrapper.Object);
         }
 
-        private Player MakePlayer(int id, string nick)
+        private static Player MakePlayer(int id, string nick)
         {
             return new Player
             {
@@ -61,7 +61,7 @@ namespace Test.ServicesTests
         public async Task SubmitReportAsync_ShouldThrow_WhenReporterNotFound()
         {
             var dto = new ReportDTO { ReporterPlayerId = 1, ReportedPlayerId = 2, Reason = "x" };
-            playerRepo.Setup(r => r.GetPlayerByIdAsync(1)).ReturnsAsync((Player)null);
+            playerRepo.Setup(r => r.GetPlayerByIdAsync(1)).ReturnsAsync((Player?)null);
             playerRepo.Setup(r => r.GetPlayerByIdAsync(2)).ReturnsAsync(MakePlayer(2, "Reported"));
 
             var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(() => sut.SubmitReportAsync(dto));
@@ -73,7 +73,7 @@ namespace Test.ServicesTests
         {
             var dto = new ReportDTO { ReporterPlayerId = 1, ReportedPlayerId = 2, Reason = "x" };
             playerRepo.Setup(r => r.GetPlayerByIdAsync(1)).ReturnsAsync(MakePlayer(1, "Reporter"));
-            playerRepo.Setup(r => r.GetPlayerByIdAsync(2)).ReturnsAsync((Player)null);
+            playerRepo.Setup(r => r.GetPlayerByIdAsync(2)).ReturnsAsync((Player?)null);
 
             var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(() => sut.SubmitReportAsync(dto));
             Assert.Equal(ServiceErrorCode.ReportedPlayerNotFound, ex.Detail.Code);
@@ -123,7 +123,7 @@ namespace Test.ServicesTests
             reportRepo.Setup(r => r.AddReportAsync(It.IsAny<Report>())).Returns(Task.CompletedTask);
             // Return threshold count (3)
             reportRepo.Setup(r => r.GetReportCountForPlayerSinceAsync(4, null)).ReturnsAsync(3);
-            banRepo.Setup(b => b.GetActiveBanForPlayerAsync(4)).ReturnsAsync((Ban)null);
+            banRepo.Setup(b => b.GetActiveBanForPlayerAsync(4)).ReturnsAsync((Ban?)null);
             banRepo.Setup(b => b.AddBanAsync(It.IsAny<Ban>())).Returns(Task.CompletedTask);
 
             await sut.SubscribeToReportUpdatesAsync(4);

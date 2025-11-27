@@ -40,12 +40,11 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand NavigateToForgotPasswordCommand { get; }
 
         private readonly ILoginManagerService loginManagerService;
-        private readonly IWindowService windowService;
 
-        public LoginViewModel(ILoginManagerService loginManagerService, IWindowService windowService)
+        public LoginViewModel(ILoginManagerService loginManagerService, IWindowService windowService) 
+            : base(windowService)
         {
             this.loginManagerService = loginManagerService;
-            this.windowService = windowService;
 
             LoginCommand = new RelayCommand(async (_) => await LoginAsync(), (_) => CanLogin());
             PlayAsGuestCommand = new RelayCommand(PlayAsGuest);
@@ -57,59 +56,38 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             return !string.IsNullOrWhiteSpace(Email) && !string.IsNullOrWhiteSpace(Password) && !IsLoggingIn;
         }
+
         private async Task LoginAsync()
         {
             IsLoggingIn = true;
             try
             {
-                var loggedInUser = await loginManagerService.LoginAsync(Email, Password);
-                bool isAccountVerified = false;
+                await ExecuteAsync(async () =>
+                {
+                    var loggedInUser = await loginManagerService.LoginAsync(Email, Password);
+                    bool isAccountVerified = false;
 
-                if (loggedInUser.UserAccountId > 0) 
-                {
-                    isAccountVerified = await loginManagerService.IsAccountVerifiedAsync(Email);
-                }
+                    if (loggedInUser.UserAccountId > 0) 
+                    {
+                        isAccountVerified = await loginManagerService.IsAccountVerifiedAsync(Email);
+                    }
 
-                if (loggedInUser.UserAccountId > 0 && isAccountVerified)
-                {
-                    ProcessSuccessfulLogin(loggedInUser);
-                }
-                else if (loggedInUser.UserAccountId > 0 && !isAccountVerified)
-                {
-                    await loginManagerService.SendVerificationCodeAsync(loggedInUser.Email);
-                    VerifyAccount(loggedInUser.Email);
-                }
-                else
-                {
-                    windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
-                        Properties.Langs.Lang.wrongCredentialsText, PopUpIcon.Warning);
-                }
+                    if (loggedInUser.UserAccountId > 0 && isAccountVerified)
+                    {
+                        ProcessSuccessfulLogin(loggedInUser);
+                    }
+                    else if (loggedInUser.UserAccountId > 0 && !isAccountVerified)
+                    {
+                        await loginManagerService.SendVerificationCodeAsync(loggedInUser.Email);
+                        VerifyAccount(loggedInUser.Email);
+                    }
+                    else
+                    {
+                        windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
+                            Properties.Langs.Lang.wrongCredentialsText, PopUpIcon.Warning);
+                    }
+                });
             }
-            catch (FaultException<ServiceErrorDetailDTO> ex)
-            {// TODO Check lang message here
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    ex.Detail.Message, PopUpIcon.Error);
-            }
-            catch (TimeoutException) 
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
-                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
-            }
-            catch (EndpointNotFoundException) 
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
-                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
-            }
-            catch (CommunicationException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
-            }
-            catch (Exception)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
-            } 
             finally
             {
                 IsLoggingIn = false;

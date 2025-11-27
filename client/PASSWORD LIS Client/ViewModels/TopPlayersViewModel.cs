@@ -1,10 +1,7 @@
 ﻿using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.TopPlayersManagerServiceReference;
 using PASSWORD_LIS_Client.Utils;
-using PASSWORD_LIS_Client.Views;
-using System;
 using System.Collections.ObjectModel;
-using System.ServiceModel;
 using System.Threading.Tasks;
 
 namespace PASSWORD_LIS_Client.ViewModels
@@ -13,7 +10,6 @@ namespace PASSWORD_LIS_Client.ViewModels
     {
         private const int NumberOfTeams = 5;
         private readonly ITopPlayersManagerService playersManagerClient;
-        private readonly IWindowService windowService;
         private ObservableCollection<TeamDTO> topTeams;
         public ObservableCollection<TeamDTO> TopTeams
         {
@@ -29,6 +25,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
 
         public TopPlayersViewModel(ITopPlayersManagerService playersManagerService, IWindowService windowService)
+            : base(windowService)
         {
             this.playersManagerClient = playersManagerService;
             this.windowService = windowService;
@@ -42,28 +39,11 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             try
             {
-                var teamsTopArray = await playersManagerClient.GetTopAsync(NumberOfTeams);
-                TopTeams = new ObservableCollection<TeamDTO>(teamsTopArray);
-            }
-            catch (FaultException<ServiceErrorDetailDTO>)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                            Properties.Langs.Lang.unexpectedServerErrorText, PopUpIcon.Error);
-            }
-            catch (EndpointNotFoundException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
-                            Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Warning);
-            }
-            catch (CommunicationException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
-            }
-            catch (Exception) 
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                            Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
+                await ExecuteAsync(async () =>
+                {
+                    var teamsTopArray = await playersManagerClient.GetTopAsync(NumberOfTeams);
+                    TopTeams = new ObservableCollection<TeamDTO>(teamsTopArray);
+                });
             }
             finally
             {

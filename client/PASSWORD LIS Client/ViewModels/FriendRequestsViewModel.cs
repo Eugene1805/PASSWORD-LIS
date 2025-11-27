@@ -1,14 +1,9 @@
-﻿using PASSWORD_LIS_Client.AccountManagerServiceReference;
-using PASSWORD_LIS_Client.Commands;
+﻿using PASSWORD_LIS_Client.Commands;
 using PASSWORD_LIS_Client.FriendsManagerServiceReference;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
-using PASSWORD_LIS_Client.Views;
-using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.ServiceModel;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -59,15 +54,17 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand RejectRequestCommand { get; }
 
         private readonly IFriendsManagerService friendsService;
-        private readonly IWindowService windowService;
 
         public FriendRequestsViewModel(IFriendsManagerService friendsService, IWindowService windowService)
+            : base(windowService)
         {
             this.friendsService = friendsService;
             this.windowService = windowService;
             PendingRequests = new ObservableCollection<FriendDTO>();
-            AcceptRequestCommand = new RelayCommand(async (_) => await RespondToRequest(true), (_) => SelectedRequest != null &&!IsLoading);
-            RejectRequestCommand = new RelayCommand(async (_) => await RespondToRequest(false), (_) => SelectedRequest != null && !IsLoading);
+            AcceptRequestCommand = new RelayCommand(async (_) => 
+            await RespondToRequest(true), (_) => SelectedRequest != null &&!IsLoading);
+            RejectRequestCommand = new RelayCommand(async (_) => 
+            await RespondToRequest(false), (_) => SelectedRequest != null && !IsLoading);
 
             _ = LoadPendingRequestsAsync();
         }
@@ -77,34 +74,11 @@ namespace PASSWORD_LIS_Client.ViewModels
             IsLoading = true;
             try
             {
-                var requests = await friendsService.GetPendingRequestsAsync();
-                PendingRequests = new ObservableCollection<FriendDTO>(requests);
-
-            }
-            catch (FaultException<ServiceErrorDetailDTO> ex)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, 
-                    ex.Detail.Message, PopUpIcon.Error);
-            }
-            catch (TimeoutException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText, 
-                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
-            }
-            catch (EndpointNotFoundException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText, 
-                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
-            }
-            catch (CommunicationException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText, 
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
-            }
-            catch (Exception)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error); 
+                await ExecuteAsync(async () =>
+                {
+                    var requests = await friendsService.GetPendingRequestsAsync();
+                    PendingRequests = new ObservableCollection<FriendDTO>(requests);
+                });
             }
             finally
             {
@@ -122,37 +96,13 @@ namespace PASSWORD_LIS_Client.ViewModels
             IsLoading = true; 
             try
             {
-                await friendsService.RespondToFriendRequestAsync(requestToRespond.PlayerId, accepted);
+                await ExecuteAsync(async () =>
+                {
+                    await friendsService.RespondToFriendRequestAsync(requestToRespond.PlayerId, accepted);
 
-                PendingRequests.Remove(requestToRespond);
-                SelectedRequest = null; 
-
-
-            }
-            catch (FaultException<ServiceErrorDetailDTO> ex)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, 
-                    ex.Detail.Message, PopUpIcon.Error);
-            }
-            catch (TimeoutException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText, 
-                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
-            }
-            catch (EndpointNotFoundException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText, 
-                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
-            }
-            catch (CommunicationException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText, 
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
-            }
-            catch (Exception)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
+                    PendingRequests.Remove(requestToRespond);
+                    SelectedRequest = null;
+                });
             }
             finally
             {

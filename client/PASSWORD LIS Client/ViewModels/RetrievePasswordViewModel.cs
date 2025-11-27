@@ -3,15 +3,12 @@ using PASSWORD_LIS_Client.PasswordResetManagerServiceReference;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
-using System;
-using System.ServiceModel;
 using System.Threading.Tasks;
 
 namespace PASSWORD_LIS_Client.ViewModels
 {
     public class RetrievePasswordViewModel : BaseViewModel
     {
-        private readonly IWindowService windowService;
         private readonly IPasswordResetManagerService passwordResetClient;
 
         private string email;
@@ -30,10 +27,10 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         public RelayCommand SendCodeCommand { get; }
 
-        public RetrievePasswordViewModel(IPasswordResetManagerService resetManagerService,IWindowService windowService)
+        public RetrievePasswordViewModel(IPasswordResetManagerService resetManagerService, IWindowService windowService) 
+            : base(windowService)
         {
             this.passwordResetClient = resetManagerService;
-            this.windowService = windowService;
             this.SendCodeCommand = new RelayCommand(async (_) => await SendCodeAsync(), (_) => CanSendCode());
         }
 
@@ -51,37 +48,20 @@ namespace PASSWORD_LIS_Client.ViewModels
             this.IsBusy = true;
             try
             {
-                bool success = await TryRequestResetCodeAsync(this.email);
+                await ExecuteAsync(async () =>
+                {
+                    bool success = await TryRequestResetCodeAsync(this.email);
 
-                if (success)
-                {
-                    ProcessCodeRequestSuccess(this.email);
-                }
-                else
-                {
-                    this.windowService.ShowPopUp(Properties.Langs.Lang.sendFailedTitleText,
-                        Properties.Langs.Lang.codeSendFailedText, PopUpIcon.Error);
-                }
-            }
-            catch (TimeoutException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
-                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);;
-            }
-            catch (EndpointNotFoundException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
-                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Warning);
-            }
-            catch (CommunicationException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Warning);
-            }
-            catch (Exception)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
+                    if (success)
+                    {
+                        ProcessCodeRequestSuccess(this.email);
+                    }
+                    else
+                    {
+                        windowService.ShowPopUp(Properties.Langs.Lang.sendFailedTitleText,
+                            Properties.Langs.Lang.codeSendFailedText, PopUpIcon.Error);
+                    }
+                });
             }
             finally
             {
@@ -91,36 +71,9 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private async Task<bool> TryRequestResetCodeAsync(string email)
         {
-            try
-            {
-                var requestDto = new EmailVerificationDTO { Email = email, VerificationCode = "" };
-                bool success = await passwordResetClient.RequestPasswordResetCodeAsync(requestDto);
-                return success;
-            }
-            catch (TimeoutException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
-                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
-                return false;
-            }
-            catch (EndpointNotFoundException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
-                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Warning);
-                return false;
-            }
-            catch (CommunicationException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Warning);
-                return false;
-            }
-            catch (Exception)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
-                return false;
-            }
+            var requestDto = new EmailVerificationDTO { Email = email, VerificationCode = "" };
+            bool success = await passwordResetClient.RequestPasswordResetCodeAsync(requestDto);
+            return success;
         }
 
         private void ProcessCodeRequestSuccess(string userEmail)
@@ -146,6 +99,5 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             return true;
         }
-
     }
 }

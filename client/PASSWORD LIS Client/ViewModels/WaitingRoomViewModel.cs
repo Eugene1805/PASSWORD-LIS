@@ -7,7 +7,6 @@ using PASSWORD_LIS_Client.WaitingRoomManagerServiceReference;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -18,7 +17,6 @@ namespace PASSWORD_LIS_Client.ViewModels
     public class WaitingRoomViewModel : BaseViewModel
     {
         private readonly IWaitingRoomManagerService roomManagerClient;
-        private readonly IWindowService windowService;
         private readonly IFriendsManagerService friendsManagerService;
         private readonly IReportManagerService reportManagerService;
         private const int MaxPlayers = 4;
@@ -134,10 +132,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ObservableCollection<PlayerDTO> ConnectedPlayers { get; }
 
         public WaitingRoomViewModel(IWaitingRoomManagerService roomManagerService, IWindowService windowService,
-            IFriendsManagerService friendsManagerService,IReportManagerService reportManagerService) 
+            IFriendsManagerService friendsManagerService,IReportManagerService reportManagerService)
+            : base(windowService)
         {
             this.roomManagerClient = roomManagerService;
-            this.windowService = windowService;
             this.friendsManagerService = friendsManagerService;
             this.reportManagerService = reportManagerService;
             friendsManagerService.FriendAdded += OnFriendAdded;
@@ -171,7 +169,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             this.IsHost = isHost;
             this.IsGuest = SessionManager.CurrentUser == null || SessionManager.CurrentUser.PlayerId < 0;
 
-            try
+            await ExecuteAsync(async () =>
             {
                 var players = await roomManagerClient.GetPlayersInRoomAsync(GameCode)
                     .ConfigureAwait(false) ?? new List<PlayerDTO>();
@@ -211,27 +209,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 {
                     update();
                 }
-            }
-            catch (TimeoutException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
-                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
-            }
-            catch (EndpointNotFoundException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
-                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
-            }
-            catch (CommunicationException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
-            }
-            catch (Exception)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
-            }
+            });
         }
         private bool CanReportPlayer()
         {
@@ -279,31 +257,14 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             try
             {
-                await roomManagerClient.SendMessageAsync(this.gameCode, new ChatMessageDTO
+                await ExecuteAsync(async () =>
                 {
-                    Message = CurrentMessage,
-                    SenderNickname = SessionManager.CurrentUser.Nickname
+                    await roomManagerClient.SendMessageAsync(this.gameCode, new ChatMessageDTO
+                    {
+                        Message = CurrentMessage,
+                        SenderNickname = SessionManager.CurrentUser.Nickname
+                    });
                 });
-            }
-            catch (TimeoutException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
-                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
-            }
-            catch (EndpointNotFoundException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
-                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
-            }
-            catch (CommunicationException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
-            }
-            catch (Exception)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
             }
             finally
             {
@@ -315,42 +276,25 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             try
             {
-                if (this.currentPlayer != null)
+                await ExecuteAsync(async () =>
                 {
-                    if (IsHost)
+                    if (this.currentPlayer != null)
                     {
-                        await roomManagerClient.HostLeftAsync(this.gameCode);
+                        if (IsHost)
+                        {
+                            await roomManagerClient.HostLeftAsync(this.gameCode);
+                        }
+                        else
+                        {
+                            await roomManagerClient.LeaveRoomAsync(this.gameCode,
+                                IsGuest ? currentPlayer.Id : SessionManager.CurrentUser.PlayerId);
+                        }
                     }
-                    else
+                    if(!IsGuest)
                     {
-                        await roomManagerClient.LeaveRoomAsync(this.gameCode,
-                            IsGuest ? currentPlayer.Id : SessionManager.CurrentUser.PlayerId);
+                        await CleanupAndUnsubscribeAsync();
                     }
-                }
-                if(!IsGuest)
-                {
-                    await CleanupAndUnsubscribeAsync();
-                }
-            }
-            catch (TimeoutException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
-                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
-            }
-            catch (EndpointNotFoundException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
-                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
-            }
-            catch (CommunicationException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
-            }
-            catch (Exception)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
+                });
             }
             finally
             {
@@ -365,30 +309,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
         private async Task StartGameAsync()
         {
-            try
+            await ExecuteAsync(async () =>
             {
                 await roomManagerClient.StartGameAsync(GameCode);
-            }
-            catch (TimeoutException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
-                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
-            }
-            catch (EndpointNotFoundException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
-                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
-            }
-            catch (CommunicationException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
-            }
-            catch (Exception)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
-            }
+            });
         }
 
         private bool CanStartGame()
@@ -484,28 +408,14 @@ namespace PASSWORD_LIS_Client.ViewModels
                 return;
             }
 
-            try
+            await ExecuteAsync(async () =>
             {
                 await roomManagerClient.SendGameInvitationToFriendAsync(friendToInvite.PlayerId, gameCode,
                     SessionManager.CurrentUser.Nickname);
                 windowService.ShowPopUp(Properties.Langs.Lang.successTitleText,
                     Properties.Langs.Lang.invitationsentSuccessText, PopUpIcon.Success);
-            } 
-            catch (FaultException<ServiceErrorDetailDTO> ex)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    ex.Detail.Message, PopUpIcon.Error);
-            } 
-            catch (CommunicationException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
-            } 
-            catch (Exception)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
-            }
+            });
+            
         }
         private bool CanInviteFriend()
         {
@@ -527,44 +437,22 @@ namespace PASSWORD_LIS_Client.ViewModels
             IsLoadingFriends = true;
             try
             {
-                var friendsArray = await friendsManagerService.
-                    GetFriendsAsync(SessionManager.CurrentUser.UserAccountId);
-                await Application.Current.Dispatcher.InvokeAsync(() =>
+                await ExecuteAsync(async () =>
                 {
-                    Friends.Clear();
-                    if (friendsArray != null)
+                    var friendsArray = await friendsManagerService.
+                        GetFriendsAsync(SessionManager.CurrentUser.UserAccountId);
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        foreach (var friend in friendsArray)
+                        Friends.Clear();
+                        if (friendsArray != null)
                         {
-                            Friends.Add(friend);
+                            foreach (var friend in friendsArray)
+                            {
+                                Friends.Add(friend);
+                            }
                         }
-                    }
-                }); 
-            }
-            catch (FaultException<ServiceErrorDetailDTO> ex)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    ex.Detail.Message, PopUpIcon.Error);
-            }
-            catch (TimeoutException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
-                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
-            }
-            catch (EndpointNotFoundException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
-                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
-            }
-            catch (CommunicationException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
-            }
-            catch (Exception)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
+                    });
+                });
             }
             finally
             {

@@ -1,16 +1,12 @@
-﻿using PASSWORD_LIS_Client.AccountManagerServiceReference;
-using PASSWORD_LIS_Client.Commands;
+﻿using PASSWORD_LIS_Client.Commands;
 using PASSWORD_LIS_Client.FriendsManagerServiceReference;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
-using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace PASSWORD_LIS_Client.ViewModels
@@ -86,15 +82,15 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand JoinGameCommand { get; }
         public ICommand CreateGameCommand { get; }
 
-        private readonly IWindowService windowService;
         private readonly IFriendsManagerService friendsManagerService;
         private readonly IWaitingRoomManagerService waitingRoomManagerService;
         private readonly IReportManagerService reportManagerService;
         private const int GameCodeLength = 5;
-        public LobbyViewModel(IWindowService windowService, IFriendsManagerService friendsManagerService, IWaitingRoomManagerService waitingRoomManagerService,
-            IReportManagerService reportManagerService)
+        
+        public LobbyViewModel(IWindowService windowService, IFriendsManagerService friendsManagerService, 
+            IWaitingRoomManagerService waitingRoomManagerService,IReportManagerService reportManagerService)
+            : base(windowService)
         {
-            this.windowService = windowService;
             this.friendsManagerService = friendsManagerService;
             this.waitingRoomManagerService = waitingRoomManagerService;
             this.reportManagerService = reportManagerService;
@@ -156,43 +152,22 @@ namespace PASSWORD_LIS_Client.ViewModels
             IsLoadingFriends = true;
             try
             {
-                var friendsArray = await friendsManagerService.GetFriendsAsync(SessionManager.CurrentUser.UserAccountId);
-                await Application.Current.Dispatcher.InvokeAsync(() =>
+                await ExecuteAsync(async () =>
                 {
-                    Friends.Clear();
-                    if (friendsArray != null)
+                    var friendsArray = await friendsManagerService.GetFriendsAsync(
+                        SessionManager.CurrentUser.UserAccountId);
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
                     {
-                        foreach (var friend in friendsArray)
+                        Friends.Clear();
+                        if (friendsArray != null)
                         {
-                            Friends.Add(friend);
+                            foreach (var friend in friendsArray)
+                            {
+                                Friends.Add(friend);
+                            }
                         }
-                    }
+                    });
                 });
-            }
-            catch (FaultException<ServiceErrorDetailDTO> ex)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, 
-                    ex.Detail.Message, PopUpIcon.Error);
-            }
-            catch (TimeoutException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText, 
-                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
-            }
-            catch (EndpointNotFoundException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText, 
-                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
-            }
-            catch (CommunicationException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText, 
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
-            }
-            catch (Exception)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
             }
             finally
             {
@@ -235,48 +210,26 @@ namespace PASSWORD_LIS_Client.ViewModels
                 return;
             }
             IsLoadingFriends = true; 
-            try
+            try 
             {
-                bool success = await friendsManagerService.DeleteFriendAsync(
-                    SessionManager.CurrentUser.PlayerId, 
-                    friendToDelete.PlayerId
-                );
+                await ExecuteAsync(async () =>
+                {
+                    bool success = await friendsManagerService.DeleteFriendAsync(
+                        SessionManager.CurrentUser.PlayerId,
+                        friendToDelete.PlayerId
+                    );
 
-                if (success)
-                {
-                    windowService.ShowPopUp(Properties.Langs.Lang.successTitleText, 
-                        Properties.Langs.Lang.successDeletionText, PopUpIcon.Success);
-                }
-                else
-                {
-                    windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                        Properties.Langs.Lang.couldNotRemoveFriendTitleText, PopUpIcon.Error);
-                }
-            }
-            catch (FaultException<ServiceErrorDetailDTO> ex)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, 
-                    ex.Detail.Message, PopUpIcon.Error);
-            }
-            catch (TimeoutException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText, 
-                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
-            }
-            catch (EndpointNotFoundException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText, 
-                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
-            }
-            catch (CommunicationException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText, 
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
-            }
-            catch (Exception) 
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
+                    if (success)
+                    {
+                        windowService.ShowPopUp(Properties.Langs.Lang.successTitleText,
+                            Properties.Langs.Lang.successDeletionText, PopUpIcon.Success);
+                    }
+                    else
+                    {
+                        windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                            Properties.Langs.Lang.couldNotRemoveFriendTitleText, PopUpIcon.Error);
+                    }
+                });
             }
             finally
             {
@@ -328,7 +281,8 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void ShowSettings(object parameter)
         {
-            var settingsViewModel = new SettingsViewModel(App.WindowService, App.FriendsManagerService, App.BackgroundMusicService);
+            var settingsViewModel = new SettingsViewModel(App.WindowService, 
+                App.FriendsManagerService, App.BackgroundMusicService);
             var settingsWindow = new SettingsWindow { DataContext = settingsViewModel };
             settingsWindow.ShowDialog();
 
@@ -340,19 +294,21 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
         private async Task CreateGameAsync()
         {
-            try
+            await ExecuteAsync(async () =>
             {
                 bool isBanned = await reportManagerService.IsPlayerBannedAsync(SessionManager.CurrentUser.PlayerId);
                 if (isBanned)
                 {
-                    windowService.ShowPopUp(Properties.Langs.Lang.bannedAccountText, Properties.Langs.Lang.cantCreateMatchText, PopUpIcon.Warning);
+                    windowService.ShowPopUp(Properties.Langs.Lang.bannedAccountText,
+                        Properties.Langs.Lang.cantCreateMatchText, PopUpIcon.Warning);
                     return;
                 }
                 string newGameCode = await waitingRoomManagerService.CreateRoomAsync(SessionManager.CurrentUser.Email);
 
                 if (!string.IsNullOrEmpty(newGameCode))
                 {
-                    var waitingRoomViewModel = new WaitingRoomViewModel(App.WaitRoomManagerService, App.WindowService, App.FriendsManagerService,
+                    var waitingRoomViewModel = new WaitingRoomViewModel(App.WaitRoomManagerService,
+                        App.WindowService, App.FriendsManagerService,
                         App.ReportManagerService);
                     await waitingRoomViewModel.InitializeAsync(newGameCode, isHost: true);
 
@@ -368,44 +324,10 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
                 else
                 {
-                    windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText, Properties.Langs.Lang.couldNotCreateMatch, PopUpIcon.Error);
+                    windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.couldNotCreateMatch, PopUpIcon.Error);
                 }
-            }
-            catch(FaultException<WaitingRoomManagerServiceReference.ServiceErrorDetailDTO> ex)
-            {
-                switch (ex.Detail.Code)
-                {
-                    case WaitingRoomManagerServiceReference.ServiceErrorCode.COULD_NOT_CREATE_ROOM:
-                        windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
-                        Properties.Langs.Lang.couldNotCreateMatch, PopUpIcon.Warning);
-                        break;
-                    default:
-                        windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                        Properties.Langs.Lang.unexpectedServerErrorText, PopUpIcon.Error);
-                        break;
-                }
-            }
-            catch (TimeoutException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
-                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
-            }
-            catch (EndpointNotFoundException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
-                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
-            }
-            catch (CommunicationException ex)
-            {
-                Console.WriteLine(ex.StackTrace);
-                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
-            }
-            catch (Exception)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
-            }
+            });
         }
         private bool CanJoinGame()
         {
@@ -413,30 +335,34 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
         private async Task JoinGameWithCodeAsync()
         {
-            try
+            await ExecuteAsync(async () =>
             {
                 bool success;
                 if (IsGuest)
                 {
-                    success = await waitingRoomManagerService.JoinRoomAsGuestAsync(GameCodeToJoin, SessionManager.CurrentUser.Nickname);
+                    success = await waitingRoomManagerService.JoinRoomAsGuestAsync(
+                        GameCodeToJoin, SessionManager.CurrentUser.Nickname);
                 }
                 else
                 {
-                    bool isBanned = await reportManagerService.IsPlayerBannedAsync(SessionManager.CurrentUser.PlayerId);
+                    bool isBanned = await reportManagerService.IsPlayerBannedAsync(
+                        SessionManager.CurrentUser.PlayerId);
                     if (isBanned)
                     {
-                        windowService.ShowPopUp(Properties.Langs.Lang.bannedAccountText, Properties.Langs.Lang.cantJoinMatchText, PopUpIcon.Warning);
+                        windowService.ShowPopUp(Properties.Langs.Lang.bannedAccountText, 
+                            Properties.Langs.Lang.cantJoinMatchText, PopUpIcon.Warning);
                         return;
                     }
-                    var playerId = await waitingRoomManagerService.JoinRoomAsRegisteredPlayerAsync(GameCodeToJoin, SessionManager.CurrentUser.Email);
+                    var playerId = await waitingRoomManagerService.JoinRoomAsRegisteredPlayerAsync(
+                        GameCodeToJoin, SessionManager.CurrentUser.Email);
                     success = playerId > 0;
                 }
 
                 if (success)
                 {
 
-                    var waitingRoomViewModel = new WaitingRoomViewModel(App.WaitRoomManagerService, App.WindowService, App.FriendsManagerService,
-                        App.ReportManagerService);
+                    var waitingRoomViewModel = new WaitingRoomViewModel(App.WaitRoomManagerService,
+                        App.WindowService, App.FriendsManagerService,App.ReportManagerService);
                     await waitingRoomViewModel.InitializeAsync(GameCodeToJoin, isHost: false);
 
                     if (Application.Current == null || Application.Current.Dispatcher == null)
@@ -449,54 +375,12 @@ namespace PASSWORD_LIS_Client.ViewModels
                         windowService.NavigateTo(waitingRoomPage);
                     }
                 }
-                else 
+                else
                 {
                     windowService.ShowPopUp(Properties.Langs.Lang.joinFailedTitle,
                         Properties.Langs.Lang.unexpectedServerErrorText, PopUpIcon.Warning);
                 }
-            }
-            catch(FaultException<WaitingRoomManagerServiceReference.ServiceErrorDetailDTO> ex)
-            {
-                switch (ex.Detail.Code)
-                {
-                    case WaitingRoomManagerServiceReference.ServiceErrorCode.ROOM_NOT_FOUND:
-                        windowService.ShowPopUp(Properties.Langs.Lang.joinFailedTitle,
-                        Properties.Langs.Lang.incorrectCodeText, PopUpIcon.Warning);
-                        break;
-                    case WaitingRoomManagerServiceReference.ServiceErrorCode.ROOM_FULL:
-                        windowService.ShowPopUp(Properties.Langs.Lang.joinFailedTitle,
-                        Properties.Langs.Lang.roomFullText, PopUpIcon.Warning);
-                        break;
-                    case WaitingRoomManagerServiceReference.ServiceErrorCode.ALREADY_IN_ROOM:
-                        windowService.ShowPopUp(Properties.Langs.Lang.joinFailedTitle,
-                        Properties.Langs.Lang.youAreAlreadyInGameText, PopUpIcon.Warning);
-                        break;
-                    default:
-                        windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                        Properties.Langs.Lang.unexpectedServerErrorText, PopUpIcon.Error);
-                        break;
-                }
-            }
-            catch (TimeoutException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
-                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
-            }
-            catch (EndpointNotFoundException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
-                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
-            }
-            catch (CommunicationException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
-            }
-            catch (Exception)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
-            }
+            });
         }
     }
 }

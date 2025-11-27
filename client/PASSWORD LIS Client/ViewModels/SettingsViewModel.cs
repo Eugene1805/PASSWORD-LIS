@@ -11,7 +11,6 @@ namespace PASSWORD_LIS_Client.ViewModels
 {
     public class SettingsViewModel : BaseViewModel
     {
-        private readonly IWindowService windowService;
         private readonly IFriendsManagerService friendsManagerService;
         private readonly BackgroundMusicService backgroundMusicService;
         private bool isEnglishSelected;
@@ -59,9 +58,11 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand LogoutCommand { get; }
 
         public bool WasLogoutSuccessful { get; private set; } = false;
+        
         public SettingsViewModel(IWindowService windowService, IFriendsManagerService friendsManagerService,
-            BackgroundMusicService backgroundMusicService) {
-
+            BackgroundMusicService backgroundMusicService)
+            : base(windowService)
+        {
             var currentLang = Settings.Default.languageCode;
             if (string.IsNullOrEmpty(currentLang) || currentLang == "en-US")
             {
@@ -71,7 +72,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 isSpanishSelected = true;
             }
-            this.windowService = windowService;
             this.friendsManagerService = friendsManagerService;
             this.backgroundMusicService = backgroundMusicService;
             this.musicVolume = Settings.Default.MusicVolume;

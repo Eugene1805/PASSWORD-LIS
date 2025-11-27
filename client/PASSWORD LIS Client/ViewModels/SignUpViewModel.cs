@@ -1,4 +1,4 @@
-﻿using PASSWORD_LIS_Client.AccountManagerServiceReference;
+using PASSWORD_LIS_Client.AccountManagerServiceReference;
 using PASSWORD_LIS_Client.Commands;
 using PASSWORD_LIS_Client.Views;
 using PASSWORD_LIS_Client.Utils;
@@ -6,7 +6,6 @@ using System;
 using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
-using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using PASSWORD_LIS_Client.Services;
@@ -16,7 +15,6 @@ namespace PASSWORD_LIS_Client.ViewModels
     public class SignUpViewModel : BaseViewModel
     {
         private readonly IAccountManagerService client;
-        private readonly IWindowService windowService;
 
         private string firstName;
         public string FirstName
@@ -73,10 +71,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand NavigateToLoginCommand { get; }
         public ICommand OpenTermsAndConditionsCommand { get; }
 
-        public SignUpViewModel(IAccountManagerService accountManager, IWindowService windowService)
+        public SignUpViewModel(IAccountManagerService accountManager, IWindowService windowService) 
+            : base(windowService)
         {
             this.client = accountManager;
-            this.windowService = windowService;
             TCLink = ConfigurationManager.AppSettings["TCPageURL"];
             SignUpCommand = new RelayCommand(async (_) => await SignUpAsync(), (_) => CanExecuteSignUp());
             NavigateToLoginCommand = new RelayCommand(NavigateToLogin);
@@ -92,34 +90,11 @@ namespace PASSWORD_LIS_Client.ViewModels
             IsSigningUp = true;
             try
             {
-                await TryCreateAccountOnServerAsync();
-                ProcessSuccessfulSignUp();
-            }
-            catch (FaultException<ServiceErrorDetailDTO> ex)
-            {
-                //ShowDetailedError(ex);
-                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.userAlreadyExistText, PopUpIcon.Warning);
-            }
-            catch (TimeoutException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
-                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
-            }
-            catch (EndpointNotFoundException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
-                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
-            }
-            catch (CommunicationException)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
-            }
-            catch (Exception)
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
+                await ExecuteAsync(async () =>
+                {
+                    await TryCreateAccountOnServerAsync();
+                    ProcessSuccessfulSignUp();
+                });
             }
             finally
             {
@@ -205,7 +180,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
             }
             catch
-            {//TODO add personalized message
+            {
                 windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
                     Properties.Langs.Lang.networkErrorTitleText, PopUpIcon.Error);
                 return false;

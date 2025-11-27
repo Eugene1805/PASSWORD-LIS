@@ -1,11 +1,8 @@
-﻿using PASSWORD_LIS_Client.AccountManagerServiceReference;
-using PASSWORD_LIS_Client.Commands;
+﻿using PASSWORD_LIS_Client.Commands;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
-using System;
 using System.Collections.Generic;
-using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using ProfileUserDTO = PASSWORD_LIS_Client.ProfileManagerServiceReference.UserDTO;
@@ -125,14 +122,13 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand SaveChangesCommand { get; }
         public ICommand ChangePasswordCommand { get; }
 
-        private readonly IWindowService windowService;
         private readonly IProfileManagerService profileManagerClient;
         private ProfileUserDTO originalState;
 
         public ProfileViewModel(IProfileManagerService profileManagerService, IWindowService windowService)
+            : base(windowService)
         {
             this.profileManagerClient = profileManagerService;
-            this.windowService = windowService;
 
             BackToLobbyCommand = new RelayCommand(BackToLobby);
             EditProfileCommand = new RelayCommand(EditProfile);
@@ -204,40 +200,16 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             try
             {
-                var updatedDto = CollectUserData();
-                var resultDto = await profileManagerClient.UpdateProfileAsync(updatedDto);
-                ProcessUpdateResponse(resultDto);
+                await ExecuteAsync(async () =>
+                {
+                    var updatedDto = CollectUserData();
+                    var resultDto = await profileManagerClient.UpdateProfileAsync(updatedDto);
+                    ProcessUpdateResponse(resultDto);
+                });
             }
-            catch (FaultException<ServiceErrorDetailDTO> ex) 
+            catch
             {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                                        ex.Detail.Message, PopUpIcon.Error);
-                IsEditMode = true; 
-            }
-            catch (TimeoutException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
-                                        Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
                 IsEditMode = true;
-            }
-            catch (EndpointNotFoundException) 
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
-                                        Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
-                IsEditMode = true;
-            }
-            catch (CommunicationException)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
-                                        Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
-                IsEditMode = true;
-            }
-            catch (Exception)
-            {
-                windowService.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText,
-                    PopUpIcon.Error);
-                IsEditMode = true; 
             }
             finally
             {
@@ -395,7 +367,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 return false;
             }
             FirstNameError = null;
-            return true; ;
+            return true;
         }
 
         private bool ValidateLastName()
@@ -415,14 +387,14 @@ namespace PASSWORD_LIS_Client.ViewModels
                 LastNameError = Properties.Langs.Lang.lastNameInvalidCharsText;
                 return false;
             }
-            LastNameError = null;
+            LastNameError = null; 
             return true;
         }
-        private string ValidateSocialMediaField(string socialMediaUsername)
+        private static string ValidateSocialMediaField(string socialMediaUsername)
         {
             if (!string.IsNullOrEmpty(socialMediaUsername) && socialMediaUsername.Length > 50)
             {
-                return Properties.Langs.Lang.usernameNotExceedFiftyCharacteresText;
+                return "El usuario no debe exceder los 50 caracteres.";
             }
             return null;
         }

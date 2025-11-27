@@ -14,6 +14,7 @@ namespace Host
     static class Program
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(Program));
+        
         static void Main(string[] args)
         {
             XmlConfigurator.Configure();
@@ -22,140 +23,15 @@ namespace Host
             try
             {
                 log.Info("The server started.");
-                // We create the dependencies first so they can be used in every service
-                var dbContextFactory = new DbContextFactory();
-
-                var emailSender = new EmailSender();
-                var codeService = new VerificationCodeService();
-                var notificationService = new NotificationService(emailSender);
-
-                var operationContextWrapper = new OperationContextWrapper();
-
-                var accountRepository = new AccountRepository(dbContextFactory);
-                var statisticsRepository = new StatisticsRepository(dbContextFactory);
-                var playerRepository = new PlayerRepository(dbContextFactory);
-                var friendshipRepository = new FriendshipRepository(dbContextFactory);
-                var reportRepository = new ReportRepository(dbContextFactory);
-                var banRepository = new BanRepository(dbContextFactory);
-                var wordRepository = new WordRepository(dbContextFactory);
-                var matchRepository = new MatchRepository(dbContextFactory);
-
-
-                var accountManagerInstance = new AccountManager(accountRepository, notificationService, codeService);
-                var loginManagerInstance = new LoginManager(accountRepository,notificationService,codeService);
-                var verificationManagerInstance = new VerificationCodeManager(accountRepository, notificationService, codeService);
-                var passwordResetManagerInstance = new PasswordResetManager(accountRepository, notificationService, codeService);
-                var profileManagerInstance = new ProfileManager(accountRepository);
-                var topPlayersManagerInstance = new TopPlayersManager(statisticsRepository);
-                var gameManagerInstance = new GameManager(operationContextWrapper, wordRepository, matchRepository, playerRepository);
-                var waitingRoomManagerInstance = new WaitingRoomManager(playerRepository,operationContextWrapper,gameManagerInstance, accountRepository, notificationService);
-                var friendsManagerInstance = new FriendsManager(friendshipRepository, accountRepository, operationContextWrapper);
-                var reportManagerInstance = new ReportManager(reportRepository, playerRepository,banRepository,operationContextWrapper);
-
+                InitializeAndStartServices(hosts);
                 
-                var accountManagerHost = new ServiceHost(accountManagerInstance);
-                var loginManagerHost = new ServiceHost(loginManagerInstance);
-                var verificationManagerHost = new ServiceHost(verificationManagerInstance);
-                var passwordResetManagerHost = new ServiceHost(passwordResetManagerInstance);
-                var profileManagerHost = new ServiceHost(profileManagerInstance);
-                var topPlayersManagerHost = new ServiceHost(topPlayersManagerInstance);
-                var friendsManagerHost = new ServiceHost(friendsManagerInstance);
-                var reportManagerHost = new ServiceHost(reportManagerInstance);
-                var gameManagerHost = new ServiceHost(gameManagerInstance);
-                var waitingRoomManagerHost = new ServiceHost(waitingRoomManagerInstance);
-                
-
-                hosts.Add(accountManagerHost);
-                hosts.Add(loginManagerHost);
-                hosts.Add(verificationManagerHost);
-                hosts.Add(passwordResetManagerHost);
-                hosts.Add(profileManagerHost);
-                hosts.Add(topPlayersManagerHost);
-                hosts.Add(friendsManagerHost);
-                hosts.Add(reportManagerHost);
-                hosts.Add(gameManagerHost);
-                hosts.Add(waitingRoomManagerHost);
-
-                
-                foreach (var host in hosts)
-                {
-                    var serviceName = host.Description != null && host.Description.ServiceType != null
-                        ? host.Description.ServiceType.Name
-                        : host.GetType().Name;
-
-                    try
-                    {
-                        host.Open();
-
-                        foreach (var endpoint in host.Description.Endpoints)
-                        {
-                            Console.WriteLine($"-> Service listening in: {endpoint.Address}");
-                        }
-                    }
-                    catch (AddressAccessDeniedException ex)
-                    {
-                        log.Error($"Failed to open service '{serviceName}'. The process lacks permissions to listen on the specified address/port. Try running as Administrator or reserving the URL with netsh. Details: {ex.Message}", ex);
-                        SafeAbort(host);
-                    }
-                    catch (AddressAlreadyInUseException ex)
-                    {
-                        log.Error($"Failed to open service '{serviceName}'. The address/port is already in use. Ensure no other service is using the same base address. Details: {ex.Message}", ex);
-                        SafeAbort(host);
-                    }
-                    catch (ObjectDisposedException ex)
-                    {
-                        log.Error($"Failed to open service '{serviceName}'. The host or one of its dependencies was disposed. Details: {ex.Message}", ex);
-                        SafeAbort(host);
-                    }
-                    catch (InvalidOperationException ex)
-                    {
-                        log.Error($"Failed to open service '{serviceName}'. Invalid configuration or state. Verify endpoints, bindings, and behaviors. Details: {ex.Message}", ex);
-                        SafeAbort(host);
-                    }
-                    catch (CommunicationObjectFaultedException ex)
-                    {
-                        log.Error($"Failed to open service '{serviceName}'. The communication object is faulted. Details: {ex.Message}", ex);
-                        SafeAbort(host);
-                    }
-                    catch (CommunicationException ex)
-                    {
-                        log.Error($"Failed to open service '{serviceName}'. A communication error occurred while opening the listener. Details: {ex.Message}", ex);
-                        SafeAbort(host);
-                    }
-                    catch (TimeoutException ex)
-                    {
-                        log.Error($"Failed to open service '{serviceName}' due to timeout. Consider increasing open timeouts. Details: {ex.Message}", ex);
-                        SafeAbort(host);
-                    }
-                    catch (Exception ex)
-                    {
-                        log.Error($"Failed to open service '{serviceName}' due to an unexpected error. Details: {ex.Message}", ex);
-                        SafeAbort(host);
-                    }
-                }
-
                 Console.WriteLine("\n All services are running");
                 Console.WriteLine("Press <Enter> to stop them.");
                 Console.ReadLine();
             }
-            catch (ObjectDisposedException ex)
+            catch (Exception ex) when (IsKnownStartupException(ex))
             {
-                log.Error("A disposal-related error occurred during service startup.", ex);
-            }
-            catch (InvalidOperationException ex)
-            {
-                log.Error("An invalid operation occurred during service startup.", ex);
-            }
-            catch(CommunicationObjectFaultedException ex) { 
-                log.Error("A communication object fault occurred during service startup.", ex);
-            } 
-            catch(CommunicationException ex)
-            {
-                log.Error("A communication error occurred during service startup.", ex);
-            }
-            catch(TimeoutException ex)
-            {
-                log.Error("A timeout occurred during service startup.", ex);
+                log.Error($"An error occurred during service startup: {ex.Message}", ex);
             }
             catch (Exception ex)
             {
@@ -164,25 +40,126 @@ namespace Host
             }
             finally
             {
-                foreach (var host in hosts)
+                CleanupHosts(hosts);
+            }
+        }
+
+        private static bool IsKnownStartupException(Exception ex)
+        {
+            return ex is ObjectDisposedException || 
+                   ex is InvalidOperationException || 
+                   ex is CommunicationObjectFaultedException || 
+                   ex is CommunicationException || 
+                   ex is TimeoutException;
+        }
+
+        private static void InitializeAndStartServices(List<ServiceHost> hosts)
+        {
+            var dbContextFactory = new DbContextFactory();
+            var emailSender = new EmailSender();
+            var codeService = new VerificationCodeService();
+            var notificationService = new NotificationService(emailSender);
+            var operationContextWrapper = new OperationContextWrapper();
+
+            var accountRepository = new AccountRepository(dbContextFactory);
+            var statisticsRepository = new StatisticsRepository(dbContextFactory);
+            var playerRepository = new PlayerRepository(dbContextFactory);
+            var friendshipRepository = new FriendshipRepository(dbContextFactory);
+            var reportRepository = new ReportRepository(dbContextFactory);
+            var banRepository = new BanRepository(dbContextFactory);
+            var wordRepository = new WordRepository(dbContextFactory);
+            var matchRepository = new MatchRepository(dbContextFactory);
+
+            var accountManagerInstance = new AccountManager(accountRepository, notificationService, codeService);
+            var loginManagerInstance = new LoginManager(accountRepository, notificationService, codeService);
+            var verificationManagerInstance = new VerificationCodeManager(accountRepository, notificationService, 
+                codeService);
+            var passwordResetManagerInstance = new PasswordResetManager(accountRepository, notificationService, 
+                
+                codeService);
+            var profileManagerInstance = new ProfileManager(accountRepository);
+            var topPlayersManagerInstance = new TopPlayersManager(statisticsRepository);
+            var gameManagerInstance = new GameManager(operationContextWrapper, wordRepository, matchRepository,
+                playerRepository);
+            var waitingRoomManagerInstance = new WaitingRoomManager(playerRepository, operationContextWrapper,
+                gameManagerInstance, accountRepository, notificationService);
+            var friendsManagerInstance = new FriendsManager(friendshipRepository, accountRepository,
+                operationContextWrapper);
+            var reportManagerInstance = new ReportManager(reportRepository, playerRepository, banRepository, 
+                operationContextWrapper);
+
+            hosts.Add(new ServiceHost(accountManagerInstance));
+            hosts.Add(new ServiceHost(loginManagerInstance));
+            hosts.Add(new ServiceHost(verificationManagerInstance));
+            hosts.Add(new ServiceHost(passwordResetManagerInstance));
+            hosts.Add(new ServiceHost(profileManagerInstance));
+            hosts.Add(new ServiceHost(topPlayersManagerInstance));
+            hosts.Add(new ServiceHost(friendsManagerInstance));
+            hosts.Add(new ServiceHost(reportManagerInstance));
+            hosts.Add(new ServiceHost(gameManagerInstance));
+            hosts.Add(new ServiceHost(waitingRoomManagerInstance));
+
+            foreach (var host in hosts)
+            {
+                OpenServiceHost(host);
+            }
+        }
+
+        private static void OpenServiceHost(ServiceHost host)
+        {
+            var serviceName = host.Description?.ServiceType?.Name ?? host.GetType().Name;
+
+            try
+            {
+                host.Open();
+                
+                foreach (var endpoint in host.Description.Endpoints)
                 {
-                    if (host != null)
+                    Console.WriteLine($"-> Service listening in: {endpoint.Address}");
+                }
+            }
+            catch (AddressAccessDeniedException ex)
+            {
+                log.Error($"Failed to open service '{serviceName}'." +
+                    $" The process lacks permissions to listen on the specified address/port." +
+                    $" Try running as Administrator or reserving the URL with netsh. Details: {ex.Message}", ex);
+                SafeAbort(host);
+            }
+            catch (AddressAlreadyInUseException ex)
+            {
+                log.Error($"Failed to open service '{serviceName}'. The address/port is already in use. " +
+                    $"Ensure no other service is using the same base address. Details: {ex.Message}", ex);
+                SafeAbort(host);
+            }
+            catch (Exception ex) when (IsKnownStartupException(ex))
+            {
+                log.Error($"Failed to open service '{serviceName}'. Details: {ex.Message}", ex);
+                SafeAbort(host);
+            }
+            catch (Exception ex)
+            {
+                log.Error($"Failed to open service '{serviceName}' due to an unexpected error. Details: {ex.Message}", ex);
+                SafeAbort(host);
+            }
+        }
+
+        private static void CleanupHosts(List<ServiceHost> hosts)
+        {
+            foreach (var host in hosts.Where(h => h != null))
+            {
+                if (host.State == CommunicationState.Faulted)
+                {
+                    host.Abort();
+                }
+                else
+                {
+                    try
                     {
-                        if (host.State == CommunicationState.Faulted)
-                        {
-                            host.Abort();
-                        }
-                        else
-                        {
-                            try
-                            {
-                                host.Close();
-                            }
-                            catch
-                            {
-                                host.Abort();
-                            }
-                        }
+                        host.Close();
+                    }
+                    catch
+                    {
+                        host.Abort();
                     }
                 }
             }

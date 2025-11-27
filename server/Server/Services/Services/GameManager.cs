@@ -18,408 +18,232 @@ using System.Threading.Tasks;
 namespace Services.Services
 {
     [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Multiple)]
-    public class GameManager : IGameManager
+    public class GameManager : ServiceBase, IGameManager
     {
-        private readonly ConcurrentDictionary<string, MatchSession> matches = 
+        private readonly ConcurrentDictionary<string, MatchSession> matches =
             new ConcurrentDictionary<string, MatchSession>();
         private readonly IOperationContextWrapper operationContext;
         private readonly IWordRepository wordRepository;
         private readonly IMatchRepository matchRepository;
         private readonly IPlayerRepository playerRepository;
-        private readonly GameBroadcaster gameBroadcaster;
         private static readonly ILog log = LogManager.GetLogger(typeof(GameManager));
 
-        private const int RoundDurationSeconds = 30; // CAMBIADO PARA PRUEBAS de 60 a 180
-        private const int ValidationDurationSeconds = 30; //Cambiado para pruebas de 20 a 60
+        private const int RoundDurationSeconds = 60;
+        private const int ValidationDurationSeconds = 30;
         private const int SuddenDeathDurationSeconds = 30;
-        private const int WordsPerRound = 5; // Change from 5 to 3 for testing
-        private const int TotalRounds = 5; //CAMBIADO DE 5 A 1
+        private const int WordsPerRound = 5;
+        private const int TotalRounds = 5;
         private const int PointsPerWin = 10;
         private const int PlayersPerMatch = 4;
         private const int SuddenDeathWordsBuffer = 15;
-        
 
         public GameManager(IOperationContextWrapper contextWrapper, IWordRepository wordRepository,
-            IMatchRepository matchRepository, IPlayerRepository playerRepository)
+            IMatchRepository matchRepository, IPlayerRepository playerRepository) : base(log)
         {
             this.operationContext = contextWrapper;
             this.wordRepository = wordRepository;
             this.matchRepository = matchRepository;
             this.playerRepository = playerRepository;
-            this.gameBroadcaster = new GameBroadcaster();
         }
 
         public bool CreateMatch(string gameCode, List<PlayerDTO> playersFromWaitingRoom)
         {
-            if (playersFromWaitingRoom == null || playersFromWaitingRoom.Count != PlayersPerMatch)
+            return Execute(() =>
             {
-                return false;
-            }
-            var matchSession = new MatchSession(gameCode, playersFromWaitingRoom);
-            return matches.TryAdd(gameCode, matchSession);
+                if (playersFromWaitingRoom == null || playersFromWaitingRoom.Count != PlayersPerMatch)
+                {
+                    return false;
+                }
+                var matchSession = new MatchSession(gameCode, playersFromWaitingRoom);
+                return matches.TryAdd(gameCode, matchSession);
+            }, context: "GameManager: CreateMatch");
         }
 
         public async Task PassTurnAsync(string gameCode, int senderPlayerId)
         {
-            if (!matches.TryGetValue(gameCode, out MatchSession session) 
-                || session.Status != MatchStatus.InProgress)
+            await ExecuteAsync(async () =>
             {
-                return;
-            }
-            if (!session.ActivePlayers.TryGetValue(senderPlayerId, out var sender))
-            {
-                return;
-            }
-            if (sender.Player.Role != PlayerRole.ClueGuy)
-            {
-                return;
-            }
-            var team = sender.Player.Team;
-            if ((team == MatchTeam.RedTeam && session.RedTeamPassedThisRound) ||
-                (team == MatchTeam.BlueTeam && session.BlueTeamPassedThisRound))
-            {
-                return;
-            }
-
-            var currentPassword = session.GetCurrentPassword(team);
-            if (currentPassword != null && currentPassword.Id != -1)
-            {
-                var historyItem = new TurnHistoryDTO
+                var session = GetPassTurnSession(gameCode);
+                if (session == null)
                 {
-                    TurnId = (team == MatchTeam.RedTeam) 
-                    ? session.RedTeamWordIndex : session.BlueTeamWordIndex,
-                    Password = DTOMapper.ToWordDTO(currentPassword),
-                    ClueUsed = "[]"
-                };
-
-                if (team == MatchTeam.RedTeam)
-                {
-                    session.RedTeamTurnHistory.Add(historyItem);
+                    return;
                 }
-                else
-                {
-                    session.BlueTeamTurnHistory.Add(historyItem);
-                }
-            }
 
-            if (team == MatchTeam.RedTeam)
-            {
-                session.RedTeamPassedThisRound = true;
-                session.RedTeamWordIndex++;
-            }
-            else
-            {
-                session.BlueTeamPassedThisRound = true;
-                session.BlueTeamWordIndex++;
-            }
-
-            var nextWord = session.GetCurrentPassword(team);
-            try 
-            {
-                gameBroadcaster.SendToPlayer(sender, cb => cb.OnNewPassword(DTOMapper.ToWordDTO(nextWord)));
-            }
-            catch 
-            {
-                await HandlePlayerDisconnectionAsync(session, sender.Player.Id);
-                await HandlePlayerDisconnectionAsync(session, sender.Player.Id); 
-            }
-
-            var partner = session.GetPartner(sender); 
-            if (partner.Callback != null)
-            {
-                try 
+                var sender = GetPassTurnSender(session, senderPlayerId);
+                if (sender.Player == null)
                 {
-                    gameBroadcaster.SendToPlayer(partner, cb =>
-                    {
-                        cb.OnNewPassword(DTOMapper.ToMaskedWordDTO(nextWord));
-                        cb.OnClueReceived("Your partner passed the word.");
-                    });
+                    return;
                 }
-                catch 
+
+                var team = sender.Player.Team;
+                if (HasTeamAlreadyPassed(session, team))
                 {
-                    await HandlePlayerDisconnectionAsync(session, partner.Player.Id);
+                    return;
                 }
-            }
+
+                var currentPassword = session.GetCurrentPassword(team);
+                AddPassHistoryIfNeeded(session, team, currentPassword);
+
+                ApplyPassAndAdvance(session, team);
+
+                var nextWord = session.GetCurrentPassword(team);
+                await SendPassTurnUpdatesAsync(session, sender, nextWord);
+            }, context: "GameManager: PassTurnAsync");
         }
 
         public async Task SubmitClueAsync(string gameCode, int senderPlayerId, string clue)
         {
-            if (string.IsNullOrWhiteSpace(clue))
+            await ExecuteAsync(async () =>
             {
-                return;
-            }
+                var context = ValidateAndGetClueContext(gameCode, senderPlayerId, clue);
+                if (context == null) return;
 
-            if (!matches.TryGetValue(gameCode, out MatchSession session) 
-                || session.Status != MatchStatus.InProgress && session.Status != MatchStatus.SuddenDeath)
-            {
-                return;
-            }
-            if (!session.ActivePlayers.TryGetValue(senderPlayerId, out var sender))
-            {
-                return;
-            }
-            if (sender.Player.Role != PlayerRole.ClueGuy)
-            { 
-                return; 
-            }
+                var (session, sender, currentPassword) = context.Value;
 
-            var team = sender.Player.Team;
-            var currentPassword = session.GetCurrentPassword(team);
-            if (currentPassword == null)
-            {
-                return;
-            }
-            var historyItem = new TurnHistoryDTO
-            {
-                TurnId = (team == MatchTeam.RedTeam) ? session.RedTeamWordIndex : session.BlueTeamWordIndex,
-                Password = DTOMapper.ToWordDTO(currentPassword),
-                ClueUsed = clue
-            };
+                RecordClueHistory(session, sender, clue, currentPassword);
 
-            if (team == MatchTeam.RedTeam)
-            {
-                session.RedTeamTurnHistory.Add(historyItem);
-            }
-            else
-            {
-                session.BlueTeamTurnHistory.Add(historyItem);
-            }
-
-            var partner = session.GetPartner(sender);
-            if (partner.Callback != null)
-            {
-                try 
-                {
-                    gameBroadcaster.SendToPlayer(partner, cb => cb.OnClueReceived(clue));
-                }
-                catch 
-                {
-                    await HandlePlayerDisconnectionAsync(session, partner.Player.Id);
-                }
-            }
+                await NotifyPartnerOfClueAsync(session, sender, clue);
+            }, context: "GameManager: SubmitClueAsync");
         }
 
         public async Task SubmitGuessAsync(string gameCode, int senderPlayerId, string guess)
         {
-            if (string.IsNullOrWhiteSpace(guess))
+            await ExecuteAsync(async () =>
             {
-                return;
-            }
-            if (!matches.TryGetValue(gameCode, out MatchSession session) ||
-                (session.Status != MatchStatus.InProgress && session.Status != MatchStatus.SuddenDeath))
-            {
-                return;
-            }
-            var sender = session.GetPlayerById(senderPlayerId);
-            if (sender.Player == null || sender.Player.Role != PlayerRole.Guesser)
-            {
-                return;
-            }
+                var context = ValidateAndGetGuessContext(gameCode, senderPlayerId, guess);
+                if (context == null) return;
 
-            var team = sender.Player.Team;
-            var currentPassword = session.GetCurrentPassword(team);
-            int currentScore = (team == MatchTeam.RedTeam) ? session.RedTeamScore : session.BlueTeamScore;
+                var (session, sender, currentPassword) = context.Value;
+                var team = sender.Player.Team;
 
-            bool isCorrect = currentPassword != null &&
-                             (guess.Equals(currentPassword.EnglishWord, StringComparison.OrdinalIgnoreCase) ||
-                              guess.Equals(currentPassword.SpanishWord, StringComparison.OrdinalIgnoreCase));
+                bool isCorrect = IsGuessCorrect(currentPassword, guess);
+                int currentScore = (team == MatchTeam.RedTeam) ? session.RedTeamScore : session.BlueTeamScore;
 
-            if (isCorrect)
-            {
-                if (session.Status == MatchStatus.SuddenDeath)
+                if (isCorrect)
                 {
-                    session.Status = MatchStatus.Finished;
-                    session.StopTimers();
-                    session.AddScore(team);
-                    await PersistAndNotifyGameEnd(session, team);
-                    return;
-                }
-                session.AddScore(team);
-
-                if (team == MatchTeam.RedTeam)
-                {
-                    session.RedTeamWordIndex++;
+                    await HandleCorrectGuessAsync(session, team);
                 }
                 else
                 {
-                    session.BlueTeamWordIndex++;
+                    await HandleIncorrectGuessAsync(session, sender, team, currentScore);
                 }
-
-                int newScore = (team == MatchTeam.RedTeam) ? session.RedTeamScore : session.BlueTeamScore;
-
-                var resultDto = new GuessResultDTO { IsCorrect = true, Team = team, NewScore = newScore };
-                await BroadcastAndHandleDisconnectsAsync(session, cb => cb.OnGuessResult(resultDto));
-                
-                var nextWord = session.GetCurrentPassword(team);
-                var clueGuy = session.GetPlayerByRole(team, PlayerRole.ClueGuy);
-                var guesser = session.GetPlayerByRole(team, PlayerRole.Guesser);
-                try
-                {
-                    if (clueGuy.Callback != null)
-                        gameBroadcaster.SendToPlayer(clueGuy, cb => cb.OnNewPassword(DTOMapper.ToWordDTO(nextWord)));
-
-                    if (guesser.Callback != null)
-                        gameBroadcaster.SendToPlayer(guesser, cb => cb.OnNewPassword(DTOMapper.ToMaskedWordDTO(nextWord)));
-                }
-                catch (Exception)
-                {
-                    if (clueGuy.Callback != null) await HandlePlayerDisconnectionIfFailed(session, clueGuy.Player.Id);
-                    if (guesser.Callback != null) await HandlePlayerDisconnectionIfFailed(session, guesser.Player.Id);
-                }
-            }
-            else
-            {
-                var resultDto = new GuessResultDTO { IsCorrect = false, Team = team, NewScore = currentScore };
-                var clueGuy = session.GetPlayerByRole(team, PlayerRole.ClueGuy);
-                try 
-                {
-                    gameBroadcaster.SendToPlayer(sender, cb => cb.OnGuessResult(resultDto));
-                    if (clueGuy.Callback != null)
-                        gameBroadcaster.SendToPlayer(clueGuy, cb => cb.OnGuessResult(resultDto));
-                }
-                catch 
-                {
-                    await HandlePlayerDisconnectionIfFailed(session, sender.Player.Id);
-                    if (clueGuy.Player != null)
-                    {
-                        await HandlePlayerDisconnectionIfFailed(session, clueGuy.Player.Id);
-                    }
-                }
-            }
+            }, context: "GameManager: SubmitGuessAsync");
         }
 
-        public async Task SubmitValidationVotesAsync(string gameCode, int senderPlayerId, 
+        public async Task SubmitValidationVotesAsync(string gameCode, int senderPlayerId,
             List<ValidationVoteDTO> votes)
         {
-            try
+            await ExecuteAsync(async () =>
             {
-                log.InfoFormat("SubmitValidationVotesAsync called - GameCode: {0}, PlayerId: {1}, VotesCount: {2}",
-                    gameCode, senderPlayerId, votes == null ? 0 : votes.Count);
-                if (votes == null)
+                try
                 {
-                    log.WarnFormat("Votes list is null for game '{0}', player {1}", gameCode, senderPlayerId);
-                    return;
-                }
-                if (!matches.TryGetValue(gameCode, out MatchSession session) 
-                    || session.Status != MatchStatus.Validating)
-                {
-                    log.WarnFormat("Match not found or not in validating state: {0}", gameCode);
-                    return;
-                }
+                    var context = ValidateValidationContext(gameCode, senderPlayerId, votes);
+                    if (context == null) return;
 
-                if (!session.ActivePlayers.TryGetValue(senderPlayerId, out var sender))
-                {
-                    log.WarnFormat("Player not found in match: {0}", senderPlayerId);
-                    return;
-                }
-
-                bool allVotesIn = false;
-                lock (session.ReceivedVotes)
-                {
-                    if (session.PlayersWhoVoted.Contains(senderPlayerId))
+                    var (session, sender) = context.Value;
+                    bool allVotesIn = false;
+                    lock (session.ReceivedVotes)
                     {
-                        return;
+                        if (session.PlayersWhoVoted.Contains(senderPlayerId))
+                        {
+                            return;
+                        }
+
+                        session.PlayersWhoVoted.Add(senderPlayerId);
+                        session.ReceivedVotes.Add((sender.Player.Team, votes));
+
+                        if (session.PlayersWhoVoted.Count >= PlayersPerMatch)
+                        {
+                            allVotesIn = true;
+                        }
                     }
 
-                    session.PlayersWhoVoted.Add(senderPlayerId);
-                    session.ReceivedVotes.Add((sender.Player.Team, votes));
-
-                    if (session.PlayersWhoVoted.Count >= PlayersPerMatch)
+                    if (allVotesIn)
                     {
-                        allVotesIn = true;
+                        session.StopTimers();
+                        await Task.Run(async () => await ProcessVotesAsync(session));
                     }
+                    log.InfoFormat("Votes processing scheduled or stored successfully for game '{0}'", gameCode);
                 }
-
-                if (allVotesIn)
+                catch (Exception ex)
                 {
-                    session.StopTimers();
-                    await Task.Run(async () => await ProcessVotesAsync(session));
+                    log.ErrorFormat("Error in SubmitValidationVotesAsync: {0}", ex.Message, ex);
+                    log.DebugFormat("Stack Trace: {0}", ex.StackTrace);
+                    throw;
                 }
-                log.InfoFormat("Votes processing scheduled or stored successfully for game '{0}'", gameCode);
-            }
-            catch (Exception ex)
-            {
-                log.ErrorFormat("Error in SubmitValidationVotesAsync: {0}", ex.Message, ex);
-                log.DebugFormat("Stack Trace: {0}", ex.StackTrace);
-                throw;
-            }
-            
+            }, context: "GameManager: SubmitValidationVotesAsync");
         }
 
         public async Task SubscribeToMatchAsync(string gameCode, int playerId)
         {
-            if (!matches.TryGetValue(gameCode, out MatchSession session))
+            await ExecuteAsync(async () =>
             {
-                log.WarnFormat("SubscribeToMatchAsync failed - game '{0}' not found or already ended.", gameCode);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError, 
-                    "MATCH_NOT_FOUND_OR_ENDED", "The match does not exist or has already ended.");
-            }
-            if (session.Status != MatchStatus.WaitingForPlayers)
-            {
-                log.WarnFormat("SubscribeToMatchAsync failed - game '{0}' already started or finishing.", gameCode);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError, 
-                    "MATCH_ALREADY_STARTED_OR_FINISHING", "The match has already started or is finishing.");
-            }
-            var expectedPlayer = session.ExpectedPlayers.FirstOrDefault(p => p.Id == playerId);
-            if (expectedPlayer == null)
-            {
-                log.WarnFormat("SubscribeToMatchAsync unauthorized join attempt for player {0} in game '{1}'.",
-                    playerId, gameCode);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError, 
-                    "NOT_AUTHORIZED_TO_JOIN", "You are not authorized to join this match.");
-            }
-            if (session.ActivePlayers.ContainsKey(playerId))
-            {
-                log.WarnFormat("SubscribeToMatchAsync duplicate join for player {0} in game '{1}'.",
-                    playerId, gameCode);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.AlreadyInRoom, 
-                    "PLAYER_ALREADY_IN_MATCH", "Player is already in the match.");
-            }
-            var callback = operationContext.GetCallbackChannel<IGameManagerCallback>();
-            if (!session.ActivePlayers.TryAdd(playerId, (callback, expectedPlayer)))
-            {
-                log.ErrorFormat("SubscribeToMatchAsync internal error adding player {0} to game '{1}'.",
-                    playerId, gameCode);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError,
-                    "JOIN_INTERNAL_ERROR", "Internal error while joining the match.");
-            }
-            if (session.ActivePlayers.Count == session.ExpectedPlayers.Count)
-            {
-                await StartGameInternalAsync(session);
-            }
+                if (!matches.TryGetValue(gameCode, out MatchSession session))
+                {
+                    log.WarnFormat("SubscribeToMatchAsync failed - game '{0}' not found or already ended.", gameCode);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError,
+                        "MATCH_NOT_FOUND_OR_ENDED", "The match does not exist or has already ended.");
+                }
+                if (session.Status != MatchStatus.WaitingForPlayers)
+                {
+                    log.WarnFormat("SubscribeToMatchAsync failed - game '{0}' already started or finishing.", gameCode);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError,
+                        "MATCH_ALREADY_STARTED_OR_FINISHING", "The match has already started or is finishing.");
+                }
+                var expectedPlayer = session.ExpectedPlayers.FirstOrDefault(p => p.Id == playerId);
+                if (expectedPlayer == null)
+                {
+                    log.WarnFormat("SubscribeToMatchAsync unauthorized join attempt for player {0} in game '{1}'.",
+                        playerId, gameCode);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError,
+                        "NOT_AUTHORIZED_TO_JOIN", "You are not authorized to join this match.");
+                }
+                if (session.ActivePlayers.ContainsKey(playerId))
+                {
+                    log.WarnFormat("SubscribeToMatchAsync duplicate join for player {0} in game '{1}'.",
+                        playerId, gameCode);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.AlreadyInRoom,
+                        "PLAYER_ALREADY_IN_MATCH", "Player is already in the match.");
+                }
+                var callback = operationContext.GetCallbackChannel<IGameManagerCallback>();
+                if (!session.ActivePlayers.TryAdd(playerId, (callback, expectedPlayer)))
+                {
+                    log.ErrorFormat("SubscribeToMatchAsync internal error adding player {0} to game '{1}'.",
+                        playerId, gameCode);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError,
+                        "JOIN_INTERNAL_ERROR", "Internal error while joining the match.");
+                }
+                if (session.ActivePlayers.Count == session.ExpectedPlayers.Count)
+                {
+                    await StartGameInternalAsync(session);
+                }
+            }, context: "GameManager: SubscribeToMatchAsync");
         }
 
         private async Task StartGameInternalAsync(MatchSession session)
         {
-            try
+
+            int regularWordsCount = TotalRounds * WordsPerRound;
+            int totalWordsToObtain = regularWordsCount + SuddenDeathWordsBuffer;
+
+            session.AllRedWords = await wordRepository.GetRandomWordsAsync(totalWordsToObtain);
+            session.AllBlueWords = await wordRepository.GetRandomWordsAsync(totalWordsToObtain);
+
+            if (session.AllRedWords.Count < totalWordsToObtain || session.AllBlueWords.Count < totalWordsToObtain)
             {
-                int regularWordsCount = TotalRounds * WordsPerRound;
-                int totalWordsToObtain = regularWordsCount + SuddenDeathWordsBuffer;
-
-                session.AllRedWords = await wordRepository.GetRandomWordsAsync(totalWordsToObtain);
-                session.AllBlueWords = await wordRepository.GetRandomWordsAsync(totalWordsToObtain);
-
-                if (session.AllRedWords.Count < totalWordsToObtain || session.AllBlueWords.Count < totalWordsToObtain)
-                {
-                    await BroadcastAndHandleDisconnectsAsync(session,
-                        cb => cb.OnMatchCancelled("Error not enough words found in the database."));
-                    matches.TryRemove(session.GameCode, out _);
-                    return;
-                }
-
-                var initState = new MatchInitStateDTO {
-                    Players = session.ActivePlayers.Values.Select(p => p.Player).ToList() 
-                };
-                await BroadcastAndHandleDisconnectsAsync(session, callback => callback.OnMatchInitialized(initState));
-                await StartNewRoundAsync(session);
-            }
-            catch (Exception ex)
-            {                
-                log.ErrorFormat("Error starting match {0} \n {1}", session.GameCode, ex);
-                await BroadcastAndHandleDisconnectsAsync(session, 
-                    callback => callback.OnMatchCancelled("Error starting the match."));
+                await BroadcastAndHandleDisconnectsAsync(session,
+                    cb => cb.OnMatchCancelled("Error not enough words found in the database."));
                 matches.TryRemove(session.GameCode, out _);
+                return;
             }
+
+            var initState = new MatchInitStateDTO
+            {
+                Players = session.ActivePlayers.Values.Select(p => p.Player).ToList()
+            };
+            await BroadcastAndHandleDisconnectsAsync(session, callback => callback.OnMatchInitialized(initState));
+            await StartNewRoundAsync(session);
+
         }
 
         private async Task StartNewRoundAsync(MatchSession session)
@@ -429,9 +253,9 @@ namespace Services.Services
 
             if (session.CurrentRound > 1)
             {
-                foreach (var playerEntry in session.ActivePlayers.Values)
+                foreach (var playerEntry in session.ActivePlayers.Values.Select(playerEntry => playerEntry.Player))
                 {
-                    playerEntry.Player.Role = (playerEntry.Player.Role == PlayerRole.ClueGuy) 
+                    playerEntry.Role = (playerEntry.Role == PlayerRole.ClueGuy)
                         ? PlayerRole.Guesser : PlayerRole.ClueGuy;
                 }
             }
@@ -439,7 +263,7 @@ namespace Services.Services
             var roundStartState = new RoundStartStateDTO
             {
                 CurrentRound = session.CurrentRound,
-                PlayersWithNewRoles = session.ActivePlayers.Values.Select(p => p.Player).ToList()
+                PlayersWithNewRoles = session.ActivePlayers.Select(playerEntry => playerEntry.Value.Player).ToList()
             };
             await BroadcastAndHandleDisconnectsAsync(session, cb => cb.OnNewRoundStarted(roundStartState));
 
@@ -455,6 +279,7 @@ namespace Services.Services
             await DistributeInitialWords(session, MatchTeam.RedTeam);
             await DistributeInitialWords(session, MatchTeam.BlueTeam);
         }
+
         private async Task DistributeInitialWords(MatchSession session, MatchTeam team)
         {
             var clueGuy = session.GetPlayerByRole(team, PlayerRole.ClueGuy);
@@ -464,17 +289,30 @@ namespace Services.Services
             try
             {
                 if (clueGuy.Callback != null)
-                    gameBroadcaster.SendToPlayer(clueGuy, cb => cb.OnNewPassword(DTOMapper.ToWordDTO(word)));
+                {
+                    GameBroadcaster.SendToPlayer(clueGuy, cb => cb.OnNewPassword(DTOMapper.ToWordDTO(word)));
+                }
 
                 if (guesser.Callback != null)
-                    gameBroadcaster.SendToPlayer(guesser, cb => cb.OnNewPassword(DTOMapper.ToMaskedWordDTO(word)));
+                {
+                    GameBroadcaster.SendToPlayer(guesser, cb => cb.OnNewPassword(DTOMapper.ToMaskedWordDTO(word)));
+                }
             }
-            catch
+            catch (Exception ex)
             {
-                if (clueGuy.Player != null) await HandlePlayerDisconnectionAsync(session, clueGuy.Player.Id);
-                if (guesser.Player != null) await HandlePlayerDisconnectionAsync(session, guesser.Player.Id);
+                log.WarnFormat("Player disconnected during word distribution in match {0}: {1}",
+                    session.GameCode, ex.Message);
+                if (clueGuy.Player != null)
+                {
+                    await HandlePlayerDisconnectionAsync(session, clueGuy.Player.Id);
+                }
+                if (guesser.Player != null)
+                {
+                    await HandlePlayerDisconnectionAsync(session, guesser.Player.Id);
+                }
             }
         }
+
         private async void TimerTickCallback(object state)
         {
             var session = (MatchSession)state;
@@ -508,12 +346,12 @@ namespace Services.Services
 
             if (session.RedTeamTurnHistory.Count > 0)
             {
-                await gameBroadcaster.BroadcastToGroupAsync(bluePlayers,
+                await GameBroadcaster.BroadcastToGroupAsync(bluePlayers,
                     cb => cb.OnBeginRoundValidation(session.RedTeamTurnHistory));
             }
             if (session.BlueTeamTurnHistory.Count > 0)
             {
-                await gameBroadcaster.BroadcastToGroupAsync(redPlayers,
+                await GameBroadcaster.BroadcastToGroupAsync(redPlayers,
                     cb => cb.OnBeginRoundValidation(session.BlueTeamTurnHistory));
             }
             if (session.RedTeamTurnHistory.Count == 0 && session.BlueTeamTurnHistory.Count == 0)
@@ -523,6 +361,7 @@ namespace Services.Services
             }
             session.StartValidationTimer(ValidationTimerTickCallback, session, ValidationDurationSeconds);
         }
+
         private async void ValidationTimerTickCallback(object state)
         {
             var session = (MatchSession)state;
@@ -568,7 +407,6 @@ namespace Services.Services
                     await StartNewRoundAsync(session);
                 }
                 log.InfoFormat("ProcessVotesAsync completed successfully for game '{0}'", session.GameCode);
-
             }
             catch (Exception ex)
             {
@@ -582,14 +420,14 @@ namespace Services.Services
             if (session.RedTeamScore == session.BlueTeamScore)
             {
                 await StartSuddenDeathAsync(session);
-                return; 
+                return;
             }
             session.Status = MatchStatus.Finished;
-            MatchTeam? winner = (session.RedTeamScore > session.BlueTeamScore) 
+            MatchTeam? winner = (session.RedTeamScore > session.BlueTeamScore)
                 ? MatchTeam.RedTeam : MatchTeam.BlueTeam;
             await PersistAndNotifyGameEnd(session, winner);
         }
-        
+
         private async Task StartSuddenDeathAsync(MatchSession session)
         {
             session.Status = MatchStatus.SuddenDeath;
@@ -607,7 +445,7 @@ namespace Services.Services
                 return;
             }
 
-            session.RedTeamTurnHistory.Clear(); 
+            session.RedTeamTurnHistory.Clear();
             session.BlueTeamTurnHistory.Clear();
             session.RedTeamPassedThisRound = true;
             session.BlueTeamPassedThisRound = true;
@@ -617,19 +455,20 @@ namespace Services.Services
             await DistributeInitialWords(session, MatchTeam.RedTeam);
             await DistributeInitialWords(session, MatchTeam.BlueTeam);
         }
+
         private async Task PersistAndNotifyGameEnd(MatchSession session, MatchTeam? winner)
         {
-            var registeredRedPlayerIds = session.GetPlayersByTeam(MatchTeam.RedTeam).
-                Where(p => p.Player.Id > 0).Select(p => p.Player.Id).ToList();
-            var registeredBluePlayerIds = session.GetPlayersByTeam(MatchTeam.BlueTeam).
-                Where(p => p.Player.Id > 0).Select(p => p.Player.Id).ToList();
+            var registeredRedPlayerIds = session.GetPlayersByTeam(MatchTeam.RedTeam)
+                .Where(p => p.Player.Id > 0).Select(p => p.Player.Id).ToList();
+            var registeredBluePlayerIds = session.GetPlayersByTeam(MatchTeam.BlueTeam)
+                .Where(p => p.Player.Id > 0).Select(p => p.Player.Id).ToList();
             try
             {
                 await matchRepository.SaveMatchResultAsync(session.RedTeamScore, session.BlueTeamScore,
                     registeredRedPlayerIds, registeredBluePlayerIds);
                 if (winner.HasValue)
                 {
-                    var winningPlayerIds = (winner == MatchTeam.RedTeam) 
+                    var winningPlayerIds = (winner == MatchTeam.RedTeam)
                         ? registeredRedPlayerIds : registeredBluePlayerIds;
                     if (winningPlayerIds.Any())
                     {
@@ -638,32 +477,35 @@ namespace Services.Services
                     }
                 }
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
-                log.ErrorFormat("ERROR persisting match {0}: {1}", session.GameCode, ex.Message); 
+                log.ErrorFormat("ERROR persisting match {0}: {1}", session.GameCode, ex.Message);
             }
-            var summary = new MatchSummaryDTO { 
-                WinnerTeam = winner, 
-                RedScore = session.RedTeamScore, 
-                BlueScore = session.BlueTeamScore 
+            var summary = new MatchSummaryDTO
+            {
+                WinnerTeam = winner,
+                RedScore = session.RedTeamScore,
+                BlueScore = session.BlueTeamScore
             };
             await BroadcastAndHandleDisconnectsAsync(session, cb => cb.OnMatchOver(summary));
-            if (matches.TryRemove(session.GameCode, out var removedMatch)) 
+            if (matches.TryRemove(session.GameCode, out var removedMatch))
             {
                 removedMatch.Dispose();
             }
         }
 
-        private async Task BroadcastAndHandleDisconnectsAsync(MatchSession session, Action<IGameManagerCallback> action)
+        private async Task BroadcastAndHandleDisconnectsAsync(MatchSession session,
+            Action<IGameManagerCallback> action)
         {
-            var disconnectedIds = await gameBroadcaster.BroadcastAsync(session, action);
+            var disconnectedIds = await GameBroadcaster.BroadcastAsync(session, action);
 
             foreach (var playerId in disconnectedIds)
             {
-                log.InfoFormat("Processing disconnection for player {0} found during broadcast.",playerId);
+                log.InfoFormat("Processing disconnection for player {0} found during broadcast.", playerId);
                 await HandlePlayerDisconnectionAsync(session, playerId);
             }
         }
+
         private async Task HandlePlayerDisconnectionIfFailed(MatchSession session, int playerId)
         {
             if (session.ActivePlayers.ContainsKey(playerId))
@@ -671,9 +513,13 @@ namespace Services.Services
                 await HandlePlayerDisconnectionAsync(session, playerId);
             }
         }
+
         private async Task HandlePlayerDisconnectionAsync(MatchSession session, int disconnectedPlayerId)
         {
-            if (session.Status == MatchStatus.Finished) return;
+            if (session.Status == MatchStatus.Finished)
+            {
+                return;
+            }
 
             if (session.ActivePlayers.TryRemove(disconnectedPlayerId, out var disconnectedPlayer))
             {
@@ -686,6 +532,7 @@ namespace Services.Services
                 matches.TryRemove(session.GameCode, out _);
             }
         }
+
         private static async Task BroadcastAsync(MatchSession session, Action<IGameManagerCallback> action)
         {
             try
@@ -706,13 +553,13 @@ namespace Services.Services
                     }
                     catch (TimeoutException ex)
                     {
-                        log.WarnFormat("TimeoutException in callback for player {0}: {1}", 
+                        log.WarnFormat("TimeoutException in callback for player {0}: {1}",
                             playerEntry.Key, ex.Message);
                         disconnectedPlayers.Add(playerEntry.Key);
                     }
                     catch (Exception ex)
                     {
-                        var msg = string.Format("Unexpected error in callback for player {0}: {1}", 
+                        var msg = string.Format("Unexpected error in callback for player {0}: {1}",
                             playerEntry.Key, ex.Message);
                         log.Error(msg, ex);
                         disconnectedPlayers.Add(playerEntry.Key);
@@ -733,6 +580,301 @@ namespace Services.Services
                 log.ErrorFormat("Error in BroadcastAsync: {0}", ex.Message, ex);
                 throw;
             }
+        }
+
+
+        private MatchSession GetPassTurnSession(string gameCode)
+        {
+            if (!matches.TryGetValue(gameCode, out MatchSession session) || session.Status != MatchStatus.InProgress)
+            {
+                return null;
+            }
+            return session;
+        }
+        private static (IGameManagerCallback Callback, PlayerDTO Player) GetPassTurnSender(
+            MatchSession session, int playerId)
+        {
+            if (!session.ActivePlayers.TryGetValue(playerId, out var sender))
+            {
+                return default((IGameManagerCallback, PlayerDTO));
+            }
+            if (sender.Player.Role != PlayerRole.ClueGuy)
+            {
+                return default((IGameManagerCallback, PlayerDTO));
+            }
+            return sender;
+        }
+        private static bool HasTeamAlreadyPassed(MatchSession session, MatchTeam team)
+        {
+            if ((team == MatchTeam.RedTeam && session.RedTeamPassedThisRound) ||
+                (team == MatchTeam.BlueTeam && session.BlueTeamPassedThisRound))
+            {
+                return true;
+            }
+            return false;
+        }
+        private static void AddPassHistoryIfNeeded(MatchSession session, MatchTeam team, PasswordWord currentPassword)
+        {
+            if (currentPassword != null && currentPassword.Id != -1)
+            {
+                var historyItem = new TurnHistoryDTO
+                {
+                    TurnId = (team == MatchTeam.RedTeam) ? session.RedTeamWordIndex : session.BlueTeamWordIndex,
+                    Password = DTOMapper.ToWordDTO(currentPassword),
+                    ClueUsed = "[]"
+                };
+                if (team == MatchTeam.RedTeam)
+                {
+                    session.RedTeamTurnHistory.Add(historyItem);
+                }
+                else
+                {
+                    session.BlueTeamTurnHistory.Add(historyItem);
+                }
+            }
+        }
+        private static void ApplyPassAndAdvance(MatchSession session, MatchTeam team)
+        {
+            if (team == MatchTeam.RedTeam)
+            {
+                session.RedTeamPassedThisRound = true;
+                session.RedTeamWordIndex++;
+            }
+            else
+            {
+                session.BlueTeamPassedThisRound = true;
+                session.BlueTeamWordIndex++;
+            }
+        }
+        private async Task SendPassTurnUpdatesAsync(MatchSession session,
+            (IGameManagerCallback Callback, PlayerDTO Player) sender, PasswordWord nextWord)
+        {
+            try
+            {
+                GameBroadcaster.SendToPlayer(sender, cb => cb.OnNewPassword(DTOMapper.ToWordDTO(nextWord)));
+            }
+            catch
+            {
+                await HandlePlayerDisconnectionAsync(session, sender.Player.Id);
+                await HandlePlayerDisconnectionAsync(session, sender.Player.Id);
+            }
+
+            var partner = session.GetPartner(sender);
+            if (partner.Callback != null)
+            {
+                try
+                {
+                    GameBroadcaster.SendToPlayer(partner, cb =>
+                    {
+                        cb.OnNewPassword(DTOMapper.ToMaskedWordDTO(nextWord));
+                        cb.OnClueReceived("Your partner passed the word.");
+                    });
+                }
+                catch
+                {
+                    await HandlePlayerDisconnectionAsync(session, partner.Player.Id);
+                }
+            }
+        }
+
+        private MatchSession GetGuessableSessionOrNull(string gameCode)
+        {
+            if (matches.TryGetValue(gameCode, out var session) &&
+                (session.Status == MatchStatus.InProgress || session.Status == MatchStatus.SuddenDeath))
+            {
+                return session;
+            }
+            return null;
+        }
+        private static (IGameManagerCallback Callback, PlayerDTO Player)
+            GetValidGuesser(MatchSession session, int playerId)
+        {
+            var sender = session.GetPlayerById(playerId);
+            if (sender.Player == null || sender.Player.Role != PlayerRole.Guesser)
+            {
+                return default((IGameManagerCallback, PlayerDTO));
+            }
+            return sender;
+        }
+        private static bool IsGuessCorrect(PasswordWord currentPassword, string guess)
+        {
+            if (currentPassword == null)
+            {
+                return false;
+            }
+            return guess.Equals(currentPassword.EnglishWord, StringComparison.OrdinalIgnoreCase) ||
+                   guess.Equals(currentPassword.SpanishWord, StringComparison.OrdinalIgnoreCase);
+        }
+        private async Task HandleCorrectGuessAsync(MatchSession session, MatchTeam team)
+        {
+            if (session.Status == MatchStatus.SuddenDeath)
+            {
+                session.Status = MatchStatus.Finished;
+                session.StopTimers();
+                session.AddScore(team);
+                await PersistAndNotifyGameEnd(session, team);
+                return;
+            }
+            session.AddScore(team);
+
+            if (team == MatchTeam.RedTeam)
+            {
+                session.RedTeamWordIndex++;
+            }
+            else
+            {
+                session.BlueTeamWordIndex++;
+            }
+
+            int newScore = (team == MatchTeam.RedTeam) ? session.RedTeamScore : session.BlueTeamScore;
+            var resultDto = new GuessResultDTO { IsCorrect = true, Team = team, NewScore = newScore };
+            await BroadcastAndHandleDisconnectsAsync(session, cb => cb.OnGuessResult(resultDto));
+
+            var nextWord = session.GetCurrentPassword(team);
+            var clueGuy = session.GetPlayerByRole(team, PlayerRole.ClueGuy);
+            var guesser = session.GetPlayerByRole(team, PlayerRole.Guesser);
+            try
+            {
+                if (clueGuy.Callback != null)
+                {
+                    GameBroadcaster.SendToPlayer(clueGuy, cb => cb.OnNewPassword(DTOMapper.ToWordDTO(nextWord)));
+                }
+                if (guesser.Callback != null)
+                {
+                    GameBroadcaster.SendToPlayer(guesser, cb => cb.OnNewPassword(DTOMapper.ToMaskedWordDTO(nextWord)));
+                }
+            }
+            catch
+            {
+                if (clueGuy.Callback != null)
+                {
+                    await HandlePlayerDisconnectionIfFailed(session, clueGuy.Player.Id);
+                }
+                if (guesser.Callback != null)
+                {
+                    await HandlePlayerDisconnectionIfFailed(session, guesser.Player.Id);
+                }
+            }
+        }
+        private async Task HandleIncorrectGuessAsync(MatchSession session,
+            (IGameManagerCallback Callback, PlayerDTO Player) sender, MatchTeam team, int currentScore)
+        {
+            var resultDto = new GuessResultDTO { IsCorrect = false, Team = team, NewScore = currentScore };
+            var clueGuy = session.GetPlayerByRole(team, PlayerRole.ClueGuy);
+            try
+            {
+                GameBroadcaster.SendToPlayer(sender, cb => cb.OnGuessResult(resultDto));
+                if (clueGuy.Callback != null)
+                {
+                    GameBroadcaster.SendToPlayer(clueGuy, cb => cb.OnGuessResult(resultDto));
+                }
+            }
+            catch
+            {
+                await HandlePlayerDisconnectionIfFailed(session, sender.Player.Id);
+                if (clueGuy.Player != null)
+                {
+                    await HandlePlayerDisconnectionIfFailed(session, clueGuy.Player.Id);
+                }
+            }
+        }
+
+        private (MatchSession, (IGameManagerCallback Callback, PlayerDTO Player), PasswordWord)?
+            ValidateAndGetClueContext(string gameCode, int senderId, string clue)
+        {
+            if (string.IsNullOrWhiteSpace(clue)) return null;
+
+            if (!matches.TryGetValue(gameCode, out MatchSession session)
+                || (session.Status != MatchStatus.InProgress && session.Status != MatchStatus.SuddenDeath))
+            {
+                return null;
+            }
+
+            if (!session.ActivePlayers.TryGetValue(senderId, out var sender)
+                || sender.Player.Role != PlayerRole.ClueGuy)
+            {
+                return null;
+            }
+
+            var currentPassword = session.GetCurrentPassword(sender.Player.Team);
+            if (currentPassword == null) return null;
+
+            return (session, sender, currentPassword);
+        }
+
+        private void RecordClueHistory(MatchSession session,
+            (IGameManagerCallback Callback, PlayerDTO Player) sender, string clue, PasswordWord currentPassword)
+        {
+            var team = sender.Player.Team;
+            var historyItem = new TurnHistoryDTO
+            {
+                TurnId = (team == MatchTeam.RedTeam) ? session.RedTeamWordIndex : session.BlueTeamWordIndex,
+                Password = DTOMapper.ToWordDTO(currentPassword),
+                ClueUsed = clue
+            };
+
+            if (team == MatchTeam.RedTeam) session.RedTeamTurnHistory.Add(historyItem);
+            else session.BlueTeamTurnHistory.Add(historyItem);
+        }
+
+        private async Task NotifyPartnerOfClueAsync(MatchSession session, (IGameManagerCallback Callback,
+            PlayerDTO Player) sender, string clue)
+        {
+            var partner = session.GetPartner(sender);
+            if (partner.Callback == null) return;
+
+            try
+            {
+                GameBroadcaster.SendToPlayer(partner, cb => cb.OnClueReceived(clue));
+            }
+            catch
+            {
+                await HandlePlayerDisconnectionAsync(session, partner.Player.Id);
+            }
+        }
+
+        private (MatchSession, (IGameManagerCallback Callback, PlayerDTO Player), PasswordWord)?
+            ValidateAndGetGuessContext(string gameCode, int senderId, string guess)
+        {
+            if (string.IsNullOrWhiteSpace(guess)) return null;
+
+            var session = GetGuessableSessionOrNull(gameCode);
+            if (session == null) return null;
+
+            var sender = GetValidGuesser(session, senderId);
+            if (sender.Player == null) return null;
+
+            var currentPassword = session.GetCurrentPassword(sender.Player.Team);
+            if (currentPassword == null) return null;
+
+            return (session, sender, currentPassword);
+        }
+
+        private (MatchSession, (IGameManagerCallback Callback, PlayerDTO Player))?
+            ValidateValidationContext(string gameCode, int senderId, List<ValidationVoteDTO> votes)
+        {
+            log.InfoFormat("SubmitValidationVotesAsync called - GameCode: {0}, PlayerId: {1}, VotesCount: {2}",
+                        gameCode, senderId, votes == null ? 0 : votes.Count);
+
+            if (votes == null)
+            {
+                log.WarnFormat("Votes list is null for game '{0}', player {1}", gameCode, senderId);
+                return null;
+            }
+
+            if (!matches.TryGetValue(gameCode, out MatchSession session) || session.Status != MatchStatus.Validating)
+            {
+                log.WarnFormat("Match not found or not in validating state: {0}", gameCode);
+                return null;
+            }
+
+            if (!session.ActivePlayers.TryGetValue(senderId, out var sender))
+            {
+                log.WarnFormat("Player not found in match: {0}", senderId);
+                return null;
+            }
+
+            return (session, sender);
         }
     }
 }

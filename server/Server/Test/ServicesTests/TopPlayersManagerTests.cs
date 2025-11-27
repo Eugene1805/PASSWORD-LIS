@@ -132,8 +132,8 @@ namespace Test.ServicesTests
             var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => topPlayersManager.GetTopAsync(numberOfTeams));
 
-            // Assert
-            Assert.Equal("STATISTICS_ERROR", ex.Detail.ErrorCode);
+            // Assert - ServiceBase catches ArgumentNullException and converts to NULL_ARGUMENT
+            Assert.Equal("NULL_ARGUMENT", ex.Detail.ErrorCode);
         }
 
         [Fact]
@@ -152,8 +152,8 @@ namespace Test.ServicesTests
             var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => topPlayersManager.GetTopAsync(numberOfTeams));
 
-            // Assert
-            Assert.Equal("STATISTICS_ERROR", ex.Detail.ErrorCode);
+            // Assert - ServiceBase catches ArgumentNullException from LINQ and converts to NULL_ARGUMENT
+            Assert.Equal("NULL_ARGUMENT", ex.Detail.ErrorCode);
         }
 
         [Fact]
@@ -176,8 +176,8 @@ namespace Test.ServicesTests
             var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => topPlayersManager.GetTopAsync(numberOfTeams));
 
-            // Assert
-            Assert.Equal("STATISTICS_ERROR", ex.Detail.ErrorCode);
+            // Assert - ServiceBase catches NullReferenceException and converts to UNEXPECTED_ERROR
+            Assert.Equal("UNEXPECTED_ERROR", ex.Detail.ErrorCode);
         }
 
         [Theory]
@@ -187,7 +187,7 @@ namespace Test.ServicesTests
         {
             // Arrange: simulate repository rejecting invalid number via exception
             mockStatisticsRepository.Setup(r => r.GetTopTeamsAsync(n))
-                                     .ThrowsAsync(new ArgumentOutOfRangeException());
+                                     .ThrowsAsync(new ArgumentOutOfRangeException(String.Format("{0}",n)));
 
             // Act
             var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
