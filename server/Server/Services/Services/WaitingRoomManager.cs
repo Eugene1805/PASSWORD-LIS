@@ -8,10 +8,7 @@ using Services.Wrappers;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
-using System.Net.Mail;
-using System.Security.Cryptography;
 using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
@@ -233,13 +230,13 @@ namespace Services.Services
             {
                 if (!rooms.TryGetValue(gameCode, out var game))
                 {
-                    throw FaultExceptionFactory.Create(ServiceErrorCode.RoomNotFound, "WAITING_ROOM_NOT_FOUND",
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.RoomNotFound, "ROOM_NOT_FOUND",
                         "Waiting room not found.");
                 }
 
                 if (game.Players.Count != MaxPlayersPerGame)
                 {
-                    throw FaultExceptionFactory.Create(ServiceErrorCode.CouldNotCreateRoom, "NOT_ENOUGH_PLAYERS",
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.CouldNotCreateGame, "COULD_NOT_CREATE_GAME",
                         "Four players are required to start a game.");
                 }
                 var playerList = game.Players.Values.Select(p => p.Item2).ToList();
@@ -247,7 +244,7 @@ namespace Services.Services
 
                 if (!matchCreated)
                 {
-                    throw FaultExceptionFactory.Create(ServiceErrorCode.CouldNotCreateRoom, "COULD_NOT_CREATE_GAME",
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.CouldNotCreateGame, "COULD_NOT_CREATE_GAME",
                         "Could not create the game.");
                 }
 
@@ -328,7 +325,7 @@ namespace Services.Services
                         friendPlayerId);
                     throw FaultExceptionFactory.Create(
                         ServiceErrorCode.PlayerNotFound,
-                        "FRIEND_NOT_FOUND",
+                        "PLAYER_NOT_FOUND",
                         "Friend not found or email missing."
                     );
                 }

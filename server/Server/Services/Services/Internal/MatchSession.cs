@@ -20,11 +20,13 @@ namespace Services.Services.Internal
         public int RedTeamScore { get; private set; }
         public int BlueTeamScore { get; private set; }
         public int CurrentRound { get; set; }
-        // Backing fields for atomic operations
-        private int _secondsLeft;
-        private int _validationSecondsLeft;
-        public int SecondsLeft { get => Volatile.Read(ref _secondsLeft); private set => _secondsLeft = value; }
-        public int ValidationSecondsLeft { get => Volatile.Read(ref _validationSecondsLeft); private set => _validationSecondsLeft = value; }
+        
+        private int secondsLeft;
+        private int validationSecondsLeft;
+        public int SecondsLeft { get => Volatile.Read(ref secondsLeft); 
+        private set => secondsLeft = value; }
+        public int ValidationSecondsLeft { get => Volatile.Read(ref validationSecondsLeft);
+        private set => validationSecondsLeft = value; }
         private Timer roundTimer;
         private Timer validationTimer;
         public List<PasswordWord> AllRedWords { get; set; } = new List<PasswordWord>();
@@ -51,8 +53,8 @@ namespace Services.Services.Internal
             ActivePlayers = new ConcurrentDictionary<int, (IGameManagerCallback, PlayerDTO)>();
         }
         
-        public int DecrementSecondsLeft() => Interlocked.Decrement(ref _secondsLeft);
-        public int DecrementValidationSecondsLeft() => Interlocked.Decrement(ref _validationSecondsLeft);
+        public int DecrementSecondsLeft() => Interlocked.Decrement(ref secondsLeft);
+        public int DecrementValidationSecondsLeft() => Interlocked.Decrement(ref validationSecondsLeft);
         public void AddScore(MatchTeam team, int points = 1)
         {
             lock (lockObj)
