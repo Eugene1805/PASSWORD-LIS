@@ -2,11 +2,11 @@
 using Data.Exceptions;
 using Data.Model;
 using Moq;
-using System.ServiceModel;
 using Services.Contracts.DTOs;
 using Services.Services;
 using Services.Util;
-using System.Linq; // added for invocation inspection
+using System.Data.Entity.Core;
+using System.ServiceModel;
 
 namespace Test.ServicesTests
 {
@@ -75,7 +75,7 @@ namespace Test.ServicesTests
                 GeneratedCode = notifCodeArg
             };
 
-            // Single assertion
+            // Assert
             Assert.Equal(expected, actual);
         }
 
@@ -329,6 +329,90 @@ namespace Test.ServicesTests
                 NotificationCalls = mockNotification.Invocations.Count(i => i.Method.Name == nameof(INotificationService.SendAccountVerificationEmailAsync))
             };
 
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public async Task IsNicknameInUse_ShouldReturnRepositoryResult_WhenNicknameIsNotNull()
+        {
+            // Arrange
+            string nickname = "ExistingUser";
+
+            mockRepo.Setup(repo => repo.IsNicknameInUse(nickname))
+                    .ReturnsAsync(true);
+
+            // Act
+            bool result = await accountManager.IsNicknameInUse(nickname);
+
+            var expected = new
+            {
+                Result = true,
+                RepoCalls = 1
+            };
+
+            var actual = new
+            {
+                Result = result,
+                RepoCalls = mockRepo.Invocations.Count(i => i.Method.Name == nameof(IAccountRepository.IsNicknameInUse))
+            };
+
+            // Assert
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public async Task IsNicknameInUse_ShouldReturnFalse_WhenNicknameIsNull()
+        {
+            // Arrange
+            string? nickname = null;
+
+
+            // Act
+            bool result = await accountManager.IsNicknameInUse(nickname);
+
+            var expected = new
+            {
+                Result = false,
+                RepoCalls = 0
+            };
+
+            var actual = new
+            {
+                Result = result,
+                RepoCalls = mockRepo.Invocations.Count(i => i.Method.Name == nameof(IAccountRepository.IsNicknameInUse))
+            };
+
+            // Assert
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public async Task IsNicknameInUse_ShouldThrowFaultException_WhenDatabaseFails()
+        {
+            // Arrange
+            string nickname = "ErrorUser";
+
+            mockRepo.Setup(repo => repo.IsNicknameInUse(nickname))
+                    .ThrowsAsync(new EntityException("Connection failed"));
+
+            // Act
+            FaultException<ServiceErrorDetailDTO> exception = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
+                () => accountManager.IsNicknameInUse(nickname)
+            );
+
+            var expected = new
+            {
+                ErrorCode = "DATABASE_ERROR",
+                RepoCalls = 1
+            };
+
+            var actual = new
+            {
+                ErrorCode = exception.Detail.ErrorCode,
+                RepoCalls = mockRepo.Invocations.Count(i => i.Method.Name == nameof(IAccountRepository.IsNicknameInUse))
+            };
+
+            // Assert
             Assert.Equal(expected, actual);
         }
     }
