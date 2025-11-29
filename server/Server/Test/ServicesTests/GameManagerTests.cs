@@ -1,10 +1,6 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.ServiceModel;
-using System.Threading.Tasks;
 using Data.DAL.Interfaces;
 using Data.Model;
 using Moq;
@@ -13,7 +9,6 @@ using Services.Contracts.DTOs;
 using Services.Contracts.Enums;
 using Services.Services;
 using Services.Wrappers;
-using Xunit;
 
 namespace Test.ServicesTests
 {
@@ -43,7 +38,6 @@ namespace Test.ServicesTests
             ];
         }
 
-        // Updated to 40 words: TotalRounds(5) × WordsPerRound(5) + SuddenDeathWordsBuffer(15) = 25 + 15 = 40
         private static List<PasswordWord> MakeWords(int count = 40)
         {
             var list = new List<PasswordWord>();

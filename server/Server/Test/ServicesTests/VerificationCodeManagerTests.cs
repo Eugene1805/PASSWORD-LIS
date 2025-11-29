@@ -101,7 +101,6 @@ namespace Test.ServicesTests
             mockNotificationService.Verify(n => n.SendAccountVerificationEmailAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
-        // Additional tests for fatal/edge cases
 
         [Fact]
         public void VerifyEmail_WhenValidationThrows_ShouldBubbleExceptionAndNotCallRepository()

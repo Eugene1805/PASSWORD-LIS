@@ -71,7 +71,6 @@ namespace Test.ServicesTests
             var email = "host@test.com";
             var hostPlayer = MakePlayer(1, email, "HostUser");
             mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync(email)).ReturnsAsync(hostPlayer);
-
             var (sut, callbacks, _) = CreateSut(mockPlayerRepo, mockOperationContext);
             var hostCallback = new Mock<IWaitingRoomCallback>();
             callbacks.Enqueue(hostCallback);
@@ -80,18 +79,29 @@ namespace Test.ServicesTests
             var gameCode = await sut.CreateRoomAsync(email);
 
             // Assert
-            Assert.NotNull(gameCode);
-            Assert.Equal(5, gameCode.Length);
-
             var players = await sut.GetPlayersInRoomAsync(gameCode);
-            Assert.Single(players);
-            var p = players[0];
-            Assert.Equal(1, p.Id);
-            Assert.Equal("HostUser", p.Nickname);
-            Assert.Equal(PlayerRole.ClueGuy, p.Role);
-            Assert.Equal(MatchTeam.RedTeam, p.Team);
-
-            hostCallback.Verify(c => c.OnPlayerJoined(It.IsAny<PlayerDTO>()), Times.Once);
+            var p = players.FirstOrDefault();
+            var expected = (
+                CodeNotNull: true,
+                CodeLen: 5,
+                PlayerCount: 1,
+                HostId: 1,
+                HostNick: (string?)"HostUser",
+                HostRole: PlayerRole.ClueGuy,
+                HostTeam: MatchTeam.RedTeam,
+                HostJoinedNotified: true
+            );
+            var actual = (
+                CodeNotNull: gameCode != null,
+                CodeLen: gameCode?.Length ?? -1,
+                PlayerCount: players.Count,
+                HostId: p?.Id ?? -1,
+                HostNick: p?.Nickname,
+                HostRole: p?.Role ?? PlayerRole.ClueGuy,
+                HostTeam: p?.Team ?? MatchTeam.RedTeam,
+                HostJoinedNotified: hostCallback.Invocations.Any(i => i.Method.Name == nameof(IWaitingRoomCallback.OnPlayerJoined))
+            );
+            Assert.Equal(expected, actual);
         }
 
         [Fact]
@@ -116,16 +126,21 @@ namespace Test.ServicesTests
             var id = await sut.JoinRoomAsRegisteredPlayerAsync(gameCode, email);
 
             // Second attempt should throw AlreadyInRoom fault
-            await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(async () =>
-            await sut.JoinRoomAsRegisteredPlayerAsync(gameCode, email));
+            bool secondJoinFault = false;
+            try { callbacks.Enqueue(new Mock<IWaitingRoomCallback>()); await sut.JoinRoomAsRegisteredPlayerAsync(gameCode, email); } catch (FaultException<ServiceErrorDetailDTO>) { secondJoinFault = true; }
 
             // Assert
-            Assert.Equal(2, id);
-
             var players = await sut.GetPlayersInRoomAsync(gameCode);
-            Assert.Equal(2, players.Count);
-            Assert.Contains(players, x => x.Id ==1);
-            Assert.Contains(players, x => x.Id ==2);
+            var expected = new { FirstJoinId = 2, SecondJoinFault = true, PlayerCount = 2, HasHost = true, HasUser = true };
+            var actual = new
+            {
+                FirstJoinId = id,
+                SecondJoinFault = secondJoinFault,
+                PlayerCount = players.Count,
+                HasHost = players.Any(x => x.Id == 1),
+                HasUser = players.Any(x => x.Id == 2)
+            };
+            Assert.Equal(expected, actual);
         }
 
         [Fact]
@@ -220,8 +235,6 @@ namespace Test.ServicesTests
             var players = await sut.GetPlayersInRoomAsync(gameCode);
             Assert.Equal(4, players.Count);
 
-            // Validate team/role assignment order
-            // Order of joins: Host(0), G1(1), G2(2), G3(3)
             var hostDto = players.First(p => p.Id ==1);
             Assert.Equal(MatchTeam.RedTeam, hostDto.Team);
             Assert.Equal(PlayerRole.ClueGuy, hostDto.Role);
@@ -323,7 +336,7 @@ namespace Test.ServicesTests
             g3Cb.Verify(c => c.OnGameStarted(), Times.Once);
 
             var players = await sut.GetPlayersInRoomAsync(gameCode);
-            Assert.Empty(players); // game removed
+            Assert.Empty(players);
 
             await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(async () =>
             await sut.JoinRoomAsGuestAsync(gameCode, "Later"));
@@ -390,7 +403,7 @@ namespace Test.ServicesTests
             await sut.JoinRoomAsGuestAsync(gameCode, "Guest1");
 
             var playersBefore = await sut.GetPlayersInRoomAsync(gameCode);
-            var guestId = playersBefore.First(p => p.Nickname == "Guest1").Id; // negative id
+            var guestId = playersBefore.First(p => p.Nickname == "Guest1").Id; 
 
             // Act
             await sut.LeaveRoomAsync(gameCode, guestId);
@@ -415,12 +428,12 @@ namespace Test.ServicesTests
             var playersBefore = await sut.GetPlayersInRoomAsync(gameCode);
             Assert.Single(playersBefore);
 
-            // Act: wrong code
+            // Act
             await sut.LeaveRoomAsync("WRONG",1);
-            // Act: wrong player in valid game
+            // Act
             await sut.LeaveRoomAsync(gameCode,999);
 
-            // Assert: still single player
+            // Assert
             var playersAfter = await sut.GetPlayersInRoomAsync(gameCode);
             Assert.Single(playersAfter);
         }
@@ -477,7 +490,7 @@ namespace Test.ServicesTests
             Assert.Single(players);
             Assert.Equal(1, players[0].Id);
 
-            // Host receives the message
+           
             hostCb.Verify(c => c.OnMessageReceived(It.IsAny<ChatMessageDTO>()), Times.Once);
         }
 
@@ -492,22 +505,21 @@ namespace Test.ServicesTests
             var gameCode = await sut.CreateRoomAsync(host.UserAccount.Email);
 
             callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
-            await sut.JoinRoomAsGuestAsync(gameCode, "Guest1"); // player count1
+            await sut.JoinRoomAsGuestAsync(gameCode, "Guest1"); 
             callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
-            await sut.JoinRoomAsGuestAsync(gameCode, "Guest2"); // player count2
+            await sut.JoinRoomAsGuestAsync(gameCode, "Guest2"); 
             callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
-            await sut.JoinRoomAsGuestAsync(gameCode, "Guest3"); // player count3
+            await sut.JoinRoomAsGuestAsync(gameCode, "Guest3"); 
 
             var players = await sut.GetPlayersInRoomAsync(gameCode);
             Assert.Equal(4, players.Count);
 
-            // Determine join order by team/role assumptions:
             var redClue = players.First(p => p.Team == MatchTeam.RedTeam && p.Role == PlayerRole.ClueGuy);
             var blueClue = players.First(p => p.Team == MatchTeam.BlueTeam && p.Role == PlayerRole.ClueGuy);
             var redGuess = players.First(p => p.Team == MatchTeam.RedTeam && p.Role == PlayerRole.Guesser);
             var blueGuess = players.First(p => p.Team == MatchTeam.BlueTeam && p.Role == PlayerRole.Guesser);
 
-            Assert.Equal(1, redClue.Id); // host
+            Assert.Equal(1, redClue.Id);
             Assert.NotEqual(0, blueClue.Id);
             Assert.NotEqual(0, redGuess.Id);
             Assert.NotEqual(0, blueGuess.Id);
