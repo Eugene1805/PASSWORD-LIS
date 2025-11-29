@@ -89,7 +89,7 @@ namespace Test.ServicesTests
             reportRepo.Setup(r => r.HasReporterReportedSinceAsync(1, 2, null)).ReturnsAsync(true);
 
             var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(() => sut.SubmitReportAsync(dto));
-            Assert.Equal(ServiceErrorCode.InvalidReportPayload, ex.Detail.Code);
+            Assert.Equal(ServiceErrorCode.MaxOneReportPerBan, ex.Detail.Code);
         }
 
         [Fact]
@@ -103,7 +103,7 @@ namespace Test.ServicesTests
             reportRepo.Setup(r => r.AddReportAsync(It.IsAny<Report>())).Returns(Task.CompletedTask);
             reportRepo.Setup(r => r.GetReportCountForPlayerSinceAsync(2, null)).ReturnsAsync(1);
 
-            await sut.SubscribeToReportUpdatesAsync(2);
+            sut.SubscribeToReportUpdatesAsync(2);
             var result = await sut.SubmitReportAsync(dto);
 
             Assert.True(result);
@@ -126,7 +126,7 @@ namespace Test.ServicesTests
             banRepo.Setup(b => b.GetActiveBanForPlayerAsync(4)).ReturnsAsync((Ban?)null);
             banRepo.Setup(b => b.AddBanAsync(It.IsAny<Ban>())).Returns(Task.CompletedTask);
 
-            await sut.SubscribeToReportUpdatesAsync(4);
+            sut.SubscribeToReportUpdatesAsync(4);
             var result = await sut.SubmitReportAsync(dto);
 
             Assert.True(result);

@@ -27,9 +27,11 @@ namespace Test.DataTests
                 Metadata = "res://*/Model.PasswordLISModel.csdl|res://*/Model.PasswordLISModel.ssdl|res://*/Model.PasswordLISModel.msl"
             };
 
-            // Act & Assert
+            // Act 
             using var ctx = new PasswordLISEntities(entityBuilder.ToString());
-            Assert.True(ctx.Database.Exists(), "La conexión a la base de datos no se pudo establecer.");
+
+            // Assert
+            Assert.True(ctx.Database.Exists(), "Coult not connect to the Database");
         }
     }
 }

@@ -451,8 +451,9 @@ namespace Test.ServicesTests
             // Opposite team (Blue) should receive history
             blueClue.Verify(c => c.OnBeginRoundValidation(It.Is<List<TurnHistoryDTO>>(l => l.Count == 2 && l[0].TurnId == 0 && l[1].TurnId == 1)), Times.Once);
             blueGuess.Verify(c => c.OnBeginRoundValidation(It.Is<List<TurnHistoryDTO>>(l => l.Count == 2)), Times.Once);
-            redClue.Verify(c => c.OnBeginRoundValidation(It.IsAny<List<TurnHistoryDTO>>()), Times.Never);
-            redGuess.Verify(c => c.OnBeginRoundValidation(It.IsAny<List<TurnHistoryDTO>>()), Times.Never);
+            // Red team validates Blue team's history (empty list)
+            redClue.Verify(c => c.OnBeginRoundValidation(It.Is<List<TurnHistoryDTO>>(l => l.Count == 0)), Times.Once);
+            redGuess.Verify(c => c.OnBeginRoundValidation(It.Is<List<TurnHistoryDTO>>(l => l.Count == 0)), Times.Once);
 
             // Now everyone (4 players) votes to trigger processing immediately
             var votesBlueClue = new List<ValidationVoteDTO> { new ValidationVoteDTO { TurnId =0, PenalizeSynonym = true } };

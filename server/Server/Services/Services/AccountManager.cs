@@ -42,7 +42,7 @@ namespace Services.Services
                 };
                 await repository.CreateAccountAsync(userAccount);
                 log.InfoFormat("Account succesfully created for: '{0}'", userAccount.Email);
-                SendEmailVerification(userAccount.Email);
+                await SendEmailVerification(userAccount.Email);
             }, context: "AccountManager: CreateAccountAsync");
         }
 
@@ -58,10 +58,10 @@ namespace Services.Services
             }, context: "AccountManager: IsNickNameInUse");
         }
 
-        private void SendEmailVerification(string email)
+        private async Task SendEmailVerification(string email)
         {
             var code = codeService.GenerateAndStoreCode(email, CodeType.EmailVerification);
-            _ = notification.SendAccountVerificationEmailAsync(email, code);
+            await notification.SendAccountVerificationEmailAsync(email, code);
         }
     }
 }

@@ -190,7 +190,7 @@ namespace Test.ServicesTests
         }
 
         [Fact]
-        public async Task CreateAccount_ShouldNotThrow_WhenNotificationServiceFails()
+        public async Task CreateAccount_ShouldThrow_WhenNotificationServiceFails()
         {
             // Arrange
             var dto = new NewAccountDTO { Email = "notify@fail.com", Password = "P@ssw0rd!" };
@@ -199,14 +199,15 @@ namespace Test.ServicesTests
             mockCodeService.Setup(c => c.GenerateAndStoreCode(dto.Email, CodeType.EmailVerification))
                             .Returns("123456");
 
-            // Return a faulted task without throwing synchronously
             mockNotification.Setup(n => n.SendAccountVerificationEmailAsync(dto.Email, It.IsAny<string>()))
-                              .Returns(Task.FromException(new Exception("smtp error")));
+                              .ThrowsAsync(new System.Net.Mail.SmtpException("SMTP server error"));
 
-            // Act - should complete without throwing because method does not await the notification task
-            await accountManager.CreateAccountAsync(dto);
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
+                () => accountManager.CreateAccountAsync(dto)
+            );
 
-            // Assert: repository and code generation still invoked, notification attempted
+            Assert.Equal("EMAIL_SENDING_ERROR", exception.Detail.ErrorCode);
             mockRepo.Verify(r => r.CreateAccountAsync(It.IsAny<UserAccount>()), Times.Once);
             mockCodeService.Verify(c => c.GenerateAndStoreCode(dto.Email, CodeType.EmailVerification), Times.Once);
             mockNotification.Verify(n => n.SendAccountVerificationEmailAsync(dto.Email, It.IsAny<string>()), Times.Once);
