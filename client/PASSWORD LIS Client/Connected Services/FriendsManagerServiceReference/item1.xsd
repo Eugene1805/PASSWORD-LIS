@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xs:schema xmlns:tns="http://tempuri.org/" elementFormDefault="qualified" targetNamespace="http://tempuri.org/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:import schemaLocation="http://localhost:8104/?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" />
-  <xs:import schemaLocation="http://localhost:8104/?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts" />
+  <xs:import schemaLocation="http://localhost:8104/?xsd=xsd4" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts" />
   <xs:element name="SubscribeToFriendUpdatesAsync">
     <xs:complexType>
       <xs:sequence>

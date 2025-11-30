@@ -401,30 +401,36 @@ namespace PASSWORD_LIS_Client.WaitingRoomManagerServiceReference {
         System.Threading.Tasks.Task<bool> JoinRoomAsGuestAsync(string gameCode, string nickname);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/SendMessage", ReplyAction="http://tempuri.org/IWaitingRoomManager/SendMessageResponse")]
+        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IWaitingRoomManager/SendMessageServiceErrorDetailDTOFault", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
         void SendMessage(string gameCode, PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ChatMessageDTO message);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/SendMessage", ReplyAction="http://tempuri.org/IWaitingRoomManager/SendMessageResponse")]
         System.Threading.Tasks.Task SendMessageAsync(string gameCode, PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ChatMessageDTO message);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/LeaveRoom", ReplyAction="http://tempuri.org/IWaitingRoomManager/LeaveRoomResponse")]
+        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IWaitingRoomManager/LeaveRoomServiceErrorDetailDTOFault", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
         void LeaveRoom(string gameCode, int playerId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/LeaveRoom", ReplyAction="http://tempuri.org/IWaitingRoomManager/LeaveRoomResponse")]
         System.Threading.Tasks.Task LeaveRoomAsync(string gameCode, int playerId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/StartGame", ReplyAction="http://tempuri.org/IWaitingRoomManager/StartGameResponse")]
+        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IWaitingRoomManager/StartGameServiceErrorDetailDTOFault", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
         void StartGame(string gameCode);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/StartGame", ReplyAction="http://tempuri.org/IWaitingRoomManager/StartGameResponse")]
         System.Threading.Tasks.Task StartGameAsync(string gameCode);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/GetPlayersInRoom", ReplyAction="http://tempuri.org/IWaitingRoomManager/GetPlayersInRoomResponse")]
+        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IWaitingRoomManager/GetPlayersInRoomServiceErrorDetailDTOFault" +
+            "", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
         PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.PlayerDTO[] GetPlayersInRoom(string gameCode);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/GetPlayersInRoom", ReplyAction="http://tempuri.org/IWaitingRoomManager/GetPlayersInRoomResponse")]
         System.Threading.Tasks.Task<PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.PlayerDTO[]> GetPlayersInRoomAsync(string gameCode);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/HostLeft", ReplyAction="http://tempuri.org/IWaitingRoomManager/HostLeftResponse")]
+        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.WaitingRoomManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IWaitingRoomManager/HostLeftServiceErrorDetailDTOFault", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
         void HostLeft(string gameCode);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IWaitingRoomManager/HostLeft", ReplyAction="http://tempuri.org/IWaitingRoomManager/HostLeftResponse")]

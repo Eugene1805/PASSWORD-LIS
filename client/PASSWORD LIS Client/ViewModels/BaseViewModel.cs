@@ -4,9 +4,11 @@ using PASSWORD_LIS_Client.Views;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.ServiceModel;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace PASSWORD_LIS_Client.ViewModels
 {
@@ -49,31 +51,32 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             catch (FaultException<ServiceErrorDetailDTO> ex)
             {
-                HandleServiceError(ex.Detail);
+                HandleTypedFaultException(ex);
+                return default;
+            }
+            catch (FaultException ex)
+            {
+                HandleUntypedFaultException(ex);
                 return default;
             }
             catch (TimeoutException)
             {
-                windowService?.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
-                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+                HandleTimeoutException();
                 return default;
             }
             catch (EndpointNotFoundException)
             {
-                windowService?.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
-                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
+                HandleEndpointNotFoundException();
                 return default;
             }
             catch (CommunicationException)
             {
-                windowService?.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
+                HandleCommunicationException();
                 return default;
             }
             catch (Exception)
             {
-                windowService?.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
+                HandleGenericException();
                 return default;
             }
         }
@@ -91,28 +94,122 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             catch (FaultException<ServiceErrorDetailDTO> ex)
             {
-                HandleServiceError(ex.Detail);
+                HandleTypedFaultException(ex);
+            }
+            catch (FaultException ex)
+            {
+                HandleUntypedFaultException(ex);
             }
             catch (TimeoutException)
             {
-                windowService?.ShowPopUp(Properties.Langs.Lang.timeLimitTitleText,
-                    Properties.Langs.Lang.serverTimeoutText, PopUpIcon.Warning);
+                HandleTimeoutException();
             }
             catch (EndpointNotFoundException)
             {
-                windowService?.ShowPopUp(Properties.Langs.Lang.connectionErrorTitleText,
-                    Properties.Langs.Lang.serverConnectionInternetErrorText, PopUpIcon.Error);
+                HandleEndpointNotFoundException();
             }
             catch (CommunicationException)
             {
-                windowService?.ShowPopUp(Properties.Langs.Lang.networkErrorTitleText,
-                    Properties.Langs.Lang.serverCommunicationErrorText, PopUpIcon.Error);
+                HandleCommunicationException();
             }
             catch (Exception)
             {
-                windowService?.ShowPopUp(Properties.Langs.Lang.errorTitleText,
-                    Properties.Langs.Lang.unexpectedErrorText, PopUpIcon.Error);
+                HandleGenericException();
             }
+        }
+
+        private void HandleTypedFaultException(FaultException<ServiceErrorDetailDTO> ex)
+        {
+            HandleServiceError(ex.Detail);
+        }
+
+        private void HandleUntypedFaultException(FaultException ex)
+        {
+            if (FaultHelpers.TryConvertToTypedFault<ServiceErrorDetailDTO>(ex, out var typedFault))
+            {
+                var clientDto = CreateClientDto(typedFault.Detail);
+                HandleServiceError(clientDto);
+                return;
+            }
+
+            var errorCodeFromXml = FaultHelpers.GetErrorCodeFromFault(ex);
+            var messageFromXml = ExtractMessageFromFault(ex);
+
+            if (!string.IsNullOrEmpty(errorCodeFromXml) || !string.IsNullOrEmpty(messageFromXml))
+            {
+                HandleServiceError(errorCodeFromXml, messageFromXml);
+                return;
+            }
+
+            HandleServiceError((ServiceErrorDetailDTO)null);
+        }
+
+        private ServiceErrorDetailDTO CreateClientDto(ServiceErrorDetailDTO serverDto)
+        {
+            return new ServiceErrorDetailDTO
+            {
+                Code = serverDto.Code,
+                ErrorCode = serverDto?.ErrorCode,
+                Message = serverDto?.Message
+            };
+        }
+
+        private static string ExtractMessageFromFault(FaultException ex)
+        {
+            try
+            {
+                var messageFault = ex.CreateMessageFault();
+                if (!messageFault.HasDetail)
+                {
+                    return null;
+                }
+
+                var reader = messageFault.GetReaderAtDetailContents();
+                var xml = reader.ReadOuterXml();
+                var xElement = XElement.Parse(xml);
+
+                return xElement.Descendants()
+                    .FirstOrDefault(node =>
+                        string.Equals(node.Name.LocalName, "Message", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(node.Name.LocalName, "message", StringComparison.OrdinalIgnoreCase))
+                    ?.Value;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private void HandleTimeoutException()
+        {
+            windowService?.ShowPopUp(
+                Properties.Langs.Lang.timeLimitTitleText,
+                Properties.Langs.Lang.serverTimeoutText,
+                PopUpIcon.Warning);
+        }
+
+        private void HandleEndpointNotFoundException()
+        {
+            windowService?.ShowPopUp(
+                Properties.Langs.Lang.connectionErrorTitleText,
+                Properties.Langs.Lang.serverConnectionInternetErrorText,
+                PopUpIcon.Error);
+        }
+
+        private void HandleCommunicationException()
+        {
+            windowService?.ShowPopUp(
+                Properties.Langs.Lang.networkErrorTitleText,
+                Properties.Langs.Lang.serverCommunicationErrorText,
+                PopUpIcon.Error);
+        }
+
+        private void HandleGenericException()
+        {
+            windowService?.ShowPopUp(
+                Properties.Langs.Lang.errorTitleText,
+                Properties.Langs.Lang.unexpectedErrorText,
+                PopUpIcon.Error);
         }
 
         private void HandleServiceError(ServiceErrorDetailDTO errorDetail)
@@ -122,175 +219,211 @@ namespace PASSWORD_LIS_Client.ViewModels
                 return;
             }
 
-            string title;
-            string message;
-            PopUpIcon icon;
+            var errorInfo = GetErrorInfo(errorDetail.Code);
 
-            switch (errorDetail.Code)
+            if (!string.IsNullOrEmpty(errorInfo.Title) || !string.IsNullOrEmpty(errorInfo.Message))
+            {
+                windowService.ShowPopUp(errorInfo.Title, errorInfo.Message, errorInfo.Icon);
+            }
+        }
+
+        private void HandleServiceError(string errorCode, string message)
+        {
+            var dto = new ServiceErrorDetailDTO
+            {
+                ErrorCode = errorCode,
+                Message = message
+            };
+            HandleServiceError(dto);
+        }
+
+        private static (string Title, string Message, PopUpIcon Icon) GetErrorInfo(ServiceErrorCode errorCode)
+        {
+            switch (errorCode)
             {
                 case ServiceErrorCode.USER_ALREADY_EXISTS:
-                    title = Properties.Langs.Lang.errorTitleText;
-                    message = Properties.Langs.Lang.userAlreadyExistText;
-                    icon = PopUpIcon.Warning;
-                    break;
+                    return (
+                        Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.userAlreadyExistText,
+                        PopUpIcon.Warning
+                    );
 
                 case ServiceErrorCode.DATABASE_ERROR:
-                    title = Properties.Langs.Lang.errorTitleText;
-                    message = Properties.Langs.Lang.serverCommunicationErrorText;
-                    icon = PopUpIcon.Error;
-                    break;
+                    return (
+                        Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.serverCommunicationErrorText,
+                        PopUpIcon.Error
+                    );
 
                 case ServiceErrorCode.EMAIL_SENDING_ERROR:
                 case ServiceErrorCode.EMAIL_CONFIGURATION_ERROR:
-                    title = Properties.Langs.Lang.warningTitleText;
-                    message = Properties.Langs.Lang.couldNotSendMail;
-                    icon = PopUpIcon.Warning;
-                    break;
+                    return (
+                        Properties.Langs.Lang.warningTitleText,
+                        Properties.Langs.Lang.couldNotSendMail,
+                        PopUpIcon.Warning
+                    );
 
                 case ServiceErrorCode.NULL_ARGUMENT:
-
                 case ServiceErrorCode.INVALID_OPERATION:
-                    title = Properties.Langs.Lang.warningTitleText;
-                    message = Properties.Langs.Lang.invalidArgument;
-                    icon = PopUpIcon.Error;
-                    break;
+                    return (
+                        Properties.Langs.Lang.warningTitleText,
+                        Properties.Langs.Lang.invalidArgument,
+                        PopUpIcon.Error
+                    );
 
                 case ServiceErrorCode.ROOM_NOT_FOUND:
-                    title = Properties.Langs.Lang.errorTitleText;
-                    message = Properties.Langs.Lang.roomNotFoundText;
-                    icon = PopUpIcon.Warning;
-                    break;
+                    return (
+                        Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.roomNotFoundText,
+                        PopUpIcon.Warning
+                    );
 
                 case ServiceErrorCode.ROOM_FULL:
-                    title = Properties.Langs.Lang.warningTitleText;
-                    message = Properties.Langs.Lang.roomFullText;
-                    icon = PopUpIcon.Warning;
-                    break;
+                    return (
+                        Properties.Langs.Lang.warningTitleText,
+                        Properties.Langs.Lang.roomFullText,
+                        PopUpIcon.Warning
+                    );
 
                 case ServiceErrorCode.PLAYER_NOT_FOUND:
-                    title = Properties.Langs.Lang.warningTitleText;
-                    message = Properties.Langs.Lang.playerNotFoundText;
-                    icon = PopUpIcon.Warning;
-                    break;
+                    return (
+                        Properties.Langs.Lang.warningTitleText,
+                        Properties.Langs.Lang.playerNotFoundText,
+                        PopUpIcon.Warning
+                    );
 
                 case ServiceErrorCode.ALREADY_IN_ROOM:
-                    title = Properties.Langs.Lang.errorTitleText;
-                    message = Properties.Langs.Lang.youAreAlreadyInGameText;
-                    icon = PopUpIcon.Warning;
-                    break;
+                    return (
+                        Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.youAreAlreadyInGameText,
+                        PopUpIcon.Warning
+                    );
 
                 case ServiceErrorCode.COULD_NOT_CREATE_ROOM:
-                    title = Properties.Langs.Lang.errorTitleText;
-                    message = Properties.Langs.Lang.errorInitializingGameText;
-                    icon = PopUpIcon.Error;
-                    break;
+                    return (
+                        Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.errorInitializingGameText,
+                        PopUpIcon.Error
+                    );
 
                 case ServiceErrorCode.STATISTICS_ERROR:
-                    title = Properties.Langs.Lang.errorTitleText;
-                    message = Properties.Langs.Lang.statisticsErrorText;
-                    icon = PopUpIcon.Error;
-                    break;
+                    return (
+                        Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.statisticsErrorText,
+                        PopUpIcon.Error
+                    );
 
                 case ServiceErrorCode.INVALID_REPORT_PAYLOAD:
-                    title = Properties.Langs.Lang.errorTitleText;
-                    message = Properties.Langs.Lang.invalidReportDataText;
-                    icon = PopUpIcon.Error;
-                    break;
+                    return (
+                        Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.invalidReportDataText,
+                        PopUpIcon.Error
+                    );
 
                 case ServiceErrorCode.REPORTER_NOT_FOUND:
-                    title = Properties.Langs.Lang.warningTitleText;
-                    message = Properties.Langs.Lang.acceptText;
-                    icon = PopUpIcon.Warning;
-                    break;
+                    return (
+                        Properties.Langs.Lang.warningTitleText,
+                        Properties.Langs.Lang.acceptText,
+                        PopUpIcon.Warning
+                    );
 
                 case ServiceErrorCode.REPORTED_PLAYER_NOT_FOUND:
-                    title = Properties.Langs.Lang.warningTitleText;
-                    message = Properties.Langs.Lang.reportedPlayerNotFoundText;
-                    icon = PopUpIcon.Warning;
-                    break;
+                    return (
+                        Properties.Langs.Lang.warningTitleText,
+                        Properties.Langs.Lang.reportedPlayerNotFoundText,
+                        PopUpIcon.Warning
+                    );
 
                 case ServiceErrorCode.PLAYER_ALREADY_BANNED:
-                    title = Properties.Langs.Lang.warningTitleText;
-                    message = Properties.Langs.Lang.playerAlreadyBannedText;
-                    icon = PopUpIcon.Warning;
-                    break;
+                    return (
+                        Properties.Langs.Lang.warningTitleText,
+                        Properties.Langs.Lang.playerAlreadyBannedText,
+                        PopUpIcon.Warning
+                    );
 
                 case ServiceErrorCode.BAN_PERSISTENCE_ERROR:
-                    title = Properties.Langs.Lang.errorTitleText;
-                    message = Properties.Langs.Lang.banPersistenceErrorText;
-                    icon = PopUpIcon.Error;
-                    break;
+                    return (
+                        Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.banPersistenceErrorText,
+                        PopUpIcon.Error
+                    );
 
                 case ServiceErrorCode.SUBSCRIPTION_ERROR:
-                    title = Properties.Langs.Lang.errorTitleText;
-                    message = Properties.Langs.Lang.subscriptionErrorText;
-                    icon = PopUpIcon.Error;
-                    break;
+                    return (
+                        Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.subscriptionErrorText,
+                        PopUpIcon.Error
+                    );
 
                 case ServiceErrorCode.UNSUBSCRIPTION_ERROR:
-                    title = Properties.Langs.Lang.errorTitleText;
-                    message = Properties.Langs.Lang.unsubscriptionErrorText;
-                    icon = PopUpIcon.Error;
-                    break;
+                    return (
+                        Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.unsubscriptionErrorText,
+                        PopUpIcon.Error
+                    );
 
                 case ServiceErrorCode.SECURITY_ERROR:
-                    title = Properties.Langs.Lang.errorTitleText;
-                    message = Properties.Langs.Lang.securityErrorText;
-                    icon = PopUpIcon.Error;
-                    break;
+                    return (
+                        Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.securityErrorText,
+                        PopUpIcon.Error
+                    );
 
                 case ServiceErrorCode.FORMAT_ERROR:
-                    title = Properties.Langs.Lang.warningTitleText;
-                    message = Properties.Langs.Lang.formatErrorText;
-                    icon = PopUpIcon.Warning;
-                    break;
+                    return (
+                        Properties.Langs.Lang.warningTitleText,
+                        Properties.Langs.Lang.formatErrorText,
+                        PopUpIcon.Warning
+                    );
 
                 case ServiceErrorCode.SELF_INVITATION:
-                    title = Properties.Langs.Lang.warningTitleText;
-                    message = Properties.Langs.Lang.selfInvitationText;
-                    icon = PopUpIcon.Warning;
-                    break;
+                    return (
+                        Properties.Langs.Lang.warningTitleText,
+                        Properties.Langs.Lang.selfInvitationText,
+                        PopUpIcon.Warning
+                    );
 
                 case ServiceErrorCode.MATCH_NOT_FOUND_OR_ENDED:
-                    title = Properties.Langs.Lang.warningTitleText;
-                    message = Properties.Langs.Lang.matchNotFoundOrEndedText;
-                    icon = PopUpIcon.Warning;
-                    break;
+                    return (
+                        Properties.Langs.Lang.warningTitleText,
+                        Properties.Langs.Lang.matchNotFoundOrEndedText,
+                        PopUpIcon.Warning
+                    );
 
                 case ServiceErrorCode.MATCH_ALREADY_STARTED_OR_FINISHING:
-                    title = Properties.Langs.Lang.warningTitleText;
-                    message = Properties.Langs.Lang.matchStartedOrFinishingText;
-                    icon = PopUpIcon.Warning;
-                    break;
+                    return (
+                        Properties.Langs.Lang.warningTitleText,
+                        Properties.Langs.Lang.matchStartedOrFinishingText,
+                        PopUpIcon.Warning
+                    );
 
                 case ServiceErrorCode.NOT_AUTHORIZED_TO_JOIN:
-                    title = Properties.Langs.Lang.errorTitleText;
-                    message = Properties.Langs.Lang.acceptText;
-                    icon = PopUpIcon.Warning;
-                    break;
+                    return (
+                        Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.acceptText,
+                        PopUpIcon.Warning
+                    );
 
                 case ServiceErrorCode.MAX_ONE_REPORT_PER_BAN:
-                    title = Properties.Langs.Lang.warningTitleText;
-                    message = Properties.Langs.Lang.maxReportLimitText;
-                    icon = PopUpIcon.Warning;
-                    break;
+                    return (
+                        Properties.Langs.Lang.warningTitleText,
+                        Properties.Langs.Lang.maxReportLimitText,
+                        PopUpIcon.Warning
+                    );
 
                 case ServiceErrorCode.COULD_NOT_CREATE_GAME:
-                    title = Properties.Langs.Lang.errorTitleText;
-                    message = Properties.Langs.Lang.couldNotCreateMatch;
-                    icon = PopUpIcon.Error;
-                    break;
+                    return (
+                        Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.couldNotCreateMatch,
+                        PopUpIcon.Error
+                    );
 
                 default:
-                    title = Properties.Langs.Lang.errorTitleText;
-                    message = Properties.Langs.Lang.unexpectedErrorText;
-                    icon = PopUpIcon.Error;
-                    break;
-            }
-
-            if (!string.IsNullOrEmpty(title) || !string.IsNullOrEmpty(message))
-            {
-                windowService.ShowPopUp(title, message, icon);
+                    return (
+                        Properties.Langs.Lang.errorTitleText,
+                        Properties.Langs.Lang.unexpectedErrorText,
+                        PopUpIcon.Error
+                    );
             }
         }
     }

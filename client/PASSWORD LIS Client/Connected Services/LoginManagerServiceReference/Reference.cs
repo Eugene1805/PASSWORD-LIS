@@ -358,6 +358,7 @@ namespace PASSWORD_LIS_Client.LoginManagerServiceReference {
         System.Threading.Tasks.Task<bool> IsAccountVerifiedAsync(string email);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILoginManager/SendVerificationCode", ReplyAction="http://tempuri.org/ILoginManager/SendVerificationCodeResponse")]
+        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.LoginManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/ILoginManager/SendVerificationCodeServiceErrorDetailDTOFault", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
         void SendVerificationCode(string email);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/ILoginManager/SendVerificationCode", ReplyAction="http://tempuri.org/ILoginManager/SendVerificationCodeResponse")]

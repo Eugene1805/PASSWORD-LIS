@@ -34,7 +34,8 @@
       <xsd:import schemaLocation="http://localhost:8104/?xsd=xsd0" namespace="http://tempuri.org/" />
       <xsd:import schemaLocation="http://localhost:8104/?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
       <xsd:import schemaLocation="http://localhost:8104/?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" />
-      <xsd:import schemaLocation="http://localhost:8104/?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts" />
+      <xsd:import schemaLocation="http://localhost:8104/?xsd=xsd3" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums" />
+      <xsd:import schemaLocation="http://localhost:8104/?xsd=xsd4" namespace="http://schemas.datacontract.org/2004/07/Services.Contracts" />
     </xsd:schema>
   </wsdl:types>
   <wsdl:message name="IFriendsManager_SubscribeToFriendUpdatesAsync_InputMessage">
@@ -46,11 +47,17 @@
   <wsdl:message name="IFriendsManager_GetFriends_OutputMessage">
     <wsdl:part name="parameters" element="tns:GetFriendsResponse" />
   </wsdl:message>
+  <wsdl:message name="IFriendsManager_GetFriends_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q1="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q1:ServiceErrorDetailDTO" />
+  </wsdl:message>
   <wsdl:message name="IFriendsManager_SendFriendRequest_InputMessage">
     <wsdl:part name="parameters" element="tns:SendFriendRequest" />
   </wsdl:message>
   <wsdl:message name="IFriendsManager_SendFriendRequest_OutputMessage">
     <wsdl:part name="parameters" element="tns:SendFriendRequestResponse" />
+  </wsdl:message>
+  <wsdl:message name="IFriendsManager_SendFriendRequest_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q2="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q2:ServiceErrorDetailDTO" />
   </wsdl:message>
   <wsdl:message name="IFriendsManager_DeleteFriend_InputMessage">
     <wsdl:part name="parameters" element="tns:DeleteFriend" />
@@ -58,11 +65,17 @@
   <wsdl:message name="IFriendsManager_DeleteFriend_OutputMessage">
     <wsdl:part name="parameters" element="tns:DeleteFriendResponse" />
   </wsdl:message>
+  <wsdl:message name="IFriendsManager_DeleteFriend_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q3="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q3:ServiceErrorDetailDTO" />
+  </wsdl:message>
   <wsdl:message name="IFriendsManager_GetPendingRequests_InputMessage">
     <wsdl:part name="parameters" element="tns:GetPendingRequests" />
   </wsdl:message>
   <wsdl:message name="IFriendsManager_GetPendingRequests_OutputMessage">
     <wsdl:part name="parameters" element="tns:GetPendingRequestsResponse" />
+  </wsdl:message>
+  <wsdl:message name="IFriendsManager_GetPendingRequests_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q4="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q4:ServiceErrorDetailDTO" />
   </wsdl:message>
   <wsdl:message name="IFriendsManager_RespondToFriendRequest_InputMessage">
     <wsdl:part name="parameters" element="tns:RespondToFriendRequest" />
@@ -70,11 +83,17 @@
   <wsdl:message name="IFriendsManager_RespondToFriendRequest_OutputMessage">
     <wsdl:part name="parameters" element="tns:RespondToFriendRequestResponse" />
   </wsdl:message>
+  <wsdl:message name="IFriendsManager_RespondToFriendRequest_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q5="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q5:ServiceErrorDetailDTO" />
+  </wsdl:message>
   <wsdl:message name="IFriendsManager_UnsubscribeFromFriendUpdates_InputMessage">
     <wsdl:part name="parameters" element="tns:UnsubscribeFromFriendUpdates" />
   </wsdl:message>
   <wsdl:message name="IFriendsManager_UnsubscribeFromFriendUpdates_OutputMessage">
     <wsdl:part name="parameters" element="tns:UnsubscribeFromFriendUpdatesResponse" />
+  </wsdl:message>
+  <wsdl:message name="IFriendsManager_UnsubscribeFromFriendUpdates_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q6="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q6:ServiceErrorDetailDTO" />
   </wsdl:message>
   <wsdl:message name="IFriendsManager_OnFriendRequestReceived_OutputCallbackMessage">
     <wsdl:part name="parameters" element="tns:OnFriendRequestReceived" />
@@ -92,26 +111,32 @@
     <wsdl:operation name="GetFriends">
       <wsdl:input wsaw:Action="http://tempuri.org/IFriendsManager/GetFriends" message="tns:IFriendsManager_GetFriends_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IFriendsManager/GetFriendsResponse" message="tns:IFriendsManager_GetFriends_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IFriendsManager/GetFriendsServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IFriendsManager_GetFriends_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
     <wsdl:operation name="SendFriendRequest">
       <wsdl:input wsaw:Action="http://tempuri.org/IFriendsManager/SendFriendRequest" message="tns:IFriendsManager_SendFriendRequest_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IFriendsManager/SendFriendRequestResponse" message="tns:IFriendsManager_SendFriendRequest_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IFriendsManager/SendFriendRequestServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IFriendsManager_SendFriendRequest_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
     <wsdl:operation name="DeleteFriend">
       <wsdl:input wsaw:Action="http://tempuri.org/IFriendsManager/DeleteFriend" message="tns:IFriendsManager_DeleteFriend_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IFriendsManager/DeleteFriendResponse" message="tns:IFriendsManager_DeleteFriend_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IFriendsManager/DeleteFriendServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IFriendsManager_DeleteFriend_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
     <wsdl:operation name="GetPendingRequests">
       <wsdl:input wsaw:Action="http://tempuri.org/IFriendsManager/GetPendingRequests" message="tns:IFriendsManager_GetPendingRequests_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IFriendsManager/GetPendingRequestsResponse" message="tns:IFriendsManager_GetPendingRequests_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IFriendsManager/GetPendingRequestsServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IFriendsManager_GetPendingRequests_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
     <wsdl:operation name="RespondToFriendRequest">
       <wsdl:input wsaw:Action="http://tempuri.org/IFriendsManager/RespondToFriendRequest" message="tns:IFriendsManager_RespondToFriendRequest_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IFriendsManager/RespondToFriendRequestResponse" message="tns:IFriendsManager_RespondToFriendRequest_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IFriendsManager/RespondToFriendRequestServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IFriendsManager_RespondToFriendRequest_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
     <wsdl:operation name="UnsubscribeFromFriendUpdates">
       <wsdl:input wsaw:Action="http://tempuri.org/IFriendsManager/UnsubscribeFromFriendUpdates" message="tns:IFriendsManager_UnsubscribeFromFriendUpdates_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IFriendsManager/UnsubscribeFromFriendUpdatesResponse" message="tns:IFriendsManager_UnsubscribeFromFriendUpdates_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IFriendsManager/UnsubscribeFromFriendUpdatesServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:IFriendsManager_UnsubscribeFromFriendUpdates_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
     <wsdl:operation name="OnFriendRequestReceived">
       <wsdl:output wsaw:Action="http://tempuri.org/IFriendsManager/OnFriendRequestReceived" message="tns:IFriendsManager_OnFriendRequestReceived_OutputCallbackMessage" />
@@ -140,6 +165,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="SendFriendRequest">
       <soap12:operation soapAction="http://tempuri.org/IFriendsManager/SendFriendRequest" style="document" />
@@ -149,6 +177,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="DeleteFriend">
       <soap12:operation soapAction="http://tempuri.org/IFriendsManager/DeleteFriend" style="document" />
@@ -158,6 +189,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="GetPendingRequests">
       <soap12:operation soapAction="http://tempuri.org/IFriendsManager/GetPendingRequests" style="document" />
@@ -167,6 +201,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="RespondToFriendRequest">
       <soap12:operation soapAction="http://tempuri.org/IFriendsManager/RespondToFriendRequest" style="document" />
@@ -176,6 +213,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="UnsubscribeFromFriendUpdates">
       <soap12:operation soapAction="http://tempuri.org/IFriendsManager/UnsubscribeFromFriendUpdates" style="document" />
@@ -185,6 +225,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
     <wsdl:operation name="OnFriendRequestReceived">
       <soap12:operation soapAction="http://tempuri.org/IFriendsManager/OnFriendRequestReceived" style="document" />
