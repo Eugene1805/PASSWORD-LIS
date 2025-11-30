@@ -46,6 +46,7 @@ namespace Services.Contracts
         /// <param name="gameCode">The room code.</param>
         /// <param name="message">The message payload.</param>
         [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
         Task SendMessageAsync(string gameCode, ChatMessageDTO message);
 
         /// <summary>
@@ -54,6 +55,7 @@ namespace Services.Contracts
         /// <param name="gameCode">The room code.</param>
         /// <param name="playerId">The leaving player id.</param>
         [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
         Task LeaveRoomAsync(string gameCode, int playerId);
 
         /// <summary>
@@ -61,6 +63,7 @@ namespace Services.Contracts
         /// </summary>
         /// <param name="gameCode">The room code.</param>
         [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
         Task StartGameAsync(string gameCode);
 
         /// <summary>
@@ -69,6 +72,7 @@ namespace Services.Contracts
         /// <param name="gameCode">The room code.</param>
         /// <returns>The list of players.</returns>
         [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
         Task<List<PlayerDTO>> GetPlayersInRoomAsync(string gameCode);
 
         /// <summary>
@@ -76,6 +80,7 @@ namespace Services.Contracts
         /// </summary>
         /// <param name="gameCode">The room code.</param>
         [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
         Task HostLeftAsync(string gameCode);
 
         /// <summary>

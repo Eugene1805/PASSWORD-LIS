@@ -62,6 +62,9 @@
   <wsdl:message name="ILoginManager_SendVerificationCode_OutputMessage">
     <wsdl:part name="parameters" element="tns:SendVerificationCodeResponse" />
   </wsdl:message>
+  <wsdl:message name="ILoginManager_SendVerificationCode_ServiceErrorDetailDTOFault_FaultMessage">
+    <wsdl:part xmlns:q3="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs" name="detail" element="q3:ServiceErrorDetailDTO" />
+  </wsdl:message>
   <wsdl:portType name="ILoginManager">
     <wsdl:operation name="Login">
       <wsdl:input wsaw:Action="http://tempuri.org/ILoginManager/Login" message="tns:ILoginManager_Login_InputMessage" />
@@ -76,6 +79,7 @@
     <wsdl:operation name="SendVerificationCode">
       <wsdl:input wsaw:Action="http://tempuri.org/ILoginManager/SendVerificationCode" message="tns:ILoginManager_SendVerificationCode_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/ILoginManager/SendVerificationCodeResponse" message="tns:ILoginManager_SendVerificationCode_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/ILoginManager/SendVerificationCodeServiceErrorDetailDTOFault" name="ServiceErrorDetailDTOFault" message="tns:ILoginManager_SendVerificationCode_ServiceErrorDetailDTOFault_FaultMessage" />
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:binding name="NetTcpBinding_ILoginManager" type="tns:ILoginManager">
@@ -113,6 +117,9 @@
       <wsdl:output>
         <soap12:body use="literal" />
       </wsdl:output>
+      <wsdl:fault name="ServiceErrorDetailDTOFault">
+        <soap12:fault use="literal" name="ServiceErrorDetailDTOFault" namespace="" />
+      </wsdl:fault>
     </wsdl:operation>
   </wsdl:binding>
   <wsdl:service name="LoginManager">

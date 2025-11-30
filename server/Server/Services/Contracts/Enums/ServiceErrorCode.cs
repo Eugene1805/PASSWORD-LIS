@@ -5,51 +5,63 @@ namespace Services.Contracts.Enums
     [DataContract]
     public enum ServiceErrorCode
     {
-         [EnumMember(Value = "USER_ALREADY_EXISTS")]
-         UserAlreadyExists,
-         [EnumMember(Value = "DATABASE_ERROR")]
-         DatabaseError,
-         [EnumMember(Value = "UNEXPECTED_ERROR")]
-         UnexpectedError,
-         [EnumMember(Value = "STATISTICS_ERROR")]
-         StatisticsError,
-         [EnumMember(Value = "COULD_NOT_CREATE_ROOM")]
-         CouldNotCreateRoom,
-         [EnumMember(Value = "ROOM_NOT_FOUND")]
-         RoomNotFound,
-         [EnumMember(Value = "ROOM_FULL")]
-         RoomFull,
-         [EnumMember(Value = "PLAYER_NOT_FOUND")]
-         PlayerNotFound,
-         [EnumMember(Value = "ALREADY_IN_ROOM")]
-         AlreadyInRoom,
-         [EnumMember(Value = "INVALID_REPORT_PAYLOAD")]
-         InvalidReportPayload,
-         [EnumMember(Value = "REPORTER_NOT_FOUND")]
-         ReporterNotFound,
-         [EnumMember(Value = "REPORTED_PLAYER_NOT_FOUND")]
-         ReportedPlayerNotFound,
-         [EnumMember(Value = "PLAYER_ALREADY_BANNED")]
-         PlayerAlreadyBanned,
-         [EnumMember(Value = "BAN_PERSISTENCE_ERROR")]
-         BanPersistenceError,
-         [EnumMember(Value = "SUBSCRIPTION_ERROR")]
-         SubscriptionError,
-         [EnumMember(Value = "UNSUBSCRIPTION_ERROR")]
-         UnsubscriptionError,
+        [EnumMember(Value = "USER_ALREADY_EXISTS")]
+        UserAlreadyExists,
+        [EnumMember(Value = "DATABASE_ERROR")]
+        DatabaseError,
+        [EnumMember(Value = "UNEXPECTED_ERROR")]
+        UnexpectedError,
+        [EnumMember(Value = "STATISTICS_ERROR")]
+        StatisticsError,
+        [EnumMember(Value = "COULD_NOT_CREATE_ROOM")]
+        CouldNotCreateRoom,
+        [EnumMember(Value = "ROOM_NOT_FOUND")]
+        RoomNotFound,
+        [EnumMember(Value = "ROOM_FULL")]
+        RoomFull,
+        [EnumMember(Value = "PLAYER_NOT_FOUND")]
+        PlayerNotFound,
+        [EnumMember(Value = "ALREADY_IN_ROOM")]
+        AlreadyInRoom,
+        [EnumMember(Value = "INVALID_REPORT_PAYLOAD")]
+        InvalidReportPayload,
+        [EnumMember(Value = "REPORTER_NOT_FOUND")]
+        ReporterNotFound,
+        [EnumMember(Value = "REPORTED_PLAYER_NOT_FOUND")]
+        ReportedPlayerNotFound,
+        [EnumMember(Value = "PLAYER_ALREADY_BANNED")]
+        PlayerAlreadyBanned,
+        [EnumMember(Value = "BAN_PERSISTENCE_ERROR")]
+        BanPersistenceError,
+        [EnumMember(Value = "SUBSCRIPTION_ERROR")]
+        SubscriptionError,
+        [EnumMember(Value = "UNSUBSCRIPTION_ERROR")]
+        UnsubscriptionError,
         [EnumMember(Value = "NULL_ARGUMENT")]
-         NullArgument,
+        NullArgument,
         [EnumMember(Value = "EMAIL_SENDING_ERROR")]
-         EmailSendingError,
+        EmailSendingError,
         [EnumMember(Value = "EMAIL_CONFIGURATION_ERROR")]
-         EmailConfigurationError,
-        [EnumMember(Value ="SECURITY_ERROR")]
-         SecurityError,
-        [EnumMember(Value ="FORMAT_ERROR")]
-         FormatError,
+        EmailConfigurationError,
+        [EnumMember(Value = "SECURITY_ERROR")]
+        SecurityError,
+        [EnumMember(Value = "FORMAT_ERROR")]
+        FormatError,
         [EnumMember(Value = "INVALID_OPERATION")]
-         InvalidOperation,
+        InvalidOperation,
         [EnumMember(Value = "SELF_INVITATION")]
-         SeflInvitation
+        SeflInvitation,
+        [EnumMember(Value = "MATCH_NOT_FOUND_OR_ENDED")]
+        MatchNotFoundOrEnded,
+        [EnumMember(Value = "MATCH_ALREADY_STARTED_OR_FINISHING")]
+        MatchAlreadyStartedOrFinishing,
+        [EnumMember(Value = "NOT_AUTHORIZED_TO_JOIN")]
+        NotAuthorizedToJoin,
+        [EnumMember(Value = "MAX_ONE_REPORT_PER_BAN")]
+        MaxOneReportPerBan,
+        [EnumMember(Value = "COULD_NOT_CREATE_GAME")]
+        CouldNotCreateGame,
+        [EnumMember(Value = "DATA_INTEGRITY_ERROR")]
+        DataIntegrityError
     }
 }

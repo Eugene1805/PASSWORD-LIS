@@ -25,6 +25,7 @@ namespace Services.Contracts
         /// <param name="userAccountId">The user account identifier.</param>
         /// <returns>List of current friends.</returns>
         [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
         Task<List<FriendDTO>> GetFriendsAsync(int userAccountId);
 
         /// <summary>
@@ -33,6 +34,7 @@ namespace Services.Contracts
         /// <param name="addresseeEmail">The target user's email.</param>
         /// <returns>The result of the request attempt.</returns>
         [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
         Task<FriendRequestResult> SendFriendRequestAsync(string addresseeEmail);
 
         /// <summary>
@@ -42,6 +44,7 @@ namespace Services.Contracts
         /// <param name="friendToDeleteId">The friend's player id to remove.</param>
         /// <returns>True if removed; otherwise, false.</returns>
         [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
         Task<bool> DeleteFriendAsync(int currentPlayerId, int friendToDeleteId);
 
         /// <summary>
@@ -49,6 +52,7 @@ namespace Services.Contracts
         /// </summary>
         /// <returns>List of pending friend request DTOs.</returns>
         [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
         Task<List<FriendDTO>> GetPendingRequestsAsync();
 
         /// <summary>
@@ -57,6 +61,7 @@ namespace Services.Contracts
         /// <param name="requesterPlayerId">The requester's player id.</param>
         /// <param name="accepted">True to accept; false to decline.</param>
         [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
         Task RespondToFriendRequestAsync(int requesterPlayerId, bool accepted);
 
         /// <summary>
@@ -64,6 +69,7 @@ namespace Services.Contracts
         /// </summary>
         /// <param name="userAccountId">The user account identifier.</param>
         [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
         Task UnsubscribeFromFriendUpdatesAsync(int userAccountId);
     }
 

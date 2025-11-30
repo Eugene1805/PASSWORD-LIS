@@ -184,8 +184,8 @@ namespace Services.Services
             var alreadyReported = await reportRepository.HasReporterReportedSinceAsync(reporterId, reportedId, since);
             if (alreadyReported)
             {
-                throw FaultExceptionFactory.Create(ServiceErrorCode.InvalidReportPayload,
-                    "INVALID_REPORT_PAYLOAD",
+                throw FaultExceptionFactory.Create(ServiceErrorCode.MaxOneReportPerBan,
+                    "MAX_ONE_REPORT_PER_BAN",
                     "You have already reported this player. You can report again after they are banned.");
             }
         }

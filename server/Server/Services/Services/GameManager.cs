@@ -202,13 +202,13 @@ namespace Services.Services
                 if (!matches.TryGetValue(gameCode, out MatchSession session))
                 {
                     log.WarnFormat("SubscribeToMatchAsync failed - game '{0}' not found or already ended.", gameCode);
-                    throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError,
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.MatchNotFoundOrEnded,
                         "MATCH_NOT_FOUND_OR_ENDED", "The match does not exist or has already ended.");
                 }
                 if (session.Status != MatchStatus.WaitingForPlayers)
                 {
                     log.WarnFormat("SubscribeToMatchAsync failed - game '{0}' already started or finishing.", gameCode);
-                    throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError,
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.MatchAlreadyStartedOrFinishing,
                         "MATCH_ALREADY_STARTED_OR_FINISHING", "The match has already started or is finishing.");
                 }
                 var expectedPlayer = session.ExpectedPlayers.FirstOrDefault(p => p.Id == playerId);
@@ -216,7 +216,7 @@ namespace Services.Services
                 {
                     log.WarnFormat("SubscribeToMatchAsync unauthorized join attempt for player {0} in game '{1}'.",
                         playerId, gameCode);
-                    throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError,
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.NotAuthorizedToJoin,
                         "NOT_AUTHORIZED_TO_JOIN", "You are not authorized to join this match.");
                 }
                 if (session.ActivePlayers.ContainsKey(playerId))
@@ -224,7 +224,7 @@ namespace Services.Services
                     log.WarnFormat("SubscribeToMatchAsync duplicate join for player {0} in game '{1}'.",
                         playerId, gameCode);
                     throw FaultExceptionFactory.Create(ServiceErrorCode.AlreadyInRoom,
-                        "PLAYER_ALREADY_IN_MATCH", "Player is already in the match.");
+                        "ALREADY_IN_ROOM", "Player is already in the match.");
                 }
                 var callback = operationContext.GetCallbackChannel<IGameManagerCallback>();
                 if (!session.ActivePlayers.TryAdd(playerId, (callback, expectedPlayer)))
@@ -232,7 +232,7 @@ namespace Services.Services
                     log.ErrorFormat("SubscribeToMatchAsync internal error adding player {0} to game '{1}'.",
                         playerId, gameCode);
                     throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError,
-                        "JOIN_INTERNAL_ERROR", "Internal error while joining the match.");
+                        "SUBSCRIPTION_ERROR", "Internal error while joining the match.");
                 }
                 if (session.ActivePlayers.Count == session.ExpectedPlayers.Count)
                 {

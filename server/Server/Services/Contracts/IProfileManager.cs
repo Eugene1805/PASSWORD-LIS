@@ -17,6 +17,6 @@ namespace Services.Contracts
         /// <returns>The persisted updated user profile.</returns>
         [OperationContract]
         [FaultContract(typeof(ServiceErrorDetailDTO))]
-        Task <UserDTO> UpdateProfileAsync(UserDTO updatedProfileData);
+        Task<UserDTO> UpdateProfileAsync(UserDTO updatedProfileData);
     }
 }

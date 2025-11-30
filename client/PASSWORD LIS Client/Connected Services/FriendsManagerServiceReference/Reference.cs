@@ -74,6 +74,175 @@ namespace PASSWORD_LIS_Client.FriendsManagerServiceReference {
         }
     }
     
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
+    [System.SerializableAttribute()]
+    public partial class ServiceErrorDetailDTO : object, System.Runtime.Serialization.IExtensibleDataObject, System.ComponentModel.INotifyPropertyChanged {
+        
+        [System.NonSerializedAttribute()]
+        private System.Runtime.Serialization.ExtensionDataObject extensionDataField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private PASSWORD_LIS_Client.FriendsManagerServiceReference.ServiceErrorCode CodeField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string ErrorCodeField;
+        
+        [System.Runtime.Serialization.OptionalFieldAttribute()]
+        private string MessageField;
+        
+        [global::System.ComponentModel.BrowsableAttribute(false)]
+        public System.Runtime.Serialization.ExtensionDataObject ExtensionData {
+            get {
+                return this.extensionDataField;
+            }
+            set {
+                this.extensionDataField = value;
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public PASSWORD_LIS_Client.FriendsManagerServiceReference.ServiceErrorCode Code {
+            get {
+                return this.CodeField;
+            }
+            set {
+                if ((this.CodeField.Equals(value) != true)) {
+                    this.CodeField = value;
+                    this.RaisePropertyChanged("Code");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string ErrorCode {
+            get {
+                return this.ErrorCodeField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.ErrorCodeField, value) != true)) {
+                    this.ErrorCodeField = value;
+                    this.RaisePropertyChanged("ErrorCode");
+                }
+            }
+        }
+        
+        [System.Runtime.Serialization.DataMemberAttribute()]
+        public string Message {
+            get {
+                return this.MessageField;
+            }
+            set {
+                if ((object.ReferenceEquals(this.MessageField, value) != true)) {
+                    this.MessageField = value;
+                    this.RaisePropertyChanged("Message");
+                }
+            }
+        }
+        
+        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
+        
+        protected void RaisePropertyChanged(string propertyName) {
+            System.ComponentModel.PropertyChangedEventHandler propertyChanged = this.PropertyChanged;
+            if ((propertyChanged != null)) {
+                propertyChanged(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
+            }
+        }
+    }
+    
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
+    [System.Runtime.Serialization.DataContractAttribute(Name="ServiceErrorCode", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.Enums")]
+    public enum ServiceErrorCode : int {
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        USER_ALREADY_EXISTS = 0,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        DATABASE_ERROR = 1,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        UNEXPECTED_ERROR = 2,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        STATISTICS_ERROR = 3,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        COULD_NOT_CREATE_ROOM = 4,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ROOM_NOT_FOUND = 5,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ROOM_FULL = 6,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        PLAYER_NOT_FOUND = 7,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        ALREADY_IN_ROOM = 8,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        INVALID_REPORT_PAYLOAD = 9,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        REPORTER_NOT_FOUND = 10,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        REPORTED_PLAYER_NOT_FOUND = 11,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        PLAYER_ALREADY_BANNED = 12,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        BAN_PERSISTENCE_ERROR = 13,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        SUBSCRIPTION_ERROR = 14,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        UNSUBSCRIPTION_ERROR = 15,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NULL_ARGUMENT = 16,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        EMAIL_SENDING_ERROR = 17,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        EMAIL_CONFIGURATION_ERROR = 18,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        SECURITY_ERROR = 19,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        FORMAT_ERROR = 20,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        INVALID_OPERATION = 21,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        SELF_INVITATION = 22,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        MATCH_NOT_FOUND_OR_ENDED = 23,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        MATCH_ALREADY_STARTED_OR_FINISHING = 24,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NOT_AUTHORIZED_TO_JOIN = 25,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        MAX_ONE_REPORT_PER_BAN = 26,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        COULD_NOT_CREATE_GAME = 27,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        DATA_INTEGRITY_ERROR = 28,
+    }
+    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("System.Runtime.Serialization", "4.0.0.0")]
     [System.Runtime.Serialization.DataContractAttribute(Name="FriendRequestResult", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts")]
     public enum FriendRequestResult : int {
@@ -111,36 +280,44 @@ namespace PASSWORD_LIS_Client.FriendsManagerServiceReference {
         System.Threading.Tasks.Task SubscribeToFriendUpdatesAsyncAsync(int userAccountId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/GetFriends", ReplyAction="http://tempuri.org/IFriendsManager/GetFriendsResponse")]
+        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.FriendsManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IFriendsManager/GetFriendsServiceErrorDetailDTOFault", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
         PASSWORD_LIS_Client.FriendsManagerServiceReference.FriendDTO[] GetFriends(int userAccountId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/GetFriends", ReplyAction="http://tempuri.org/IFriendsManager/GetFriendsResponse")]
         System.Threading.Tasks.Task<PASSWORD_LIS_Client.FriendsManagerServiceReference.FriendDTO[]> GetFriendsAsync(int userAccountId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/SendFriendRequest", ReplyAction="http://tempuri.org/IFriendsManager/SendFriendRequestResponse")]
+        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.FriendsManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IFriendsManager/SendFriendRequestServiceErrorDetailDTOFault", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
         PASSWORD_LIS_Client.FriendsManagerServiceReference.FriendRequestResult SendFriendRequest(string addresseeEmail);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/SendFriendRequest", ReplyAction="http://tempuri.org/IFriendsManager/SendFriendRequestResponse")]
         System.Threading.Tasks.Task<PASSWORD_LIS_Client.FriendsManagerServiceReference.FriendRequestResult> SendFriendRequestAsync(string addresseeEmail);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/DeleteFriend", ReplyAction="http://tempuri.org/IFriendsManager/DeleteFriendResponse")]
+        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.FriendsManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IFriendsManager/DeleteFriendServiceErrorDetailDTOFault", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
         bool DeleteFriend(int currentPlayerId, int friendToDeleteId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/DeleteFriend", ReplyAction="http://tempuri.org/IFriendsManager/DeleteFriendResponse")]
         System.Threading.Tasks.Task<bool> DeleteFriendAsync(int currentPlayerId, int friendToDeleteId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/GetPendingRequests", ReplyAction="http://tempuri.org/IFriendsManager/GetPendingRequestsResponse")]
+        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.FriendsManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IFriendsManager/GetPendingRequestsServiceErrorDetailDTOFault", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
         PASSWORD_LIS_Client.FriendsManagerServiceReference.FriendDTO[] GetPendingRequests();
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/GetPendingRequests", ReplyAction="http://tempuri.org/IFriendsManager/GetPendingRequestsResponse")]
         System.Threading.Tasks.Task<PASSWORD_LIS_Client.FriendsManagerServiceReference.FriendDTO[]> GetPendingRequestsAsync();
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/RespondToFriendRequest", ReplyAction="http://tempuri.org/IFriendsManager/RespondToFriendRequestResponse")]
+        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.FriendsManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IFriendsManager/RespondToFriendRequestServiceErrorDetailDTOFau" +
+            "lt", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
         void RespondToFriendRequest(int requesterPlayerId, bool accepted);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/RespondToFriendRequest", ReplyAction="http://tempuri.org/IFriendsManager/RespondToFriendRequestResponse")]
         System.Threading.Tasks.Task RespondToFriendRequestAsync(int requesterPlayerId, bool accepted);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/UnsubscribeFromFriendUpdates", ReplyAction="http://tempuri.org/IFriendsManager/UnsubscribeFromFriendUpdatesResponse")]
+        [System.ServiceModel.FaultContractAttribute(typeof(PASSWORD_LIS_Client.FriendsManagerServiceReference.ServiceErrorDetailDTO), Action="http://tempuri.org/IFriendsManager/UnsubscribeFromFriendUpdatesServiceErrorDetail" +
+            "DTOFault", Name="ServiceErrorDetailDTO", Namespace="http://schemas.datacontract.org/2004/07/Services.Contracts.DTOs")]
         void UnsubscribeFromFriendUpdates(int userAccountId);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://tempuri.org/IFriendsManager/UnsubscribeFromFriendUpdates", ReplyAction="http://tempuri.org/IFriendsManager/UnsubscribeFromFriendUpdatesResponse")]

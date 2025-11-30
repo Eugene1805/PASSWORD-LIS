@@ -33,6 +33,7 @@ namespace Services.Contracts
         /// <param name="email">The email address to send the verification code to.</param>
         /// <returns>A task representing the asynchronous operation.</returns>
         [OperationContract]
+        [FaultContract(typeof(ServiceErrorDetailDTO))]
         Task SendVerificationCodeAsync(string email);
     }
 }

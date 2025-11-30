@@ -4,13 +4,8 @@ using Moq;
 using Services.Contracts.DTOs;
 using Services.Contracts.Enums;
 using Services.Services;
-using System;
-using System.Collections.Generic;
 using System.Data.Entity.Infrastructure;
-using System.Linq;
 using System.ServiceModel;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace Test.ServicesTests
 {
@@ -173,36 +168,41 @@ namespace Test.ServicesTests
                     { "TikTok", " tiktokUser" }
                 }
             };
-
             UserAccount? capturedAccount = null;
             List<SocialAccount>? capturedSocials = null;
-
-            mockRepo.Setup(repo => repo.UpdateUserProfileAsync(
-                inputDto.PlayerId,
-                It.IsAny<UserAccount>(),
-                It.IsAny<List<SocialAccount>>()
-            ))
-            .Callback<int, UserAccount, List<SocialAccount>>((id, ua, sa) => {
-                capturedAccount = ua;
-                capturedSocials = sa;
-            })
-            .ReturnsAsync(true);
+            mockRepo.Setup(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(), It.IsAny<List<SocialAccount>>()))
+                .Callback<int, UserAccount, List<SocialAccount>>((id, ua, sa) => { capturedAccount = ua; capturedSocials = sa; })
+                .ReturnsAsync(true);
 
             // Act
             await profileManager.UpdateProfileAsync(inputDto);
 
             // Assert
-            Assert.NotNull(capturedAccount);
-            Assert.Equal(inputDto.FirstName, capturedAccount.FirstName);
-            Assert.Equal(inputDto.LastName, capturedAccount.LastName);
-            Assert.Equal((byte?)inputDto.PhotoId, capturedAccount.PhotoId);
-
-            Assert.NotNull(capturedSocials);
-            Assert.Equal(4, capturedSocials.Count);
-            Assert.Contains(capturedSocials, s => s.Provider == "Facebook" && s.Username == "fbUser ");
-            Assert.Contains(capturedSocials, s => s.Provider == "Instagram" && s.Username == "");
-            Assert.Contains(capturedSocials, s => s.Provider == "X" && s.Username == null);
-            Assert.Contains(capturedSocials, s => s.Provider == "TikTok" && s.Username == " tiktokUser");
+            var expected = (
+                AccountNotNull: true,
+                FirstName: (string?)inputDto.FirstName,
+                LastName: (string?)inputDto.LastName,
+                PhotoId: (byte?)inputDto.PhotoId,
+                SocialsNotNull: true,
+                Count: 4,
+                HasFacebook: true,
+                HasInstagram: true,
+                HasX: true,
+                HasTikTok: true
+            );
+            var actual = (
+                AccountNotNull: capturedAccount != null,
+                FirstName: capturedAccount?.FirstName,
+                LastName: capturedAccount?.LastName,
+                PhotoId: capturedAccount?.PhotoId,
+                SocialsNotNull: capturedSocials != null,
+                Count: capturedSocials?.Count ?? 0,
+                HasFacebook: capturedSocials?.Any(s => s.Provider == "Facebook" && s.Username == "fbUser ") ?? false,
+                HasInstagram: capturedSocials?.Any(s => s.Provider == "Instagram" && s.Username == "") ?? false,
+                HasX: capturedSocials?.Any(s => s.Provider == "X" && s.Username == null) ?? false,
+                HasTikTok: capturedSocials?.Any(s => s.Provider == "TikTok" && s.Username == " tiktokUser") ?? false
+            );
+            Assert.Equal(expected, actual);
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Test.ServicesTests.ServicesUtilTest
 
         public NotificationServiceTests()
         {
-            // Arrange (Setup global para todas las pruebas)
+            // Arrange
             mockEmailSender = new Mock<IEmailSender>();
             notificationService = new NotificationService(mockEmailSender.Object);
         }
@@ -27,14 +27,10 @@ namespace Test.ServicesTests.ServicesUtilTest
             await notificationService.SendAccountVerificationEmailAsync(testEmail, testCode);
 
             // Assert
-            // Verificamos que el método SendEmailAsync fue llamado exactamente una vez.
             mockEmailSender.Verify(
                 sender => sender.SendEmailAsync(
-                    // Verificamos que el email del destinatario sea el correcto.
                     It.Is<string>(email => email == testEmail),
-                    // Verificamos que el asunto sea el esperado.
                     It.Is<string>(subject => subject == expectedSubject),
-                    // Verificamos que el cuerpo del mensaje contenga el código de verificación.
                     It.Is<string>(body => body.Contains(testCode))
                 ),
                 Times.Once()
@@ -53,14 +49,10 @@ namespace Test.ServicesTests.ServicesUtilTest
             await notificationService.SendPasswordResetEmailAsync(testEmail, testCode);
 
             // Assert
-            // Verificamos de nuevo, pero para el método de reseteo de contraseña.
             mockEmailSender.Verify(
                 sender => sender.SendEmailAsync(
-                    // Verificamos el email.
                     It.Is<string>(email => email == testEmail),
-                    // Verificamos el asunto.
                     It.Is<string>(subject => subject == expectedSubject),
-                    // Verificamos que el cuerpo contenga el código de reseteo.
                     It.Is<string>(body => body.Contains(testCode))
                 ),
                 Times.Once()

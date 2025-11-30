@@ -8,28 +8,33 @@ namespace Test.ServicesTests.ServicesUtilTest
         public void GenerateAndStoreCode_ShouldReturn_6DigitString()
         {
             // Arrange
-            var codeService = new VerificationCodeService();
-            var email = "test@example.com";
+            VerificationCodeService codeService = new VerificationCodeService();
+            string email = "test@example.com";
 
             // Act
-            var code = codeService.GenerateAndStoreCode(email, CodeType.EmailVerification);
+            string code = codeService.GenerateAndStoreCode(email, CodeType.EmailVerification);
 
             // Assert
-            Assert.NotNull(code);
-            Assert.Equal(6, code.Length);
-            Assert.True(int.TryParse(code, out _));
+            var expected = new { NotNull = true, Length = 6, IsNumeric = true };
+            var actual = new
+            {
+                NotNull = code != null,
+                Length = code?.Length ?? 0,
+                IsNumeric = code != null && int.TryParse(code, out _)
+            };
+            Assert.Equal(expected, actual);
         }
 
         [Fact]
         public void ValidateCode_ShouldReturnTrue_ForValidAndUnexpiredCode()
         {
             // Arrange
-            var codeService = new VerificationCodeService();
-            var email = "test@example.com";
-            var code = codeService.GenerateAndStoreCode(email, CodeType.PasswordReset);
+            VerificationCodeService codeService = new VerificationCodeService();
+            string email = "test@example.com";
+            string code = codeService.GenerateAndStoreCode(email, CodeType.PasswordReset);
 
             // Act
-            var isValid = codeService.ValidateCode(email, code, CodeType.PasswordReset);
+            bool isValid = codeService.ValidateCode(email, code, CodeType.PasswordReset);
 
             // Assert
             Assert.True(isValid);
@@ -39,12 +44,12 @@ namespace Test.ServicesTests.ServicesUtilTest
         public void ValidateCode_ShouldReturnFalse_ForInvalidCode()
         {
             // Arrange
-            var codeService = new VerificationCodeService();
-            var email = "test@example.com";
-            codeService.GenerateAndStoreCode(email, CodeType.EmailVerification);
+            VerificationCodeService codeService = new VerificationCodeService();
+            string email = "test@example.com";
+            _ = codeService.GenerateAndStoreCode(email, CodeType.EmailVerification);
 
             // Act
-            var isValid = codeService.ValidateCode(email, "000000", CodeType.EmailVerification);
+            bool isValid = codeService.ValidateCode(email, "000000", CodeType.EmailVerification);
 
             // Assert
             Assert.False(isValid);
@@ -54,30 +59,28 @@ namespace Test.ServicesTests.ServicesUtilTest
         public void ValidateCode_ShouldReturnFalse_AfterCodeIsUsedOnce()
         {
             // Arrange
-            var codeService = new VerificationCodeService();
-            var email = "test@example.com";
-            var code = codeService.GenerateAndStoreCode(email, CodeType.EmailVerification);
+            VerificationCodeService codeService = new VerificationCodeService();
+            string email = "test@example.com";
+            string code = codeService.GenerateAndStoreCode(email, CodeType.EmailVerification);
 
             // Act
-            var firstAttempt = codeService.ValidateCode(email, code, CodeType.EmailVerification);
-            var secondAttempt = codeService.ValidateCode(email, code, CodeType.EmailVerification);
+            bool firstAttempt = codeService.ValidateCode(email, code, CodeType.EmailVerification);
+            bool secondAttempt = codeService.ValidateCode(email, code, CodeType.EmailVerification);
 
             // Assert
-            Assert.True(firstAttempt); // La primera vez debe ser válido.
-            Assert.False(secondAttempt); // La segunda vez ya no debe existir.
+            Assert.Equal((true, false), (firstAttempt, secondAttempt));
         }
 
         [Fact]
         public void ValidateCode_ShouldReturnFalse_ForCorrectCodeButWrongType()
         {
             // Arrange
-            var codeService = new VerificationCodeService();
-            var email = "test@example.com";
-            var code = codeService.GenerateAndStoreCode(email, CodeType.EmailVerification);
+            VerificationCodeService codeService = new VerificationCodeService();
+            string email = "test@example.com";
+            string code = codeService.GenerateAndStoreCode(email, CodeType.EmailVerification);
 
             // Act
-            // Intentamos validar un código de verificación de email como si fuera de reseteo de password.
-            var isValid = codeService.ValidateCode(email, code, CodeType.PasswordReset);
+            bool isValid = codeService.ValidateCode(email, code, CodeType.PasswordReset);
 
             // Assert
             Assert.False(isValid);
@@ -87,12 +90,12 @@ namespace Test.ServicesTests.ServicesUtilTest
         public void CanRequestCode_ShouldReturnFalse_ImmediatelyAfterGeneratingCode()
         {
             // Arrange
-            var codeService = new VerificationCodeService();
-            var email = "test@example.com";
-            codeService.GenerateAndStoreCode(email, CodeType.EmailVerification);
+            VerificationCodeService codeService = new VerificationCodeService();
+            string email = "test@example.com";
+            _ = codeService.GenerateAndStoreCode(email, CodeType.EmailVerification);
 
             // Act
-            var canRequest = codeService.CanRequestCode(email, CodeType.EmailVerification);
+            bool canRequest = codeService.CanRequestCode(email, CodeType.EmailVerification);
 
             // Assert
             Assert.False(canRequest);
@@ -102,18 +105,17 @@ namespace Test.ServicesTests.ServicesUtilTest
         public void DifferentCodeTypes_ShouldNotConflict_ForSameUser()
         {
             // Arrange
-            var codeService = new VerificationCodeService();
-            var email = "user@example.com";
+            VerificationCodeService codeService = new VerificationCodeService();
+            string email = "user@example.com";
 
             // Act
-            var verificationCode = codeService.GenerateAndStoreCode(email, CodeType.EmailVerification);
-            var resetCode = codeService.GenerateAndStoreCode(email, CodeType.PasswordReset);
+            string verificationCode = codeService.GenerateAndStoreCode(email, CodeType.EmailVerification);
+            string resetCode = codeService.GenerateAndStoreCode(email, CodeType.PasswordReset);
+            bool emailValid = codeService.ValidateCode(email, verificationCode, CodeType.EmailVerification);
+            bool resetValid = codeService.ValidateCode(email, resetCode, CodeType.PasswordReset);
 
             // Assert
-            // Verificamos que ambos códigos se puedan validar correctamente, demostrando que no se sobrescribieron.
-            Assert.True(codeService.ValidateCode(email, verificationCode, CodeType.EmailVerification));
-            Assert.True(codeService.ValidateCode(email, resetCode, CodeType.PasswordReset));
+            Assert.Equal((true, true), (emailValid, resetValid));
         }
-    
     }
 }

@@ -355,7 +355,7 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
     <value>Contraseña</value>
   </data>
   <data name="userPasswordRequirementsText" xml:space="preserve">
-    <value>Usa 8-15 caracteres incluyendo al menos una mayúscula, una minúscula, un carácter numérico y un símbolo  </value>
+    <value>Para la contraseña usa 8-15 caracteres incluyendo al menos una mayúscula, una minúscula, un carácter numérico y un símbolo  </value>
   </data>
   <data name="validateRoundText" xml:space="preserve">
     <value>Validar Ronda</value>
@@ -776,5 +776,66 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
   </data>
   <data name="invalidEmailFormatText" xml:space="preserve">
     <value>El formato del correo no es válido</value>
+  </data>
+  <data name="couldNotSendMail" xml:space="preserve">
+    <value>No pudimos enviar el email, intenta más tarde</value>
+  </data>
+  <data name="invalidArgument" xml:space="preserve">
+    <value>Haz ingresado un valor invalido, intenta con algo diferente</value>
+  </data>
+  <data name="statisticsErrorText" xml:space="preserve">
+    <value>Error al recuperar las estadísticas.</value>
+  </data>
+  <data name="invalidReportDataText" xml:space="preserve">
+    <value>La información del reporte es inválida.</value>
+  </data>
+  <data name="reporterNotFoundText" xml:space="preserve">
+    <value>No se encontró al usuario que reporta.</value>
+  </data>
+  <data name="reportedPlayerNotFoundText" xml:space="preserve">
+    <value>No se encontró al jugador reportado.</value>
+  </data>
+  <data name="playerAlreadyBannedText" xml:space="preserve">
+    <value>Este jugador ya se encuentra baneado.</value>
+  </data>
+  <data name="banPersistenceErrorText" xml:space="preserve">
+    <value>Error al guardar el estado de baneo.</value>
+  </data>
+  <data name="subscriptionErrorText" xml:space="preserve">
+    <value>Ocurrió un error procesando la suscripción.</value>
+  </data>
+  <data name="unsubscriptionErrorText" xml:space="preserve">
+    <value>Ocurrió un error al cancelar la suscripción.
+</value>
+  </data>
+  <data name="securityErrorText" xml:space="preserve">
+    <value>Error de seguridad: Acceso denegado.</value>
+  </data>
+  <data name="formatErrorText" xml:space="preserve">
+    <value>El formato de los datos ingresados es incorrecto.</value>
+  </data>
+  <data name="selfInvitationText" xml:space="preserve">
+    <value>No puedes invitarte a ti mismo.</value>
+  </data>
+  <data name="matchNotFoundOrEndedText" xml:space="preserve">
+    <value>La partida no existe o ya ha terminado.</value>
+  </data>
+  <data name="matchStartedOrFinishingText" xml:space="preserve">
+    <value>La partida ya está en curso o finalizando.</value>
+  </data>
+  <data name="notAuthorizedToJoinText" xml:space="preserve">
+    <value>No tienes permiso para unirte a esta sala.
+</value>
+  </data>
+  <data name="maxReportLimitText" xml:space="preserve">
+    <value>Solo se permite un reporte por infracción.
+</value>
+  </data>
+  <data name="gameCreationErrorText" xml:space="preserve">
+    <value>No se pudo iniciar la configuración de la partida.</value>
+  </data>
+  <data name="roomNotFoundText" xml:space="preserve">
+    <value>No existe una sala con ese código
+</value>
   </data>
 </root>

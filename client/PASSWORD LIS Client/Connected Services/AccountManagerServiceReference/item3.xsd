@@ -18,6 +18,19 @@
       <xs:enumeration value="BAN_PERSISTENCE_ERROR" />
       <xs:enumeration value="SUBSCRIPTION_ERROR" />
       <xs:enumeration value="UNSUBSCRIPTION_ERROR" />
+      <xs:enumeration value="NULL_ARGUMENT" />
+      <xs:enumeration value="EMAIL_SENDING_ERROR" />
+      <xs:enumeration value="EMAIL_CONFIGURATION_ERROR" />
+      <xs:enumeration value="SECURITY_ERROR" />
+      <xs:enumeration value="FORMAT_ERROR" />
+      <xs:enumeration value="INVALID_OPERATION" />
+      <xs:enumeration value="SELF_INVITATION" />
+      <xs:enumeration value="MATCH_NOT_FOUND_OR_ENDED" />
+      <xs:enumeration value="MATCH_ALREADY_STARTED_OR_FINISHING" />
+      <xs:enumeration value="NOT_AUTHORIZED_TO_JOIN" />
+      <xs:enumeration value="MAX_ONE_REPORT_PER_BAN" />
+      <xs:enumeration value="COULD_NOT_CREATE_GAME" />
+      <xs:enumeration value="DATA_INTEGRITY_ERROR" />
     </xs:restriction>
   </xs:simpleType>
   <xs:element name="ServiceErrorCode" nillable="true" type="tns:ServiceErrorCode" />

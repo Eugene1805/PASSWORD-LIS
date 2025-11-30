@@ -5,6 +5,7 @@ using Services.Contracts.Enums;
 using Services.Util;
 using System;
 using System.Configuration;
+using System.Data.Entity.Core;
 using System.Data.Entity.Infrastructure;
 using System.Net.Mail;
 using System.Security;
@@ -86,6 +87,12 @@ namespace Services.Services
                 throw FaultExceptionFactory.Create(ServiceErrorCode.EmailSendingError,
                     "EMAIL_SENDING_ERROR", "Failed to send email");
             }
+            catch(EntityException ex)
+            {
+                logger.Error($"{context} - Entity Framework error.", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError,
+                    "DATABASE_ERROR", "An error occurred while processing the request.");
+            }
             catch (Exception ex)
             {
                 logger.Fatal($"{context} - Unexpected error.", ex);
@@ -163,6 +170,12 @@ namespace Services.Services
                 logger.Error($"{context} - SMTP error.", ex);
                 throw FaultExceptionFactory.Create(ServiceErrorCode.EmailSendingError,
                     "EMAIL_SENDING_ERROR", "Failed to send email");
+            }
+            catch (EntityException ex)
+            {
+                logger.Error($"{context} - Entity Framework error.", ex);
+                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError,
+                    "DATABASE_ERROR", "An error occurred while processing the request.");
             }
             catch (Exception ex)
             {

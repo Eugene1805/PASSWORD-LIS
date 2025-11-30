@@ -5,7 +5,6 @@ using Services.Contracts;
 using Services.Contracts.DTOs;
 using Services.Contracts.Enums;
 using Services.Util;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
@@ -37,16 +36,52 @@ namespace Services.Services
                     throw FaultExceptionFactory.Create(ServiceErrorCode.StatisticsError,
                         "STATISTICS_ERROR", "An error occurred while fetching statistics. Please try again later.");
                 }
-                
-                List<TeamDTO> topTeamsDto = topTeamsFromDb.Select(team => new TeamDTO
+
+                if (topTeamsFromDb == null)
+                {
+                    return new List<TeamDTO>();
+                }
+
+                return MapToTeamDTOs(topTeamsFromDb);
+            }, context:"TopPlayersManager: GetTopAsync ");
+        }
+
+        private List<TeamDTO> MapToTeamDTOs(List<Team> teams)
+        {
+            var result = new List<TeamDTO>();
+
+            foreach (var team in teams)
+            {
+                if (team.Player == null)
+                {
+                    log.ErrorFormat("Data Integrity Error: Team with ID {0} (Score: {1}) has a NULL Player collection.",
+                        team.Id, team.TotalPoints);
+
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.DataIntegrityError,
+                        "DATA_INTEGRITY_ERROR", "Server data corruption detected (Team-Player).");
+                }
+
+                var nicknames = new List<string>();
+                foreach (var player in team.Player)
+                {
+                    if (player.UserAccount == null)
+                    {
+                        log.ErrorFormat("Data Integrity Error: Player with ID {0} (in Team {1}) has a NULL UserAccount.",
+                            player.Id, team.Id);
+
+                        throw FaultExceptionFactory.Create(ServiceErrorCode.DataIntegrityError,
+                            "DATA_INTEGRITY_ERROR", "Server data corruption detected (Player-Account).");
+                    }
+                    nicknames.Add(player.UserAccount.Nickname);
+                }
+
+                result.Add(new TeamDTO
                 {
                     Score = team.TotalPoints,
-                    PlayersNicknames = team.Player
-                                     .Select(p => p.UserAccount.Nickname)
-                                     .ToList()
-                }).ToList();
-                return topTeamsDto;
-            }, context:"TopPlayersManager: GetTopAsync ");
+                    PlayersNicknames = nicknames
+                });
+            }
+            return result;
         }
     }
 }

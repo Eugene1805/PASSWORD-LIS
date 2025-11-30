@@ -198,7 +198,7 @@
                     <TextBox x:Name="messageGroupChatTextBox" 
                              Text="{Binding CurrentMessage, UpdateSourceTrigger=PropertyChanged}"
                              Style="{StaticResource primaryTextBoxStyle}" 
-                             Grid.Column="0" MaxLength="250"
+                             Grid.Column="0" MaxLength="250" 
                              Height="40">
                         <TextBox.InputBindings>
                             <KeyBinding Key="Enter" Command="{Binding SendMessageCommand}"/>

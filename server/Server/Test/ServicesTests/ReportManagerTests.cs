@@ -1,13 +1,9 @@
-using System;
-using System.Threading.Tasks;
 using Moq;
-using Xunit;
 using Services.Services;
 using Services.Contracts.DTOs;
 using Services.Contracts.Enums;
 using Data.DAL.Interfaces;
 using Data.Model;
-using Services.Util;
 using System.ServiceModel;
 using Services.Wrappers;
 using Services.Contracts;
@@ -89,7 +85,7 @@ namespace Test.ServicesTests
             reportRepo.Setup(r => r.HasReporterReportedSinceAsync(1, 2, null)).ReturnsAsync(true);
 
             var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(() => sut.SubmitReportAsync(dto));
-            Assert.Equal(ServiceErrorCode.InvalidReportPayload, ex.Detail.Code);
+            Assert.Equal(ServiceErrorCode.MaxOneReportPerBan, ex.Detail.Code);
         }
 
         [Fact]
@@ -103,7 +99,7 @@ namespace Test.ServicesTests
             reportRepo.Setup(r => r.AddReportAsync(It.IsAny<Report>())).Returns(Task.CompletedTask);
             reportRepo.Setup(r => r.GetReportCountForPlayerSinceAsync(2, null)).ReturnsAsync(1);
 
-            await sut.SubscribeToReportUpdatesAsync(2);
+            sut.SubscribeToReportUpdatesAsync(2);
             var result = await sut.SubmitReportAsync(dto);
 
             Assert.True(result);
@@ -121,12 +117,12 @@ namespace Test.ServicesTests
             banRepo.Setup(b => b.GetLastBanEndTimeAsync(4)).ReturnsAsync((DateTime?)null);
             reportRepo.Setup(r => r.HasReporterReportedSinceAsync(3, 4, null)).ReturnsAsync(false);
             reportRepo.Setup(r => r.AddReportAsync(It.IsAny<Report>())).Returns(Task.CompletedTask);
-            // Return threshold count (3)
+            
             reportRepo.Setup(r => r.GetReportCountForPlayerSinceAsync(4, null)).ReturnsAsync(3);
             banRepo.Setup(b => b.GetActiveBanForPlayerAsync(4)).ReturnsAsync((Ban?)null);
             banRepo.Setup(b => b.AddBanAsync(It.IsAny<Ban>())).Returns(Task.CompletedTask);
 
-            await sut.SubscribeToReportUpdatesAsync(4);
+            sut.SubscribeToReportUpdatesAsync(4);
             var result = await sut.SubmitReportAsync(dto);
 
             Assert.True(result);

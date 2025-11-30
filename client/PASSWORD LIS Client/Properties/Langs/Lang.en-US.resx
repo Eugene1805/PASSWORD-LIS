@@ -355,7 +355,7 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
     <value>Password</value>
   </data>
   <data name="userPasswordRequirementsText" xml:space="preserve">
-    <value>Use 8-15 characters including at least one uppercase, one lowercase, one numeric character and one symbol</value>
+    <value>Use 8-15 characters for the password, including at least one uppercase, one lowercase, one numeric character and one symbol</value>
   </data>
   <data name="validateRoundText" xml:space="preserve">
     <value>Validate Round</value>
@@ -776,5 +776,69 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   </data>
   <data name="invalidEmailFormatText" xml:space="preserve">
     <value>The email format is invalid</value>
+  </data>
+  <data name="couldNotSendMail" xml:space="preserve">
+    <value>We could not send the email, try again later</value>
+  </data>
+  <data name="invalidArgument" xml:space="preserve">
+    <value>You gave and invalid value, try with another one</value>
+  </data>
+  <data name="statisticsErrorText" xml:space="preserve">
+    <value>Error retrieving statistics.</value>
+  </data>
+  <data name="invalidReportDataText" xml:space="preserve">
+    <value>Invalid report information.</value>
+  </data>
+  <data name="reporterNotFoundText" xml:space="preserve">
+    <value>Reporter user not found.</value>
+  </data>
+  <data name="reportedPlayerNotFoundText" xml:space="preserve">
+    <value>Reported player not found.</value>
+  </data>
+  <data name="playerAlreadyBannedText" xml:space="preserve">
+    <value>This player is already banned.</value>
+  </data>
+  <data name="banPersistenceErrorText" xml:space="preserve">
+    <value>Error saving ban status.</value>
+  </data>
+  <data name="subscriptionErrorText" xml:space="preserve">
+    <value>An error occurred processing the subscription.</value>
+  </data>
+  <data name="unsubscriptionErrorText" xml:space="preserve">
+    <value>An error occurred canceling the subscription.</value>
+  </data>
+  <data name="securityErrorText" xml:space="preserve">
+    <value>Security error: Access denied.</value>
+  </data>
+  <data name="formatErrorText" xml:space="preserve">
+    <value>The input data format is incorrect.</value>
+  </data>
+  <data name="selfInvitationText" xml:space="preserve">
+    <value>You cannot invite yourself.
+</value>
+  </data>
+  <data name="matchNotFoundOrEndedText" xml:space="preserve">
+    <value>The match does not exist or has ended.
+</value>
+  </data>
+  <data name="matchStartedOrFinishingText" xml:space="preserve">
+    <value>The match is already in progress or finishing.
+</value>
+  </data>
+  <data name="notAuthorizedToJoinText" xml:space="preserve">
+    <value>You are not authorized to join this room.
+</value>
+  </data>
+  <data name="maxReportLimitText" xml:space="preserve">
+    <value>Only one report per infraction is allowed.
+</value>
+  </data>
+  <data name="gameCreationErrorText" xml:space="preserve">
+    <value>Could not start game configuration.
+</value>
+  </data>
+  <data name="roomNotFoundText" xml:space="preserve">
+    <value>There is not a room with that code
+</value>
   </data>
 </root>

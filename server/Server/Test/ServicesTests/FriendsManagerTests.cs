@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Data.Entity.Infrastructure;
-using System.Linq;
 using System.ServiceModel;
-using System.Threading.Tasks;
 using Data.DAL.Interfaces;
 using Data.Model;
 using Moq;
@@ -12,7 +8,6 @@ using Services.Contracts.DTOs;
 using Services.Contracts.Enums;
 using Services.Services;
 using Services.Wrappers;
-using Xunit;
 
 namespace Test.ServicesTests
 {
@@ -32,13 +27,9 @@ namespace Test.ServicesTests
             ctx = new Mock<IOperationContextWrapper>();
             cbA = new Mock<IFriendsCallback>();
             cbB = new Mock<IFriendsCallback>();
-            
-            // Setup ICommunicationObject for cbA and cbB
             cbA.As<ICommunicationObject>();
             cbB.As<ICommunicationObject>();
-            
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(() => cbA.Object);
-
             sut = new FriendsManager(friendshipRepo.Object, accountRepo.Object, ctx.Object);
         }
 
@@ -48,128 +39,107 @@ namespace Test.ServicesTests
             {
                 Id = accountId,
                 Nickname = nick,
-                Player = new List<Player> { 
-                    new Player { Id = playerId, UserAccountId = accountId, 
-                        UserAccount = new UserAccount { Id = accountId, Nickname = nick } 
-                    } 
-                }
+                Player = [new Player { Id = playerId, UserAccountId = accountId, UserAccount = new UserAccount { Id = accountId, Nickname = nick } }]
             };
         }
-
 
         [Fact]
         public async Task GetFriendsAsync_ShouldMapToDTOs()
         {
             var acc2 = MakeAccount(2, 20, "B");
             var acc3 = MakeAccount(3, 30, "C");
-            friendshipRepo.Setup(r => r.GetFriendsByUserAccountIdAsync(1))
-                .ReturnsAsync(new List<UserAccount> { acc2, acc3 });
-
+            friendshipRepo.Setup(r => r.GetFriendsByUserAccountIdAsync(1)).ReturnsAsync(new List<UserAccount> { acc2, acc3 });
             var list = await sut.GetFriendsAsync(1);
-
-            Assert.Equal(2, list.Count);
-            Assert.Contains(list, f => f.PlayerId == 20 && f.Nickname == "B");
-            Assert.Contains(list, f => f.PlayerId == 30 && f.Nickname == "C");
+            var expected = new { Count = 2, HasB = true, HasC = true };
+            var actual = new { Count = list.Count, HasB = list.Any(f => f.PlayerId == 20 && f.Nickname == "B"), HasC = list.Any(f => f.PlayerId == 30 && f.Nickname == "C") };
+            Assert.Equal(expected, actual);
         }
 
         [Fact]
         public async Task GetFriendsAsync_ShouldReturnEmptyList_WhenNoFriends()
         {
-            friendshipRepo.Setup(r => r.GetFriendsByUserAccountIdAsync(1))
-                .ReturnsAsync(new List<UserAccount>());
-
+            friendshipRepo.Setup(r => r.GetFriendsByUserAccountIdAsync(1)).ReturnsAsync(new List<UserAccount>());
             var list = await sut.GetFriendsAsync(1);
-
             Assert.Empty(list);
         }
 
         [Fact]
         public async Task GetFriendsAsync_ShouldThrowFault_WhenRepositoryThrowsException()
         {
-            friendshipRepo.Setup(r => r.GetFriendsByUserAccountIdAsync(1))
-                .ThrowsAsync(new Exception("Database error"));
-
-            var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
-                () => sut.GetFriendsAsync(1)
-            );
-
-            Assert.Equal(ServiceErrorCode.UnexpectedError, ex.Detail.Code);
+            friendshipRepo.Setup(r => r.GetFriendsByUserAccountIdAsync(1)).ThrowsAsync(new Exception("Database error"));
+            FaultException<ServiceErrorDetailDTO>? ex = null;
+            try { await sut.GetFriendsAsync(1); } catch (FaultException<ServiceErrorDetailDTO> e) { ex = e; }
+            Assert.Equal((Threw: true, Code: (ServiceErrorCode?)ServiceErrorCode.UnexpectedError), (Threw: ex != null,ex?.Detail.Code));
         }
 
         [Fact]
         public async Task GetFriendsAsync_ShouldThrowFault_WhenRepositoryThrowsDbUpdateException()
         {
-            friendshipRepo.Setup(r => r.GetFriendsByUserAccountIdAsync(1))
-                .ThrowsAsync(new DbUpdateException("DB error"));
-
-            var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
-                () => sut.GetFriendsAsync(1)
-            );
-
-            Assert.Equal(ServiceErrorCode.DatabaseError, ex.Detail.Code);
+            friendshipRepo.Setup(r => r.GetFriendsByUserAccountIdAsync(1)).ThrowsAsync(new DbUpdateException("DB error"));
+            FaultException<ServiceErrorDetailDTO>? ex = null;
+            try { await sut.GetFriendsAsync(1); } catch (FaultException<ServiceErrorDetailDTO> e) { ex = e; }
+            Assert.Equal((Threw: true, Code: (ServiceErrorCode?)ServiceErrorCode.DatabaseError), (Threw: ex != null, ex?.Detail.Code));
         }
 
         [Fact]
         public async Task DeleteFriendAsync_WhenRepositoryReturnsTrue_ShouldNotifyBoth()
         {
             friendshipRepo.Setup(r => r.DeleteFriendshipAsync(10, 11)).ReturnsAsync(true);
-
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             sut.SubscribeToFriendUpdatesAsync(100);
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbB.Object);
             sut.SubscribeToFriendUpdatesAsync(110);
-
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(10)).ReturnsAsync(MakeAccount(100, 10, "A"));
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(11)).ReturnsAsync(MakeAccount(110, 11, "B"));
-
             var res = await sut.DeleteFriendAsync(10, 11);
-
-            Assert.True(res);
-            cbB.Verify(c => c.OnFriendRemoved(10), Times.Once);
-            cbA.Verify(c => c.OnFriendRemoved(11), Times.Once);
+            var actual = new
+            {
+                Result = res,
+                A_Removed11 = cbA.Invocations.Any(i => i.Method.Name == nameof(IFriendsCallback.OnFriendRemoved) && (int)i.Arguments[0] == 11),
+                B_Removed10 = cbB.Invocations.Any(i => i.Method.Name == nameof(IFriendsCallback.OnFriendRemoved) && (int)i.Arguments[0] == 10)
+            };
+            Assert.Equal(new { Result = true, A_Removed11 = true, B_Removed10 = true }, actual);
         }
 
         [Fact]
         public async Task DeleteFriendAsync_WhenRepositoryReturnsFalse_ShouldNotNotify()
         {
             friendshipRepo.Setup(r => r.DeleteFriendshipAsync(10, 11)).ReturnsAsync(false);
-
             var res = await sut.DeleteFriendAsync(10, 11);
-
-            Assert.False(res);
-            cbA.Verify(c => c.OnFriendRemoved(It.IsAny<int>()), Times.Never);
-            cbB.Verify(c => c.OnFriendRemoved(It.IsAny<int>()), Times.Never);
+            var actual = new
+            {
+                Result = res,
+                A_Notified = cbA.Invocations.Any(i => i.Method.Name == nameof(IFriendsCallback.OnFriendRemoved)),
+                B_Notified = cbB.Invocations.Any(i => i.Method.Name == nameof(IFriendsCallback.OnFriendRemoved))
+            };
+            Assert.Equal(new { Result = false, A_Notified = false, B_Notified = false }, actual);
         }
 
         [Fact]
         public async Task DeleteFriendAsync_ShouldNotifyOnlyConnectedClients()
         {
             friendshipRepo.Setup(r => r.DeleteFriendshipAsync(10, 11)).ReturnsAsync(true);
-
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             sut.SubscribeToFriendUpdatesAsync(100);
-
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(10)).ReturnsAsync(MakeAccount(100, 10, "A"));
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(11)).ReturnsAsync(MakeAccount(110, 11, "B"));
-
             var res = await sut.DeleteFriendAsync(10, 11);
-
-            Assert.True(res);
-            cbA.Verify(c => c.OnFriendRemoved(11), Times.Once);
-            cbB.Verify(c => c.OnFriendRemoved(It.IsAny<int>()), Times.Never);
+            var actual = new
+            {
+                Result = res,
+                A_Removed11 = cbA.Invocations.Any(i => i.Method.Name == nameof(IFriendsCallback.OnFriendRemoved) && (int)i.Arguments[0] == 11),
+                B_Notified = cbB.Invocations.Any(i => i.Method.Name == nameof(IFriendsCallback.OnFriendRemoved))
+            };
+            Assert.Equal(new { Result = true, A_Removed11 = true, B_Notified = false }, actual);
         }
 
         [Fact]
         public async Task DeleteFriendAsync_ShouldThrowFault_WhenRepositoryThrowsException()
         {
-            friendshipRepo.Setup(r => r.DeleteFriendshipAsync(10, 11))
-                .ThrowsAsync(new Exception("Error"));
-
-            var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
-                () => sut.DeleteFriendAsync(10, 11)
-            );
-
-            Assert.Equal(ServiceErrorCode.UnexpectedError, ex.Detail.Code);
+            friendshipRepo.Setup(r => r.DeleteFriendshipAsync(10, 11)).ThrowsAsync(new Exception("Error"));
+            FaultException<ServiceErrorDetailDTO>? ex = null;
+            try { await sut.DeleteFriendAsync(10, 11); } catch (FaultException<ServiceErrorDetailDTO> e) { ex = e; }
+            Assert.Equal((Threw: true, Code: (ServiceErrorCode?)ServiceErrorCode.UnexpectedError), (Threw: ex != null, ex?.Detail.Code));
         }
 
         [Fact]
@@ -184,17 +154,13 @@ namespace Test.ServicesTests
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             sut.SubscribeToFriendUpdatesAsync(200);
-
             var reqAcc = MakeAccount(201, 21, "Requester");
             var friendReq = new Friendship { RequesterId = 21, Player1 = reqAcc.Player.First() };
-            friendshipRepo.Setup(r => r.GetPendingRequestsAsync(200))
-                .ReturnsAsync(new List<Friendship> { friendReq });
-
+            friendshipRepo.Setup(r => r.GetPendingRequestsAsync(200)).ReturnsAsync(new List<Friendship> { friendReq });
             var list = await sut.GetPendingRequestsAsync();
-
-            Assert.Single(list);
-            Assert.Equal(21, list[0].PlayerId);
-            Assert.Equal("Requester", list[0].Nickname);
+            var expected = (Count: 1, PlayerId: (int?)21, Nickname: (string?)"Requester");
+            var actual = (Count: list.Count, PlayerId: list.FirstOrDefault()?.PlayerId, Nickname: list.FirstOrDefault()?.Nickname);
+            Assert.Equal(expected, actual);
         }
 
         [Fact]
@@ -202,12 +168,8 @@ namespace Test.ServicesTests
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             sut.SubscribeToFriendUpdatesAsync(200);
-
-            friendshipRepo.Setup(r => r.GetPendingRequestsAsync(200))
-                .ReturnsAsync(new List<Friendship>());
-
+            friendshipRepo.Setup(r => r.GetPendingRequestsAsync(200)).ReturnsAsync(new List<Friendship>());
             var list = await sut.GetPendingRequestsAsync();
-
             Assert.Empty(list);
         }
 
@@ -216,15 +178,10 @@ namespace Test.ServicesTests
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             sut.SubscribeToFriendUpdatesAsync(200);
-
-            friendshipRepo.Setup(r => r.GetPendingRequestsAsync(200))
-                .ThrowsAsync(new Exception("Error"));
-
-            var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
-                () => sut.GetPendingRequestsAsync()
-            );
-
-            Assert.Equal(ServiceErrorCode.UnexpectedError, ex.Detail.Code);
+            friendshipRepo.Setup(r => r.GetPendingRequestsAsync(200)).ThrowsAsync(new Exception("Error"));
+            FaultException<ServiceErrorDetailDTO>? ex = null;
+            try { await sut.GetPendingRequestsAsync(); } catch (FaultException<ServiceErrorDetailDTO> e) { ex = e; }
+            Assert.Equal((Threw: true, Code: (ServiceErrorCode?)ServiceErrorCode.UnexpectedError), (Threw: ex != null, ex?.Detail.Code));
         }
 
         [Fact]
@@ -239,29 +196,21 @@ namespace Test.ServicesTests
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             sut.SubscribeToFriendUpdatesAsync(300);
-
             var requester = MakeAccount(300, 30, "A");
             var addressee = MakeAccount(310, 31, "B");
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(requester);
             accountRepo.Setup(a => a.GetUserByEmailAsync("b@test.com")).ReturnsAsync(addressee);
-
             friendshipRepo.Setup(r => r.GetFriendsByUserAccountIdAsync(300))
                 .ReturnsAsync(new List<UserAccount>());
             friendshipRepo.Setup(r => r.GetPendingRequestsAsync(310))
                 .ReturnsAsync(new List<Friendship>());
             friendshipRepo.Setup(r => r.GetPendingRequestsAsync(300))
                 .ReturnsAsync(new List<Friendship>());
-
             friendshipRepo.Setup(r => r.CreateFriendRequestAsync(30, 31)).ReturnsAsync(true);
-
-            // Subscribe addressee before sending request
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbB.Object);
             sut.SubscribeToFriendUpdatesAsync(310);
-
-            // Reset context back to requester for sending request
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             var result = await sut.SendFriendRequestAsync("b@test.com");
-
             Assert.Equal(FriendRequestResult.Success, result);
             cbB.Verify(c => c.OnFriendRequestReceived(It.Is<FriendDTO>(d => d.PlayerId == 30 && d.Nickname == "A")), Times.Once);
         }
@@ -271,10 +220,8 @@ namespace Test.ServicesTests
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             sut.SubscribeToFriendUpdatesAsync(300);
-
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(MakeAccount(300, 30, "A"));
             accountRepo.Setup(a => a.GetUserByEmailAsync("x@test.com")).ReturnsAsync((UserAccount?)null);
-
             var result = await sut.SendFriendRequestAsync("x@test.com");
             Assert.Equal(FriendRequestResult.UserNotFound, result);
         }
@@ -284,12 +231,10 @@ namespace Test.ServicesTests
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             sut.SubscribeToFriendUpdatesAsync(300);
-
             var requesterNoPlayer = new UserAccount { Id = 300, Nickname = "A", Player = new List<Player>() };
             var addressee = MakeAccount(310, 31, "B");
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(requesterNoPlayer);
             accountRepo.Setup(a => a.GetUserByEmailAsync("b@test.com")).ReturnsAsync(addressee);
-
             var result = await sut.SendFriendRequestAsync("b@test.com");
             Assert.Equal(FriendRequestResult.Failed, result);
         }
@@ -299,11 +244,9 @@ namespace Test.ServicesTests
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             sut.SubscribeToFriendUpdatesAsync(300);
-
             var requester = MakeAccount(300, 30, "A");
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(requester);
             accountRepo.Setup(a => a.GetUserByEmailAsync("a@test.com")).ReturnsAsync(requester);
-
             var result = await sut.SendFriendRequestAsync("a@test.com");
             Assert.Equal(FriendRequestResult.CannotAddSelf, result);
         }
@@ -313,12 +256,10 @@ namespace Test.ServicesTests
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             sut.SubscribeToFriendUpdatesAsync(300);
-
             var requester = MakeAccount(300, 30, "A");
             var addresseeNoPlayer = new UserAccount { Id = 310, Nickname = "B", Player = new List<Player>() };
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(requester);
             accountRepo.Setup(a => a.GetUserByEmailAsync("b@test.com")).ReturnsAsync(addresseeNoPlayer);
-
             var result = await sut.SendFriendRequestAsync("b@test.com");
             Assert.Equal(FriendRequestResult.UserNotFound, result);
         }
@@ -328,14 +269,11 @@ namespace Test.ServicesTests
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             sut.SubscribeToFriendUpdatesAsync(300);
-
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300))
                 .ThrowsAsync(new Exception("Error"));
-
             var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => sut.SendFriendRequestAsync("b@test.com")
             );
-
             Assert.Equal(ServiceErrorCode.UnexpectedError, ex.Detail.Code);
         }
 
@@ -348,18 +286,14 @@ namespace Test.ServicesTests
             sut.SubscribeToFriendUpdatesAsync(300);
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbB.Object);
             sut.SubscribeToFriendUpdatesAsync(310);
-
             var addresseeAcc = MakeAccount(300, 30, "Addressee");
             var requesterAcc = MakeAccount(310, 31, "Requester");
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(addresseeAcc);
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(310)).ReturnsAsync(requesterAcc);
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(31)).ReturnsAsync(requesterAcc);
-
             friendshipRepo.Setup(r => r.RespondToFriendRequestAsync(31, 30, accept)).ReturnsAsync(true);
-
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             await sut.RespondToFriendRequestAsync(31, accept);
-
             if (accept)
             {
                 cbA.Verify(c => c.OnFriendAdded(It.Is<FriendDTO>(d => d.PlayerId == 31 && d.Nickname == "Requester")), Times.Once);
@@ -376,7 +310,6 @@ namespace Test.ServicesTests
         public async Task RespondToFriendRequestAsync_WhenNoCallback_ShouldNotNotify()
         {
             await sut.RespondToFriendRequestAsync(31, true);
-            
             cbA.Verify(c => c.OnFriendAdded(It.IsAny<FriendDTO>()), Times.Never);
             cbB.Verify(c => c.OnFriendAdded(It.IsAny<FriendDTO>()), Times.Never);
         }
@@ -386,11 +319,8 @@ namespace Test.ServicesTests
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             sut.SubscribeToFriendUpdatesAsync(300);
-
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync((UserAccount?)null);
-
             await sut.RespondToFriendRequestAsync(31, true);
-
             cbA.Verify(c => c.OnFriendAdded(It.IsAny<FriendDTO>()), Times.Never);
         }
 
@@ -399,12 +329,9 @@ namespace Test.ServicesTests
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             sut.SubscribeToFriendUpdatesAsync(300);
-
             var addresseeNoPlayer = new UserAccount { Id = 300, Nickname = "A", Player = new List<Player>() };
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(addresseeNoPlayer);
-
             await sut.RespondToFriendRequestAsync(31, true);
-
             cbA.Verify(c => c.OnFriendAdded(It.IsAny<FriendDTO>()), Times.Never);
         }
 
@@ -413,14 +340,10 @@ namespace Test.ServicesTests
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             sut.SubscribeToFriendUpdatesAsync(300);
-
             var addresseeAcc = MakeAccount(300, 30, "Addressee");
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(addresseeAcc);
-
             friendshipRepo.Setup(r => r.RespondToFriendRequestAsync(31, 30, true)).ReturnsAsync(false);
-
             await sut.RespondToFriendRequestAsync(31, true);
-
             cbA.Verify(c => c.OnFriendAdded(It.IsAny<FriendDTO>()), Times.Never);
         }
 
@@ -429,14 +352,11 @@ namespace Test.ServicesTests
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             sut.SubscribeToFriendUpdatesAsync(300);
-
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300))
                 .ThrowsAsync(new Exception("Error"));
-
             var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => sut.RespondToFriendRequestAsync(31, true)
             );
-
             Assert.Equal(ServiceErrorCode.UnexpectedError, ex.Detail.Code);
         }
 
@@ -445,24 +365,20 @@ namespace Test.ServicesTests
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             sut.SubscribeToFriendUpdatesAsync(300);
-
             var requester = MakeAccount(300, 30, "A");
             var addressee = MakeAccount(310, 31, "B");
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(requester);
             accountRepo.Setup(a => a.GetUserByEmailAsync("b@test.com")).ReturnsAsync(addressee);
-
             friendshipRepo.Setup(r => r.GetFriendsByUserAccountIdAsync(300))
                 .ReturnsAsync(new List<UserAccount> { addressee });
             var result = await sut.SendFriendRequestAsync("b@test.com");
             Assert.Equal(FriendRequestResult.AlreadyFriends, result);
-
             friendshipRepo.Setup(r => r.GetFriendsByUserAccountIdAsync(300))
                 .ReturnsAsync(new List<UserAccount>());
             friendshipRepo.Setup(r => r.GetPendingRequestsAsync(310))
                 .ReturnsAsync(new List<Friendship> { new Friendship { RequesterId = 30 } });
             result = await sut.SendFriendRequestAsync("b@test.com");
             Assert.Equal(FriendRequestResult.RequestAlreadySent, result);
-
             friendshipRepo.Setup(r => r.GetPendingRequestsAsync(310))
                 .ReturnsAsync(new List<Friendship>());
             friendshipRepo.Setup(r => r.GetPendingRequestsAsync(300))
@@ -476,20 +392,15 @@ namespace Test.ServicesTests
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             sut.SubscribeToFriendUpdatesAsync(300);
-
             var requester = MakeAccount(300, 30, "A");
             var addressee = MakeAccount(310, 31, "B");
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(requester);
             accountRepo.Setup(a => a.GetUserByEmailAsync("b@test.com")).ReturnsAsync(addressee);
-
             friendshipRepo.Setup(r => r.GetFriendsByUserAccountIdAsync(300)).ReturnsAsync(new List<UserAccount>());
             friendshipRepo.Setup(r => r.GetPendingRequestsAsync(310)).ReturnsAsync(new List<Friendship>());
             friendshipRepo.Setup(r => r.GetPendingRequestsAsync(300)).ReturnsAsync(new List<Friendship>());
-
             friendshipRepo.Setup(r => r.CreateFriendRequestAsync(30, 31)).ReturnsAsync(false);
-
             var result = await sut.SendFriendRequestAsync("b@test.com");
-
             Assert.Equal(FriendRequestResult.Failed, result);
             cbB.Verify(c => c.OnFriendRequestReceived(It.IsAny<FriendDTO>()), Times.Never);
         }
@@ -500,13 +411,9 @@ namespace Test.ServicesTests
             var callback = new Mock<IFriendsCallback>();
             callback.As<ICommunicationObject>();
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(callback.Object);
-
             sut.SubscribeToFriendUpdatesAsync(500);
-
-            // Verify client is subscribed by checking pending requests don't throw null exception
             friendshipRepo.Setup(r => r.GetPendingRequestsAsync(500))
                 .ReturnsAsync(new List<Friendship>());
-
             var list = await sut.GetPendingRequestsAsync();
             Assert.NotNull(list);
         }
@@ -516,9 +423,7 @@ namespace Test.ServicesTests
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             sut.SubscribeToFriendUpdatesAsync(500);
-
             await sut.UnsubscribeFromFriendUpdatesAsync(500);
-
             var list = await sut.GetPendingRequestsAsync();
             Assert.Empty(list);
         }
@@ -530,16 +435,12 @@ namespace Test.ServicesTests
             sut.SubscribeToFriendUpdatesAsync(300);
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbB.Object);
             sut.SubscribeToFriendUpdatesAsync(310);
-
             var addresseeAcc = MakeAccount(300, 30, "Addressee");
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(addresseeAcc);
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(31)).ReturnsAsync((UserAccount?)null);
-
             friendshipRepo.Setup(r => r.RespondToFriendRequestAsync(31, 30, true)).ReturnsAsync(true);
-
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             await sut.RespondToFriendRequestAsync(31, true);
-
             cbA.Verify(c => c.OnFriendAdded(It.IsAny<FriendDTO>()), Times.Never);
             cbB.Verify(c => c.OnFriendAdded(It.IsAny<FriendDTO>()), Times.Never);
         }
@@ -551,17 +452,13 @@ namespace Test.ServicesTests
             sut.SubscribeToFriendUpdatesAsync(300);
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbB.Object);
             sut.SubscribeToFriendUpdatesAsync(310);
-
             var addresseeAcc = MakeAccount(300, 30, "Addressee");
             var requesterNoPlayer = new UserAccount { Id = 310, Nickname = "B", Player = new List<Player>() };
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(addresseeAcc);
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(31)).ReturnsAsync(requesterNoPlayer);
-
             friendshipRepo.Setup(r => r.RespondToFriendRequestAsync(31, 30, true)).ReturnsAsync(true);
-
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             await sut.RespondToFriendRequestAsync(31, true);
-
             cbA.Verify(c => c.OnFriendAdded(It.IsAny<FriendDTO>()), Times.Never);
             cbB.Verify(c => c.OnFriendAdded(It.IsAny<FriendDTO>()), Times.Never);
         }
@@ -570,15 +467,11 @@ namespace Test.ServicesTests
         public async Task NotifyFriendRemovedAsync_WhenCurrentUserNotFound_ShouldNotifyOnlyFriend()
         {
             friendshipRepo.Setup(r => r.DeleteFriendshipAsync(10, 11)).ReturnsAsync(true);
-
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbB.Object);
             sut.SubscribeToFriendUpdatesAsync(110);
-
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(10)).ReturnsAsync((UserAccount?)null);
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(11)).ReturnsAsync(MakeAccount(110, 11, "B"));
-
             var res = await sut.DeleteFriendAsync(10, 11);
-
             Assert.True(res);
             cbB.Verify(c => c.OnFriendRemoved(10), Times.Once);
         }
@@ -587,15 +480,11 @@ namespace Test.ServicesTests
         public async Task NotifyFriendRemovedAsync_WhenFriendNotFound_ShouldNotifyOnlyCurrentUser()
         {
             friendshipRepo.Setup(r => r.DeleteFriendshipAsync(10, 11)).ReturnsAsync(true);
-
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             sut.SubscribeToFriendUpdatesAsync(100);
-
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(10)).ReturnsAsync(MakeAccount(100, 10, "A"));
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(11)).ReturnsAsync((UserAccount?)null);
-
             var res = await sut.DeleteFriendAsync(10, 11);
-
             Assert.True(res);
             cbA.Verify(c => c.OnFriendRemoved(11), Times.Once);
         }
@@ -605,23 +494,18 @@ namespace Test.ServicesTests
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             sut.SubscribeToFriendUpdatesAsync(300);
-
             var requester = MakeAccount(300, 30, "A");
             var addressee = MakeAccount(310, 31, "B");
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(requester);
             accountRepo.Setup(a => a.GetUserByEmailAsync("b@test.com")).ReturnsAsync(addressee);
-
             friendshipRepo.Setup(r => r.GetFriendsByUserAccountIdAsync(300))
                 .ReturnsAsync(new List<UserAccount>());
             friendshipRepo.Setup(r => r.GetPendingRequestsAsync(310))
                 .ReturnsAsync(new List<Friendship>());
             friendshipRepo.Setup(r => r.GetPendingRequestsAsync(300))
                 .ReturnsAsync(new List<Friendship>());
-
             friendshipRepo.Setup(r => r.CreateFriendRequestAsync(30, 31)).ReturnsAsync(true);
-
             var result = await sut.SendFriendRequestAsync("b@test.com");
-
             Assert.Equal(FriendRequestResult.Success, result);
             cbB.Verify(c => c.OnFriendRequestReceived(It.IsAny<FriendDTO>()), Times.Never);
         }
@@ -631,17 +515,13 @@ namespace Test.ServicesTests
         {
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             sut.SubscribeToFriendUpdatesAsync(300);
-
             var addresseeAcc = MakeAccount(300, 30, "Addressee");
             var requesterAcc = MakeAccount(310, 31, "Requester");
             accountRepo.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(addresseeAcc);
             accountRepo.Setup(a => a.GetUserByPlayerIdAsync(31)).ReturnsAsync(requesterAcc);
-
             friendshipRepo.Setup(r => r.RespondToFriendRequestAsync(31, 30, true)).ReturnsAsync(true);
-
             ctx.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(cbA.Object);
             await sut.RespondToFriendRequestAsync(31, true);
-
             cbA.Verify(c => c.OnFriendAdded(It.Is<FriendDTO>(d => d.PlayerId == 31 && d.Nickname == "Requester")), Times.Once);
             cbB.Verify(c => c.OnFriendAdded(It.IsAny<FriendDTO>()), Times.Never);
         }

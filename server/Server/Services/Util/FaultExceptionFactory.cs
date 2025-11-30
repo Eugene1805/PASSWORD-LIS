@@ -6,7 +6,8 @@ namespace Services.Util
 {
     public static class FaultExceptionFactory
     {
-        public static FaultException<ServiceErrorDetailDTO> Create(ServiceErrorCode code, string errorCode, string message)
+        public static FaultException<ServiceErrorDetailDTO> Create(ServiceErrorCode code,
+            string errorCode, string message)
         {
             var detail = new ServiceErrorDetailDTO
             {

@@ -71,6 +71,7 @@ namespace Services.Contracts
     /// <summary>
     /// Callback contract for real-time game events sent to clients.
     /// </summary>
+    [ServiceContract]
     public interface IGameManagerCallback
     {
         /// <summary>

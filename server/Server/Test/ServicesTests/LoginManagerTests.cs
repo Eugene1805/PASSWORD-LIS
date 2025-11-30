@@ -1,4 +1,11 @@
-﻿using BCrypt.Net;
+﻿using System;
+using System.Collections.Generic;
+using System.Data.Common;
+using System.Data.Entity.Infrastructure;
+using System.Linq;
+using System.ServiceModel;
+using System.Threading.Tasks;
+using BCrypt.Net;
 using Data.DAL.Interfaces;
 using Data.Model;
 using Moq;
@@ -6,13 +13,6 @@ using Services.Contracts.DTOs;
 using Services.Contracts.Enums;
 using Services.Services;
 using Services.Util;
-using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Data.Entity.Infrastructure;
-using System.Linq;
-using System.ServiceModel;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Test.ServicesTests
@@ -40,18 +40,7 @@ namespace Test.ServicesTests
             var password = "ValidPassword123!";
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
             var mockPlayer = new Player { Id = 10 };
-            var mockAccount = new UserAccount
-            {
-                Id = 1,
-                Nickname = "testuser",
-                Email = email,
-                FirstName = "Test",
-                LastName = "User",
-                PasswordHash = hashedPassword,
-                PhotoId = 1,
-                Player = new List<Player> { mockPlayer },
-                SocialAccount = new List<SocialAccount>()
-            };
+            var mockAccount = new UserAccount { Id = 1, Nickname = "testuser", Email = email, FirstName = "Test", LastName = "User", PasswordHash = hashedPassword, PhotoId = 1, Player = new List<Player> { mockPlayer }, SocialAccount = new List<SocialAccount>() };
 
             mockRepo.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync(mockAccount);
 
@@ -59,11 +48,9 @@ namespace Test.ServicesTests
             var result = await loginManager.LoginAsync(email, password);
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Equal(mockAccount.Id, result.UserAccountId);
-            Assert.Equal(mockPlayer.Id, result.PlayerId);
-            Assert.Equal(mockAccount.Nickname, result.Nickname);
-            mockRepo.Verify(repo => repo.GetUserByEmailAsync(email), Times.Once);
+            var expected = new { NotNull = true, UserAccountId = mockAccount.Id, PlayerId = mockPlayer.Id, Nickname = mockAccount.Nickname, Calls = 1 };
+            var actual = new { NotNull = result != null, UserAccountId = result!.UserAccountId, PlayerId = result.PlayerId, Nickname = result.Nickname, Calls = mockRepo.Invocations.Count(i => i.Method.Name == nameof(IAccountRepository.GetUserByEmailAsync)) };
+            Assert.Equal(expected, actual);
         }
 
         [Fact]
@@ -79,9 +66,9 @@ namespace Test.ServicesTests
             var result = await loginManager.LoginAsync(email, password);
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Equal(-1, result.UserAccountId);
-            mockRepo.Verify(repo => repo.GetUserByEmailAsync(email), Times.Once);
+            var expected = new { NotNull = true, UserAccountId = -1, Calls = 1 };
+            var actual = new { NotNull = result != null, UserAccountId = result!.UserAccountId, Calls = mockRepo.Invocations.Count(i => i.Method.Name == nameof(IAccountRepository.GetUserByEmailAsync)) };
+            Assert.Equal(expected, actual);
         }
 
         [Fact]
@@ -92,15 +79,7 @@ namespace Test.ServicesTests
             var correctPassword = "ValidPassword123!";
             var wrongPassword = "WrongPassword!";
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(correctPassword);
-            var mockAccount = new UserAccount
-            {
-                Id = 1,
-                Nickname = "testuser",
-                Email = email,
-                PasswordHash = hashedPassword,
-                Player = new List<Player> { new Player { Id = 10 } },
-                SocialAccount = new List<SocialAccount>()
-            };
+            var mockAccount = new UserAccount { Id = 1, Nickname = "testuser", Email = email, PasswordHash = hashedPassword, Player = new List<Player> { new Player { Id = 10 } }, SocialAccount = new List<SocialAccount>() };
 
             mockRepo.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync(mockAccount);
 
@@ -108,9 +87,9 @@ namespace Test.ServicesTests
             var result = await loginManager.LoginAsync(email, wrongPassword);
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Equal(-1, result.UserAccountId);
-            mockRepo.Verify(repo => repo.GetUserByEmailAsync(email), Times.Once);
+            var expected = new { NotNull = true, UserAccountId = -1, Calls = 1 };
+            var actual = new { NotNull = result != null, UserAccountId = result!.UserAccountId, Calls = mockRepo.Invocations.Count(i => i.Method.Name == nameof(IAccountRepository.GetUserByEmailAsync)) };
+            Assert.Equal(expected, actual);
         }
 
         [Fact]
@@ -120,15 +99,7 @@ namespace Test.ServicesTests
             var email = "test@example.com";
             var password = "ValidPassword123!";
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
-            var mockAccount = new UserAccount
-            {
-                Id = 1,
-                Nickname = "testuser",
-                Email = email,
-                PasswordHash = hashedPassword,
-                Player = new List<Player>(),
-                SocialAccount = new List<SocialAccount>()
-            };
+            var mockAccount = new UserAccount { Id = 1, Nickname = "testuser", Email = email, PasswordHash = hashedPassword, Player = new List<Player>(), SocialAccount = new List<SocialAccount>() };
 
             mockRepo.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync(mockAccount);
 
@@ -136,9 +107,9 @@ namespace Test.ServicesTests
             var result = await loginManager.LoginAsync(email, password);
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Equal(-1, result.UserAccountId);
-            mockRepo.Verify(repo => repo.GetUserByEmailAsync(email), Times.Once);
+            var expected = new { NotNull = true, UserAccountId = -1, Calls = 1 };
+            var actual = new { NotNull = result != null, UserAccountId = result!.UserAccountId, Calls = mockRepo.Invocations.Count(i => i.Method.Name == nameof(IAccountRepository.GetUserByEmailAsync)) };
+            Assert.Equal(expected, actual);
         }
 
         [Fact]
@@ -371,18 +342,7 @@ namespace Test.ServicesTests
             var mockPlayer = new Player { Id = 10 };
             var socialAccount1 = new SocialAccount { Provider = "Google", Username = "user@google.com" };
             var socialAccount2 = new SocialAccount { Provider = "Facebook", Username = "user@facebook.com" };
-            var mockAccount = new UserAccount
-            {
-                Id = 1,
-                Nickname = "testuser",
-                Email = email,
-                FirstName = "Test",
-                LastName = "User",
-                PasswordHash = hashedPassword,
-                PhotoId = 5,
-                Player = new List<Player> { mockPlayer },
-                SocialAccount = new List<SocialAccount> { socialAccount1, socialAccount2 }
-            };
+            var mockAccount = new UserAccount { Id = 1, Nickname = "testuser", Email = email, FirstName = "Test", LastName = "User", PasswordHash = hashedPassword, PhotoId = 5, Player = new List<Player> { mockPlayer }, SocialAccount = new List<SocialAccount> { socialAccount1, socialAccount2 } };
 
             mockRepo.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync(mockAccount);
 
@@ -390,17 +350,9 @@ namespace Test.ServicesTests
             var result = await loginManager.LoginAsync(email, password);
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Equal(mockAccount.Id, result.UserAccountId);
-            Assert.Equal(mockPlayer.Id, result.PlayerId);
-            Assert.Equal(mockAccount.Nickname, result.Nickname);
-            Assert.Equal(mockAccount.Email, result.Email);
-            Assert.Equal(mockAccount.FirstName, result.FirstName);
-            Assert.Equal(mockAccount.LastName, result.LastName);
-            Assert.Equal(5, result.PhotoId);
-            Assert.Equal(2, result.SocialAccounts.Count);
-            Assert.Equal("user@google.com", result.SocialAccounts["Google"]);
-            Assert.Equal("user@facebook.com", result.SocialAccounts["Facebook"]);
+            var expected = new { NotNull = true, UserAccountId = 1, PlayerId = 10, Nickname = "testuser", Email = email, FirstName = "Test", LastName = "User", PhotoId = 5, SocialCount = 2, Google = "user@google.com", Facebook = "user@facebook.com" };
+            var actual = new { NotNull = result != null, UserAccountId = result!.UserAccountId, PlayerId = result.PlayerId, Nickname = result.Nickname, Email = result.Email, FirstName = result.FirstName, LastName = result.LastName, PhotoId = result.PhotoId, SocialCount = result.SocialAccounts.Count, Google = result.SocialAccounts["Google"], Facebook = result.SocialAccounts["Facebook"] };
+            Assert.Equal(expected, actual);
         }
 
         [Fact]

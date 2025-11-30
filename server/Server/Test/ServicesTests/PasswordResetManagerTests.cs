@@ -197,11 +197,16 @@ namespace Test.ServicesTests
             // Act
             var result = passwordManager.ResetPassword(dto);
 
-            // Assert
-            Assert.True(result);
-            Assert.NotNull(capturedHash);
-            Assert.NotEqual(dto.NewPassword, capturedHash);
-            Assert.True(BCrypt.Net.BCrypt.Verify(dto.NewPassword, capturedHash!));
+            
+            var expected = new { Result = true, CapturedNotNull = true, Different = true, Verifies = true };
+            var actual = new
+            {
+                Result = result,
+                CapturedNotNull = capturedHash != null,
+                Different = capturedHash != null && capturedHash != dto.NewPassword,
+                Verifies = capturedHash != null && BCrypt.Net.BCrypt.Verify(dto.NewPassword, capturedHash)
+            };
+            Assert.Equal(expected, actual);
         }
 
         [Fact]
