@@ -1,3 +1,4 @@
+using log4net;
 using PASSWORD_LIS_Client.AccountManagerServiceReference;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
@@ -14,6 +15,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 {
     public class BaseViewModel : INotifyPropertyChanged
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(BaseViewModel));
         protected IWindowService windowService;
 
         public BaseViewModel() { }
@@ -59,24 +61,24 @@ namespace PASSWORD_LIS_Client.ViewModels
                 HandleUntypedFaultException(ex);
                 return default;
             }
-            catch (TimeoutException)
+            catch (TimeoutException ex)
             {
-                HandleTimeoutException();
+                HandleTimeoutException(ex);
                 return default;
             }
-            catch (EndpointNotFoundException)
+            catch (EndpointNotFoundException ex)
             {
-                HandleEndpointNotFoundException();
+                HandleEndpointNotFoundException(ex);
                 return default;
             }
-            catch (CommunicationException)
+            catch (CommunicationException ex)
             {
-                HandleCommunicationException();
+                HandleCommunicationException(ex);
                 return default;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                HandleGenericException();
+                HandleGenericException(ex);
                 return default;
             }
         }
@@ -100,26 +102,29 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 HandleUntypedFaultException(ex);
             }
-            catch (TimeoutException)
+            catch (TimeoutException ex)
             {
-                HandleTimeoutException();
+                HandleTimeoutException(ex);
             }
-            catch (EndpointNotFoundException)
+            catch (EndpointNotFoundException ex)
             {
-                HandleEndpointNotFoundException();
+                HandleEndpointNotFoundException(ex);
             }
-            catch (CommunicationException)
+            catch (CommunicationException ex)
             {
-                HandleCommunicationException();
+                HandleCommunicationException(ex);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                HandleGenericException();
+                HandleGenericException(ex);
             }
         }
 
         private void HandleTypedFaultException(FaultException<ServiceErrorDetailDTO> ex)
         {
+            var errorCode = ex.Detail?.ErrorCode ?? "UNKNOWN";
+            log.WarnFormat("Service fault exception caught. ErrorCode: {0}, Message: {1}", 
+                errorCode, ex.Message);
             HandleServiceError(ex.Detail);
         }
 
@@ -128,6 +133,8 @@ namespace PASSWORD_LIS_Client.ViewModels
             if (FaultHelpers.TryConvertToTypedFault<ServiceErrorDetailDTO>(ex, out var typedFault))
             {
                 var clientDto = CreateClientDto(typedFault.Detail);
+                log.InfoFormat("Successfully converted untyped fault to typed. ErrorCode: {0}", 
+                    clientDto.ErrorCode ?? "NONE");
                 HandleServiceError(clientDto);
                 return;
             }
@@ -137,10 +144,13 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             if (!string.IsNullOrEmpty(errorCodeFromXml) || !string.IsNullOrEmpty(messageFromXml))
             {
+                log.InfoFormat("Extracted fault details from XML. ErrorCode: {0}, Message: {1}", 
+                    errorCodeFromXml ?? "NONE", messageFromXml ?? "NONE");
                 HandleServiceError(errorCodeFromXml, messageFromXml);
                 return;
             }
 
+            log.Warn("Could not extract fault details from exception, using default error handling");
             HandleServiceError((ServiceErrorDetailDTO)null);
         }
 
@@ -174,38 +184,45 @@ namespace PASSWORD_LIS_Client.ViewModels
                         string.Equals(node.Name.LocalName, "message", StringComparison.OrdinalIgnoreCase))
                     ?.Value;
             }
-            catch
+            catch (Exception extractEx)
             {
+                log.DebugFormat("Failed to extract message from fault XML: {0}", extractEx.Message);
                 return null;
             }
         }
 
-        private void HandleTimeoutException()
+        private void HandleTimeoutException(TimeoutException ex)
         {
+            log.WarnFormat("Timeout exception caught. Message: {0}", ex.Message);
             windowService?.ShowPopUp(
                 Properties.Langs.Lang.timeLimitTitleText,
                 Properties.Langs.Lang.serverTimeoutText,
                 PopUpIcon.Warning);
         }
 
-        private void HandleEndpointNotFoundException()
+        private void HandleEndpointNotFoundException(EndpointNotFoundException ex)
         {
+            log.ErrorFormat("Endpoint not found exception caught. Message: {0}", ex.Message);
             windowService?.ShowPopUp(
                 Properties.Langs.Lang.connectionErrorTitleText,
                 Properties.Langs.Lang.serverConnectionInternetErrorText,
                 PopUpIcon.Error);
         }
 
-        private void HandleCommunicationException()
+        private void HandleCommunicationException(CommunicationException ex)
         {
+            log.ErrorFormat("Communication exception caught. Type: {0}, Message: {1}", 
+                ex.GetType().Name, ex.Message);
             windowService?.ShowPopUp(
                 Properties.Langs.Lang.networkErrorTitleText,
                 Properties.Langs.Lang.serverCommunicationErrorText,
                 PopUpIcon.Error);
         }
 
-        private void HandleGenericException()
+        private void HandleGenericException(Exception ex)
         {
+            log.ErrorFormat("Unexpected exception caught. Type: {0}, Message: {1}, StackTrace: {2}", 
+                ex.GetType().Name, ex.Message, ex.StackTrace);
             windowService?.ShowPopUp(
                 Properties.Langs.Lang.errorTitleText,
                 Properties.Langs.Lang.unexpectedErrorText,
@@ -214,12 +231,25 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void HandleServiceError(ServiceErrorDetailDTO errorDetail)
         {
-            if (windowService == null || errorDetail == null)
+            if (windowService == null)
             {
+                log.Warn("WindowService is null, cannot display error popup");
+                return;
+            }
+
+            if (errorDetail == null)
+            {
+                log.Warn("ErrorDetail is null, displaying default error message");
+                windowService.ShowPopUp(
+                    Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.unexpectedErrorText,
+                    PopUpIcon.Error);
                 return;
             }
 
             var errorInfo = GetErrorInfo(errorDetail.Code);
+            log.InfoFormat("Displaying service error to user. ErrorCode: {0}, Title: {1}", 
+                errorDetail.Code, errorInfo.Title);
 
             if (!string.IsNullOrEmpty(errorInfo.Title) || !string.IsNullOrEmpty(errorInfo.Message))
             {
@@ -229,6 +259,8 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void HandleServiceError(string errorCode, string message)
         {
+            log.InfoFormat("Handling service error with errorCode: {0}, message: {1}", 
+                errorCode ?? "NONE", message ?? "NONE");
             var dto = new ServiceErrorDetailDTO
             {
                 ErrorCode = errorCode,
