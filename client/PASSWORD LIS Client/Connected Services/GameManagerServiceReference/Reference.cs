@@ -150,6 +150,36 @@ namespace PASSWORD_LIS_Client.GameManagerServiceReference {
         
         [System.Runtime.Serialization.EnumMemberAttribute()]
         EMAIL_CONFIGURATION_ERROR = 18,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        SECURITY_ERROR = 19,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        FORMAT_ERROR = 20,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        INVALID_OPERATION = 21,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        SELF_INVITATION = 22,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        MATCH_NOT_FOUND_OR_ENDED = 23,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        MATCH_ALREADY_STARTED_OR_FINISHING = 24,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        NOT_AUTHORIZED_TO_JOIN = 25,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        MAX_ONE_REPORT_PER_BAN = 26,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        COULD_NOT_CREATE_GAME = 27,
+        
+        [System.Runtime.Serialization.EnumMemberAttribute()]
+        DATA_INTEGRITY_ERROR = 28,
     }
     
     [System.Diagnostics.DebuggerStepThroughAttribute()]

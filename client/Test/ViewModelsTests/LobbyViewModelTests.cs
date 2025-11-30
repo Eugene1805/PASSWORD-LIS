@@ -68,7 +68,7 @@ namespace Test.ViewModelsTests
             Assert.True(vm.JoinGameCommand.CanExecute(null));
         }
 
-        /*[Fact]
+        [Fact]
         public async Task CreateGame_WhenBanned_ShouldShowWarningAndNotNavigate()
         {
             SessionManager.Login(LoggedUser());
@@ -124,7 +124,7 @@ namespace Test.ViewModelsTests
             await Task.Run(async () =>
             {
                 vm.CreateGameCommand.Execute(null);
-                await Task.Delay(100);
+                await Task.Delay(1000);
             });
             
             await WaitUntilAsync(() => mockWindow.Invocations.Any(i => i.Method.Name == nameof(IWindowService.NavigateTo)));
@@ -166,13 +166,13 @@ namespace Test.ViewModelsTests
             await Task.Run(async () =>
             {
                 vm.JoinGameCommand.Execute(null);
-                await Task.Delay(100);
+                await Task.Delay(1000);
             });
             
             await WaitUntilAsync(() => mockWindow.Invocations.Any(i => i.Method.Name == nameof(IWindowService.NavigateTo)));
 
             Assert.Contains(mockWindow.Invocations, i => i.Method.Name == nameof(IWindowService.NavigateTo));
-        }*/
+        }
 
         [Fact]
         public async Task JoinGame_AsRegisteredBanned_ShouldWarnAndNotNavigate()

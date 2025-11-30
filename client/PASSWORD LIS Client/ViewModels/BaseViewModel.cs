@@ -126,162 +126,156 @@ namespace PASSWORD_LIS_Client.ViewModels
             string message;
             PopUpIcon icon;
 
-            switch (errorDetail.ErrorCode)
+            switch (errorDetail.Code)
             {
-                case "USER_ALREADY_EXISTS":
+                case ServiceErrorCode.USER_ALREADY_EXISTS:
                     title = Properties.Langs.Lang.errorTitleText;
                     message = Properties.Langs.Lang.userAlreadyExistText;
                     icon = PopUpIcon.Warning;
                     break;
 
-                case "DATABASE_ERROR":
+                case ServiceErrorCode.DATABASE_ERROR:
                     title = Properties.Langs.Lang.errorTitleText;
                     message = Properties.Langs.Lang.serverCommunicationErrorText;
                     icon = PopUpIcon.Error;
                     break;
 
-                case "EMAIL_SENDING_ERROR":
-                case "EMAIL_CONFIGURATION_ERROR":
+                case ServiceErrorCode.EMAIL_SENDING_ERROR:
+                case ServiceErrorCode.EMAIL_CONFIGURATION_ERROR:
                     title = Properties.Langs.Lang.warningTitleText;
                     message = Properties.Langs.Lang.couldNotSendMail;
                     icon = PopUpIcon.Warning;
                     break;
 
-                case "NULL_ARGUMENT":
+                case ServiceErrorCode.NULL_ARGUMENT:
 
-                case "INVALID_OPERATION":
+                case ServiceErrorCode.INVALID_OPERATION:
                     title = Properties.Langs.Lang.warningTitleText;
                     message = Properties.Langs.Lang.invalidArgument;
                     icon = PopUpIcon.Error;
                     break;
 
-                case "ROOM_NOT_FOUND":
+                case ServiceErrorCode.ROOM_NOT_FOUND:
                     title = Properties.Langs.Lang.errorTitleText;
                     message = Properties.Langs.Lang.roomNotFoundText;
                     icon = PopUpIcon.Warning;
                     break;
 
-                case "ROOM_FULL":
+                case ServiceErrorCode.ROOM_FULL:
                     title = Properties.Langs.Lang.warningTitleText;
                     message = Properties.Langs.Lang.roomFullText;
                     icon = PopUpIcon.Warning;
                     break;
 
-                case "PLAYER_NOT_FOUND":
+                case ServiceErrorCode.PLAYER_NOT_FOUND:
                     title = Properties.Langs.Lang.warningTitleText;
                     message = Properties.Langs.Lang.playerNotFoundText;
                     icon = PopUpIcon.Warning;
                     break;
 
-                case "ALREADY_IN_ROOM":
+                case ServiceErrorCode.ALREADY_IN_ROOM:
                     title = Properties.Langs.Lang.errorTitleText;
                     message = Properties.Langs.Lang.youAreAlreadyInGameText;
                     icon = PopUpIcon.Warning;
                     break;
 
-                case "COULD_NOT_CREATE_ROOM":
+                case ServiceErrorCode.COULD_NOT_CREATE_ROOM:
                     title = Properties.Langs.Lang.errorTitleText;
                     message = Properties.Langs.Lang.errorInitializingGameText;
                     icon = PopUpIcon.Error;
                     break;
 
-                case "UNEXPECTED_ERROR":
-                    title = Properties.Langs.Lang.errorTitleText;
-                    message = Properties.Langs.Lang.acceptText; 
-                    icon = PopUpIcon.Error;
-                    break;
-
-                case "STATISTICS_ERROR":
+                case ServiceErrorCode.STATISTICS_ERROR:
                     title = Properties.Langs.Lang.errorTitleText;
                     message = Properties.Langs.Lang.statisticsErrorText;
                     icon = PopUpIcon.Error;
                     break;
 
-                case "INVALID_REPORT_PAYLOAD":
+                case ServiceErrorCode.INVALID_REPORT_PAYLOAD:
                     title = Properties.Langs.Lang.errorTitleText;
                     message = Properties.Langs.Lang.invalidReportDataText;
                     icon = PopUpIcon.Error;
                     break;
 
-                case "REPORTER_NOT_FOUND":
+                case ServiceErrorCode.REPORTER_NOT_FOUND:
                     title = Properties.Langs.Lang.warningTitleText;
                     message = Properties.Langs.Lang.acceptText;
                     icon = PopUpIcon.Warning;
                     break;
 
-                case "REPORTED_PLAYER_NOT_FOUND":
+                case ServiceErrorCode.REPORTED_PLAYER_NOT_FOUND:
                     title = Properties.Langs.Lang.warningTitleText;
                     message = Properties.Langs.Lang.reportedPlayerNotFoundText;
                     icon = PopUpIcon.Warning;
                     break;
 
-                case "PLAYER_ALREADY_BANNED":
+                case ServiceErrorCode.PLAYER_ALREADY_BANNED:
                     title = Properties.Langs.Lang.warningTitleText;
                     message = Properties.Langs.Lang.playerAlreadyBannedText;
                     icon = PopUpIcon.Warning;
                     break;
 
-                case "BAN_PERSISTENCE_ERROR":
+                case ServiceErrorCode.BAN_PERSISTENCE_ERROR:
                     title = Properties.Langs.Lang.errorTitleText;
                     message = Properties.Langs.Lang.banPersistenceErrorText;
                     icon = PopUpIcon.Error;
                     break;
 
-                case "SUBSCRIPTION_ERROR":
+                case ServiceErrorCode.SUBSCRIPTION_ERROR:
                     title = Properties.Langs.Lang.errorTitleText;
                     message = Properties.Langs.Lang.subscriptionErrorText;
                     icon = PopUpIcon.Error;
                     break;
 
-                case "UNSUBSCRIPTION_ERROR":
+                case ServiceErrorCode.UNSUBSCRIPTION_ERROR:
                     title = Properties.Langs.Lang.errorTitleText;
                     message = Properties.Langs.Lang.unsubscriptionErrorText;
                     icon = PopUpIcon.Error;
                     break;
 
-                case "SECURITY_ERROR":
+                case ServiceErrorCode.SECURITY_ERROR:
                     title = Properties.Langs.Lang.errorTitleText;
                     message = Properties.Langs.Lang.securityErrorText;
                     icon = PopUpIcon.Error;
                     break;
 
-                case "FORMAT_ERROR":
+                case ServiceErrorCode.FORMAT_ERROR:
                     title = Properties.Langs.Lang.warningTitleText;
                     message = Properties.Langs.Lang.formatErrorText;
                     icon = PopUpIcon.Warning;
                     break;
 
-                case "SELF_INVITATION":
+                case ServiceErrorCode.SELF_INVITATION:
                     title = Properties.Langs.Lang.warningTitleText;
                     message = Properties.Langs.Lang.selfInvitationText;
                     icon = PopUpIcon.Warning;
                     break;
 
-                case "MATCH_NOT_FOUND_OR_ENDED":
+                case ServiceErrorCode.MATCH_NOT_FOUND_OR_ENDED:
                     title = Properties.Langs.Lang.warningTitleText;
                     message = Properties.Langs.Lang.matchNotFoundOrEndedText;
                     icon = PopUpIcon.Warning;
                     break;
 
-                case "MATCH_ALREADY_STARTED_OR_FINISHING":
+                case ServiceErrorCode.MATCH_ALREADY_STARTED_OR_FINISHING:
                     title = Properties.Langs.Lang.warningTitleText;
                     message = Properties.Langs.Lang.matchStartedOrFinishingText;
                     icon = PopUpIcon.Warning;
                     break;
 
-                case "NOT_AUTHORIZED_TO_JOIN":
+                case ServiceErrorCode.NOT_AUTHORIZED_TO_JOIN:
                     title = Properties.Langs.Lang.errorTitleText;
                     message = Properties.Langs.Lang.acceptText;
                     icon = PopUpIcon.Warning;
                     break;
 
-                case "MAX_ONE_REPORT_PER_BAN":
+                case ServiceErrorCode.MAX_ONE_REPORT_PER_BAN:
                     title = Properties.Langs.Lang.warningTitleText;
                     message = Properties.Langs.Lang.maxReportLimitText;
                     icon = PopUpIcon.Warning;
                     break;
 
-                case "COULD_NOT_CREATE_GAME":
+                case ServiceErrorCode.COULD_NOT_CREATE_GAME:
                     title = Properties.Langs.Lang.errorTitleText;
                     message = Properties.Langs.Lang.couldNotCreateMatch;
                     icon = PopUpIcon.Error;

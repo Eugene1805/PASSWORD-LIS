@@ -28,7 +28,7 @@ namespace Test.UtilsTests
             // Assert
             Assert.NotNull(SessionManager.CurrentUser);
             Assert.Equal(123, SessionManager.CurrentUser.UserAccountId);
-            //Assert.Equal(456, SessionManager.CurrentUser.PlayerId);
+            Assert.Equal(456, SessionManager.CurrentUser.PlayerId);
             Assert.Equal("TestUser", SessionManager.CurrentUser.Nickname);
 
             // Cleanup
@@ -39,15 +39,10 @@ namespace Test.UtilsTests
         public void Login_WithNullUser_ShouldSetCurrentUserToNull()
         {
             // Arrange
-            var user = new PASSWORD_LIS_Client.LoginManagerServiceReference.UserDTO
-            {
-                UserAccountId = 1,
-                PlayerId = 1
-            };
-            SessionManager.Login(user);
+            PASSWORD_LIS_Client.LoginManagerServiceReference.UserDTO user = null;
 
             // Act
-            SessionManager.Login(null);
+            SessionManager.Login(user);
 
             // Assert
             Assert.Null(SessionManager.CurrentUser);
