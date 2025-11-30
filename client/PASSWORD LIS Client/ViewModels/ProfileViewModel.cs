@@ -283,7 +283,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             if (!IsEditMode)
             {
-                windowService.GoBack();
+                windowService.GoToLobby(); 
                 return;
             }
 
@@ -298,7 +298,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 {
                     RevertChanges(); 
                     IsEditMode = false;
-                    windowService.GoBack();
+                    windowService.GoToLobby(); 
                 }
                 else
                 {
@@ -308,7 +308,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             else
             {
                 IsEditMode = false;
-                windowService.GoBack();
+                windowService.GoToLobby();
             }
         }
         private void RevertChanges()

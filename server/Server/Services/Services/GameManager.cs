@@ -28,7 +28,7 @@ namespace Services.Services
         private readonly IPlayerRepository playerRepository;
         private static readonly ILog log = LogManager.GetLogger(typeof(GameManager));
 
-        private const int RoundDurationSeconds = 60;
+        private const int RoundDurationSeconds = 10;
         private const int ValidationDurationSeconds = 30;
         private const int SuddenDeathDurationSeconds = 30;
         private const int WordsPerRound = 5;
@@ -135,13 +135,34 @@ namespace Services.Services
         {
             await ExecuteAsync(async () =>
             {
-                try
+                if (votes == null)
                 {
-                    var context = ValidateValidationContext(gameCode, senderPlayerId, votes);
-                    if (context == null) return;
+                    log.WarnFormat("Votes list is null for game '{0}'", gameCode);
+                    return;
+                }
 
-                    var (session, sender) = context.Value;
+                if (!matches.TryGetValue(gameCode, out MatchSession session))
+                {
+                    log.WarnFormat("Match not found: {0}", gameCode);
+                    return;
+                }
+
+                await ExecuteSafeAsync(session, async () =>
+                {
+                    if (session.Status != MatchStatus.Validating)
+                    {
+                        log.WarnFormat("Match {0} is not in validating state.", gameCode);
+                        return;
+                    }
+
+                    if (!session.ActivePlayers.TryGetValue(senderPlayerId, out var sender))
+                    {
+                        log.WarnFormat("Player {0} not found in match {1}", senderPlayerId, gameCode);
+                        return;
+                    }
+
                     bool allVotesIn = false;
+
                     lock (session.ReceivedVotes)
                     {
                         if (session.PlayersWhoVoted.Contains(senderPlayerId))
@@ -152,7 +173,7 @@ namespace Services.Services
                         session.PlayersWhoVoted.Add(senderPlayerId);
                         session.ReceivedVotes.Add((sender.Player.Team, votes));
 
-                        if (session.PlayersWhoVoted.Count >= PlayersPerMatch)
+                        if (session.PlayersWhoVoted.Count >= session.ActivePlayers.Count)
                         {
                             allVotesIn = true;
                         }
@@ -160,17 +181,17 @@ namespace Services.Services
 
                     if (allVotesIn)
                     {
+                        log.InfoFormat("All votes received for game {0}. Processing...", gameCode);
                         session.StopTimers();
-                        await Task.Run(async () => await ProcessVotesAsync(session));
+                        await ProcessVotesAsync(session);
                     }
-                    log.InfoFormat("Votes processing scheduled or stored successfully for game '{0}'", gameCode);
-                }
-                catch (Exception ex)
-                {
-                    log.ErrorFormat("Error in SubmitValidationVotesAsync: {0}", ex.Message, ex);
-                    log.DebugFormat("Stack Trace: {0}", ex.StackTrace);
-                    throw;
-                }
+                    else
+                    {
+                        log.InfoFormat("Vote received for game '{0}'. Waiting for others.", gameCode);
+                    }
+
+                }, "Error procesando la votación de la ronda."); // Mensaje para el cliente
+
             }, context: "GameManager: SubmitValidationVotesAsync");
         }
 
@@ -453,39 +474,43 @@ namespace Services.Services
                 .Where(p => p.Player.Id > 0).Select(p => p.Player.Id).ToList();
             var registeredBluePlayerIds = session.GetPlayersByTeam(MatchTeam.BlueTeam)
                 .Where(p => p.Player.Id > 0).Select(p => p.Player.Id).ToList();
-            try
+            await ExecuteSafeAsync(session, async () =>
             {
+                log.Info($"Saving match result for game {session.GameCode}...");
+
                 await matchRepository.SaveMatchResultAsync(session.RedTeamScore, session.BlueTeamScore,
                     registeredRedPlayerIds, registeredBluePlayerIds);
+
                 if (winner.HasValue)
                 {
                     var winningPlayerIds = (winner == MatchTeam.RedTeam)
                         ? registeredRedPlayerIds : registeredBluePlayerIds;
+
                     if (winningPlayerIds.Any())
                     {
                         await Task.WhenAll(winningPlayerIds.Select(
                             id => playerRepository.UpdatePlayerTotalPointsAsync(id, PointsPerWin)));
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                log.ErrorFormat("ERROR persisting match {0}: {1}", session.GameCode, ex.Message);
-            }
-            var summary = new MatchSummaryDTO
-            {
-                WinnerTeam = winner,
-                RedScore = session.RedTeamScore,
-                BlueScore = session.BlueTeamScore
-            };
-            await BroadcastAndHandleDisconnectsAsync(session, cb => cb.OnMatchOver(summary));
-            if (matches.TryRemove(session.GameCode, out var removedMatch))
-            {
-                removedMatch.Dispose();
-            }
+
+                var summary = new MatchSummaryDTO
+                {
+                    WinnerTeam = winner,
+                    RedScore = session.RedTeamScore,
+                    BlueScore = session.BlueTeamScore
+                };
+
+                await BroadcastAndHandleDisconnectsAsync(session, cb => cb.OnMatchOver(summary));
+
+                if (matches.TryRemove(session.GameCode, out var removedMatch))
+                {
+                    removedMatch.Dispose();
+                }
+
+            }, "Error guardando los resultados de la partida en la base de datos.");
         }
 
-        private async Task BroadcastAndHandleDisconnectsAsync(MatchSession session,
+        private async Task  BroadcastAndHandleDisconnectsAsync(MatchSession session,
             Action<IGameManagerCallback> action)
         {
             var disconnectedIds = await GameBroadcaster.BroadcastAsync(session, action);
@@ -773,8 +798,10 @@ namespace Services.Services
         private (MatchSession, (IGameManagerCallback Callback, PlayerDTO Player), PasswordWord)?
             ValidateAndGetClueContext(string gameCode, int senderId, string clue)
         {
-            if (string.IsNullOrWhiteSpace(clue)) return null;
-
+            if (string.IsNullOrWhiteSpace(clue))
+            {
+                return null;
+            }
             if (!matches.TryGetValue(gameCode, out MatchSession session)
                 || (session.Status != MatchStatus.InProgress && session.Status != MatchStatus.SuddenDeath))
             {
@@ -788,8 +815,10 @@ namespace Services.Services
             }
 
             var currentPassword = session.GetCurrentPassword(sender.Player.Team);
-            if (currentPassword == null) return null;
-
+            if (currentPassword == null)
+            {
+                return null;
+            }
             return (session, sender, currentPassword);
         }
 
@@ -804,8 +833,14 @@ namespace Services.Services
                 ClueUsed = clue
             };
 
-            if (team == MatchTeam.RedTeam) session.RedTeamTurnHistory.Add(historyItem);
-            else session.BlueTeamTurnHistory.Add(historyItem);
+            if (team == MatchTeam.RedTeam)
+            {
+                session.RedTeamTurnHistory.Add(historyItem);
+            }
+            else
+            {
+                session.BlueTeamTurnHistory.Add(historyItem);
+            }
         }
 
         private async Task NotifyPartnerOfClueAsync(MatchSession session, (IGameManagerCallback Callback,
@@ -830,42 +865,41 @@ namespace Services.Services
             if (string.IsNullOrWhiteSpace(guess)) return null;
 
             var session = GetGuessableSessionOrNull(gameCode);
-            if (session == null) return null;
-
+            if (session == null)
+            {
+                return null;
+            }
             var sender = GetValidGuesser(session, senderId);
-            if (sender.Player == null) return null;
+            if (sender.Player == null)
+            {
+                return null;
+            }
 
             var currentPassword = session.GetCurrentPassword(sender.Player.Team);
-            if (currentPassword == null) return null;
-
+            if (currentPassword == null)
+            {
+                return null;
+            }
             return (session, sender, currentPassword);
         }
-
-        private (MatchSession, (IGameManagerCallback Callback, PlayerDTO Player))?
-            ValidateValidationContext(string gameCode, int senderId, List<ValidationVoteDTO> votes)
+        private async Task ExecuteSafeAsync(MatchSession session, Func<Task> action, string errorMessage)
         {
-            log.InfoFormat("SubmitValidationVotesAsync called - GameCode: {0}, PlayerId: {1}, VotesCount: {2}",
-                        gameCode, senderId, votes == null ? 0 : votes.Count);
-
-            if (votes == null)
+            try
             {
-                log.WarnFormat("Votes list is null for game '{0}', player {1}", gameCode, senderId);
-                return null;
+                await action();
             }
-
-            if (!matches.TryGetValue(gameCode, out MatchSession session) || session.Status != MatchStatus.Validating)
+            catch (Exception ex)
             {
-                log.WarnFormat("Match not found or not in validating state: {0}", gameCode);
-                return null;
-            }
+                log.Error($"CRITICAL ERROR in game {session.GameCode}: {ex.Message}", ex);
 
-            if (!session.ActivePlayers.TryGetValue(senderId, out var sender))
-            {
-                log.WarnFormat("Player not found in match: {0}", senderId);
-                return null;
-            }
+                await BroadcastAndHandleDisconnectsAsync(session,
+                    cb => cb.OnMatchCancelled($"Internal Server Error: {errorMessage}"));
 
-            return (session, sender);
+                if (matches.TryRemove(session.GameCode, out var removedSession))
+                {
+                    removedSession.Dispose();
+                }
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using PASSWORD_LIS_Client.Commands;
+﻿using log4net;
+using PASSWORD_LIS_Client.Commands;
 using PASSWORD_LIS_Client.GameManagerServiceReference;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
@@ -20,6 +21,8 @@ namespace PASSWORD_LIS_Client.ViewModels
         private readonly IWindowService windowService;
         private readonly string gameCode;
         private readonly PlayerDTO currentPlayer;
+        private readonly ILog log = LogManager.GetLogger(typeof(GameViewModel));
+
 
         private int currentWordIndex = 1;
         private int currentRoundIndex = 1;
@@ -28,7 +31,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         private bool isSuddenDeathActive = false;
         private bool isMatchEnding = false;
 
-        private const int MaxWordsPerRound = 5; // Palabras por ronda
+        private const int MaxWordsPerRound = 5;
 
         private bool isLoading = true;
         public bool IsLoading
@@ -44,7 +47,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             set => SetProperty(ref currentPlayerRole, value);
         }
 
-        private int timerSeconds = 180; //Cambiado para pruebas
+        private int timerSeconds = 60;
         public int TimerSeconds
         {
             get => timerSeconds;
@@ -181,7 +184,8 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand RequestHintCommand { get; }
 
 
-        public GameViewModel(IGameManagerService gameManagerService, IWindowService windowService, string gameCode, WaitingRoomManagerServiceReference.PlayerDTO waitingRoomPlayer)
+        public GameViewModel(IGameManagerService gameManagerService, IWindowService windowService, string gameCode, WaitingRoomManagerServiceReference.PlayerDTO waitingRoomPlayer) 
+            : base(windowService)
         {
             this.gameManagerService = gameManagerService;
             this.windowService = windowService;
@@ -219,13 +223,22 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         public async Task InitializeAsync()
         {
-            try
+            await ExecuteAsync(async () =>
             {
-                await gameManagerService.SubscribeToMatchAsync(gameCode, currentPlayer.Id);
-            }catch (Exception ex)
-            {
-                HandleConnectionError(ex, Properties.Langs.Lang.errorSubscribingGameText); 
-            }
+                try
+                {
+                    if (gameManagerService is ICommunicationObject clientChannel)
+                    {
+                        clientChannel.Faulted += OnServerConnectionLost;
+                        clientChannel.Closed += OnServerConnectionLost;
+                    }
+                    await gameManagerService.SubscribeToMatchAsync(gameCode, currentPlayer.Id);
+                }
+                catch (Exception ex)
+                {
+                    HandleConnectionError(ex, Properties.Langs.Lang.errorSubscribingGameText);
+                }
+            });
         }
 
         private void OnMatchInitialized(MatchInitStateDTO state)
@@ -274,13 +287,11 @@ namespace PASSWORD_LIS_Client.ViewModels
                 {
                     return;
                 }
+                isMatchEnding = true;
 
 
                 windowService.ShowPopUp(Properties.Langs.Lang.matchCancelledText, reason, PopUpIcon.Warning);
-                UnsubscribeFromEvents();
-                gameManagerService.Cleanup();
-
-                windowService.GoToLobby();
+                ForceReturnToLobby();
             });
         }
 
@@ -450,7 +461,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 Page endPage = didIWin ? (Page)new WinnersPage() : new LosersPage();
                 endPage.DataContext = gameEndViewModel;
                 windowService.NavigateTo(endPage);
-                gameManagerService.Cleanup();
+                SafeCleanup();
             });
         }
 
@@ -509,20 +520,23 @@ namespace PASSWORD_LIS_Client.ViewModels
         private async Task SendClueAsync()
         {
             CanSendClue = false;
-            try
+            await ExecuteAsync(async () =>
             {
-                await gameManagerService.SubmitClueAsync(gameCode, currentPlayer.Id, currentClueText);
-                CurrentClueText = string.Empty; 
-            }
-            catch (Exception ex)
-            {
-                if (isMatchEnding)
+                try
                 {
-                    return;
+                    await gameManagerService.SubmitClueAsync(gameCode, currentPlayer.Id, currentClueText);
+                    CurrentClueText = string.Empty;
                 }
-                HandleConnectionError(ex, Properties.Langs.Lang.errorSendingClueText);
-                CanSendClue = true;
-            }
+                catch (Exception ex)
+                {
+                    if (isMatchEnding)
+                    {
+                        return;
+                    }
+                    HandleConnectionError(ex, Properties.Langs.Lang.errorSendingClueText);
+                    CanSendClue = true;
+                }
+            }); 
         }
         private async Task SendGuessAsync()
         {
@@ -587,6 +601,65 @@ namespace PASSWORD_LIS_Client.ViewModels
             IsHintVisible = true;
         }
 
+        private void OnServerConnectionLost(object sender, EventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                if (isMatchEnding)
+                {
+                    return;
+                }
+                isMatchEnding = true;
+
+                windowService.ShowPopUp(
+                    Properties.Langs.Lang.connectionErrorTitleText,
+                    "La conexión con el servidor se perdió inesperadamente.",
+                    PopUpIcon.Error);
+
+                ForceReturnToLobby();
+            });
+        }
+        private void ForceReturnToLobby()
+        {
+            UnsubscribeFromEvents();
+            SafeCleanup();
+            windowService.GoToLobby();
+        }
+
+        private void SafeCleanup()
+        {
+            try
+            {
+                if (gameManagerService is ICommunicationObject clientChannel)
+                {
+                    clientChannel.Faulted -= OnServerConnectionLost;
+                    clientChannel.Closed -= OnServerConnectionLost;
+
+                    if (clientChannel.State == CommunicationState.Opened)
+                    {
+                        gameManagerService.Cleanup();
+                    }
+                    else
+                    {
+                        clientChannel.Abort();
+                    }
+                }
+                else
+                {
+                    gameManagerService.Cleanup();
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Warn($"Error limpiando conexión: {ex.Message}");
+
+                if (gameManagerService is ICommunicationObject clientChannel)
+                {
+                    clientChannel.Abort();
+                }
+            }
+        }
+
         private async void ShowSnackbar(string message)
         {
             SnackbarMessage = message;
@@ -614,6 +687,12 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
+                if (isMatchEnding)
+                {
+                    return;
+                }
+                isMatchEnding = true;
+
                 string title = Properties.Langs.Lang.errorTitleText;
                 string message = $"{customMessage}\n{Properties.Langs.Lang.unexpectedErrorText}";
 
@@ -634,9 +713,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
 
                 windowService.ShowPopUp(title, message, PopUpIcon.Error);
-                UnsubscribeFromEvents();
-                gameManagerService.Cleanup();
-                windowService.GoBack();
+                ForceReturnToLobby();
             });
         }
     }

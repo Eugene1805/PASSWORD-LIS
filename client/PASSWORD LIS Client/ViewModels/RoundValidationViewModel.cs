@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.ServiceModel;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -72,6 +71,12 @@ namespace PASSWORD_LIS_Client.ViewModels
             gameManagerService.MatchCancelled += OnMatchCancelled;
             gameManagerService.MatchOver += OnMatchOver;
 
+            if (gameManagerService is ICommunicationObject clientChannel)
+            {
+                clientChannel.Faulted += OnServerConnectionLost;
+                clientChannel.Closed += OnServerConnectionLost;
+            }
+
             if (turns == null || turns.Count == 0)
             {
                 IsListEmpty = true;
@@ -83,8 +88,8 @@ namespace PASSWORD_LIS_Client.ViewModels
                 IsListEmpty = false;
                 EmptyListMessage = string.Empty;
                 var groupedTurns = turns.Where(turn => turn.Password.EnglishWord != "END" && turn.Password.SpanishWord != "END")
-                .GroupBy(turn => turn.TurnId)
-                .Select(group => new ValidationTurnViewModel(group, language));
+                    .GroupBy(turn => turn.TurnId)
+                    .Select(group => new ValidationTurnViewModel(group, language));
                 TurnsToValidate = new ObservableCollection<ValidationTurnViewModel>(groupedTurns);
             }
 
@@ -156,7 +161,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             try
             {
-                log.InfoFormat("Submitting {0} validation votes for game {1}, player {2}", votes.Count, gameCode, playerId);
+                log.InfoFormat("Submitting votes for game {0}...", gameCode);
                 await gameManagerService.SubmitValidationVotesAsync(gameCode, playerId, votes);
                 log.InfoFormat("SubmitValidationVotesAsync completed successfully");
             }
@@ -218,12 +223,37 @@ namespace PASSWORD_LIS_Client.ViewModels
                 gameManagerService.MatchCancelled -= OnMatchCancelled;
                 gameManagerService.MatchOver -= OnMatchOver;
 
+                if (gameManagerService is ICommunicationObject clientChannel)
+                {
+                    clientChannel.Faulted -= OnServerConnectionLost;
+                    clientChannel.Closed -= OnServerConnectionLost;
+                }
+
                 log.Info("Cleanup completed successfully");
             }
             catch (Exception ex)
             {
                 log.Error($"Error during cleanup: {ex.Message}", ex);
             }
+        }
+        private void OnServerConnectionLost(object sender, EventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                if (isMatchEnding)
+                {
+                    return;
+                }
+                isMatchEnding = true;
+
+                windowService.ShowPopUp(
+                    Properties.Langs.Lang.connectionErrorTitleText,
+                    "Conexión perdida durante la validación.",
+                    PopUpIcon.Error);
+
+                Cleanup();
+                windowService.GoToLobby();
+            });
         }
 
         private void HandleConnectionError(Exception ex, string customMessage)
