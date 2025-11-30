@@ -633,5 +633,62 @@ namespace Test.ServicesTests
             await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(() =>
             sut.SendGameInvitationToFriendAsync(42, "ABCDE", "Host"));
         }
+
+        [Fact]
+        public async Task SendGameInvitationByEmailAsync_WhenInvitingSelf_ShouldThrowFaultException()
+        {
+            // Arrange
+            var (sut, _, _) = CreateSut(mockPlayerRepo, mockOperationContext);
+            string myEmail = "me@test.com";
+            string myNickname = "MyNick";
+            string gameCode = "ABCDE";
+
+            mockAccountRepository.Setup(a => a.GetUserByEmailAsync(myEmail))
+                .ReturnsAsync(new UserAccount
+                {
+                    Email = myEmail,
+                    Nickname = myNickname // Mismo nick que el argumento 'inviterNickname'
+                });
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
+                () => sut.SendGameInvitationByEmailAsync(myEmail, gameCode, myNickname)
+            );
+
+            Assert.Equal("SELF_INVITATION", ex.Detail.ErrorCode);
+
+            mockNotificationService.Verify(
+                n => n.SendGameInvitationEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()),
+                Times.Never);
+        }
+
+        [Fact]
+        public async Task SendGameInvitationToFriendAsync_WhenInvitingSelf_ShouldThrowFaultException()
+        {
+            // Arrange
+            var (sut, _, _) = CreateSut(mockPlayerRepo, mockOperationContext);
+            int friendId = 99;
+            string myNickname = "MyNick";
+            string gameCode = "ABCDE";
+
+            mockAccountRepository.Setup(a => a.GetUserByPlayerIdAsync(friendId))
+                .ReturnsAsync(new UserAccount
+                {
+                    Id = 1,
+                    Email = "me@test.com",
+                    Nickname = myNickname
+                });
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
+                () => sut.SendGameInvitationToFriendAsync(friendId, gameCode, myNickname)
+            );
+
+            Assert.Equal("SELF_INVITATION", ex.Detail.ErrorCode);
+
+            mockNotificationService.Verify(
+                n => n.SendGameInvitationEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()),
+                Times.Never);
+        }
     }
 }

@@ -4,13 +4,8 @@ using Moq;
 using Services.Contracts.DTOs;
 using Services.Contracts.Enums;
 using Services.Services;
-using System;
-using System.Collections.Generic;
 using System.Data.Entity.Infrastructure;
-using System.Linq;
 using System.ServiceModel;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace Test.ServicesTests
 {

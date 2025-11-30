@@ -60,6 +60,8 @@ namespace Services.Contracts.Enums
         [EnumMember(Value = "MAX_ONE_REPORT_PER_BAN")]
         MaxOneReportPerBan,
         [EnumMember(Value = "COULD_NOT_CREATE_GAME")]
-        CouldNotCreateGame
+        CouldNotCreateGame,
+        [EnumMember(Value = "DATA_INTEGRITY_ERROR")]
+        DataIntegrityError
     }
 }

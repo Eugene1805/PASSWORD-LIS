@@ -49,31 +49,29 @@ namespace Test.ServicesTests
             // Act
             var result = await topPlayersManager.GetTopAsync(numberOfTeams);
 
-            // Assert
-            var expected = new
-            {
-                NotNull = true,
-                Count = 2,
-                FirstScore = 100,
-                FirstPlayersCount = 2,
-                HasP1 = true,
-                HasP2 = true,
-                SecondScore = 90,
-                SecondPlayersCount = 1,
-                SecondPlayer = "Player3"
-            };
-            var actual = new
-            {
-                NotNull = result != null,
-                Count = result?.Count ?? 0,
-                FirstScore = result?.ElementAtOrDefault(0)?.Score ?? -1,
-                FirstPlayersCount = result?.ElementAtOrDefault(0)?.PlayersNicknames.Count ?? -1,
-                HasP1 = result?.ElementAtOrDefault(0)?.PlayersNicknames.Contains("Player1") ?? false,
-                HasP2 = result?.ElementAtOrDefault(0)?.PlayersNicknames.Contains("Player2") ?? false,
-                SecondScore = result?.ElementAtOrDefault(1)?.Score ?? -1,
-                SecondPlayersCount = result?.ElementAtOrDefault(1)?.PlayersNicknames.Count ?? -1,
-                SecondPlayer = result?.ElementAtOrDefault(1)?.PlayersNicknames.FirstOrDefault()
-            };
+            // Assert (use tuples to align nullability)
+            var expected = (
+                NotNull: true,
+                Count: 2,
+                FirstScore: 100,
+                FirstPlayersCount: 2,
+                HasP1: true,
+                HasP2: true,
+                SecondScore: 90,
+                SecondPlayersCount: 1,
+                SecondPlayer: (string?)"Player3"
+            );
+            var actual = (
+                NotNull: result != null,
+                Count: result?.Count ?? 0,
+                FirstScore: result?.ElementAtOrDefault(0)?.Score ?? -1,
+                FirstPlayersCount: result?.ElementAtOrDefault(0)?.PlayersNicknames.Count ?? -1,
+                HasP1: result?.ElementAtOrDefault(0)?.PlayersNicknames.Contains("Player1") ?? false,
+                HasP2: result?.ElementAtOrDefault(0)?.PlayersNicknames.Contains("Player2") ?? false,
+                SecondScore: result?.ElementAtOrDefault(1)?.Score ?? -1,
+                SecondPlayersCount: result?.ElementAtOrDefault(1)?.PlayersNicknames.Count ?? -1,
+                SecondPlayer: result?.ElementAtOrDefault(1)?.PlayersNicknames.FirstOrDefault()
+            );
             Assert.Equal(expected, actual);
         }
 
@@ -120,50 +118,59 @@ namespace Test.ServicesTests
         }
 
         [Fact]
-        public async Task GetTop_WhenRepositoryReturnsNull_ShouldThrowFaultException()
+        public async Task GetTop_WhenRepositoryReturnsNull_ShouldReturnEmptyList()
         {
             // Arrange
             var numberOfTeams = 2;
             mockStatisticsRepository.Setup(r => r.GetTopTeamsAsync(numberOfTeams)).ReturnsAsync((List<Team>)null!);
 
             // Act
-            FaultException<ServiceErrorDetailDTO>? ex = null;
-            try { await topPlayersManager.GetTopAsync(numberOfTeams); } catch (FaultException<ServiceErrorDetailDTO> e) { ex = e; }
+            var result = await topPlayersManager.GetTopAsync(numberOfTeams);
 
             // Assert
-            Assert.Equal((Threw: true, Code: "NULL_ARGUMENT"), (Threw: ex != null, Code: ex?.Detail.ErrorCode));
+            Assert.Equal((NotNull: true, Empty: true, Count: 0), (NotNull: result != null, Empty: result!.Count == 0, Count: result.Count));
         }
 
         [Fact]
-        public async Task GetTop_WhenTeamPlayerCollectionIsNull_ShouldThrowFaultException()
+        public async Task GetTop_WhenAPlayerHasNullUserAccount_ShouldThrowDataIntegrityFault()
         {
             // Arrange
             var numberOfTeams = 1;
-            var teams = new List<Team> { new Team { TotalPoints = 10, Player = null! } };
+            var teams = new List<Team>
+            {
+                new Team
+                {
+                    Id = 10,
+                    TotalPoints = 12,
+                    Player = new List<Player> { new Player { Id = 5, UserAccount = null! } }
+                }
+            };
+
             mockStatisticsRepository.Setup(r => r.GetTopTeamsAsync(numberOfTeams)).ReturnsAsync(teams);
 
-            // Act
-            FaultException<ServiceErrorDetailDTO>? ex = null;
-            try { await topPlayersManager.GetTopAsync(numberOfTeams); } catch (FaultException<ServiceErrorDetailDTO> e) { ex = e; }
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
+                () => topPlayersManager.GetTopAsync(numberOfTeams)
+            );
 
-            // Assert 
-            Assert.Equal((Threw: true, Code: "NULL_ARGUMENT"), (Threw: ex != null, Code: ex?.Detail.ErrorCode));
+            // Assert
+            Assert.Equal("DATA_INTEGRITY_ERROR", ex.Detail.ErrorCode);
         }
 
         [Fact]
-        public async Task GetTop_WhenAPlayerHasNullUserAccount_ShouldThrowFaultException()
+        public async Task GetTop_WhenTeamPlayerCollectionIsNull_ShouldThrowDataIntegrityFault()
         {
             // Arrange
             var numberOfTeams = 1;
-            var teams = new List<Team> { new Team { TotalPoints = 12, Player = new List<Player> { new Player { UserAccount = null! } } } };
+            var teams = new List<Team> { new Team { Id = 20, TotalPoints = 10, Player = null! } };
             mockStatisticsRepository.Setup(r => r.GetTopTeamsAsync(numberOfTeams)).ReturnsAsync(teams);
 
-            // Act
-            FaultException<ServiceErrorDetailDTO>? ex = null;
-            try { await topPlayersManager.GetTopAsync(numberOfTeams); } catch (FaultException<ServiceErrorDetailDTO> e) { ex = e; }
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
+                () => topPlayersManager.GetTopAsync(numberOfTeams)
+            );
 
-            // Assert
-            Assert.Equal((Threw: true, Code: "UNEXPECTED_ERROR"), (Threw: ex != null, Code: ex?.Detail.ErrorCode));
+            Assert.Equal("DATA_INTEGRITY_ERROR", ex.Detail.ErrorCode);
         }
 
         [Theory]
