@@ -6,6 +6,7 @@ using PASSWORD_LIS_Client.ViewModels;
 using PASSWORD_LIS_Client.Views;
 using System.Globalization;
 using System.Net.NetworkInformation;
+using System.ServiceModel;
 using System.Threading;
 using System.Windows;
 
@@ -29,6 +30,45 @@ namespace PASSWORD_LIS_Client
         public static IReportManagerService ReportManagerService { get; private set; }
         public static IGameManagerService GameManagerService { get; private set; }
         private static readonly ILog log = LogManager.GetLogger(typeof(App));
+
+        public static void ResetServices()
+        {
+            log.Info("Resetting all WCF services due to connection loss...");
+
+            void SafeClose(object service)
+            {
+                if (service is ICommunicationObject commObj)
+                {
+                    try { commObj.Abort(); } catch { }
+                }
+            }
+
+            SafeClose(LoginManagerService);
+            SafeClose(AccountManagerService);
+            SafeClose(FriendsManagerService);
+            SafeClose(PasswordResetManagerService);
+            SafeClose(ProfileManagerService);
+            SafeClose(TopPlayersManagerService);
+            SafeClose(VerificationCodeManagerService);
+            SafeClose(WaitRoomManagerService);
+            SafeClose(ReportManagerService);
+            SafeClose(GameManagerService);
+
+            LoginManagerService = new WcfLoginManagerService();
+            WindowService = new WindowService(); 
+            BackgroundMusicService = new BackgroundMusicService();
+            AccountManagerService = new WcfAccountManagerService();
+            FriendsManagerService = new WcfFriendsManagerService();
+            PasswordResetManagerService = new WcfPasswordResetManagerService();
+            ProfileManagerService = new WcfProfileManagerService();
+            TopPlayersManagerService = new WcfTopPlayersManagerService();
+            VerificationCodeManagerService = new WcfVerificationCodeManagerService();
+            WaitRoomManagerService = new WcfWaitingRoomManagerService();
+            ReportManagerService = new WcfReportManagerService();
+            GameManagerService = new WcfGameManagerService();
+
+            log.Info("Services successfully reset.");
+        }
         protected override void OnStartup(StartupEventArgs e)
         {
             XmlConfigurator.Configure();

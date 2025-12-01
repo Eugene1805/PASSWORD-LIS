@@ -13,13 +13,14 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace PASSWORD_LIS_Client.ViewModels
 {
     public class RoundValidationViewModel : BaseViewModel
     {
         public ObservableCollection<ValidationTurnViewModel> TurnsToValidate { get; }
-        private int validationSeconds = 60; //CAMBIADO PARA PRUEBAS DE 20 A 60
+        private int validationSeconds = 30; 
         public int ValidationSeconds
         {
             get => validationSeconds;
@@ -56,15 +57,24 @@ namespace PASSWORD_LIS_Client.ViewModels
         private readonly string language;
         private readonly ILog log = LogManager.GetLogger(typeof(RoundValidationViewModel));
         private bool isMatchEnding = false;
+        private  DispatcherTimer serverGuardian;
+        private DateTime lastServerMessageTime;
+
 
         public RoundValidationViewModel(List<TurnHistoryDTO> turns, IGameManagerService gameManagerService, IWindowService windowService,
-            string gameCode, int playerId, string language)
+            string gameCode, int playerId, string language) : base(windowService)
         {
             this.gameManagerService = gameManagerService;
             this.windowService = windowService;
             this.gameCode = gameCode;
             this.playerId = playerId;
             this.language = language;
+
+            serverGuardian = new DispatcherTimer();
+            serverGuardian.Interval = TimeSpan.FromSeconds(2);
+            serverGuardian.Tick += CheckServerPulse;
+            lastServerMessageTime = DateTime.Now;
+            serverGuardian.Start();
 
             gameManagerService.ValidationTimerTick += OnValidationTimerTick;
             gameManagerService.ValidationComplete += OnValidationComplete;
@@ -101,6 +111,11 @@ namespace PASSWORD_LIS_Client.ViewModels
             Application.Current.Dispatcher.Invoke(() =>
             {
                 ValidationSeconds = secondsLeft;
+                lastServerMessageTime = DateTime.Now;
+                if (!serverGuardian.IsEnabled)
+                {
+                    serverGuardian.Start();
+                }
             });
         }
 
@@ -112,6 +127,10 @@ namespace PASSWORD_LIS_Client.ViewModels
                 LogCurrentState();
                 Application.Current.Dispatcher.Invoke(() =>
                 {
+                    if (serverGuardian != null)
+                    {
+                        serverGuardian.Stop();
+                    }
                     log.InfoFormat("Dispatcher invoked - starting cleanup");
                     Cleanup();
                     log.InfoFormat("Cleanup completed - calling GoBack");
@@ -129,6 +148,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
+                if (serverGuardian != null)
+                {
+                    serverGuardian.Stop();
+                }
                 windowService.ShowPopUp(Properties.Langs.Lang.matchCancelledText,
                     reason, PopUpIcon.Warning);
                 Cleanup();
@@ -159,41 +182,44 @@ namespace PASSWORD_LIS_Client.ViewModels
                 });
             }
 
-            try
+            await ExecuteAsync(async () =>
             {
-                log.InfoFormat("Submitting votes for game {0}...", gameCode);
-                await gameManagerService.SubmitValidationVotesAsync(gameCode, playerId, votes);
-                log.InfoFormat("SubmitValidationVotesAsync completed successfully");
-            }
-            catch (FaultException fe)
-            {
-                log.Error($"FaultException in SubmitVotesAsync: {fe.Message}", fe);
-                HandleConnectionError(fe, "Error al enviar los votos");
-                CanSubmit = true;
-            }
-            catch (CommunicationException ce)
-            {
-                if (isMatchEnding)
+                try
                 {
-                    log.Info("CommunicationException was ignored because the game has ended (MatchOver received).");
-                    return;
+                    log.InfoFormat("Submitting votes for game {0}...", gameCode);
+                    await gameManagerService.SubmitValidationVotesAsync(gameCode, playerId, votes);
+                    log.InfoFormat("SubmitValidationVotesAsync completed successfully");
                 }
+                catch (FaultException fe)
+                {
+                    log.Error($"FaultException in SubmitVotesAsync: {fe.Message}", fe);
+                    HandleConnectionError(fe, "Error al enviar los votos");
+                    CanSubmit = true;
+                }
+                catch (CommunicationException ce)
+                {
+                    if (isMatchEnding)
+                    {
+                        log.Info("CommunicationException was ignored because the game has ended (MatchOver received).");
+                        return;
+                    }
 
-                log.Error($"CommunicationException in SubmitVotesAsync: {ce.Message}", ce);
-                HandleConnectionError(ce, "Error de comunicación al enviar los votos");
-                CanSubmit = true;
-            }
-            catch (Exception ex)
-            {
-                if (isMatchEnding)
-                {
-                    log.Info("Generic Exception was ignored because the game has ended.");
-                    return;
+                    log.Error($"CommunicationException in SubmitVotesAsync: {ce.Message}", ce);
+                    HandleConnectionError(ce, "Error de comunicación al enviar los votos");
+                    CanSubmit = true;
                 }
-                log.Error($"Unexpected error in SubmitVotesAsync: {ex.Message}", ex);
-                HandleConnectionError(ex, "Error al enviar los votos");
-                CanSubmit = true;
-            }
+                catch (Exception ex)
+                {
+                    if (isMatchEnding)
+                    {
+                        log.Info("Generic Exception was ignored because the game has ended.");
+                        return;
+                    }
+                    log.Error($"Unexpected error in SubmitVotesAsync: {ex.Message}", ex);
+                    HandleConnectionError(ex, "Error al enviar los votos");
+                    CanSubmit = true;
+                }
+            });
         }
         private void LogCurrentState()
         {
@@ -217,6 +243,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             try
             {
+                if (serverGuardian != null)
+                {
+                    serverGuardian.Stop();
+                }
                 log.Info("Starting cleanup - unsubscribing from events");
                 gameManagerService.ValidationTimerTick -= OnValidationTimerTick;
                 gameManagerService.ValidationComplete -= OnValidationComplete;
@@ -246,14 +276,29 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
                 isMatchEnding = true;
 
+                if (serverGuardian != null)
+                {
+                    serverGuardian.Stop();
+                }
+
                 windowService.ShowPopUp(
                     Properties.Langs.Lang.connectionErrorTitleText,
                     "Conexión perdida durante la validación.",
                     PopUpIcon.Error);
 
                 Cleanup();
+                App.ResetServices();
                 windowService.GoToLobby();
             });
+        }
+
+        private void CheckServerPulse(object sender, EventArgs e)
+        {
+            if ((DateTime.Now - lastServerMessageTime).TotalSeconds > 6)
+            {
+                serverGuardian.Stop();
+                OnServerConnectionLost(this, EventArgs.Empty);
+            }
         }
 
         private void HandleConnectionError(Exception ex, string customMessage)
@@ -262,6 +307,11 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 string title = Properties.Langs.Lang.errorTitleText;
                 string message = $"{customMessage}\n{Properties.Langs.Lang.unexpectedErrorText}";
+
+                if (serverGuardian != null)
+                {
+                    serverGuardian.Stop();
+                }
 
                 if (ex is TimeoutException)
                 {

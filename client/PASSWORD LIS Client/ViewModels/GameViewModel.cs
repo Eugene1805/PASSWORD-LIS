@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace PASSWORD_LIS_Client.ViewModels
 {
@@ -22,6 +23,8 @@ namespace PASSWORD_LIS_Client.ViewModels
         private readonly string gameCode;
         private readonly PlayerDTO currentPlayer;
         private readonly ILog log = LogManager.GetLogger(typeof(GameViewModel));
+        private DispatcherTimer serverGuardian;
+        private DateTime lastServerMessageTime;
 
 
         private int currentWordIndex = 1;
@@ -203,6 +206,10 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             CurrentPlayerRole = currentPlayer.Role;
 
+            serverGuardian = new DispatcherTimer();
+            serverGuardian.Interval = TimeSpan.FromSeconds(10);
+            serverGuardian.Tick += CheckServerPulse;
+
             gameManagerService.MatchInitialized += OnMatchInitialized;
             gameManagerService.TimerTick += OnTimerTick;
             gameManagerService.MatchCancelled += OnMatchCancelled;
@@ -247,6 +254,9 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 try
                 {
+                    lastServerMessageTime= DateTime.Now;
+                    serverGuardian.Start();
+
                     currentWordIndex = 1;
                     currentRoundIndex = 1;
 
@@ -276,6 +286,11 @@ namespace PASSWORD_LIS_Client.ViewModels
             Application.Current.Dispatcher.Invoke(() =>
             {
                 TimerSeconds = secondsLeft;
+                lastServerMessageTime = DateTime.Now;
+                if (!serverGuardian.IsEnabled)
+                {
+                    serverGuardian.Start();
+                }
             });
         }
 
@@ -425,6 +440,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
+                if (serverGuardian != null)
+                {
+                    serverGuardian.Stop();
+                }
                 var validationViewModel = new RoundValidationViewModel(
                 turns, gameManagerService, windowService, gameCode, currentPlayer.Id, currentLanguage);
                 var validationPage = new RoundValidationPage { DataContext = validationViewModel };
@@ -469,6 +488,11 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
+                lastServerMessageTime = DateTime.Now;
+                if (!serverGuardian.IsEnabled)
+                {
+                    serverGuardian.Start();
+                }
                 currentRoundIndex = state.CurrentRound;
                 CurrentRoundText = string.Format(Properties.Langs.Lang.currentRoundText, currentRoundIndex);
 
@@ -501,6 +525,11 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
+                lastServerMessageTime = DateTime.Now;
+                if (!serverGuardian.IsEnabled)
+                {
+                    serverGuardian.Start();
+                }
                 isSuddenDeathActive = true;
                 IsSuddenDeathVisible = true;
                 CanPassTurn = false;
@@ -549,32 +578,39 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
 
             CanSendGuess = false;
-            try
+
+            await ExecuteAsync(async () =>
             {
-                await gameManagerService.SubmitGuessAsync(gameCode, currentPlayer.Id, currentGuessText);
-            }
-            catch (Exception ex)
-            {
-                if (isMatchEnding)
+                try
                 {
-                    return;
+                    await gameManagerService.SubmitGuessAsync(gameCode, currentPlayer.Id, currentGuessText);
                 }
-                HandleConnectionError(ex, Properties.Langs.Lang.errorSendingRiddleText);
-                CanSendGuess = true;
-            }
+                catch (Exception ex)
+                {
+                    if (isMatchEnding)
+                    {
+                        return;
+                    }
+                    HandleConnectionError(ex, Properties.Langs.Lang.errorSendingRiddleText);
+                    CanSendGuess = true;
+                }
+            });
         }
         private async Task PassTurnAsync()
         {
             CanPassTurn = false;
-            try
+            await ExecuteAsync(async () =>
             {
-                await gameManagerService.PassTurnAsync(gameCode, currentPlayer.Id);
-            }
-            catch (Exception ex)
-            {
-                HandleConnectionError(ex, Properties.Langs.Lang.errorPassingTurnText);
-                CanPassTurn = true;
-            }
+                try
+                {
+                    await gameManagerService.PassTurnAsync(gameCode, currentPlayer.Id);
+                }
+                catch (Exception ex)
+                {
+                    HandleConnectionError(ex, Properties.Langs.Lang.errorPassingTurnText);
+                    CanPassTurn = true;
+                }
+            });           
         }
         private void RequestHint()
         {
@@ -611,6 +647,11 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
                 isMatchEnding = true;
 
+                if (serverGuardian != null)
+                {
+                    serverGuardian.Stop();
+                }
+
                 windowService.ShowPopUp(
                     Properties.Langs.Lang.connectionErrorTitleText,
                     "La conexión con el servidor se perdió inesperadamente.",
@@ -623,6 +664,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             UnsubscribeFromEvents();
             SafeCleanup();
+            App.ResetServices();
             windowService.GoToLobby();
         }
 
@@ -660,6 +702,15 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
         }
 
+        private void CheckServerPulse(object sender, EventArgs e)
+        {
+            if ((DateTime.Now - lastServerMessageTime).TotalSeconds > 6)
+            {
+                serverGuardian.Stop();
+                OnServerConnectionLost(this, EventArgs.Empty);
+            }
+        }
+
         private async void ShowSnackbar(string message)
         {
             SnackbarMessage = message;
@@ -670,6 +721,10 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void UnsubscribeFromEvents()
         {
+            if (serverGuardian != null)
+            {
+                serverGuardian.Stop();
+            }
             gameManagerService.MatchInitialized -= OnMatchInitialized;
             gameManagerService.TimerTick -= OnTimerTick;
             gameManagerService.MatchCancelled -= OnMatchCancelled;
@@ -692,7 +747,10 @@ namespace PASSWORD_LIS_Client.ViewModels
                     return;
                 }
                 isMatchEnding = true;
-
+                if (serverGuardian != null)
+                {
+                    serverGuardian.Stop();
+                }
                 string title = Properties.Langs.Lang.errorTitleText;
                 string message = $"{customMessage}\n{Properties.Langs.Lang.unexpectedErrorText}";
 
