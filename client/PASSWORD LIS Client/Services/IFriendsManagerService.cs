@@ -32,13 +32,12 @@ namespace PASSWORD_LIS_Client.Services
         private readonly DuplexChannelFactory<IFriendsManager> factory;
         private IFriendsManager proxy;
         private static readonly ILog log = LogManager.GetLogger(typeof(WcfFriendsManagerService));
-        //        private static readonly ILog log = LogManager.GetLogger(typeof(WcfGameManagerService));
 
 
         public WcfFriendsManagerService()
         {
             var context = new InstanceContext(this);
-            factory = new DuplexChannelFactory<IFriendsManager>(context, "*"); //"NetTcpBinding_IFriendsManager"
+            factory = new DuplexChannelFactory<IFriendsManager>(context, "*");
             proxy = GetProxy();
         }
         private IFriendsManager GetProxy()
@@ -58,7 +57,8 @@ namespace PASSWORD_LIS_Client.Services
                 }
                 catch (Exception ex)
                 {
-                    log.Warn($"Error al abortar canal antiguo: {ex.Message}");
+                    log.WarnFormat("Error aborting previus channel: {0}", ex.Message);
+                    throw;
                 }
                 proxy = factory.CreateChannel();
             }
@@ -99,8 +99,7 @@ namespace PASSWORD_LIS_Client.Services
         {
             try
             {
-                var channel = proxy as ICommunicationObject;
-                if (channel != null && channel.State == CommunicationState.Opened)
+                if (proxy is ICommunicationObject channel && channel.State == CommunicationState.Opened)
                 {
                     return proxy.UnsubscribeFromFriendUpdatesAsync(userAccountId);
                 }

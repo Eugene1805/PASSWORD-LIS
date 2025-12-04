@@ -20,7 +20,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             get => volume;
             set
             {
-                // Use a tolerance for floating point comparison to avoid S1244
                 const double Tolerance = 0.0001;
                 if (Math.Abs(volume - value) > Tolerance)
                 {

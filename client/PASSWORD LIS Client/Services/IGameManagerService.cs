@@ -2,9 +2,7 @@
 using PASSWORD_LIS_Client.GameManagerServiceReference;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.ServiceModel;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -75,7 +73,8 @@ namespace PASSWORD_LIS_Client.Services
                 }
                 catch (Exception ex)
                 {
-                    log.Warn($"Error al abortar canal antiguo: {ex.Message}");
+                    log.WarnFormat("Error aborting previues channle: {0}", ex.Message);
+                    throw;
                 }
 
                 proxy = factory.CreateChannel();
@@ -88,8 +87,7 @@ namespace PASSWORD_LIS_Client.Services
         {
             try
             {
-                var channel = proxy as ICommunicationObject;
-                if (channel != null)
+                if (proxy is ICommunicationObject channel)
                 {
                     if (channel.State == CommunicationState.Opened)
                     {
@@ -103,7 +101,7 @@ namespace PASSWORD_LIS_Client.Services
             }
             catch (Exception ex)
             {
-                log.Error($"Error during Cleanup: {ex.Message}");
+                log.ErrorFormat("Error during Cleanup: {0}", ex.Message);
                 (proxy as ICommunicationObject)?.Abort();
             }
         }
@@ -167,7 +165,6 @@ namespace PASSWORD_LIS_Client.Services
 
         public Task SubmitValidationVotesAsync(string gameCode, int senderPlayerId, List<ValidationVoteDTO> votes)
         {
-            log.Info($"SubmitValidationVotesAsync called - GameCode: {gameCode}, PlayerId: {senderPlayerId}, VotesCount: {votes?.Count}");
             return GetProxy().SubmitValidationVotesAsync(gameCode, senderPlayerId, votes);
         }
 
@@ -178,7 +175,6 @@ namespace PASSWORD_LIS_Client.Services
 
         public void OnValidationComplete(ValidationResultDTO result)
         {
-            log.Info($"OnValidationComplete received - RedScore: {result.NewRedTeamScore}, BlueScore: {result.NewBlueTeamScore}");
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 try

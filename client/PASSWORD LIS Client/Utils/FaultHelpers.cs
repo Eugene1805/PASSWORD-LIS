@@ -48,23 +48,34 @@ namespace PASSWORD_LIS_Client.Utils
 
         public static string GetErrorCodeFromFault(FaultException ex)
         {
-            if (ex == null) return null;
+            if (ex == null)
+            {
+                return null;
+            } 
             
-                var mf = ex.CreateMessageFault();
-                if (!mf.HasDetail) return null;
-                var reader = mf.GetReaderAtDetailContents();
-                var xml = reader.ReadOuterXml();
-                if (string.IsNullOrWhiteSpace(xml)) return null;
+            var mf = ex.CreateMessageFault();
+            if (!mf.HasDetail)
+            {
+                return null;
+            } 
+            var reader = mf.GetReaderAtDetailContents();
+            var xml = reader.ReadOuterXml();
+            if (string.IsNullOrWhiteSpace(xml))
+            { 
+                return null; 
+            }
 
-                var x = XElement.Parse(xml);
-                var names = new[] { "ErrorCode", "errorCode", "Code", "code" };
-                foreach (var n in names)
+            var x = XElement.Parse(xml);
+            var names = new[] { "ErrorCode", "errorCode", "Code", "code" };
+            foreach (var n in names)
+            {
+                var node = x.Descendants().FirstOrDefault(d => 
+                string.Equals(d.Name.LocalName, n, StringComparison.OrdinalIgnoreCase));
+                if (node != null)
                 {
-                    var node = x.Descendants().FirstOrDefault(d => 
-                    string.Equals(d.Name.LocalName, n, StringComparison.OrdinalIgnoreCase));
-                    if (node != null) return node.Value;
+                    return node.Value;
                 }
-            
+            }
             return null;
         }
     

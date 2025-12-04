@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
+using System.Diagnostics;
 
 namespace PASSWORD_LIS_Client.ViewModels
 {
@@ -51,29 +52,27 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand SubmitVotesCommand { get; }
 
         private readonly IGameManagerService gameManagerService;
-        private readonly IWindowService windowService;
         private readonly string gameCode;
         private readonly int playerId;
-        private readonly string language;
         private readonly ILog log = LogManager.GetLogger(typeof(RoundValidationViewModel));
         private bool isMatchEnding = false;
-        private  DispatcherTimer serverGuardian;
-        private DateTime lastServerMessageTime;
+        private readonly DispatcherTimer serverGuardian;
+        private readonly Stopwatch serverPulseWatch = new Stopwatch();
 
 
         public RoundValidationViewModel(List<TurnHistoryDTO> turns, IGameManagerService gameManagerService, IWindowService windowService,
             string gameCode, int playerId, string language) : base(windowService)
         {
             this.gameManagerService = gameManagerService;
-            this.windowService = windowService;
             this.gameCode = gameCode;
             this.playerId = playerId;
-            this.language = language;
 
-            serverGuardian = new DispatcherTimer();
-            serverGuardian.Interval = TimeSpan.FromSeconds(2);
+            serverGuardian = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(2)
+            };
             serverGuardian.Tick += CheckServerPulse;
-            lastServerMessageTime = DateTime.Now;
+            serverPulseWatch.Restart();
             serverGuardian.Start();
 
             gameManagerService.ValidationTimerTick += OnValidationTimerTick;
@@ -111,7 +110,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             Application.Current.Dispatcher.Invoke(() =>
             {
                 ValidationSeconds = secondsLeft;
-                lastServerMessageTime = DateTime.Now;
+                serverPulseWatch.Restart();
                 if (!serverGuardian.IsEnabled)
                 {
                     serverGuardian.Start();
@@ -127,15 +126,11 @@ namespace PASSWORD_LIS_Client.ViewModels
                 LogCurrentState();
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    if (serverGuardian != null)
-                    {
-                        serverGuardian.Stop();
-                    }
+                    serverGuardian?.Stop();
                     log.InfoFormat("Dispatcher invoked - starting cleanup");
                     Cleanup();
                     log.InfoFormat("Cleanup completed - calling GoBack");
                     windowService.GoBack();
-                    log.InfoFormat("Successfully navigated back from validation");
                 });
             }
             catch (Exception ex)
@@ -148,10 +143,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                if (serverGuardian != null)
-                {
-                    serverGuardian.Stop();
-                }
+                serverGuardian?.Stop();
                 windowService.ShowPopUp(Properties.Langs.Lang.matchCancelledText,
                     reason, PopUpIcon.Warning);
                 Cleanup();
@@ -226,7 +218,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             try
             {
                 log.InfoFormat("Current state - CanSubmit: {0}, TurnsCount: {1}", CanSubmit, TurnsToValidate.Count);
-                log.InfoFormat("Application.Current null: {0}", Application.Current == null);
                 log.InfoFormat("Application.Current.MainWindow null: {0}", Application.Current?.MainWindow == null);
 
                 if (Application.Current?.MainWindow != null && Application.Current.MainWindow.Content is Frame frame)
@@ -243,10 +234,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             try
             {
-                if (serverGuardian != null)
-                {
-                    serverGuardian.Stop();
-                }
+                serverGuardian?.Stop();
                 log.Info("Starting cleanup - unsubscribing from events");
                 gameManagerService.ValidationTimerTick -= OnValidationTimerTick;
                 gameManagerService.ValidationComplete -= OnValidationComplete;
@@ -276,10 +264,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
                 isMatchEnding = true;
 
-                if (serverGuardian != null)
-                {
-                    serverGuardian.Stop();
-                }
+                serverGuardian?.Stop();
 
                 windowService.ShowPopUp(
                     Properties.Langs.Lang.connectionErrorTitleText,
@@ -294,7 +279,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void CheckServerPulse(object sender, EventArgs e)
         {
-            if ((DateTime.Now - lastServerMessageTime).TotalSeconds > 6)
+            if (serverPulseWatch.IsRunning && serverPulseWatch.Elapsed.TotalSeconds > 6)
             {
                 serverGuardian.Stop();
                 OnServerConnectionLost(this, EventArgs.Empty);
@@ -308,10 +293,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 string title = Properties.Langs.Lang.errorTitleText;
                 string message = $"{customMessage}\n{Properties.Langs.Lang.unexpectedErrorText}";
 
-                if (serverGuardian != null)
-                {
-                    serverGuardian.Stop();
-                }
+                serverGuardian?.Stop();
 
                 if (ex is TimeoutException)
                 {

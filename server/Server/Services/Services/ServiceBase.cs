@@ -17,6 +17,7 @@ namespace Services.Services
     public abstract class ServiceBase
     {
         protected readonly ILog logger;
+        private const string DatabaseError = "DATABASE_ERROR";
         protected ServiceBase(ILog log) 
         {
             this.logger = log;
@@ -38,66 +39,10 @@ namespace Services.Services
                 logger.WarnFormat("{0} - Service produced a generic FaultException.", faultEx);
                 throw;
             }
-            catch (ArgumentNullException ex)
-            {
-                logger.Error($"{context} - Null argument.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.NullArgument,
-                    "NULL_ARGUMENT", "A null argument was received occurred.");
-            }
-            catch (InvalidOperationException ex)
-            {
-                logger.Error($"{context } - Invalid operation", ex);
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.InvalidOperation,
-                    "INVALID_OPERATION",ex.Message);
-            }
-            catch (DuplicateAccountException ex) 
-            {
-                logger.Warn($"{context} - Duplicate.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UserAlreadyExists,
-                    "USER_ALREADY_EXISTS", ex.Message);
-            }
-            catch (SecurityException ex)
-            {
-                logger.Error($"{context} - Security error.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.SecurityError, 
-                    "SECURITY_ERROR", "Could not load Enviroment variables");
-            }
-            catch (DbUpdateException ex)
-            {
-                logger.Error($"{context} - Database update error.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError,
-                    "DATABASE_ERROR", "An error occurred while processing the request.");
-            }
-            catch (ConfigurationErrorsException ex)
-            {
-                logger.Error($"{context} - Email config error.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.EmailConfigurationError,
-                    "EMAIL_CONFIGURATION_ERROR", "Email service configuration error");
-            }
-            catch (FormatException ex)
-            {
-                logger.Error($"{context} - Email config format.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.FormatError,
-                    "FORMAT_ERROR", "Invalid email service configuration");
-            }
-            catch (SmtpException ex)
-            {
-                logger.Error($"{context} - SMTP error.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.EmailSendingError,
-                    "EMAIL_SENDING_ERROR", "Failed to send email");
-            }
-            catch(EntityException ex)
-            {
-                logger.Error($"{context} - Entity Framework error.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError,
-                    "DATABASE_ERROR", "An error occurred while processing the request.");
-            }
             catch (Exception ex)
             {
-                logger.Fatal($"{context} - Unexpected error.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError,
-                    "UNEXPECTED_ERROR", "An unexpected server error occurred.");
+                HandleAndThrow(ex, context, useUpdateMessageForDbUpdate: true);
+                throw; 
             }
         }
 
@@ -122,66 +67,61 @@ namespace Services.Services
                 logger.WarnFormat("{0} - Service produced a generic FaultException.", faultEx);
                 throw;
             }
-            catch (ArgumentNullException ex)
-            {
-                logger.Error($"{context} - Null argument.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.NullArgument,
-                    "NULL_ARGUMENT", "A null argument was received occurred.");
-            }
-            catch (InvalidOperationException ex)
-            {
-                logger.Error($"{context} - Invalid operation", ex);
-                throw FaultExceptionFactory.Create(
-                    ServiceErrorCode.InvalidOperation,
-                    "INVALID_OPERATION", ex.Message);
-            }
-            catch (DuplicateAccountException ex)
-            {
-                logger.Warn($"{context} - Duplicate.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UserAlreadyExists,
-                    "USER_ALREADY_EXISTS", ex.Message);
-            }
-            catch (SecurityException ex)
-            {
-                logger.Error($"{context} - Security error.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.SecurityError,
-                    "SECURITY_ERROR", "Could not load Enviroment variables");
-            }
-            catch (DbUpdateException ex)
-            {
-                logger.Error($"{context} - Database update error.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError,
-                    "DATABASE_ERROR", "An error occurred while processing the request.");
-            }
-            catch (ConfigurationErrorsException ex)
-            {
-                logger.Error($"{context} - Email config error.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.EmailConfigurationError,
-                    "EMAIL_CONFIGURATION_ERROR", "Email service configuration error");
-            }
-            catch (FormatException ex)
-            {
-                logger.Error($"{context} - Email config format.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.FormatError,
-                    "FORMAT_ERROR", "Invalid email service configuration");
-            }
-            catch (SmtpException ex)
-            {
-                logger.Error($"{context} - SMTP error.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.EmailSendingError,
-                    "EMAIL_SENDING_ERROR", "Failed to send email");
-            }
-            catch (EntityException ex)
-            {
-                logger.Error($"{context} - Entity Framework error.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError,
-                    "DATABASE_ERROR", "An error occurred while processing the request.");
-            }
             catch (Exception ex)
             {
-                logger.Fatal($"{context} - Unexpected error.", ex);
-                throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError,
-                    "UNEXPECTED_ERROR", "An unexpected server error occurred.");
+                HandleAndThrow(ex, context, useUpdateMessageForDbUpdate: false);
+                throw; 
+            }
+        }
+
+        private void HandleAndThrow(Exception ex, string context, bool useUpdateMessageForDbUpdate)
+        {
+            switch (ex)
+            {
+                case ArgumentNullException _:
+                    logger.Error($"{context} - Null argument.", ex);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.NullArgument,
+                        "NULL_ARGUMENT", "A null argument was received occurred.");
+                case InvalidOperationException _:
+                    logger.Error($"{context} - Invalid operation", ex);
+                    throw FaultExceptionFactory.Create(
+                        ServiceErrorCode.InvalidOperation,
+                        "INVALID_OPERATION", ex.Message);
+                case DuplicateAccountException dupEx:
+                    logger.Warn($"{context} - Duplicate.", dupEx);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.UserAlreadyExists,
+                        "USER_ALREADY_EXISTS", dupEx.Message);
+                case SecurityException _:
+                    logger.Error($"{context} - Security error.", ex);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.SecurityError, 
+                        "SECURITY_ERROR", "Could not load Enviroment variables");
+                case DbUpdateException _:
+                    logger.Error($"{context} - Database update error.", ex);
+                    var dbUpdateMsg = useUpdateMessageForDbUpdate
+                        ? "An error occurred while processing the update."
+                        : "An error occurred while processing the request.";
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError,
+                        DatabaseError, dbUpdateMsg);
+                case ConfigurationErrorsException _:
+                    logger.Error($"{context} - Email config error.", ex);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.EmailConfigurationError,
+                        "EMAIL_CONFIGURATION_ERROR", "Email service configuration error");
+                case FormatException _:
+                    logger.Error($"{context} - Email config format.", ex);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.FormatError,
+                        "FORMAT_ERROR", "Invalid email service configuration");
+                case SmtpException _:
+                    logger.Error($"{context} - SMTP error.", ex);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.EmailSendingError,
+                        "EMAIL_SENDING_ERROR", "Failed to send email");
+                case EntityException _:
+                    logger.Error($"{context} - Entity Framework error.", ex);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError,
+                        DatabaseError, "An error occurred while processing the request.");
+                default:
+                    logger.Fatal($"{context} - Unexpected error.", ex);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError,
+                        "UNEXPECTED_ERROR", "An unexpected server error occurred.");
             }
         }
     }

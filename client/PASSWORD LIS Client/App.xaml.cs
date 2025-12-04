@@ -12,9 +12,7 @@ using System.Windows;
 
 namespace PASSWORD_LIS_Client
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
+    
     public partial class App : Application
     {
         public static BackgroundMusicService BackgroundMusicService { get; private set; }
@@ -35,27 +33,20 @@ namespace PASSWORD_LIS_Client
         {
             log.Info("Resetting all WCF services due to connection loss...");
 
-            void SafeClose(object service)
+            foreach (var service in GetAllServiceInstances())
             {
-                if (service is ICommunicationObject commObj)
-                {
-                    try { commObj.Abort(); } catch { }
-                }
+                CloseServiceSafely(service);
             }
 
-            SafeClose(LoginManagerService);
-            SafeClose(AccountManagerService);
-            SafeClose(FriendsManagerService);
-            SafeClose(PasswordResetManagerService);
-            SafeClose(ProfileManagerService);
-            SafeClose(TopPlayersManagerService);
-            SafeClose(VerificationCodeManagerService);
-            SafeClose(WaitRoomManagerService);
-            SafeClose(ReportManagerService);
-            SafeClose(GameManagerService);
+            InitializeAllServices();
 
+            log.Info("Services successfully reset.");
+        }
+
+        private static void InitializeAllServices()
+        {
             LoginManagerService = new WcfLoginManagerService();
-            WindowService = new WindowService(); 
+            WindowService = new WindowService();
             BackgroundMusicService = new BackgroundMusicService();
             AccountManagerService = new WcfAccountManagerService();
             FriendsManagerService = new WcfFriendsManagerService();
@@ -66,9 +57,40 @@ namespace PASSWORD_LIS_Client
             WaitRoomManagerService = new WcfWaitingRoomManagerService();
             ReportManagerService = new WcfReportManagerService();
             GameManagerService = new WcfGameManagerService();
-
-            log.Info("Services successfully reset.");
         }
+
+        private static object[] GetAllServiceInstances()
+        {
+            return new object[]
+            {
+                LoginManagerService,
+                AccountManagerService,
+                FriendsManagerService,
+                PasswordResetManagerService,
+                ProfileManagerService,
+                TopPlayersManagerService,
+                VerificationCodeManagerService,
+                WaitRoomManagerService,
+                ReportManagerService,
+                GameManagerService
+            };
+        }
+
+        private static void CloseServiceSafely(object service)
+        {
+            if (service is ICommunicationObject commObj)
+            {
+                try
+                {
+                    commObj.Close();
+                }
+                catch
+                {
+                    commObj.Abort();
+                }
+            }
+        }
+
         protected override void OnStartup(StartupEventArgs e)
         {
             XmlConfigurator.Configure();
@@ -83,27 +105,12 @@ namespace PASSWORD_LIS_Client
                 Thread.CurrentThread.CurrentUICulture = culture;
             }
 
-            // Dependencies for LoginViewModel
-            LoginManagerService = new WcfLoginManagerService();
-            WindowService = new WindowService();
-            // Other dependencies
-            BackgroundMusicService = new BackgroundMusicService();
-            AccountManagerService = new WcfAccountManagerService();
-            FriendsManagerService = new WcfFriendsManagerService();
-            PasswordResetManagerService = new WcfPasswordResetManagerService();
-            ProfileManagerService = new WcfProfileManagerService();
-            TopPlayersManagerService = new WcfTopPlayersManagerService();
-            VerificationCodeManagerService = new WcfVerificationCodeManagerService();
-            WaitRoomManagerService = new WcfWaitingRoomManagerService();
-            ReportManagerService = new WcfReportManagerService();
-            GameManagerService = new WcfGameManagerService();
-
+            InitializeAllServices();
 
             var loginViewModel = new LoginViewModel(LoginManagerService, WindowService);
             var loginWindow = new LoginWindow { DataContext = loginViewModel };
             loginWindow.Show();
 
-            
             log.Info("App started");
         }
 

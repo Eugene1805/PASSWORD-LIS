@@ -135,64 +135,123 @@ namespace Services.Services
         {
             await ExecuteAsync(async () =>
             {
-                if (votes == null)
+                if (!TryPrepareVoteSession(gameCode, votes, out var session))
                 {
-                    log.WarnFormat("Votes list is null for game '{0}'", gameCode);
-                    return;
-                }
-
-                if (!matches.TryGetValue(gameCode, out MatchSession session))
-                {
-                    log.WarnFormat("Match not found: {0}", gameCode);
                     return;
                 }
 
                 await ExecuteSafeAsync(session, async () =>
                 {
-                    if (session.Status != MatchStatus.Validating)
-                    {
-                        log.WarnFormat("Match {0} is not in validating state.", gameCode);
-                        return;
-                    }
-
-                    if (!session.ActivePlayers.TryGetValue(senderPlayerId, out var sender))
-                    {
-                        log.WarnFormat("Player {0} not found in match {1}", senderPlayerId, gameCode);
-                        return;
-                    }
-
-                    bool allVotesIn = false;
-
-                    lock (session.ReceivedVotes)
-                    {
-                        if (session.PlayersWhoVoted.Contains(senderPlayerId))
-                        {
-                            return;
-                        }
-
-                        session.PlayersWhoVoted.Add(senderPlayerId);
-                        session.ReceivedVotes.Add((sender.Player.Team, votes));
-
-                        if (session.PlayersWhoVoted.Count >= session.ActivePlayers.Count)
-                        {
-                            allVotesIn = true;
-                        }
-                    }
-
-                    if (allVotesIn)
-                    {
-                        log.InfoFormat("All votes received for game {0}. Processing...", gameCode);
-                        session.StopTimers();
-                        await ProcessVotesAsync(session);
-                    }
-                    else
-                    {
-                        log.InfoFormat("Vote received for game '{0}'. Waiting for others.", gameCode);
-                    }
-
-                }, "Error procesando la votación de la ronda."); // Mensaje para el cliente
+                    await ProcessVoteInternalAsync(session, senderPlayerId, votes, gameCode);
+                }, "Error while processing the round");
 
             }, context: "GameManager: SubmitValidationVotesAsync");
+        }
+
+        private bool TryPrepareVoteSession(string gameCode, List<ValidationVoteDTO> votes, out MatchSession session)
+        {
+            session = null;
+            if (!AreVotesProvided(votes, gameCode))
+            {
+                return false;
+            }
+            if (!TryGetVoteSession(gameCode, out session))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        private async Task ProcessVoteInternalAsync(MatchSession session, int senderPlayerId, List<ValidationVoteDTO> votes, string gameCode)
+        {
+            if (!IsSessionInValidating(session, gameCode))
+            {
+                return;
+            }
+
+            if (!TryGetActiveSender(session, senderPlayerId, gameCode, out var sender))
+            {
+                return;
+            }
+
+            var allVotesIn = TryRegisterVote(session, senderPlayerId, sender.Player.Team, votes);
+            if (allVotesIn == null)
+            {
+                return; // already voted
+            }
+
+            if (allVotesIn.Value)
+            {
+                log.InfoFormat("All votes received for game {0}. Processing...", gameCode);
+                session.StopTimers();
+                await ProcessVotesAsync(session);
+            }
+            else
+            {
+                log.InfoFormat("Vote received for game '{0}'. Waiting for others.", gameCode);
+            }
+        }
+
+        private static bool AreVotesProvided(List<ValidationVoteDTO> votes, string gameCode)
+        {
+            if (votes == null)
+            {
+                log.WarnFormat("Votes list is null for game '{0}'", gameCode);
+                return false;
+            }
+            return true;
+        }
+
+        private bool TryGetVoteSession(string gameCode, out MatchSession session)
+        {
+            if (!matches.TryGetValue(gameCode, out session))
+            {
+                log.WarnFormat("Match not found: {0}", gameCode);
+                return false;
+            }
+            return true;
+        }
+
+        private static bool IsSessionInValidating(MatchSession session, string gameCode)
+        {
+            if (session.Status != MatchStatus.Validating)
+            {
+                log.WarnFormat("Match {0} is not in validating state.", gameCode);
+                return false;
+            }
+            return true;
+        }
+
+        private static bool TryGetActiveSender(MatchSession session, int senderPlayerId, string gameCode,
+            out (IGameManagerCallback Callback, PlayerDTO Player) sender)
+        {
+            if (!session.ActivePlayers.TryGetValue(senderPlayerId, out sender))
+            {
+                log.WarnFormat("Player {0} not found in match {1}", senderPlayerId, gameCode);
+                return false;
+            }
+            return true;
+        }
+
+        private  static bool? TryRegisterVote(MatchSession session, int senderPlayerId, MatchTeam team, List<ValidationVoteDTO> votes)
+        {
+            bool? allVotesIn = false;
+            lock (session.ReceivedVotes)
+            {
+                if (session.PlayersWhoVoted.Contains(senderPlayerId))
+                {
+                    return null;
+                }
+
+                session.PlayersWhoVoted.Add(senderPlayerId);
+                session.ReceivedVotes.Add((team, votes));
+
+                if (session.PlayersWhoVoted.Count >= session.ActivePlayers.Count)
+                {
+                    allVotesIn = true;
+                }
+            }
+            return allVotesIn;
         }
 
         public async Task SubscribeToMatchAsync(string gameCode, int playerId)
@@ -476,7 +535,7 @@ namespace Services.Services
                 .Where(p => p.Player.Id > 0).Select(p => p.Player.Id).ToList();
             await ExecuteSafeAsync(session, async () =>
             {
-                log.Info($"Saving match result for game {session.GameCode}...");
+                log.InfoFormat("Saving match result for game {0}...", session.GameCode);
 
                 await matchRepository.SaveMatchResultAsync(session.RedTeamScore, session.BlueTeamScore,
                     registeredRedPlayerIds, registeredBluePlayerIds);

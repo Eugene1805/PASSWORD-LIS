@@ -43,13 +43,13 @@ namespace Test.ViewModelsTests
             var viewModel = new TopPlayersViewModel(mockService.Object, mockWindow.Object);
 
             // Assert
-            await WaitUntilLoadingCompletes(() => viewModel.IsLoading == false);
+            await WaitUntilLoadingCompletes(() => !viewModel.IsLoading);
             Assert.Equal(2, viewModel.TopTeams.Count);
             Assert.All(viewModel.TopTeams, team => Assert.IsType<TeamDTO>(team));
         }
 
         [Fact]
-        public async Task Constructor_WhenServiceThrowsFaultException_ShouldShowNetworkErrorPopup()
+        public async Task Constructor_WhenServiceThrowsFaultException_ShouldShowStatisticsErrorPopup()
         {
             // Arrange
             var mockService = new Mock<ITopPlayersManagerService>();
@@ -57,6 +57,7 @@ namespace Test.ViewModelsTests
             
             var errorDetail = new ServiceErrorDetailDTO
             {
+                Code = ServiceErrorCode.STATISTICS_ERROR,
                 ErrorCode = "STATISTICS_ERROR"
             };
             mockService
@@ -67,10 +68,10 @@ namespace Test.ViewModelsTests
             var viewModel = new TopPlayersViewModel(mockService.Object, mockWindow.Object);
 
             // Assert
-            await WaitUntilLoadingCompletes(() => viewModel.IsLoading == false);
+            await WaitUntilLoadingCompletes(() => !viewModel.IsLoading);
             mockWindow.Verify(w => w.ShowPopUp(
-                It.Is<string>(title => title == PASSWORD_LIS_Client.Properties.Langs.Lang.networkErrorTitleText),
-                It.Is<string>(message => message == PASSWORD_LIS_Client.Properties.Langs.Lang.serverCommunicationErrorText),
+                It.Is<string>(title => title == PASSWORD_LIS_Client.Properties.Langs.Lang.errorTitleText),
+                It.Is<string>(message => message == PASSWORD_LIS_Client.Properties.Langs.Lang.statisticsErrorText),
                 PopUpIcon.Error), Times.Once);
         }
 
@@ -88,7 +89,7 @@ namespace Test.ViewModelsTests
             var viewModel = new TopPlayersViewModel(mockService.Object, mockWindow.Object);
 
             // Assert
-            await WaitUntilLoadingCompletes(() => viewModel.IsLoading == false);
+            await WaitUntilLoadingCompletes(() => !viewModel.IsLoading);
             mockWindow.Verify(w => w.ShowPopUp(
                 It.Is<string>(title => title == PASSWORD_LIS_Client.Properties.Langs.Lang.connectionErrorTitleText),
                 It.Is<string>(message => message == PASSWORD_LIS_Client.Properties.Langs.Lang.serverConnectionInternetErrorText),
@@ -109,7 +110,7 @@ namespace Test.ViewModelsTests
             var viewModel = new TopPlayersViewModel(mockService.Object, mockWindow.Object);
 
             // Assert
-            await WaitUntilLoadingCompletes(() => viewModel.IsLoading == false);
+            await WaitUntilLoadingCompletes(() => !viewModel.IsLoading);
             mockWindow.Verify(w => w.ShowPopUp(
                 It.Is<string>(title => title == PASSWORD_LIS_Client.Properties.Langs.Lang.networkErrorTitleText),
                 It.Is<string>(message => message == PASSWORD_LIS_Client.Properties.Langs.Lang.serverCommunicationErrorText),

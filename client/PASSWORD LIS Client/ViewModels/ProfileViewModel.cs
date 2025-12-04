@@ -12,6 +12,11 @@ namespace PASSWORD_LIS_Client.ViewModels
 {
     public class ProfileViewModel : BaseViewModel
     {
+        private const string FacebookKey = "Facebook";
+        private const string InstagramKey = "Instagram";
+        private const string XKey = "X";
+        private const string TikTokKey = "TikTok";
+
         private string nickname;
         public string Nickname
         {
@@ -154,10 +159,14 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             if (currentUser.SocialAccounts != null)
             {
-                Facebook = currentUser.SocialAccounts.ContainsKey("Facebook") ? currentUser.SocialAccounts["Facebook"] : "";
-                Instagram = currentUser.SocialAccounts.ContainsKey("Instagram") ? currentUser.SocialAccounts["Instagram"] : "";
-                XSocialMedia = currentUser.SocialAccounts.ContainsKey("X") ? currentUser.SocialAccounts["X"] : "";
-                Tiktok = currentUser.SocialAccounts.ContainsKey("TikTok") ? currentUser.SocialAccounts["TikTok"] : "";
+                Facebook = currentUser.SocialAccounts.ContainsKey(FacebookKey) ? 
+                    currentUser.SocialAccounts[FacebookKey] : "";
+                Instagram = currentUser.SocialAccounts.ContainsKey(InstagramKey) ?
+                    currentUser.SocialAccounts[InstagramKey] : "";
+                XSocialMedia = currentUser.SocialAccounts.ContainsKey(XKey) ?
+                    currentUser.SocialAccounts[XKey] : "";
+                Tiktok = currentUser.SocialAccounts.ContainsKey(TikTokKey) ? 
+                    currentUser.SocialAccounts[TikTokKey] : "";
             }
 
             SaveOriginalState();
@@ -231,10 +240,10 @@ namespace PASSWORD_LIS_Client.ViewModels
                 PhotoId = this.PhotoId,
                 SocialAccounts = new Dictionary<string, string>
                 {
-                    { "Facebook", this.Facebook },
-                    { "Instagram", this.Instagram },
-                    { "X", this.XSocialMedia },
-                    { "TikTok", this.Tiktok }
+                    { FacebookKey, this.Facebook },
+                    { InstagramKey, this.Instagram },
+                    { XKey, this.XSocialMedia },
+                    { TikTokKey, this.Tiktok }
                 }
             };
         }
@@ -256,10 +265,14 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 return true;
             }
-            string oldFacebook = originalState.SocialAccounts.ContainsKey("Facebook") ? originalState.SocialAccounts["Facebook"] : "";
-            string oldInstagram = originalState.SocialAccounts.ContainsKey("Instagram") ? originalState.SocialAccounts["Instagram"] : "";
-            string oldX = originalState.SocialAccounts.ContainsKey("X") ? originalState.SocialAccounts["X"] : "";
-            string oldTiktok = originalState.SocialAccounts.ContainsKey("TikTok") ? originalState.SocialAccounts["TikTok"] : "";
+            string oldFacebook = originalState.SocialAccounts.ContainsKey(FacebookKey) ?
+                originalState.SocialAccounts[FacebookKey] : "";
+            string oldInstagram = originalState.SocialAccounts.ContainsKey(InstagramKey) ?
+                originalState.SocialAccounts[InstagramKey] : "";
+            string oldX = originalState.SocialAccounts.ContainsKey(XKey) ?
+                originalState.SocialAccounts[XKey] : "";
+            string oldTiktok = originalState.SocialAccounts.ContainsKey(TikTokKey) ?
+                originalState.SocialAccounts[TikTokKey] : "";
 
             if ((Facebook ?? "") != oldFacebook)
             {
@@ -300,10 +313,6 @@ namespace PASSWORD_LIS_Client.ViewModels
                     IsEditMode = false;
                     windowService.GoToLobby(); 
                 }
-                else
-                {
-                    return;
-                }
             }
             else
             {
@@ -320,10 +329,10 @@ namespace PASSWORD_LIS_Client.ViewModels
             FirstName = originalState.FirstName;
             LastName = originalState.LastName;
             PhotoId = originalState.PhotoId;
-            Facebook = originalState.SocialAccounts["Facebook"];
-            Instagram = originalState.SocialAccounts["Instagram"];
-            XSocialMedia = originalState.SocialAccounts["X"];
-            Tiktok = originalState.SocialAccounts["TikTok"];
+            Facebook = originalState.SocialAccounts[FacebookKey];
+            Instagram = originalState.SocialAccounts[InstagramKey];
+            XSocialMedia = originalState.SocialAccounts[XKey];
+            Tiktok = originalState.SocialAccounts[TikTokKey];
         }
         private void ClearAllErrors()
         {
