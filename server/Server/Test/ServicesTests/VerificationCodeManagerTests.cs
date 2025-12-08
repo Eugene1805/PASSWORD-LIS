@@ -33,8 +33,8 @@ namespace Test.ServicesTests
             // Arrange
             var verificationDto = new EmailVerificationDTO { Email = "test@example.com", VerificationCode = "123456" };
 
-            mockCodeService.Setup(s => s.ValidateCode(verificationDto.Email, verificationDto.VerificationCode, CodeType.EmailVerification,true))
-                            .Returns(true);
+            mockCodeService.Setup(s => s.ValidateCode(verificationDto.Email, verificationDto.VerificationCode,
+                CodeType.EmailVerification,true)).Returns(true);
 
             mockAccountRepository.Setup(repo => repo.VerifyEmail(verificationDto.Email)).Returns(true);
 
@@ -43,7 +43,8 @@ namespace Test.ServicesTests
 
             // Assert
             Assert.True(result);
-            mockCodeService.Verify(s => s.ValidateCode(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CodeType>(),true), Times.Once);
+            mockCodeService.Verify(s => s.ValidateCode(It.IsAny<string>(), It.IsAny<string>(), 
+                It.IsAny<CodeType>(),true), Times.Once);
             mockAccountRepository.Verify(repo => repo.VerifyEmail(verificationDto.Email), Times.Once);
         }
 
@@ -51,10 +52,11 @@ namespace Test.ServicesTests
         public void VerifyEmail_WhenCodeIsInvalid_ShouldReturnFalseAndNotCallRepository()
         {
             // Arrange
-            var verificationDto = new EmailVerificationDTO { Email = "test@example.com", VerificationCode = "wrong-code" };
+            var verificationDto = new EmailVerificationDTO { Email = "test@example.com", 
+                VerificationCode = "wrong-code" };
 
-            mockCodeService.Setup(s => s.ValidateCode(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CodeType>(),true))
-                            .Returns(false);
+            mockCodeService.Setup(s => s.ValidateCode(It.IsAny<string>(), It.IsAny<string>(), 
+                It.IsAny<CodeType>(),true)).Returns(false);
 
             // Act
             var result = verificationCodeManager.VerifyEmail(verificationDto);
@@ -73,7 +75,8 @@ namespace Test.ServicesTests
 
             mockCodeService.Setup(s => s.CanRequestCode(email, CodeType.EmailVerification)).Returns(true);
             
-            mockCodeService.Setup(s => s.GenerateAndStoreCode(email, CodeType.EmailVerification)).Returns(generatedCode);
+            mockCodeService.Setup(s => s.GenerateAndStoreCode(email,
+                CodeType.EmailVerification)).Returns(generatedCode);
 
             // Act
             var result = verificationCodeManager.ResendVerificationCode(email);
@@ -98,7 +101,8 @@ namespace Test.ServicesTests
             // Assert
             Assert.False(result);
             mockCodeService.Verify(s => s.GenerateAndStoreCode(It.IsAny<string>(), It.IsAny<CodeType>()), Times.Never);
-            mockNotificationService.Verify(n => n.SendAccountVerificationEmailAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            mockNotificationService.Verify(n => n.SendAccountVerificationEmailAsync(It.IsAny<string>(),
+                It.IsAny<string>()), Times.Never);
         }
 
 
@@ -107,8 +111,8 @@ namespace Test.ServicesTests
         {
             // Arrange
             var dto = new EmailVerificationDTO { Email = "e@x.com", VerificationCode = "X" };
-            mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.VerificationCode, CodeType.EmailVerification, true))
-                            .Throws(new Exception("validation failure"));
+            mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.VerificationCode, CodeType.EmailVerification, 
+                true)).Throws(new Exception("validation failure"));
 
             // Act + Assert
             Assert.Throws<FaultException<ServiceErrorDetailDTO>>(() => verificationCodeManager.VerifyEmail(dto));
@@ -120,10 +124,9 @@ namespace Test.ServicesTests
         {
             // Arrange
             var dto = new EmailVerificationDTO { Email = "e@x.com", VerificationCode = "OK" };
-            mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.VerificationCode, CodeType.EmailVerification, true))
-                            .Returns(true);
-            mockAccountRepository.Setup(r => r.VerifyEmail(dto.Email))
-                                 .Throws(new Exception("db failure"));
+            mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.VerificationCode, CodeType.EmailVerification,
+                true)).Returns(true);
+            mockAccountRepository.Setup(r => r.VerifyEmail(dto.Email)).Throws(new Exception("db failure"));
 
             // Act + Assert
             Assert.Throws<FaultException<ServiceErrorDetailDTO>>(() => verificationCodeManager.VerifyEmail(dto));
@@ -134,10 +137,9 @@ namespace Test.ServicesTests
         {
             // Arrange
             var dto = new EmailVerificationDTO { Email = "e@x.com", VerificationCode = "OK" };
-            mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.VerificationCode, CodeType.EmailVerification, true))
-                            .Returns(true);
-            mockAccountRepository.Setup(r => r.VerifyEmail(dto.Email))
-                                 .Returns(false);
+            mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.VerificationCode, CodeType.EmailVerification,
+                true)).Returns(true);
+            mockAccountRepository.Setup(r => r.VerifyEmail(dto.Email)).Returns(false);
 
             // Act
             var result = verificationCodeManager.VerifyEmail(dto);
@@ -157,7 +159,8 @@ namespace Test.ServicesTests
 
             // Act + Assert
             Assert.Throws<FaultException<ServiceErrorDetailDTO>>(() => verificationCodeManager.ResendVerificationCode(email));
-            mockNotificationService.Verify(n => n.SendAccountVerificationEmailAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            mockNotificationService.Verify(n => n.SendAccountVerificationEmailAsync(It.IsAny<string>(), 
+                It.IsAny<string>()), Times.Never);
         }
 
         [Fact]
@@ -175,7 +178,8 @@ namespace Test.ServicesTests
 
             // Assert
             Assert.True(result);
-            mockNotificationService.Verify(n => n.SendAccountVerificationEmailAsync(email, It.IsAny<string>()), Times.Once);
+            mockNotificationService.Verify(n => n.SendAccountVerificationEmailAsync(email, It.IsAny<string>()),
+                Times.Once);
         }
 
         [Theory]
@@ -192,7 +196,8 @@ namespace Test.ServicesTests
             // Assert
             Assert.False(result);
             mockCodeService.Verify(s => s.GenerateAndStoreCode(It.IsAny<string>(), It.IsAny<CodeType>()), Times.Never);
-            mockNotificationService.Verify(n => n.SendAccountVerificationEmailAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            mockNotificationService.Verify(n => n.SendAccountVerificationEmailAsync(It.IsAny<string>(), 
+                It.IsAny<string>()), Times.Never);
         }
 
         [Theory]
@@ -202,8 +207,8 @@ namespace Test.ServicesTests
         {
             // Arrange
             var dto = new EmailVerificationDTO { Email = "user@example.com", VerificationCode = code! };
-            mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.VerificationCode, CodeType.EmailVerification, true))
-                            .Returns(false);
+            mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.VerificationCode, CodeType.EmailVerification,
+                true)).Returns(false);
 
             // Act
             var result = verificationCodeManager.VerifyEmail(dto);

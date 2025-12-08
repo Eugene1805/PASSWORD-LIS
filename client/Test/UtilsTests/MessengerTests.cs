@@ -127,7 +127,7 @@ namespace Test.UtilsTests
             Messenger.SendUserLoggedOut();
 
             // Assert
-            Assert.Equal(10, invokeCount); // Only handler2 should have been invoked
+            Assert.Equal(10, invokeCount); 
 
             // Cleanup
             Messenger.Unsubscribe(handler2);

@@ -28,11 +28,11 @@ namespace Test.ServicesTests
             mockNotificationService = new Mock<INotificationService>();
         }
 
-        private (WaitingRoomManager sut, ConcurrentQueue<Mock<IWaitingRoomCallback>> callbacks, Mock<IGameManager> gameManager) CreateSut(Mock<IPlayerRepository> repo, Mock<IOperationContextWrapper> ctx)
+        private (WaitingRoomManager sut, ConcurrentQueue<Mock<IWaitingRoomCallback>> callbacks,
+            Mock<IGameManager> gameManager) CreateSut(Mock<IPlayerRepository> repo, Mock<IOperationContextWrapper> ctx)
         {
             var callbackQueue = new ConcurrentQueue<Mock<IWaitingRoomCallback>>();
 
-            // Return a different callback channel on each Join call (dequeue order)
             ctx.Setup(o => o.GetCallbackChannel<IWaitingRoomCallback>())
                 .Returns(() =>
                 {
@@ -40,13 +40,13 @@ namespace Test.ServicesTests
                     {
                         return cb.Object;
                     }
-                    // Fallback callback to avoid nulls in corner cases
                     var fallback = new Mock<IWaitingRoomCallback>();
                     return fallback.Object;
                 });
 
             var gm = new Mock<IGameManager>();
-            var sut = new WaitingRoomManager(repo.Object, ctx.Object, gm.Object, mockAccountRepository.Object, mockNotificationService.Object);
+            var sut = new WaitingRoomManager(repo.Object, ctx.Object, gm.Object, mockAccountRepository.Object,
+                mockNotificationService.Object);
             return (sut, callbackQueue, gm);
         }
 
@@ -99,7 +99,8 @@ namespace Test.ServicesTests
                 HostNick: p?.Nickname,
                 HostRole: p?.Role ?? PlayerRole.ClueGuy,
                 HostTeam: p?.Team ?? MatchTeam.RedTeam,
-                HostJoinedNotified: hostCallback.Invocations.Any(i => i.Method.Name == nameof(IWaitingRoomCallback.OnPlayerJoined))
+                HostJoinedNotified: hostCallback.Invocations.Any(i 
+                => i.Method.Name == nameof(IWaitingRoomCallback.OnPlayerJoined))
             );
             Assert.Equal(expected, actual);
         }
@@ -113,25 +114,32 @@ namespace Test.ServicesTests
             mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync(email)).ReturnsAsync(player);
 
             var (sut, callbacks, _) = CreateSut(mockPlayerRepo, mockOperationContext);
-            // Host setup
+            
             var host = MakePlayer(1, "host@test.com", "Host");
             mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync(host.UserAccount.Email)).ReturnsAsync(host);
             var hostCb = new Mock<IWaitingRoomCallback>();
             callbacks.Enqueue(hostCb);
             var gameCode = await sut.CreateRoomAsync(host.UserAccount.Email);
 
-            // Player join
             var userCb = new Mock<IWaitingRoomCallback>();
             callbacks.Enqueue(userCb);
             var id = await sut.JoinRoomAsRegisteredPlayerAsync(gameCode, email);
 
-            // Second attempt should throw AlreadyInRoom fault
             bool secondJoinFault = false;
-            try { callbacks.Enqueue(new Mock<IWaitingRoomCallback>()); await sut.JoinRoomAsRegisteredPlayerAsync(gameCode, email); } catch (FaultException<ServiceErrorDetailDTO>) { secondJoinFault = true; }
+            try 
+            { 
+                callbacks.Enqueue(new Mock<IWaitingRoomCallback>()); 
+                await sut.JoinRoomAsRegisteredPlayerAsync(gameCode, email); 
+            } 
+            catch (FaultException<ServiceErrorDetailDTO>) 
+            { 
+                secondJoinFault = true; 
+            }
 
             // Assert
             var players = await sut.GetPlayersInRoomAsync(gameCode);
-            var expected = new { FirstJoinId = 2, SecondJoinFault = true, PlayerCount = 2, HasHost = true, HasUser = true };
+            var expected = new { FirstJoinId = 2, SecondJoinFault = true, PlayerCount = 2, HasHost = true, 
+                HasUser = true };
             var actual = new
             {
                 FirstJoinId = id,
@@ -177,7 +185,7 @@ namespace Test.ServicesTests
         [Fact]
         public async Task JoinGameAsRegisteredPlayer_ShouldFail_WhenRoomIsFull()
         {
-            // Arrange: host +3 guests -> room full
+            // Arrange
             var (sut, callbacks, _) = CreateSut(mockPlayerRepo, mockOperationContext);
             var host = MakePlayer(1, "host@test.com", "Host");
             mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync(host.UserAccount.Email)).ReturnsAsync(host);
@@ -191,7 +199,7 @@ namespace Test.ServicesTests
             callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
             await sut.JoinRoomAsGuestAsync(gameCode, "G3");
 
-            // Attempt registered join when full
+
             var reg = MakePlayer(10, "full@test.com", "FullUser");
             mockPlayerRepo.Setup(r => r.GetPlayerByEmailAsync("full@test.com")).ReturnsAsync(reg);
             callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
@@ -214,7 +222,6 @@ namespace Test.ServicesTests
             callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
             var gameCode = await sut.CreateRoomAsync(host.UserAccount.Email);
 
-            // Guest1,2,3 (reaching4 total including host)
             callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
             var g1 = await sut.JoinRoomAsGuestAsync(gameCode, "Guest1");
             callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
@@ -222,7 +229,6 @@ namespace Test.ServicesTests
             callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
             var g3 = await sut.JoinRoomAsGuestAsync(gameCode, "Guest3");
 
-            //5th player should throw (room full)
             callbacks.Enqueue(new Mock<IWaitingRoomCallback>());
             await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(async () =>
             await sut.JoinRoomAsGuestAsync(gameCode, "Guest4"));
@@ -349,7 +355,8 @@ namespace Test.ServicesTests
             var (sut, _, _) = CreateSut(mockPlayerRepo, mockOperationContext);
 
             // Act + Assert
-            await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(async () => await sut.StartGameAsync("XXXXX"));
+            await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(async () 
+                => await sut.StartGameAsync("XXXXX"));
         }
 
         [Fact]
@@ -363,7 +370,8 @@ namespace Test.ServicesTests
             var gameCode = await sut.CreateRoomAsync(host.UserAccount.Email);
 
             // Act + Assert
-            await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(async () => await sut.StartGameAsync(gameCode));
+            await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(async () 
+                => await sut.StartGameAsync(gameCode));
         }
 
         [Fact]
@@ -474,15 +482,15 @@ namespace Test.ServicesTests
             var hostCb = new Mock<IWaitingRoomCallback>();
             var g1Cb = new Mock<IWaitingRoomCallback>();
 
-            // Make guest callback throw on message
-            g1Cb.Setup(c => c.OnMessageReceived(It.IsAny<ChatMessageDTO>())).Throws(new System.Exception("client error"));
+            g1Cb.Setup(c => c.OnMessageReceived(It.IsAny<ChatMessageDTO>())).
+                Throws(new System.Exception("client error"));
 
             callbacks.Enqueue(hostCb);
             var gameCode = await sut.CreateRoomAsync(host.UserAccount.Email);
             callbacks.Enqueue(g1Cb);
             await sut.JoinRoomAsGuestAsync(gameCode, "Guest1");
 
-            // Act: send message triggers broadcast; guest will be removed
+            // Act
             await sut.SendMessageAsync(gameCode, new ChatMessageDTO { Message = "hi" });
 
             // Assert
@@ -547,7 +555,8 @@ namespace Test.ServicesTests
             await sut.SendGameInvitationByEmailAsync("friend@test.com", "ABCDE", "Host");
 
             // Assert
-            mockNotificationService.Verify(n => n.SendGameInvitationEmailAsync("friend@test.com", "ABCDE", "Host"), Times.Once);
+            mockNotificationService.Verify(n => n.SendGameInvitationEmailAsync("friend@test.com", "ABCDE", "Host"),
+                Times.Once);
         }
 
         [Fact]
@@ -583,13 +592,15 @@ namespace Test.ServicesTests
         {
             // Arrange
             var (sut, _, _) = CreateSut(mockPlayerRepo, mockOperationContext);
-            mockAccountRepository.Setup(a => a.GetUserByPlayerIdAsync(42)).ReturnsAsync(new UserAccount { Email = "friend@test.com" });
+            mockAccountRepository.Setup(a => a.GetUserByPlayerIdAsync(42)).ReturnsAsync(
+                new UserAccount { Email = "friend@test.com" });
 
             // Act
             await sut.SendGameInvitationToFriendAsync(42, "ABCDE", "Host");
 
             // Assert
-            mockNotificationService.Verify(n => n.SendGameInvitationEmailAsync("friend@test.com", "ABCDE", "Host"), Times.Once);
+            mockNotificationService.Verify(n => n.SendGameInvitationEmailAsync("friend@test.com", "ABCDE", "Host"),
+                Times.Once);
         }
 
         [Fact]
@@ -609,7 +620,8 @@ namespace Test.ServicesTests
         {
             // Arrange
             var (sut, _, _) = CreateSut(mockPlayerRepo, mockOperationContext);
-            mockAccountRepository.Setup(a => a.GetUserByPlayerIdAsync(42)).ReturnsAsync(new UserAccount { Email = "friend@test.com" });
+            mockAccountRepository.Setup(a => a.GetUserByPlayerIdAsync(42)).ReturnsAsync(
+                new UserAccount { Email = "friend@test.com" });
             mockNotificationService
             .Setup(n => n.SendGameInvitationEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
             .ThrowsAsync(new SmtpException("smtp error"));
@@ -624,7 +636,8 @@ namespace Test.ServicesTests
         {
             // Arrange
             var (sut, _, _) = CreateSut(mockPlayerRepo, mockOperationContext);
-            mockAccountRepository.Setup(a => a.GetUserByPlayerIdAsync(42)).ReturnsAsync(new UserAccount { Email = "friend@test.com" });
+            mockAccountRepository.Setup(a => a.GetUserByPlayerIdAsync(42)).ReturnsAsync(
+                new UserAccount { Email = "friend@test.com" });
             mockNotificationService
             .Setup(n => n.SendGameInvitationEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
             .ThrowsAsync(new Exception("boom"));
@@ -647,7 +660,7 @@ namespace Test.ServicesTests
                 .ReturnsAsync(new UserAccount
                 {
                     Email = myEmail,
-                    Nickname = myNickname // Mismo nick que el argumento 'inviterNickname'
+                    Nickname = myNickname
                 });
 
             // Act & Assert

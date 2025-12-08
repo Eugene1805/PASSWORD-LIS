@@ -32,9 +32,11 @@ namespace Test.ServicesTests
         public void ResetPassword_ShouldReturnTrue_WhenCodeIsValid()
         {
             // Arrange
-            var resetDto = new PasswordResetDTO { Email = "test@example.com", ResetCode = "123456", NewPassword = "NewPassword123!" };
+            var resetDto = new PasswordResetDTO { Email = "test@example.com", ResetCode = "123456", 
+                NewPassword = "NewPassword123!" };
 
-            mockCodeService.Setup(s => s.ValidateCode(resetDto.Email, resetDto.ResetCode, CodeType.PasswordReset, true)).Returns(true);
+            mockCodeService.Setup(s => s.ValidateCode(resetDto.Email, 
+                resetDto.ResetCode, CodeType.PasswordReset, true)).Returns(true);
             mockRepo.Setup(r => r.ResetPassword(resetDto.Email, It.IsAny<string>())).Returns(true);
 
             // Act
@@ -42,7 +44,6 @@ namespace Test.ServicesTests
 
             // Assert
             Assert.True(result);
-
             mockRepo.Verify(r => r.ResetPassword(resetDto.Email, It.IsAny<string>()), Times.Once);
         }
 
@@ -50,9 +51,11 @@ namespace Test.ServicesTests
         public void ResetPassword_ShouldReturnFalse_WhenCodeIsInvalid()
         {
             // Arrange
-            var resetDto = new PasswordResetDTO { Email = "test@example.com", ResetCode = "invalid-code", NewPassword = "NewPassword123!" };
+            var resetDto = new PasswordResetDTO { Email = "test@example.com", ResetCode = "invalid-code",
+                NewPassword = "NewPassword123!" };
 
-            mockCodeService.Setup(s => s.ValidateCode(resetDto.Email, resetDto.ResetCode, CodeType.PasswordReset, true)).Returns(false);
+            mockCodeService.Setup(s => s.ValidateCode(resetDto.Email, 
+                resetDto.ResetCode, CodeType.PasswordReset, true)).Returns(false);
 
             // Act
             var result = passwordManager.ResetPassword(resetDto);
@@ -79,10 +82,10 @@ namespace Test.ServicesTests
             Assert.False(result);
 
             mockCodeService.Verify(s => s.GenerateAndStoreCode(It.IsAny<string>(), It.IsAny<CodeType>()), Times.Never);
-            mockNotification.Verify(s => s.SendPasswordResetEmailAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            mockNotification.Verify(s => s.SendPasswordResetEmailAsync(It.IsAny<string>(),
+                It.IsAny<string>()), Times.Never);
         }
 
-        // Additional tests for fatal scenarios and defect detection
 
         [Fact]
         public void RequestPasswordResetCode_ShouldReturnFalse_WhenAccountDoesNotExist()
@@ -97,7 +100,8 @@ namespace Test.ServicesTests
             // Assert
             Assert.False(result);
             mockCodeService.Verify(s => s.GenerateAndStoreCode(It.IsAny<string>(), It.IsAny<CodeType>()), Times.Never);
-            mockNotification.Verify(s => s.SendPasswordResetEmailAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            mockNotification.Verify(s => s.SendPasswordResetEmailAsync(It.IsAny<string>(), 
+                It.IsAny<string>()), Times.Never);
         }
 
         [Fact]
@@ -109,7 +113,8 @@ namespace Test.ServicesTests
 
             mockRepo.Setup(r => r.AccountAlreadyExist(emailDto.Email)).Returns(true);
             mockCodeService.Setup(s => s.CanRequestCode(emailDto.Email, CodeType.PasswordReset)).Returns(true);
-            mockCodeService.Setup(s => s.GenerateAndStoreCode(emailDto.Email, CodeType.PasswordReset)).Returns(generated);
+            mockCodeService.Setup(s => s.GenerateAndStoreCode(emailDto.Email, 
+                CodeType.PasswordReset)).Returns(generated);
 
             // Act
             var result = passwordManager.RequestPasswordResetCode(emailDto);
@@ -132,7 +137,8 @@ namespace Test.ServicesTests
 
             // Act + Assert
             Assert.Throws<FaultException<ServiceErrorDetailDTO>>(() => passwordManager.RequestPasswordResetCode(emailDto));
-            mockNotification.Verify(s => s.SendPasswordResetEmailAsync(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            mockNotification.Verify(s => s.SendPasswordResetEmailAsync(It.IsAny<string>(), It.IsAny<string>()),
+                Times.Never);
         }
 
         [Fact]
@@ -160,7 +166,8 @@ namespace Test.ServicesTests
         {
             // Arrange
             var dto = new PasswordResetDTO { Email = "user@example.com", ResetCode = "OK", NewPassword = "P@ssw0rd!" };
-            mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.ResetCode, CodeType.PasswordReset, true)).Returns(true);
+            mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.ResetCode, 
+                CodeType.PasswordReset, true)).Returns(true);
             mockRepo.Setup(r => r.ResetPassword(dto.Email, It.IsAny<string>())).Returns(false);
 
             // Act
@@ -187,12 +194,13 @@ namespace Test.ServicesTests
         public void ResetPassword_ShouldHashPassword_BeforeSaving()
         {
             // Arrange
-            var dto = new PasswordResetDTO { Email = "user@example.com", ResetCode = "OK", NewPassword = "PlainText#1" };
+            var dto = new PasswordResetDTO { Email = "user@example.com", ResetCode = "123456",
+                NewPassword = "PlainText#1" };
             string? capturedHash = null;
-            mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.ResetCode, CodeType.PasswordReset, true)).Returns(true);
+            mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.ResetCode,
+                CodeType.PasswordReset, true)).Returns(true);
             mockRepo.Setup(r => r.ResetPassword(dto.Email, It.IsAny<string>()))
-                .Callback<string, string>((email, hash) => capturedHash = hash)
-                .Returns(true);
+                .Callback<string, string>((email, hash) => capturedHash = hash).Returns(true);
 
             // Act
             var result = passwordManager.ResetPassword(dto);
@@ -214,7 +222,8 @@ namespace Test.ServicesTests
         {
             // Arrange
             var emailDto = new EmailVerificationDTO { Email = "user@example.com", VerificationCode = "123456" };
-            mockCodeService.Setup(s => s.ValidateCode(emailDto.Email, emailDto.VerificationCode, CodeType.PasswordReset, false))
+            mockCodeService.Setup(s => s.ValidateCode(emailDto.Email, emailDto.VerificationCode, 
+                CodeType.PasswordReset, false))
                 .Returns(true);
 
             // Act
@@ -222,7 +231,8 @@ namespace Test.ServicesTests
 
             // Assert
             Assert.True(result);
-            mockCodeService.Verify(s => s.ValidateCode(emailDto.Email, emailDto.VerificationCode, CodeType.PasswordReset, false), Times.Once);
+            mockCodeService.Verify(s => s.ValidateCode(emailDto.Email, emailDto.VerificationCode,
+                CodeType.PasswordReset, false), Times.Once);
         }
 
         [Fact]
@@ -230,7 +240,8 @@ namespace Test.ServicesTests
         {
             // Arrange
             var emailDto = new EmailVerificationDTO { Email = "user@example.com", VerificationCode = "bad" };
-            mockCodeService.Setup(s => s.ValidateCode(emailDto.Email, emailDto.VerificationCode, CodeType.PasswordReset, false))
+            mockCodeService.Setup(s => s.ValidateCode(emailDto.Email, emailDto.VerificationCode, 
+                CodeType.PasswordReset, false))
                 .Returns(false);
 
             // Act

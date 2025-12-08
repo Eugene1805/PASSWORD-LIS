@@ -15,10 +15,13 @@ namespace Test.ViewModelsTests
         [Fact]
         public void CanSendCode_WhenEmptyOrBusy_ShouldBeFalse()
         {
+            // Arrange
             var mockClient = new Mock<IPasswordResetManagerService>();
             var mockWindow = new Mock<IWindowService>();
             var vm = new RetrievePasswordViewModel(mockClient.Object, mockWindow.Object);
             vm.Email = string.Empty;
+            // Act
+            // Assert
             Assert.False(vm.SendCodeCommand.CanExecute(null));
             vm.Email = "test@example.com";
             vm.IsBusy = true;
@@ -28,13 +31,16 @@ namespace Test.ViewModelsTests
         [Fact]
         public void SendCode_WhenInvalidEmail_ShouldShowPopUpAndNotCallService()
         {
+            // Arrange
             var mockClient = new Mock<IPasswordResetManagerService>();
             var mockWindow = new Mock<IWindowService>();
             var vm = new RetrievePasswordViewModel(mockClient.Object, mockWindow.Object);
             vm.Email = "invalid";
 
+            // Act
             vm.SendCodeCommand.Execute(null);
 
+            // Assert
             mockWindow.Verify(w => w.ShowPopUp(
                 PASSWORD_LIS_Client.Properties.Langs.Lang.warningTitleText,
                 PASSWORD_LIS_Client.Properties.Langs.Lang.invalidEmailErrorText,
@@ -45,6 +51,7 @@ namespace Test.ViewModelsTests
         [Fact]
         public void SendCode_WhenServiceSuccess_ShouldOpenVerifyAndClose()
         {
+            // Arrange
             var mockClient = new Mock<IPasswordResetManagerService>();
             var mockWindow = new Mock<IWindowService>();
             mockClient
@@ -55,8 +62,10 @@ namespace Test.ViewModelsTests
                 Email = "user@example.com"
             };
 
+            // Act
             vm.SendCodeCommand.Execute(null);
 
+            // Assert
             mockWindow.Verify(w => w.ShowVerifyCodeWindow(
                 "user@example.com",
                 PASSWORD_LIS_Client.Views.VerificationReason.PasswordReset), Times.Once);
@@ -66,6 +75,7 @@ namespace Test.ViewModelsTests
         [Fact]
         public void SendCode_WhenServiceFails_ShouldShowErrorPopUp()
         {
+            // Arrange
             var mockClient = new Mock<IPasswordResetManagerService>();
             var mockWindow = new Mock<IWindowService>();
             mockClient
@@ -76,8 +86,10 @@ namespace Test.ViewModelsTests
                 Email = "user@example.com"
             };
 
+            // Act
             vm.SendCodeCommand.Execute(null);
 
+            // Assert
             mockWindow.Verify(w => w.ShowPopUp(
                 PASSWORD_LIS_Client.Properties.Langs.Lang.sendFailedTitleText,
                 PASSWORD_LIS_Client.Properties.Langs.Lang.codeSendFailedText,
@@ -87,6 +99,7 @@ namespace Test.ViewModelsTests
         [Fact]
         public void TryRequestResetCode_WhenTimeout_ShouldShowTimeoutWarningAndReturnFalse()
         {
+            // Arrange
             var mockClient = new Mock<IPasswordResetManagerService>();
             var mockWindow = new Mock<IWindowService>();
             mockClient
@@ -97,8 +110,10 @@ namespace Test.ViewModelsTests
                 Email = "user@example.com"
             };
 
+            // Act
             vm.SendCodeCommand.Execute(null);
 
+            // Assert
             mockWindow.Verify(w => w.ShowPopUp(
                 PASSWORD_LIS_Client.Properties.Langs.Lang.timeLimitTitleText,
                 PASSWORD_LIS_Client.Properties.Langs.Lang.serverTimeoutText,
@@ -108,6 +123,7 @@ namespace Test.ViewModelsTests
         [Fact]
         public void TryRequestResetCode_WhenEndpointNotFound_ShouldShowConnectionWarning()
         {
+            // Arrange
             var mockClient = new Mock<IPasswordResetManagerService>();
             var mockWindow = new Mock<IWindowService>();
             mockClient
@@ -118,8 +134,10 @@ namespace Test.ViewModelsTests
                 Email = "user@example.com"
             };
 
+            // Act
             vm.SendCodeCommand.Execute(null);
 
+            // Assert
             mockWindow.Verify(w => w.ShowPopUp(
                 PASSWORD_LIS_Client.Properties.Langs.Lang.connectionErrorTitleText,
                 PASSWORD_LIS_Client.Properties.Langs.Lang.serverConnectionInternetErrorText,

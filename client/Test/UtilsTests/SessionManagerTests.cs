@@ -31,7 +31,6 @@ namespace Test.UtilsTests
             Assert.Equal(456, SessionManager.CurrentUser.PlayerId);
             Assert.Equal("TestUser", SessionManager.CurrentUser.Nickname);
 
-            // Cleanup
             SessionManager.Logout();
         }
 
@@ -75,7 +74,6 @@ namespace Test.UtilsTests
             Assert.Equal(20, SessionManager.CurrentUser.PlayerId);
             Assert.Equal("SecondUser", SessionManager.CurrentUser.Nickname);
 
-            // Cleanup
             SessionManager.Logout();
         }
 
@@ -127,7 +125,6 @@ namespace Test.UtilsTests
             // Assert
             Assert.True(result);
 
-            // Cleanup
             SessionManager.Logout();
         }
 
@@ -192,7 +189,6 @@ namespace Test.UtilsTests
             Assert.Equal(999, SessionManager.CurrentUser.UserAccountId);
             Assert.Equal(-1, SessionManager.CurrentUser.PlayerId);
 
-            // Cleanup
             SessionManager.Logout();
         }
     }

@@ -49,7 +49,6 @@ namespace Test.ServicesTests
             // Act
             var result = await topPlayersManager.GetTopAsync(numberOfTeams);
 
-            // Assert (use tuples to align nullability)
             var expected = (
                 NotNull: true,
                 Count: 2,
@@ -72,6 +71,7 @@ namespace Test.ServicesTests
                 SecondPlayersCount: result?.ElementAtOrDefault(1)?.PlayersNicknames.Count ?? -1,
                 SecondPlayer: result?.ElementAtOrDefault(1)?.PlayersNicknames.FirstOrDefault()
             );
+            // Assert 
             Assert.Equal(expected, actual);
         }
 
@@ -86,7 +86,8 @@ namespace Test.ServicesTests
             var result = await topPlayersManager.GetTopAsync(numberOfTeams);
 
             // Assert
-            Assert.Equal((NotNull: true, Empty: true, Count: 0), (NotNull: result != null, Empty: result!.Count == 0, Count: result.Count));
+            Assert.Equal((NotNull: true, Empty: true, Count: 0), (NotNull: result != null, Empty: result!.Count == 0,
+                Count: result.Count));
         }
 
         [Fact]
@@ -101,7 +102,8 @@ namespace Test.ServicesTests
             var result = await topPlayersManager.GetTopAsync(numberOfTeams);
 
             // Assert
-            Assert.Equal((Count: 1, Score: 50, NicknamesCount: 0), (Count: result.Count, Score: result[0].Score, NicknamesCount: result[0].PlayersNicknames.Count));
+            Assert.Equal((Count: 1, Score: 50, NicknamesCount: 0), (Count: result.Count, Score: result[0].Score, 
+                NicknamesCount: result[0].PlayersNicknames.Count));
         }
 
         [Fact]
@@ -109,11 +111,19 @@ namespace Test.ServicesTests
         {
             // Arrange
             var numberOfTeams = 3;
-            mockStatisticsRepository.Setup(repo => repo.GetTopTeamsAsync(numberOfTeams)).ThrowsAsync(new System.Exception("Simulated Database error"));
+            mockStatisticsRepository.Setup(repo => repo.GetTopTeamsAsync(numberOfTeams)).
+                ThrowsAsync(new System.Exception("Simulated Database error"));
 
             // Act & Assert
             FaultException<ServiceErrorDetailDTO>? ex = null;
-            try { await topPlayersManager.GetTopAsync(numberOfTeams); } catch (FaultException<ServiceErrorDetailDTO> e) { ex = e; }
+            try 
+            { 
+                await topPlayersManager.GetTopAsync(numberOfTeams); 
+            } 
+            catch (FaultException<ServiceErrorDetailDTO> e) 
+            {
+                ex = e; 
+            }
             Assert.Equal((Threw: true, Code: "STATISTICS_ERROR"), (Threw: ex != null, Code: ex?.Detail.ErrorCode));
         }
 
@@ -128,7 +138,8 @@ namespace Test.ServicesTests
             var result = await topPlayersManager.GetTopAsync(numberOfTeams);
 
             // Assert
-            Assert.Equal((NotNull: true, Empty: true, Count: 0), (NotNull: result != null, Empty: result!.Count == 0, Count: result.Count));
+            Assert.Equal((NotNull: true, Empty: true, Count: 0), (NotNull: result != null, Empty: result!.Count == 0,
+                Count: result.Count));
         }
 
         [Fact]
@@ -179,11 +190,19 @@ namespace Test.ServicesTests
         public async Task GetTop_WithNonPositiveNumber_ShouldThrowFaultException_WhenRepositoryRejects(int n)
         {
             // Arrange
-            mockStatisticsRepository.Setup(r => r.GetTopTeamsAsync(n)).ThrowsAsync(new ArgumentOutOfRangeException(string.Format("{0}", n)));
+            mockStatisticsRepository.Setup(r => r.GetTopTeamsAsync(n)).
+                ThrowsAsync(new ArgumentOutOfRangeException(string.Format("{0}", n)));
 
             // Act
             FaultException<ServiceErrorDetailDTO>? ex = null;
-            try { await topPlayersManager.GetTopAsync(n); } catch (FaultException<ServiceErrorDetailDTO> e) { ex = e; }
+            try 
+            { 
+                await topPlayersManager.GetTopAsync(n); 
+            } 
+            catch (FaultException<ServiceErrorDetailDTO> e) 
+            {
+                ex = e; 
+            }
 
             // Assert
             Assert.Equal((Threw: true, Code: "STATISTICS_ERROR"), (Threw: ex != null, Code: ex?.Detail.ErrorCode));
@@ -199,7 +218,8 @@ namespace Test.ServicesTests
             var result = await topPlayersManager.GetTopAsync(0);
 
             // Assert
-            Assert.Equal((NotNull: true, Empty: true, Count: 0), (NotNull: result != null, Empty: result!.Count == 0, Count: result.Count));
+            Assert.Equal((NotNull: true, Empty: true, Count: 0), (NotNull: result != null, Empty: result!.Count == 0,
+                Count: result.Count));
         }
     }
 }

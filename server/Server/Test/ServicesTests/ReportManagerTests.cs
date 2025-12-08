@@ -103,7 +103,8 @@ namespace Test.ServicesTests
             var result = await sut.SubmitReportAsync(dto);
 
             Assert.True(result);
-            reportRepo.Verify(r => r.AddReportAsync(It.Is<Report>(rep => rep.ReporterPlayerId == 1 && rep.ReportedPlayerId == 2 && rep.Reason == "ok")), Times.Once);
+            reportRepo.Verify(r => r.AddReportAsync(It.Is<Report>(rep 
+                => rep.ReporterPlayerId == 1 && rep.ReportedPlayerId == 2 && rep.Reason == "ok")), Times.Once);
             callback.Verify(c => c.OnReportReceived("RepNick", "ok"), Times.Once);
             callback.Verify(c => c.OnReportCountUpdated(1), Times.Once);
         }
@@ -144,7 +145,8 @@ namespace Test.ServicesTests
         [Fact]
         public async Task IsPlayerBannedAsync_ShouldReturnTrue_WhenActiveBanExists()
         {
-            banRepo.Setup(b => b.GetActiveBanForPlayerAsync(15)).ReturnsAsync(new Ban { PlayerId = 15, EndTime = DateTime.UtcNow.AddMinutes(10) });
+            banRepo.Setup(b => b.GetActiveBanForPlayerAsync(15)).ReturnsAsync(
+                new Ban { PlayerId = 15, EndTime = DateTime.UtcNow.AddMinutes(10) });
             var res = await sut.IsPlayerBannedAsync(15);
             Assert.True(res);
         }
