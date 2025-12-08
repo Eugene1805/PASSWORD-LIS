@@ -40,16 +40,21 @@ namespace Test.ServicesTests
             mockRepo.Setup(repo => repo.CreateAccountAsync(It.IsAny<UserAccount>()))
                      .Returns(Task.CompletedTask);
 
-            mockCodeService.Setup(service => service.GenerateAndStoreCode(newAccountDto.Email, CodeType.EmailVerification))
-                            .Returns(generatedCode);
+            mockCodeService.Setup(service => service.GenerateAndStoreCode(newAccountDto.Email,
+                CodeType.EmailVerification)).Returns(generatedCode);
 
             // Act
             await accountManager.CreateAccountAsync(newAccountDto);
 
-            int repoCalls = mockRepo.Invocations.Count(i => i.Method.Name == nameof(IAccountRepository.CreateAccountAsync));
-            int codeCalls = mockCodeService.Invocations.Count(i => i.Method.Name == nameof(IVerificationCodeService.GenerateAndStoreCode));
-            int notificationCalls = mockNotification.Invocations.Count(i => i.Method.Name == nameof(INotificationService.SendAccountVerificationEmailAsync));
-            string? repoEmailArg = (mockRepo.Invocations.First(i => i.Method.Name == nameof(IAccountRepository.CreateAccountAsync)).Arguments[0] as UserAccount)?.Email;
+            int repoCalls = mockRepo.Invocations.Count(i => 
+            i.Method.Name == nameof(IAccountRepository.CreateAccountAsync));
+            int codeCalls = mockCodeService.Invocations.Count(i => 
+            i.Method.Name == nameof(IVerificationCodeService.GenerateAndStoreCode));
+            int notificationCalls = mockNotification.Invocations.Count(i => 
+            i.Method.Name == nameof(INotificationService.SendAccountVerificationEmailAsync));
+            string? repoEmailArg = (mockRepo.Invocations.First(i => 
+            i.Method.Name == nameof(IAccountRepository.CreateAccountAsync)).Arguments[0] as UserAccount)?.Email;
+
             string? codeEmailArg = mockCodeService.Invocations[0].Arguments[0] as string;
             CodeType codeTypeArg = (CodeType)mockCodeService.Invocations[0].Arguments[1];
             string? notifEmailArg = mockNotification.Invocations[0].Arguments[0] as string;
@@ -102,12 +107,12 @@ namespace Test.ServicesTests
             // Act
             await accountManager.CreateAccountAsync(newAccountDto);
 
-            // Actual state
             UserAccount? createdAccount = mockRepo.Invocations
                 .Where(i => i.Method.Name == nameof(IAccountRepository.CreateAccountAsync))
                 .Select(i => i.Arguments[0] as UserAccount)
                 .FirstOrDefault();
-            string? notifCode = mockNotification.Invocations.First(i => i.Method.Name == nameof(INotificationService.SendAccountVerificationEmailAsync)).Arguments[1] as string;
+            string? notifCode = mockNotification.Invocations.First(i => 
+            i.Method.Name == nameof(INotificationService.SendAccountVerificationEmailAsync)).Arguments[1] as string;
 
             var expected = new
             {
@@ -123,9 +128,12 @@ namespace Test.ServicesTests
 
             var actual = new
             {
-                RepoCalls = mockRepo.Invocations.Count(i => i.Method.Name == nameof(IAccountRepository.CreateAccountAsync)),
-                CodeCalls = mockCodeService.Invocations.Count(i => i.Method.Name == nameof(IVerificationCodeService.GenerateAndStoreCode)),
-                NotificationCalls = mockNotification.Invocations.Count(i => i.Method.Name == nameof(INotificationService.SendAccountVerificationEmailAsync)),
+                RepoCalls = mockRepo.Invocations.Count(i => 
+                i.Method.Name == nameof(IAccountRepository.CreateAccountAsync)),
+                CodeCalls = mockCodeService.Invocations.Count(i => 
+                i.Method.Name == nameof(IVerificationCodeService.GenerateAndStoreCode)),
+                NotificationCalls = mockNotification.Invocations.Count(i => 
+                i.Method.Name == nameof(INotificationService.SendAccountVerificationEmailAsync)),
                 Email = createdAccount?.Email,
                 Nickname = createdAccount?.Nickname,
                 FirstName = createdAccount?.FirstName,
@@ -150,7 +158,8 @@ namespace Test.ServicesTests
                      .ThrowsAsync(new DuplicateAccountException("User already exist"));
 
             // Act
-            FaultException<ServiceErrorDetailDTO> exception = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
+            FaultException<ServiceErrorDetailDTO> exception = await
+                Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => accountManager.CreateAccountAsync(newAccountDto)
             );
 
@@ -165,9 +174,12 @@ namespace Test.ServicesTests
             var actual = new
             {
                 ErrorCode = exception.Detail.ErrorCode,
-                RepoCalls = mockRepo.Invocations.Count(i => i.Method.Name == nameof(IAccountRepository.CreateAccountAsync)),
-                CodeCalls = mockCodeService.Invocations.Count(i => i.Method.Name == nameof(IVerificationCodeService.GenerateAndStoreCode)),
-                NotificationCalls = mockNotification.Invocations.Count(i => i.Method.Name == nameof(INotificationService.SendAccountVerificationEmailAsync))
+                RepoCalls = mockRepo.Invocations.Count(i => 
+                i.Method.Name == nameof(IAccountRepository.CreateAccountAsync)),
+                CodeCalls = mockCodeService.Invocations.Count(i => 
+                i.Method.Name == nameof(IVerificationCodeService.GenerateAndStoreCode)),
+                NotificationCalls = mockNotification.Invocations.Count(i => 
+                i.Method.Name == nameof(INotificationService.SendAccountVerificationEmailAsync))
             };
 
             Assert.Equal(expected, actual);
@@ -187,7 +199,8 @@ namespace Test.ServicesTests
                      .ThrowsAsync(new System.Data.Entity.Infrastructure.DbUpdateException("Error de BD"));
 
             // Act
-            FaultException<ServiceErrorDetailDTO> exception = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
+            FaultException<ServiceErrorDetailDTO> exception = await 
+                Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => accountManager.CreateAccountAsync(newAccountDto)
             );
 
@@ -202,9 +215,12 @@ namespace Test.ServicesTests
             var actual = new
             {
                 ErrorCode = exception.Detail.ErrorCode,
-                RepoCalls = mockRepo.Invocations.Count(i => i.Method.Name == nameof(IAccountRepository.CreateAccountAsync)),
-                CodeCalls = mockCodeService.Invocations.Count(i => i.Method.Name == nameof(IVerificationCodeService.GenerateAndStoreCode)),
-                NotificationCalls = mockNotification.Invocations.Count(i => i.Method.Name == nameof(INotificationService.SendAccountVerificationEmailAsync))
+                RepoCalls = mockRepo.Invocations.Count(i => 
+                i.Method.Name == nameof(IAccountRepository.CreateAccountAsync)),
+                CodeCalls = mockCodeService.Invocations.Count(i => 
+                i.Method.Name == nameof(IVerificationCodeService.GenerateAndStoreCode)),
+                NotificationCalls = mockNotification.Invocations.Count(i => 
+                i.Method.Name == nameof(INotificationService.SendAccountVerificationEmailAsync))
             };
 
             Assert.Equal(expected, actual);
@@ -253,7 +269,8 @@ namespace Test.ServicesTests
                 LastName = captured?.LastName,
                 PasswordIsHashed = !string.IsNullOrWhiteSpace(captured?.PasswordHash),
                 PasswordNotRaw = captured?.PasswordHash != dto.Password,
-                RepoCalls = mockRepo.Invocations.Count(i => i.Method.Name == nameof(IAccountRepository.CreateAccountAsync))
+                RepoCalls = mockRepo.Invocations.Count(i => 
+                i.Method.Name == nameof(IAccountRepository.CreateAccountAsync))
             };
 
             Assert.Equal(expected, actual);
@@ -272,7 +289,8 @@ namespace Test.ServicesTests
                             .Throws(new Exception("code generation failed"));
 
             // Act
-            FaultException<ServiceErrorDetailDTO> ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
+            FaultException<ServiceErrorDetailDTO> ex = await 
+                Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => accountManager.CreateAccountAsync(dto)
             );
 
@@ -287,9 +305,12 @@ namespace Test.ServicesTests
             var actual = new
             {
                 ErrorCode = ex.Detail.ErrorCode,
-                RepoCalls = mockRepo.Invocations.Count(i => i.Method.Name == nameof(IAccountRepository.CreateAccountAsync)),
-                CodeCalls = mockCodeService.Invocations.Count(i => i.Method.Name == nameof(IVerificationCodeService.GenerateAndStoreCode)),
-                NotificationCalls = mockNotification.Invocations.Count(i => i.Method.Name == nameof(INotificationService.SendAccountVerificationEmailAsync))
+                RepoCalls = mockRepo.Invocations.Count(i => 
+                i.Method.Name == nameof(IAccountRepository.CreateAccountAsync)),
+                CodeCalls = mockCodeService.Invocations.Count(i => 
+                i.Method.Name == nameof(IVerificationCodeService.GenerateAndStoreCode)),
+                NotificationCalls = mockNotification.Invocations.Count(i => 
+                i.Method.Name == nameof(INotificationService.SendAccountVerificationEmailAsync))
             };
 
             Assert.Equal(expected, actual);
@@ -309,7 +330,8 @@ namespace Test.ServicesTests
                               .ThrowsAsync(new System.Net.Mail.SmtpException("SMTP server error"));
 
             // Act
-            FaultException<ServiceErrorDetailDTO> exception = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
+            FaultException<ServiceErrorDetailDTO> exception = await 
+                Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => accountManager.CreateAccountAsync(dto)
             );
 
@@ -324,9 +346,12 @@ namespace Test.ServicesTests
             var actual = new
             {
                 ErrorCode = exception.Detail.ErrorCode,
-                RepoCalls = mockRepo.Invocations.Count(i => i.Method.Name == nameof(IAccountRepository.CreateAccountAsync)),
-                CodeCalls = mockCodeService.Invocations.Count(i => i.Method.Name == nameof(IVerificationCodeService.GenerateAndStoreCode)),
-                NotificationCalls = mockNotification.Invocations.Count(i => i.Method.Name == nameof(INotificationService.SendAccountVerificationEmailAsync))
+                RepoCalls = mockRepo.Invocations.Count(i => 
+                i.Method.Name == nameof(IAccountRepository.CreateAccountAsync)),
+                CodeCalls = mockCodeService.Invocations.Count(i => 
+                i.Method.Name == nameof(IVerificationCodeService.GenerateAndStoreCode)),
+                NotificationCalls = mockNotification.Invocations.Count(i => 
+                i.Method.Name == nameof(INotificationService.SendAccountVerificationEmailAsync))
             };
 
             Assert.Equal(expected, actual);
@@ -396,7 +421,8 @@ namespace Test.ServicesTests
                     .ThrowsAsync(new EntityException("Connection failed"));
 
             // Act
-            FaultException<ServiceErrorDetailDTO> exception = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
+            FaultException<ServiceErrorDetailDTO> exception = await 
+                Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => accountManager.IsNicknameInUse(nickname)
             );
 
@@ -409,7 +435,8 @@ namespace Test.ServicesTests
             var actual = new
             {
                 ErrorCode = exception.Detail.ErrorCode,
-                RepoCalls = mockRepo.Invocations.Count(i => i.Method.Name == nameof(IAccountRepository.IsNicknameInUse))
+                RepoCalls = mockRepo.Invocations.Count(i => 
+                i.Method.Name == nameof(IAccountRepository.IsNicknameInUse))
             };
 
             // Assert
