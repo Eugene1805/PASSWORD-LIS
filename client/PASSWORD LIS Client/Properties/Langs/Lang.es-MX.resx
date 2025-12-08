@@ -838,4 +838,31 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
     <value>No existe una sala con ese código
 </value>
   </data>
+  <data name="drawText" xml:space="preserve">
+    <value>Empate</value>
+  </data>
+  <data name="drawMessageText" xml:space="preserve">
+    <value>¡Felicidades, lograron un empate justo y bien merecido! </value>
+  </data>
+  <data name="suddenDeathRoundText" xml:space="preserve">
+    <value>Ronda de Muerte Súbita</value>
+  </data>
+  <data name="suddenDeathFirstGuessWinsText" xml:space="preserve">
+    <value>¡Muerte Súbita! El primero en acertar gana.</value>
+  </data>
+  <data name="suddenDeathTitleText" xml:space="preserve">
+    <value>MUERTE SÚBITA</value>
+  </data>
+  <data name="connectionUnexpected" xml:space="preserve">
+    <value>La conexión con el servidor se perdió inesperadamente.</value>
+  </data>
+  <data name="opposingTeamNotSendCluesText" xml:space="preserve">
+    <value>El equipo contrario no envió pistas</value>
+  </data>
+  <data name="communicationErrorSendingVotesText" xml:space="preserve">
+    <value>Error de comunicación al enviar los votos</value>
+  </data>
+  <data name="connectionLostValidationText" xml:space="preserve">
+    <value>Conexión perdida durante la validación</value>
+  </data>
 </root>

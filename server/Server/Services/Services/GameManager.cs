@@ -12,7 +12,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Services.Services
@@ -28,9 +27,9 @@ namespace Services.Services
         private readonly IPlayerRepository playerRepository;
         private static readonly ILog log = LogManager.GetLogger(typeof(GameManager));
 
-        private const int RoundDurationSeconds = 10;
+        private const int RoundDurationSeconds = 40;
         private const int ValidationDurationSeconds = 30;
-        private const int SuddenDeathDurationSeconds = 30;
+        private const int SuddenDeathDurationSeconds = 10;
         private const int WordsPerRound = 5;
         private const int TotalRounds = 5;
         private const int PointsPerWin = 10;
@@ -510,9 +509,7 @@ namespace Services.Services
             bool succes = session.LoadNextSuddenDeathWord(wordsUsedInRegularRounds);
             if (!succes)
             {
-                await BroadcastAndHandleDisconnectsAsync(session,
-                    cb => cb.OnMatchCancelled("Error: Sudden death words exhausted."));
-                matches.TryRemove(session.GameCode, out _);
+                await PersistAndNotifyGameEnd(session, null);
                 return;
             }
 

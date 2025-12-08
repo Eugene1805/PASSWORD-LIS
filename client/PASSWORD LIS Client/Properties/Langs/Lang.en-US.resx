@@ -841,4 +841,31 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
     <value>There is not a room with that code
 </value>
   </data>
+  <data name="drawText" xml:space="preserve">
+    <value>Draw</value>
+  </data>
+  <data name="drawMessageText" xml:space="preserve">
+    <value>Congratulations, you achieved a fair and well-deserved draw!</value>
+  </data>
+  <data name="suddenDeathRoundText" xml:space="preserve">
+    <value>Sudden Death Round</value>
+  </data>
+  <data name="suddenDeathFirstGuessWinsText" xml:space="preserve">
+    <value>Sudden Death! The first one to guess correctly wins.</value>
+  </data>
+  <data name="suddenDeathTitleText" xml:space="preserve">
+    <value>SUDDEN DEATH</value>
+  </data>
+  <data name="connectionUnexpected" xml:space="preserve">
+    <value>The connection to the server was unexpectedly lost.</value>
+  </data>
+  <data name="opposingTeamNotSendCluesText" xml:space="preserve">
+    <value>The opposing team did not send any clues</value>
+  </data>
+  <data name="communicationErrorSendingVotesText" xml:space="preserve">
+    <value>Communication error when sending the votes</value>
+  </data>
+  <data name="connectionLostValidationText" xml:space="preserve">
+    <value>Connection lost during validation</value>
+  </data>
 </root>

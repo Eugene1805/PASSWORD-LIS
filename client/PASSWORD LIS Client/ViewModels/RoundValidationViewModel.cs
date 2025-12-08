@@ -56,6 +56,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         private readonly int playerId;
         private readonly ILog log = LogManager.GetLogger(typeof(RoundValidationViewModel));
         private bool isMatchEnding = false;
+        private bool validationReceived = false;
         private readonly DispatcherTimer serverGuardian;
         private readonly Stopwatch serverPulseWatch = new Stopwatch();
 
@@ -89,7 +90,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             if (turns == null || turns.Count == 0)
             {
                 IsListEmpty = true;
-                EmptyListMessage = "El equipo contrario no envió pistas."; //Properties.Langs.Lang.opponentNoCluesText
+                EmptyListMessage = Properties.Langs.Lang.opposingTeamNotSendCluesText;
                 TurnsToValidate = new ObservableCollection<ValidationTurnViewModel>();
             }
             else
@@ -122,6 +123,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             try
             {
+                validationReceived = true;
                 log.InfoFormat("OnValidationComplete processing - Red: {0}, Blue: {1}", result.NewRedTeamScore, result.NewBlueTeamScore);
                 LogCurrentState();
                 Application.Current.Dispatcher.Invoke(() =>
@@ -185,30 +187,30 @@ namespace PASSWORD_LIS_Client.ViewModels
                 catch (FaultException fe)
                 {
                     log.Error($"FaultException in SubmitVotesAsync: {fe.Message}", fe);
-                    HandleConnectionError(fe, "Error al enviar los votos");
+                    HandleConnectionError(fe, Properties.Langs.Lang.errorSendingVotesText);
                     CanSubmit = true;
                 }
                 catch (CommunicationException ce)
                 {
-                    if (isMatchEnding)
+                    if (isMatchEnding || validationReceived)
                     {
-                        log.Info("CommunicationException was ignored because the game has ended (MatchOver received).");
+                        log.Info("CommunicationException was ignored because validation was already received or match is ending.");
                         return;
                     }
 
                     log.Error($"CommunicationException in SubmitVotesAsync: {ce.Message}", ce);
-                    HandleConnectionError(ce, "Error de comunicación al enviar los votos");
+                    HandleConnectionError(ce, Properties.Langs.Lang.communicationErrorSendingVotesText);
                     CanSubmit = true;
                 }
                 catch (Exception ex)
                 {
-                    if (isMatchEnding)
+                    if (isMatchEnding || validationReceived)
                     {
-                        log.Info("Generic Exception was ignored because the game has ended.");
+                        log.Info("Generic Exception was ignored because validation was already received.");
                         return;
                     }
                     log.Error($"Unexpected error in SubmitVotesAsync: {ex.Message}", ex);
-                    HandleConnectionError(ex, "Error al enviar los votos");
+                    HandleConnectionError(ex, Properties.Langs.Lang.errorSendingVotesText);
                     CanSubmit = true;
                 }
             });
@@ -268,7 +270,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
                 windowService.ShowPopUp(
                     Properties.Langs.Lang.connectionErrorTitleText,
-                    "Conexión perdida durante la validación.",
+                    Properties.Langs.Lang.connectionLostValidationText,
                     PopUpIcon.Error);
 
                 Cleanup();

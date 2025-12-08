@@ -20,6 +20,7 @@ namespace Data.DAL.Implementations
             {
                 var topTeamsEntities = await context.Team
                     .Include(t => t.Player.Select(p => p.UserAccount))
+                    .Where(t => t.Player.Any())
                     .OrderByDescending(t => t.TotalPoints)
                     .Take(numberOfTeams)
                     .ToListAsync();

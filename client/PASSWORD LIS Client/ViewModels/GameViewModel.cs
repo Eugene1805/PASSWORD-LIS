@@ -347,8 +347,16 @@ namespace PASSWORD_LIS_Client.ViewModels
                 CurrentClue = Properties.Langs.Lang.waitingAClueText;
                 CanSendClue = true;
                 CanSendGuess = false;
+                if (isSuddenDeathActive)
+                {
+                    CurrentWordCountText = string.Empty;
+                    CanRequestHint = true;
+                }
+                else
+                {
+                    CurrentWordCountText = string.Format(Properties.Langs.Lang.currentWordText, currentWordIndex);
+                }
 
-                CurrentWordCountText = string.Format(Properties.Langs.Lang.currentWordText, currentWordIndex);
                 IsHintVisible = false;
                 CurrentHintText = string.Empty;
                 CurrentGuessText = string.Empty;
@@ -456,12 +464,20 @@ namespace PASSWORD_LIS_Client.ViewModels
             Application.Current.Dispatcher.Invoke(() =>
             {
                 isMatchEnding = true;
-
                 UnsubscribeFromEvents();
-
-                bool didIWin = summary.WinnerTeam.HasValue && summary.WinnerTeam.Value == currentPlayer.Team;
                 var gameEndViewModel = new GameEndViewModel(summary.RedScore, summary.BlueScore, windowService);
-                Page endPage = didIWin ? (Page)new WinnersPage() : new LosersPage();
+                Page endPage;
+
+                if (summary.WinnerTeam == null)
+                {
+                    endPage = new DrawPage();
+                }
+                else
+                {
+                    bool didIWin = summary.WinnerTeam.Value == currentPlayer.Team;
+                    endPage = didIWin ? (Page)new WinnersPage() : new LosersPage();
+                }
+
                 endPage.DataContext = gameEndViewModel;
                 windowService.NavigateTo(endPage);
                 SafeCleanup();
@@ -517,7 +533,6 @@ namespace PASSWORD_LIS_Client.ViewModels
                 isSuddenDeathActive = true;
                 IsSuddenDeathVisible = true;
                 CanPassTurn = false;
-                currentPasswordDto = null;
 
                 if (CurrentPlayerRole == PlayerRole.Guesser)
                 {
@@ -526,7 +541,9 @@ namespace PASSWORD_LIS_Client.ViewModels
                     CanSendGuess = false;
                 }
 
-                _ = ShowSnackbar("¡Muerte Súbita! El primero en acertar gana.");
+                CurrentRoundText = Properties.Langs.Lang.suddenDeathRoundText;
+                CurrentWordCountText = string.Empty;
+                _ = ShowSnackbar(Properties.Langs.Lang.suddenDeathFirstGuessWinsText);
             });
         }
 
@@ -634,10 +651,9 @@ namespace PASSWORD_LIS_Client.ViewModels
                 serverGuardian?.Stop();
 
                 windowService.ShowPopUp(
-                    Properties.Langs.Lang.connectionErrorTitleText,
-                    "La conexión con el servidor se perdió inesperadamente.",
+                    Properties.Langs.Lang.connectionErrorTitleText, 
+                    Properties.Langs.Lang.unexpectedServerErrorText,
                     PopUpIcon.Error);
-
                 ForceReturnToLobby();
             });
         }
