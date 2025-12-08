@@ -127,13 +127,13 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand SaveChangesCommand { get; }
         public ICommand ChangePasswordCommand { get; }
 
-        private readonly IProfileManagerService profileManagerClient;
+        private readonly IProfileManagerService profileManagerService;
         private ProfileUserDTO originalState;
 
         public ProfileViewModel(IProfileManagerService profileManagerService, IWindowService windowService)
             : base(windowService)
         {
-            this.profileManagerClient = profileManagerService;
+            this.profileManagerService = profileManagerService;
 
             BackToLobbyCommand = new RelayCommand(BackToLobby);
             EditProfileCommand = new RelayCommand(EditProfile);
@@ -211,7 +211,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 await ExecuteAsync(async () =>
                 {
                     var updatedDto = CollectUserData();
-                    var resultDto = await profileManagerClient.UpdateProfileAsync(updatedDto);
+                    var resultDto = await profileManagerService.UpdateProfileAsync(updatedDto);
                     ProcessUpdateResponse(resultDto);
                 });
             }
