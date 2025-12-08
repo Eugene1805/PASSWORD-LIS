@@ -27,6 +27,8 @@ namespace PASSWORD_LIS_Client.Utils
         void CloseMainWindow();
         void GoToLobby();
 
+        void ReturnToLogin();
+
     }
 
     public class WindowService : IWindowService
@@ -188,6 +190,13 @@ namespace PASSWORD_LIS_Client.Utils
             var lobbyViewModel = new LobbyViewModel(this, App.FriendsManagerService, App.WaitRoomManagerService, App.ReportManagerService);
             var lobbyPage = new LobbyPage { DataContext = lobbyViewModel };
             NavigateTo(lobbyPage);
+        }
+
+        public void ReturnToLogin()
+        {
+            ShowLoginWindow();
+
+            CloseMainWindow();
         }
     }
 }

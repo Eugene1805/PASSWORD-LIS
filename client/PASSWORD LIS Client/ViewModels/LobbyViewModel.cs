@@ -82,7 +82,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand JoinGameCommand { get; }
         public ICommand CreateGameCommand { get; }
 
-        private readonly IFriendsManagerService friendsManagerService;
+        private IFriendsManagerService friendsManagerService;
         private readonly IWaitingRoomManagerService waitingRoomManagerService;
         private readonly IReportManagerService reportManagerService;
         private const int GameCodeLength = 5;
@@ -137,6 +137,24 @@ namespace PASSWORD_LIS_Client.ViewModels
                 _ = LoadFriendsAsync(); 
             }
             
+        }
+        public async Task RefreshAfterConnectionLoss()
+        {
+            if (SessionManager.IsUserLoggedIn() && !IsGuest)
+            {
+                this.friendsManagerService = App.FriendsManagerService;
+                friendsManagerService.FriendAdded -= OnFriendAdded;
+                friendsManagerService.FriendRemoved -= OnFriendRemoved;
+
+                friendsManagerService.FriendAdded += OnFriendAdded;
+                friendsManagerService.FriendRemoved += OnFriendRemoved;
+                await ExecuteAsync(async () =>
+                {
+                    friendsManagerService.SubscribeToFriendUpdatesAsync(SessionManager.CurrentUser.UserAccountId);
+
+                    await LoadFriendsAsync();
+                });
+            }
         }
 
         private void NavigateToProfile(object parameter)

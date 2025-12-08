@@ -12,13 +12,15 @@ namespace PASSWORD_LIS_Client.Views
         public LobbyPage()
         {
             InitializeComponent();
+            this.Loaded += LobbyPageLoaded;
         }
 
-        private void LobbyPageLoaded(object sender, RoutedEventArgs e)
+        private async void LobbyPageLoaded(object sender, RoutedEventArgs e)
         {
             if (DataContext is LobbyViewModel viewModel)
             {
                 viewModel.LoadSessionData();
+                await viewModel.RefreshAfterConnectionLoss();
             }
         }
     }

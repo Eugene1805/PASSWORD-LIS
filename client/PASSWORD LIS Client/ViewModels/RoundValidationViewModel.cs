@@ -275,7 +275,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
                 Cleanup();
                 App.ResetServices();
-                windowService.GoToLobby();
+                ForceReturnToLogin();
             });
         }
 
@@ -317,7 +317,22 @@ namespace PASSWORD_LIS_Client.ViewModels
                 Cleanup();
                 gameManagerService.Cleanup();
 
-                windowService.GoToLobby();
+                ForceReturnToLogin();
+            });
+        }
+
+        private void ForceReturnToLogin()
+        {
+            serverGuardian?.Stop();
+            Cleanup();
+
+            App.ResetServices();
+
+
+            // 4. Navegar
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                windowService.ReturnToLogin();
             });
         }
     }

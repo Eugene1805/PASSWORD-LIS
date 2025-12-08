@@ -305,7 +305,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
 
                 windowService.ShowPopUp(Properties.Langs.Lang.matchCancelledText, reason, PopUpIcon.Warning);
-                ForceReturnToLobby();
+                ForceReturnToLogin();
             });
         }
 
@@ -654,15 +654,20 @@ namespace PASSWORD_LIS_Client.ViewModels
                     Properties.Langs.Lang.connectionErrorTitleText, 
                     Properties.Langs.Lang.unexpectedServerErrorText,
                     PopUpIcon.Error);
-                ForceReturnToLobby();
+                ForceReturnToLogin();
             });
         }
-        private void ForceReturnToLobby()
+        private void ForceReturnToLogin()
         {
             UnsubscribeFromEvents();
             SafeCleanup();
+
             App.ResetServices();
-            windowService.GoToLobby();
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                windowService.ReturnToLogin();
+            });
         }
 
         private void SafeCleanup()
@@ -762,7 +767,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
 
                 windowService.ShowPopUp(title, message, PopUpIcon.Error);
-                ForceReturnToLobby();
+                ForceReturnToLogin();
             });
         }
     }
