@@ -83,7 +83,6 @@ namespace Test.ViewModelsTests
             var mockMusic = new Mock<BackgroundMusicService>();
             var vm = new SettingsViewModel(mockWindow.Object, mockFriends.Object, mockMusic.Object);
 
-            // Simulate logged in registered user
             var user = new PASSWORD_LIS_Client.LoginManagerServiceReference.UserDTO
             {
                 UserAccountId =123,
@@ -110,7 +109,7 @@ namespace Test.ViewModelsTests
             var mockMusic = new Mock<BackgroundMusicService>();
             var vm = new SettingsViewModel(mockWindow.Object, mockFriends.Object, mockMusic.Object);
 
-            // Simulate logged in GUEST (PlayerId <0)
+            
             var user = new PASSWORD_LIS_Client.LoginManagerServiceReference.UserDTO
             {
                 UserAccountId =999,

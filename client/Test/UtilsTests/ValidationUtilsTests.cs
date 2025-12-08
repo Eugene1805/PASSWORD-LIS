@@ -5,7 +5,6 @@ namespace Test.UtilsTests
 {
     public class ValidationUtilsTests
     {
-        #region ContainsOnlyLetters Tests
 
         [Fact]
         public void ContainsOnlyLetters_WithOnlyLetters_ShouldReturnTrue()
@@ -163,9 +162,6 @@ namespace Test.UtilsTests
             Assert.True(result);
         }
 
-        #endregion
-
-        #region ArePasswordRequirementsMet Tests
 
         [Fact]
         public void ArePasswordRequirementsMet_WithValidPassword_ShouldReturnTrue()
@@ -196,7 +192,7 @@ namespace Test.UtilsTests
         [Fact]
         public void ArePasswordRequirementsMet_WithMinimumLength_ShouldReturnTrue()
         {
-            // Arrange - 8 characters exactly
+            // Arrange
             var password = "Abcd12#$";
 
             // Act
@@ -209,7 +205,7 @@ namespace Test.UtilsTests
         [Fact]
         public void ArePasswordRequirementsMet_WithMaximumLength_ShouldReturnTrue()
         {
-            // Arrange - 15 characters exactly
+            // Arrange
             var password = "Abcd12#$1234567";
 
             // Act
@@ -274,7 +270,7 @@ namespace Test.UtilsTests
         [Fact]
         public void ArePasswordRequirementsMet_WithTooShort_ShouldReturnFalse()
         {
-            // Arrange - 7 characters
+            // Arrange 
             var password = "Pass12!";
 
             // Act
@@ -287,7 +283,7 @@ namespace Test.UtilsTests
         [Fact]
         public void ArePasswordRequirementsMet_WithTooLong_ShouldReturnFalse()
         {
-            // Arrange - 16 characters
+            // Arrange
             var password = "Pass12!123456789";
 
             // Act
@@ -349,9 +345,6 @@ namespace Test.UtilsTests
             Assert.True(result);
         }
 
-        #endregion
-
-        #region IsValidEmail Tests
 
         [Fact]
         public void IsValidEmail_WithValidEmail_ShouldReturnTrue()
@@ -587,9 +580,7 @@ namespace Test.UtilsTests
             Assert.False(result);
         }
 
-        #endregion
-
-        #region PasswordsMatch Tests
+       
 
         [Fact]
         public void PasswordsMatch_WithMatchingPasswords_ShouldReturnTrue()
@@ -717,6 +708,5 @@ namespace Test.UtilsTests
             Assert.True(result);
         }
 
-        #endregion
     }
 }

@@ -28,6 +28,7 @@ namespace Test.ViewModelsTests
         [Fact]
         public void SubmitReport_WhenSuccess_ShouldShowSuccessAndClose()
         {
+            // Arrange
             var reporter = MakeUser(10);
             var reported = MakePlayer(20, "badguy");
             var mockWindow = new Mock<IWindowService>();
@@ -38,8 +39,10 @@ namespace Test.ViewModelsTests
                 ReportReason = "spam"
             };
 
+            // Act
             vm.SubmitReportCommand.Execute(null);
 
+            // Assert
             mockWindow.Verify(w => w.ShowPopUp(
                 PASSWORD_LIS_Client.Properties.Langs.Lang.reportSummitedText,
                 PASSWORD_LIS_Client.Properties.Langs.Lang.thanksForReportText,
@@ -50,6 +53,7 @@ namespace Test.ViewModelsTests
         [Fact]
         public void SubmitReport_WhenFails_ShouldShowErrorAndClose()
         {
+            // Arrange
             var reporter = MakeUser(10);
             var reported = MakePlayer(20, "badguy");
             var mockWindow = new Mock<IWindowService>();
@@ -60,8 +64,10 @@ namespace Test.ViewModelsTests
                 ReportReason = "spam"
             };
 
+            // Act
             vm.SubmitReportCommand.Execute(null);
 
+            // Assert
             mockWindow.Verify(w => w.ShowPopUp(
                 PASSWORD_LIS_Client.Properties.Langs.Lang.errorTitleText,
                 PASSWORD_LIS_Client.Properties.Langs.Lang.couldNotSummitReportText,

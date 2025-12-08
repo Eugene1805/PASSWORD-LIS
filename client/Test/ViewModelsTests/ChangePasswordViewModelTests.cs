@@ -15,11 +15,14 @@ namespace Test.ViewModelsTests
         [Fact]
         public void CanChangePassword_WhenEmptyOrBusy_ShouldBeFalse()
         {
+            // Arrange
             var mockWindow = new Mock<IWindowService>();
             var mockClient = new Mock<IPasswordResetManagerService>();
             var vm = new ChangePasswordViewModel("e@e.com", "code", mockWindow.Object, mockClient.Object);
             vm.NewPassword = string.Empty;
             vm.ConfirmPassword = string.Empty;
+            // Act
+            // Assert
             Assert.False(vm.ChangePasswordCommand.CanExecute(null));
             vm.NewPassword = "x";
             vm.ConfirmPassword = "y";
@@ -30,6 +33,7 @@ namespace Test.ViewModelsTests
         [Fact]
         public void ChangePassword_WhenPasswordsDontMatch_ShouldShowWarning()
         {
+            // Arrange
             var mockWindow = new Mock<IWindowService>();
             var mockClient = new Mock<IPasswordResetManagerService>();
             var vm = new ChangePasswordViewModel("e@e.com", "code", mockWindow.Object, mockClient.Object)
@@ -38,8 +42,10 @@ namespace Test.ViewModelsTests
                 ConfirmPassword = "xyz"
             };
 
+            // Act
             vm.ChangePasswordCommand.Execute(null);
 
+            // Assert
             mockWindow.Verify(w => w.ShowPopUp(
                 PASSWORD_LIS_Client.Properties.Langs.Lang.warningTitleText,
                 PASSWORD_LIS_Client.Properties.Langs.Lang.matchingPasswordErrorText,
@@ -50,6 +56,7 @@ namespace Test.ViewModelsTests
         [Fact]
         public void ChangePassword_WhenServiceSuccess_ShouldShowSuccessAndNavigateLoginAndClose()
         {
+            // Arrange
             var mockWindow = new Mock<IWindowService>();
             var mockClient = new Mock<IPasswordResetManagerService>();
             mockClient.Setup(c => c.ResetPasswordAsync(It.IsAny<PasswordResetDTO>())).ReturnsAsync(true);
@@ -59,8 +66,10 @@ namespace Test.ViewModelsTests
                 ConfirmPassword = "Valid1!"
             };
 
+            // Act
             vm.ChangePasswordCommand.Execute(null);
 
+            // Assert
             mockWindow.Verify(w => w.ShowPopUp(
                 PASSWORD_LIS_Client.Properties.Langs.Lang.succesfulPasswordChangeTitleText,
                 PASSWORD_LIS_Client.Properties.Langs.Lang.successfulPasswordChangeText,
@@ -72,6 +81,7 @@ namespace Test.ViewModelsTests
         [Fact]
         public void ChangePassword_WhenServiceFails_ShouldShowWarning()
         {
+            // Arrange
             var mockWindow = new Mock<IWindowService>();
             var mockClient = new Mock<IPasswordResetManagerService>();
             mockClient.Setup(c => c.ResetPasswordAsync(It.IsAny<PasswordResetDTO>())).ReturnsAsync(false);
@@ -81,8 +91,10 @@ namespace Test.ViewModelsTests
                 ConfirmPassword = "Valid1!"
             };
 
+            // Act
             vm.ChangePasswordCommand.Execute(null);
 
+            // Assert
             mockWindow.Verify(w => w.ShowPopUp(
                 PASSWORD_LIS_Client.Properties.Langs.Lang.unexpectedErrorText,
                 PASSWORD_LIS_Client.Properties.Langs.Lang.passwordChangeFailedText,
@@ -92,6 +104,7 @@ namespace Test.ViewModelsTests
         [Fact]
         public void ChangePassword_WhenTimeout_ShouldShowTimeoutWarning()
         {
+            // Arrange
             var mockWindow = new Mock<IWindowService>();
             var mockClient = new Mock<IPasswordResetManagerService>();
             mockClient
@@ -103,8 +116,10 @@ namespace Test.ViewModelsTests
                 ConfirmPassword = "Valid1!"
             };
 
+            // Act
             vm.ChangePasswordCommand.Execute(null);
 
+            // Assert
             mockWindow.Verify(w => w.ShowPopUp(
                 PASSWORD_LIS_Client.Properties.Langs.Lang.timeLimitTitleText,
                 PASSWORD_LIS_Client.Properties.Langs.Lang.serverTimeoutText,
@@ -114,6 +129,7 @@ namespace Test.ViewModelsTests
         [Fact]
         public void ChangePassword_WhenEndpointNotFound_ShouldShowConnectionWarning()
         {
+            // Arrange
             var mockWindow = new Mock<IWindowService>();
             var mockClient = new Mock<IPasswordResetManagerService>();
             mockClient
@@ -125,8 +141,10 @@ namespace Test.ViewModelsTests
                 ConfirmPassword = "Valid1!"
             };
 
+            // Act
             vm.ChangePasswordCommand.Execute(null);
 
+            // Assert
             mockWindow.Verify(w => w.ShowPopUp(
                 PASSWORD_LIS_Client.Properties.Langs.Lang.connectionErrorTitleText,
                 PASSWORD_LIS_Client.Properties.Langs.Lang.serverConnectionInternetErrorText,
