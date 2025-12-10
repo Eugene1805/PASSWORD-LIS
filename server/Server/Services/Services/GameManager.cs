@@ -26,6 +26,7 @@ namespace Services.Services
         private readonly IMatchRepository matchRepository;
         private readonly IPlayerRepository playerRepository;
         private readonly TurnHistoryManager turnHistoryManager = new TurnHistoryManager();
+        private readonly WordDistributor wordDistributor = new WordDistributor();
         private static readonly ILog log = LogManager.GetLogger(typeof(GameManager));
 
         private const int RoundDurationSeconds = 40;
@@ -86,7 +87,7 @@ namespace Services.Services
                 turnHistoryManager.ApplyPassAndAdvance(session, team);
 
                 var nextWord = session.GetCurrentPassword(team);
-                await SendPassTurnUpdatesAsync(session, sender, nextWord);
+                await wordDistributor.SendPassTurnUpdatesAsync(session, sender, nextWord, HandlePlayerDisconnectionAsync);
             }, context: "GameManager: PassTurnAsync");
         }
 
@@ -101,7 +102,7 @@ namespace Services.Services
 
                 turnHistoryManager.RecordClue(session, sender.Player.Team, currentPassword, clue);
 
-                await NotifyPartnerOfClueAsync(session, sender, clue);
+                await wordDistributor.NotifyPartnerOfClueAsync(session, sender, clue, HandlePlayerDisconnectionAsync);
             }, context: "GameManager: SubmitClueAsync");
         }
 
@@ -358,41 +359,8 @@ namespace Services.Services
 
             session.StartRoundTimer(TimerTickCallback, session, RoundDurationSeconds);
 
-            await DistributeInitialWords(session, MatchTeam.RedTeam);
-            await DistributeInitialWords(session, MatchTeam.BlueTeam);
-        }
-
-        private async Task DistributeInitialWords(MatchSession session, MatchTeam team)
-        {
-            var clueGuy = session.GetPlayerByRole(team, PlayerRole.ClueGuy);
-            var guesser = session.GetPlayerByRole(team, PlayerRole.Guesser);
-            var word = session.GetCurrentPassword(team);
-
-            try
-            {
-                if (clueGuy.Callback != null)
-                {
-                    GameBroadcaster.SendToPlayer(clueGuy, cb => cb.OnNewPassword(DTOMapper.ToWordDTO(word)));
-                }
-
-                if (guesser.Callback != null)
-                {
-                    GameBroadcaster.SendToPlayer(guesser, cb => cb.OnNewPassword(DTOMapper.ToMaskedWordDTO(word)));
-                }
-            }
-            catch (Exception ex)
-            {
-                log.WarnFormat("Player disconnected during word distribution in match {0}: {1}",
-                    session.GameCode, ex.Message);
-                if (clueGuy.Player != null)
-                {
-                    await HandlePlayerDisconnectionAsync(session, clueGuy.Player.Id);
-                }
-                if (guesser.Player != null)
-                {
-                    await HandlePlayerDisconnectionAsync(session, guesser.Player.Id);
-                }
-            }
+            await wordDistributor.DistributeWordToTeamAsync(session, MatchTeam.RedTeam, HandlePlayerDisconnectionAsync);
+            await wordDistributor.DistributeWordToTeamAsync(session, MatchTeam.BlueTeam, HandlePlayerDisconnectionAsync);
         }
 
         private async void TimerTickCallback(object state)
@@ -523,8 +491,8 @@ namespace Services.Services
 
             session.StartRoundTimer(TimerTickCallback, session, SuddenDeathDurationSeconds);
 
-            await DistributeInitialWords(session, MatchTeam.RedTeam);
-            await DistributeInitialWords(session, MatchTeam.BlueTeam);
+            await wordDistributor.DistributeWordToTeamAsync(session, MatchTeam.RedTeam, HandlePlayerDisconnectionAsync);
+            await wordDistributor.DistributeWordToTeamAsync(session, MatchTeam.BlueTeam, HandlePlayerDisconnectionAsync);
         }
 
         private async Task PersistAndNotifyGameEnd(MatchSession session, MatchTeam? winner)
@@ -678,34 +646,6 @@ namespace Services.Services
             }
             return sender;
         }
-        private async Task SendPassTurnUpdatesAsync(MatchSession session, ActivePlayer sender, PasswordWord nextWord)
-        {
-            try
-            {
-                GameBroadcaster.SendToPlayer(sender, cb => cb.OnNewPassword(DTOMapper.ToWordDTO(nextWord)));
-            }
-            catch
-            {
-                await HandlePlayerDisconnectionAsync(session, sender.Player.Id);
-            }
-
-            var partner = session.GetPartner(sender);
-            if (partner?.Callback != null)
-            {
-                try
-                {
-                    GameBroadcaster.SendToPlayer(partner, cb =>
-                    {
-                        cb.OnNewPassword(DTOMapper.ToMaskedWordDTO(nextWord));
-                        cb.OnClueReceived("Your partner passed the word.");
-                    });
-                }
-                catch
-                {
-                    await HandlePlayerDisconnectionAsync(session, partner.Player.Id);
-                }
-            }
-        }
 
         private MatchSession GetGuessableSessionOrNull(string gameCode)
         {
@@ -752,31 +692,7 @@ namespace Services.Services
             var resultDto = new GuessResultDTO { IsCorrect = true, Team = team, NewScore = newScore };
             await BroadcastAndHandleDisconnectsAsync(session, cb => cb.OnGuessResult(resultDto));
 
-            var nextWord = session.GetCurrentPassword(team);
-            var clueGuy = session.GetPlayerByRole(team, PlayerRole.ClueGuy);
-            var guesser = session.GetPlayerByRole(team, PlayerRole.Guesser);
-            try
-            {
-                if (clueGuy.Callback != null)
-                {
-                    GameBroadcaster.SendToPlayer(clueGuy, cb => cb.OnNewPassword(DTOMapper.ToWordDTO(nextWord)));
-                }
-                if (guesser.Callback != null)
-                {
-                    GameBroadcaster.SendToPlayer(guesser, cb => cb.OnNewPassword(DTOMapper.ToMaskedWordDTO(nextWord)));
-                }
-            }
-            catch
-            {
-                if (clueGuy.Callback != null)
-                {
-                    await HandlePlayerDisconnectionIfFailed(session, clueGuy.Player.Id);
-                }
-                if (guesser.Callback != null)
-                {
-                    await HandlePlayerDisconnectionIfFailed(session, guesser.Player.Id);
-                }
-            }
+            await wordDistributor.SendNextWordToTeamAsync(session, team, HandlePlayerDisconnectionIfFailed);
         }
         private async Task HandleIncorrectGuessAsync(MatchSession session,
             ActivePlayer sender, MatchTeam team, int currentScore)
@@ -826,21 +742,6 @@ namespace Services.Services
                 return null;
             }
             return (session, sender, currentPassword);
-        }
-
-        private async Task NotifyPartnerOfClueAsync(MatchSession session, ActivePlayer sender, string clue)
-        {
-            var partner = session.GetPartner(sender);
-            if (partner?.Callback == null) return;
-
-            try
-            {
-                GameBroadcaster.SendToPlayer(partner, cb => cb.OnClueReceived(clue));
-            }
-            catch
-            {
-                await HandlePlayerDisconnectionAsync(session, partner.Player.Id);
-            }
         }
 
         private (MatchSession, ActivePlayer, PasswordWord)? ValidateAndGetGuessContext(

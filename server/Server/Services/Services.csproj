@@ -132,6 +132,7 @@
     <Compile Include="Services\Internal\MatchSession.cs" />
     <Compile Include="Services\Internal\RulesEngine.cs" />
     <Compile Include="Services\Internal\TurnHistoryManager.cs" />
+    <Compile Include="Services\Internal\WordDistributor.cs" />
     <Compile Include="Services\LoginManager.cs" />
     <Compile Include="Services\ProfileManager.cs" />
     <Compile Include="Services\PasswordResetManager.cs" />
