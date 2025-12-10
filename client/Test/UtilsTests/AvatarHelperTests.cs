@@ -23,10 +23,8 @@ namespace Test.UtilsTests
         [InlineData(6, "Avatar6.png")]
         public void GetAvatarUriById_WithValidPhotoId_ShouldReturnCorrectUri(int photoId, string expectedFileName)
         {
-            // Act
             var result = AvatarHelper.GetAvatarUriById(photoId);
 
-            // Assert
             Assert.NotNull(result);
             Assert.Contains(expectedFileName, result.ToString());
             Assert.Contains("/Resources/", result.ToString());
@@ -41,10 +39,8 @@ namespace Test.UtilsTests
         [InlineData(-100)]
         public void GetAvatarUriById_WithInvalidPhotoId_ShouldReturnDefaultUri(int photoId)
         {
-            // Act
             var result = AvatarHelper.GetAvatarUriById(photoId);
 
-            // Assert
             Assert.NotNull(result);
             Assert.Contains("AvatarDefault.png", result.ToString());
             Assert.Contains("/Resources/", result.ToString());
@@ -54,10 +50,8 @@ namespace Test.UtilsTests
         [Fact]
         public void GetAvatarUriById_WithPhotoIdAtLowerBoundary_ShouldReturnAvatar1()
         {
-            // Act
             var result = AvatarHelper.GetAvatarUriById(1);
 
-            // Assert
             Assert.NotNull(result);
             Assert.Contains("Avatar1.png", result.ToString());
         }
@@ -65,10 +59,8 @@ namespace Test.UtilsTests
         [Fact]
         public void GetAvatarUriById_WithPhotoIdAtUpperBoundary_ShouldReturnAvatar6()
         {
-            // Act
             var result = AvatarHelper.GetAvatarUriById(6);
 
-            // Assert
             Assert.NotNull(result);
             Assert.Contains("Avatar6.png", result.ToString());
         }
@@ -76,10 +68,9 @@ namespace Test.UtilsTests
         [Fact]
         public void GetAvatarUriById_WithPhotoIdJustBelowLowerBoundary_ShouldReturnDefault()
         {
-            // Act
+
             var result = AvatarHelper.GetAvatarUriById(0);
 
-            // Assert
             Assert.NotNull(result);
             Assert.Contains("AvatarDefault.png", result.ToString());
         }
@@ -87,10 +78,8 @@ namespace Test.UtilsTests
         [Fact]
         public void GetAvatarUriById_WithPhotoIdJustAboveUpperBoundary_ShouldReturnDefault()
         {
-            // Act
             var result = AvatarHelper.GetAvatarUriById(7);
 
-            // Assert
             Assert.NotNull(result);
             Assert.Contains("AvatarDefault.png", result.ToString());
         }

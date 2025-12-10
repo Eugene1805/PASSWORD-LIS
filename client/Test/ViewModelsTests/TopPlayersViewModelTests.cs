@@ -29,7 +29,6 @@ namespace Test.ViewModelsTests
         [Fact]
         public async Task Constructor_WhenServiceReturnsData_ShouldLoadTopTeamsSuccessfully()
         {
-            // Arrange
             var mockService = new Mock<ITopPlayersManagerService>();
             var mockWindow = new Mock<IWindowService>();
             var expectedTeams = new[]
@@ -39,10 +38,8 @@ namespace Test.ViewModelsTests
             };
             mockService.Setup(s => s.GetTopAsync(It.IsAny<int>())).ReturnsAsync(expectedTeams);
 
-            // Act
             var viewModel = new TopPlayersViewModel(mockService.Object, mockWindow.Object);
 
-            // Assert
             await WaitUntilLoadingCompletes(() => !viewModel.IsLoading);
             Assert.Equal(2, viewModel.TopTeams.Count);
             Assert.All(viewModel.TopTeams, team => Assert.IsType<TeamDTO>(team));
@@ -51,7 +48,6 @@ namespace Test.ViewModelsTests
         [Fact]
         public async Task Constructor_WhenServiceThrowsFaultException_ShouldShowStatisticsErrorPopup()
         {
-            // Arrange
             var mockService = new Mock<ITopPlayersManagerService>();
             var mockWindow = new Mock<IWindowService>();
             
@@ -64,10 +60,8 @@ namespace Test.ViewModelsTests
                 .Setup(s => s.GetTopAsync(It.IsAny<int>()))
                 .ThrowsAsync(new FaultException<ServiceErrorDetailDTO>(errorDetail));
 
-            // Act
             var viewModel = new TopPlayersViewModel(mockService.Object, mockWindow.Object);
 
-            // Assert
             await WaitUntilLoadingCompletes(() => !viewModel.IsLoading);
             mockWindow.Verify(w => w.ShowPopUp(
                 It.Is<string>(title => title == PASSWORD_LIS_Client.Properties.Langs.Lang.errorTitleText),
@@ -78,17 +72,14 @@ namespace Test.ViewModelsTests
         [Fact]
         public async Task Constructor_WhenEndpointNotFound_ShouldShowConnectionErrorPopup()
         {
-            // Arrange
             var mockService = new Mock<ITopPlayersManagerService>();
             var mockWindow = new Mock<IWindowService>();
             mockService
                 .Setup(s => s.GetTopAsync(It.IsAny<int>()))
                 .ThrowsAsync(new EndpointNotFoundException());
 
-            // Act
             var viewModel = new TopPlayersViewModel(mockService.Object, mockWindow.Object);
 
-            // Assert
             await WaitUntilLoadingCompletes(() => !viewModel.IsLoading);
             mockWindow.Verify(w => w.ShowPopUp(
                 It.Is<string>(title => title == PASSWORD_LIS_Client.Properties.Langs.Lang.connectionErrorTitleText),
@@ -99,17 +90,14 @@ namespace Test.ViewModelsTests
         [Fact]
         public async Task Constructor_WhenCommunicationException_ShouldShowNetworkErrorPopup()
         {
-            // Arrange
             var mockService = new Mock<ITopPlayersManagerService>();
             var mockWindow = new Mock<IWindowService>();
             mockService
                 .Setup(s => s.GetTopAsync(It.IsAny<int>()))
                 .ThrowsAsync(new CommunicationException());
 
-            // Act
             var viewModel = new TopPlayersViewModel(mockService.Object, mockWindow.Object);
 
-            // Assert
             await WaitUntilLoadingCompletes(() => !viewModel.IsLoading);
             mockWindow.Verify(w => w.ShowPopUp(
                 It.Is<string>(title => title == PASSWORD_LIS_Client.Properties.Langs.Lang.networkErrorTitleText),

@@ -26,7 +26,6 @@ namespace Test.ViewModelsTests
         [Fact]
         public async Task SignUpCommand_WhenInputIsValidAndServiceSucceeds_ShouldNavigateToVerifyCode()
         {
-            // Arrange
             viewModel.FirstName = "Test";
             viewModel.LastName = "User";
             viewModel.Nickname = "tester";
@@ -40,10 +39,8 @@ namespace Test.ViewModelsTests
             mockAccountService.Setup(s => s.CreateAccountAsync(It.IsAny<NewAccountDTO>()))
                                .Returns(Task.CompletedTask);
 
-            // Act
             await viewModel.SignUpAsync();
 
-            // Assert
             mockAccountService.Verify(s => s.IsNicknameInUseAsync(It.IsAny<string>()), Times.Once);
             mockAccountService.Verify(s => s.CreateAccountAsync(It.IsAny<NewAccountDTO>()), Times.Once);
             mockWindowService.Verify(w => w.ShowVerifyCodeWindow(viewModel.Email, It.IsAny<VerificationReason>()), 
@@ -54,7 +51,6 @@ namespace Test.ViewModelsTests
         [Fact]
         public async Task SignUpCommand_WhenServiceThrowsFaultException_ShouldShowUserExistsPopUp()
         {
-            // Arrange
             viewModel.FirstName = "Test";
             viewModel.LastName = "User";
             viewModel.Nickname = "tester";
@@ -72,10 +68,8 @@ namespace Test.ViewModelsTests
             mockAccountService.Setup(s => s.CreateAccountAsync(It.IsAny<NewAccountDTO>()))
                                .ThrowsAsync(new FaultException<ServiceErrorDetailDTO>(errorDetail));
 
-            // Act
             await viewModel.SignUpAsync();
 
-            // Assert
             mockWindowService.Verify(w => w.ShowPopUp(
                 It.Is<string>(s => s == PASSWORD_LIS_Client.Properties.Langs.Lang.errorTitleText),
                 It.Is<string>(s => s == PASSWORD_LIS_Client.Properties.Langs.Lang.userAlreadyExistText),
@@ -87,23 +81,18 @@ namespace Test.ViewModelsTests
         [Fact]
         public void CanExecuteSignUp_WhenFieldsAreEmpty_ShouldBeFalse()
         {
-            // Arrange
-            viewModel.Email = ""; 
+            viewModel.Email = "";
 
-            // Act
             var canExecute = viewModel.SignUpCommand.CanExecute(null);
 
-            // Assert
             Assert.False(canExecute);
         }
 
         [Fact]
         public void NavigateToLoginCommand_ShouldShowLoginAndCloseCurrentWindow()
         {
-            // Arrange & Act
             viewModel.NavigateToLoginCommand.Execute(null);
 
-            // Assert
             mockWindowService.Verify(w => w.ShowLoginWindow(), Times.Once);
             mockWindowService.Verify(w => w.CloseWindow(viewModel), Times.Once);
         }
@@ -114,10 +103,8 @@ namespace Test.ViewModelsTests
         [InlineData("Test123", "nameInvalidCharsText")]
         public void FirstName_WhenInvalid_ShouldSetErrorMessage(string value, string errorKey)
         {
-            // Act
             viewModel.FirstName = value;
 
-            // Assert
             var expectedError = typeof(PASSWORD_LIS_Client.Properties.Langs.Lang)
                 .GetProperty(errorKey)
                 .GetValue(null) as string;
@@ -127,10 +114,8 @@ namespace Test.ViewModelsTests
         [Fact]
         public void FirstName_WhenValid_ShouldClearErrorMessage()
         {
-            // Act
             viewModel.FirstName = "ValidName";
 
-            // Assert
             Assert.Null(viewModel.FirstNameError);
         }
 
@@ -140,10 +125,8 @@ namespace Test.ViewModelsTests
         [InlineData("Test123", "lastNameInvalidCharsText")]
         public void LastName_WhenInvalid_ShouldSetErrorMessage(string value, string errorKey)
         {
-            // Act
             viewModel.LastName = value;
 
-            // Assert
             var expectedError = typeof(PASSWORD_LIS_Client.Properties.Langs.Lang)
                 .GetProperty(errorKey)
                 .GetValue(null) as string;
@@ -153,10 +136,8 @@ namespace Test.ViewModelsTests
         [Fact]
         public void LastName_WhenValid_ShouldClearErrorMessage()
         {
-            // Act
             viewModel.LastName = "ValidLastName";
 
-            // Assert
             Assert.Null(viewModel.LastNameError);
         }
 
@@ -165,10 +146,8 @@ namespace Test.ViewModelsTests
         [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "nicknameTooLongText")]
         public void Nickname_WhenInvalid_ShouldSetErrorMessage(string value, string errorKey)
         {
-            // Act
             viewModel.Nickname = value;
 
-            // Assert
             var expectedError = typeof(PASSWORD_LIS_Client.Properties.Langs.Lang)
                 .GetProperty(errorKey)
                 .GetValue(null) as string;
@@ -178,17 +157,14 @@ namespace Test.ViewModelsTests
         [Fact]
         public void Nickname_WhenValid_ShouldClearErrorMessage()
         {
-            // Act
             viewModel.Nickname = "ValidNickname";
 
-            // Assert
             Assert.Null(viewModel.NicknameError);
         }
 
         [Fact]
         public async Task SignUpAsync_WhenNicknameInUse_ShouldSetNicknameError()
         {
-            // Arrange
             viewModel.FirstName = "Test";
             viewModel.LastName = "User";
             viewModel.Nickname = "existingNickname";
@@ -199,10 +175,8 @@ namespace Test.ViewModelsTests
             mockAccountService.Setup(s => s.IsNicknameInUseAsync(It.IsAny<string>()))
                                .ReturnsAsync(true);
 
-            // Act
             await viewModel.SignUpAsync();
 
-            // Assert
             Assert.Equal(PASSWORD_LIS_Client.Properties.Langs.Lang.nicknameInUseText, viewModel.NicknameError);
             mockAccountService.Verify(s => s.CreateAccountAsync(It.IsAny<NewAccountDTO>()), Times.Never);
         }
@@ -212,30 +186,24 @@ namespace Test.ViewModelsTests
         [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")]
         public void Email_WhenEmptyOrTooLong_ShouldSetErrorMessage(string value)
         {
-            // Act
             viewModel.Email = value;
 
-            // Assert
             Assert.NotNull(viewModel.EmailError);
         }
 
         [Fact]
         public void Email_WhenInvalidFormat_ShouldSetErrorMessage()
         {
-            // Act
             viewModel.Email = "invalidemail";
 
-            // Assert
             Assert.Equal(PASSWORD_LIS_Client.Properties.Langs.Lang.invalidEmailFormatText, viewModel.EmailError);
         }
 
         [Fact]
         public void Email_WhenValid_ShouldClearErrorMessage()
         {
-            // Act
             viewModel.Email = "valid@email.com";
 
-            // Assert
             Assert.Null(viewModel.EmailError);
         }
 
@@ -244,20 +212,16 @@ namespace Test.ViewModelsTests
         [InlineData("weak")]
         public void Password_WhenInvalid_ShouldSetErrorMessage(string value)
         {
-            // Act
             viewModel.Password = value;
 
-            // Assert
             Assert.Equal(PASSWORD_LIS_Client.Properties.Langs.Lang.userPasswordRequirementsText, viewModel.PasswordError);
         }
 
         [Fact]
         public void Password_WhenValid_ShouldClearErrorMessage()
         {
-            // Act
             viewModel.Password = "ValidPass1!";
 
-            // Assert
             Assert.Null(viewModel.PasswordError);
         }
 
@@ -266,46 +230,37 @@ namespace Test.ViewModelsTests
         [InlineData("DifferentPass1!")]
         public void ConfirmPassword_WhenInvalid_ShouldSetErrorMessage(string confirmPassword)
         {
-            // Arrange
             viewModel.Password = "ValidPass1!";
 
-            // Act
             viewModel.ConfirmPassword = confirmPassword;
 
-            // Assert
             Assert.Equal(PASSWORD_LIS_Client.Properties.Langs.Lang.matchingPasswordErrorText, viewModel.ConfirmPasswordError);
         }
 
         [Fact]
         public void ConfirmPassword_WhenMatchesPassword_ShouldClearErrorMessage()
         {
-            // Arrange
             viewModel.Password = "ValidPass1!";
             viewModel.ConfirmPassword = "ValidPass1!";
 
-            // Assert
             Assert.Null(viewModel.ConfirmPasswordError);
         }
 
         [Fact]
         public void Password_WhenChangedAfterConfirmPassword_ShouldRevalidateConfirmPassword()
         {
-            // Arrange
             viewModel.Password = "ValidPass1!";
             viewModel.ConfirmPassword = "ValidPass1!";
             Assert.Null(viewModel.ConfirmPasswordError);
 
-            // Act
             viewModel.Password = "NewValidPass1!";
 
-            // Assert
             Assert.Equal(PASSWORD_LIS_Client.Properties.Langs.Lang.matchingPasswordErrorText, viewModel.ConfirmPasswordError);
         }
 
         [Fact]
         public void CanExecuteSignUp_WhenAllFieldsValidAndFilled_ShouldReturnTrue()
         {
-            // Arrange
             viewModel.FirstName = "Test";
             viewModel.LastName = "User";
             viewModel.Nickname = "tester";
@@ -313,35 +268,29 @@ namespace Test.ViewModelsTests
             viewModel.Password = "ValidPass1!";
             viewModel.ConfirmPassword = "ValidPass1!";
 
-            // Act
             var canExecute = viewModel.SignUpCommand.CanExecute(null);
 
-            // Assert
             Assert.True(canExecute);
         }
 
         [Fact]
         public void CanExecuteSignUp_WhenAnyFieldHasError_ShouldReturnFalse()
         {
-            // Arrange
-            viewModel.FirstName = "Test123"; // Invalid
+            viewModel.FirstName = "Test123";
             viewModel.LastName = "User";
             viewModel.Nickname = "tester";
             viewModel.Email = "test@example.com";
             viewModel.Password = "ValidPass1!";
             viewModel.ConfirmPassword = "ValidPass1!";
 
-            // Act
             var canExecute = viewModel.SignUpCommand.CanExecute(null);
 
-            // Assert
             Assert.False(canExecute);
         }
 
         [Fact]
         public void CanExecuteSignUp_WhenIsSigningUp_ShouldReturnFalse()
         {
-            // Arrange
             viewModel.FirstName = "Test";
             viewModel.LastName = "User";
             viewModel.Nickname = "tester";
@@ -349,21 +298,17 @@ namespace Test.ViewModelsTests
             viewModel.Password = "ValidPass1!";
             viewModel.ConfirmPassword = "ValidPass1!";
 
-            // Simulate signing up
             typeof(SignUpViewModel).GetProperty(nameof(viewModel.IsSigningUp))
                 .SetValue(viewModel, true);
 
-            // Act
             var canExecute = viewModel.SignUpCommand.CanExecute(null);
 
-            // Assert
             Assert.False(canExecute);
         }
 
         [Fact]
         public async Task SignUpAsync_WhenAllFieldsValid_ShouldNotShowAnyPopUp()
         {
-            // Arrange
             viewModel.FirstName = "Test";
             viewModel.LastName = "User";
             viewModel.Nickname = "tester";
@@ -376,10 +321,8 @@ namespace Test.ViewModelsTests
             mockAccountService.Setup(s => s.CreateAccountAsync(It.IsAny<NewAccountDTO>()))
                                .Returns(Task.CompletedTask);
 
-            // Act
             await viewModel.SignUpAsync();
 
-            // Assert
             Assert.Null(viewModel.FirstNameError);
             Assert.Null(viewModel.LastNameError);
             Assert.Null(viewModel.NicknameError);
@@ -391,18 +334,15 @@ namespace Test.ViewModelsTests
         [Fact]
         public async Task SignUpAsync_WhenMultipleFieldsInvalid_ShouldSetAllErrorMessages()
         {
-            // Arrange
-            viewModel.FirstName = "Test123"; // Invalid: contains numbers
-            viewModel.LastName = ""; // Invalid: empty
+            viewModel.FirstName = "Test123";
+            viewModel.LastName = "";
             viewModel.Nickname = "tester";
-            viewModel.Email = "invalidemail"; // Invalid: format
-            viewModel.Password = "weak"; // Invalid: doesn't meet requirements
-            viewModel.ConfirmPassword = "different"; // Invalid: doesn't match
+            viewModel.Email = "invalidemail";
+            viewModel.Password = "weak";
+            viewModel.ConfirmPassword = "different";
 
-            // Act
             await viewModel.SignUpAsync();
 
-            // Assert
             Assert.NotNull(viewModel.FirstNameError);
             Assert.NotNull(viewModel.LastNameError);
             Assert.NotNull(viewModel.EmailError);
@@ -415,14 +355,11 @@ namespace Test.ViewModelsTests
         [Fact]
         public void ValidationErrors_WhenFieldsCorrected_ShouldClearAutomatically()
         {
-            // Arrange - Set invalid values
             viewModel.FirstName = "Test123";
             Assert.NotNull(viewModel.FirstNameError);
 
-            // Act - Correct the value
             viewModel.FirstName = "Test";
 
-            // Assert
             Assert.Null(viewModel.FirstNameError);
         }
     }

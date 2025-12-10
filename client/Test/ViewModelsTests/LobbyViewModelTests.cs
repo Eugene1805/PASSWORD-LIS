@@ -57,25 +57,21 @@ namespace Test.ViewModelsTests
         [Fact]
         public void CanJoinGame_ValidatesGameCodeLength()
         {
-            // Arrange
             SessionManager.Logout();
             var mockWindow = new Mock<IWindowService>();
             var mockFriends = new Mock<IFriendsManagerService>();
             var mockWaiting = new Mock<IWaitingRoomManagerService>();
             var mockReport = new Mock<IReportManagerService>();
             var vm = new LobbyViewModel(mockWindow.Object, mockFriends.Object, mockWaiting.Object, mockReport.Object);
-            vm.GameCodeToJoin = "AB12"; // length4
-            // Act
-            // Assert
+            vm.GameCodeToJoin = "AB12";
             Assert.False(vm.JoinGameCommand.CanExecute(null));
-            vm.GameCodeToJoin = "ABCDE"; // length5
+            vm.GameCodeToJoin = "ABCDE";
             Assert.True(vm.JoinGameCommand.CanExecute(null));
         }
 
         [Fact]
         public async Task CreateGame_WhenBanned_ShouldShowWarningAndNotNavigate()
         {
-            // Arrange
             SessionManager.Login(LoggedUser());
             var mockWindow = new Mock<IWindowService>();
             var mockFriends = new Mock<IFriendsManagerService>();
@@ -84,14 +80,12 @@ namespace Test.ViewModelsTests
             mockReport.Setup(r => r.IsPlayerBannedAsync(It.IsAny<int>())).ReturnsAsync(true);
             var vm = new LobbyViewModel(mockWindow.Object, mockFriends.Object, mockWaiting.Object, mockReport.Object);
 
-            // Act
             await Task.Run(async () =>
             {
                 vm.CreateGameCommand.Execute(null);
                 await Task.Delay(300);
             });
 
-            // Assert
             mockWindow.Verify(w => w.ShowPopUp(
                 It.Is<string>(s => s == PASSWORD_LIS_Client.Properties.Langs.Lang.bannedAccountText),
                 It.Is<string>(s => s == PASSWORD_LIS_Client.Properties.Langs.Lang.cantCreateMatchText),
@@ -102,7 +96,6 @@ namespace Test.ViewModelsTests
         [Fact]
         public async Task CreateGame_OnSuccess_ShouldNavigateToWaitingRoom()
         {
-            // Arrange
             SessionManager.Login(LoggedUser());
             var mockWindow = new Mock<IWindowService>();
             var mockFriends = new Mock<IFriendsManagerService>();
@@ -129,7 +122,6 @@ namespace Test.ViewModelsTests
 
             var vm = new LobbyViewModel(mockWindow.Object, mockFriends.Object, mockWaiting.Object, mockReport.Object);
 
-            // Act
             await Task.Run(async () =>
             {
                 vm.CreateGameCommand.Execute(null);
@@ -139,14 +131,12 @@ namespace Test.ViewModelsTests
             await WaitUntilAsync(() => mockWindow.Invocations.Any(i 
                 => i.Method.Name == nameof(IWindowService.NavigateTo)));
 
-            // Assert
             Assert.Contains(mockWindow.Invocations, i => i.Method.Name == nameof(IWindowService.NavigateTo));
         }
 
         [Fact]
         public async Task JoinGame_AsGuestBannedCheckNotRequired_SuccessNavigates()
         {
-            // Arrange
             SessionManager.Login(LoggedUser(-1));
             var mockWindow = new Mock<IWindowService>();
             var mockFriends = new Mock<IFriendsManagerService>();
@@ -175,7 +165,6 @@ namespace Test.ViewModelsTests
                 GameCodeToJoin = "ABCDE"
             };
 
-            // Act
             await Task.Run(async () =>
             {
                 vm.JoinGameCommand.Execute(null);
@@ -185,14 +174,12 @@ namespace Test.ViewModelsTests
             await WaitUntilAsync(() => mockWindow.Invocations.Any(i 
                 => i.Method.Name == nameof(IWindowService.NavigateTo)));
 
-            // Assert
             Assert.Contains(mockWindow.Invocations, i => i.Method.Name == nameof(IWindowService.NavigateTo));
         }
 
         [Fact]
         public async Task JoinGame_AsRegisteredBanned_ShouldWarnAndNotNavigate()
         {
-            // Arrange
             SessionManager.Login(LoggedUser(5));
             var mockWindow = new Mock<IWindowService>();
             var mockFriends = new Mock<IFriendsManagerService>();
@@ -205,14 +192,12 @@ namespace Test.ViewModelsTests
                 GameCodeToJoin = "ABCDE"
             };
 
-            // Act
             await Task.Run(async () =>
             {
                 vm.JoinGameCommand.Execute(null);
                 await Task.Delay(300);
             });
 
-            // Assert
             mockWindow.Verify(w => w.ShowPopUp(
                 It.Is<string>(s => s == PASSWORD_LIS_Client.Properties.Langs.Lang.bannedAccountText),
                 It.Is<string>(s => s == PASSWORD_LIS_Client.Properties.Langs.Lang.cantJoinMatchText),

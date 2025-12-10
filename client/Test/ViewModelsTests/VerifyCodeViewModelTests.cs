@@ -14,7 +14,7 @@ namespace Test.ViewModelsTests
         [Fact]
         public void CanVerify_BlocksWhenBusyOrEmpty()
         {
-            // Arrange
+            
             var mockWin = new Mock<IWindowService>();
             var mockNewAcc = new Mock<IVerificationCodeManagerService>();
             var mockReset = new Mock<IPasswordResetManagerService>();
@@ -25,8 +25,7 @@ namespace Test.ViewModelsTests
             mockNewAcc.Object,
             mockReset.Object);
             vm.EnteredCode = string.Empty;
-            // Act
-            // Assert
+            
             Assert.False(vm.VerifyCodeCommand.CanExecute(null));
             vm.EnteredCode = "123456";
             vm.IsBusy = true;
@@ -36,7 +35,7 @@ namespace Test.ViewModelsTests
         [Fact]
         public void Verify_WhenEmpty_ShouldNotExecute()
         {
-            // Arrange
+
             var mockWin = new Mock<IWindowService>();
             var mockNewAcc = new Mock<IVerificationCodeManagerService>();
             var mockReset = new Mock<IPasswordResetManagerService>();
@@ -47,16 +46,15 @@ namespace Test.ViewModelsTests
             mockNewAcc.Object,
             mockReset.Object);
             vm.EnteredCode = string.Empty;
-            // Act
+
             vm.VerifyCodeCommand.Execute(null);
-            // Assert
+
             mockNewAcc.Verify(s => s.VerifyEmailAsync(It.IsAny<EmailVerificationDTO>()), Times.Never);
         }
 
         [Fact]
         public void Verify_AccountActivation_Success_ShouldShowSuccessAndNavigateLogin()
         {
-            // Arrange
             var mockWin = new Mock<IWindowService>();
             var mockNewAcc = new Mock<IVerificationCodeManagerService>();
             var mockReset = new Mock<IPasswordResetManagerService>();
@@ -73,10 +71,8 @@ namespace Test.ViewModelsTests
                 EnteredCode = "999999"
             };
 
-            // Act
             vm.VerifyCodeCommand.Execute(null);
 
-            // Assert
             mockWin.Verify(w => w.ShowPopUp(
             PASSWORD_LIS_Client.Properties.Langs.Lang.profileUpdatedTitleText,
             PASSWORD_LIS_Client.Properties.Langs.Lang.successfulSignUpText,
@@ -88,7 +84,6 @@ namespace Test.ViewModelsTests
         [Fact]
         public void Verify_PasswordReset_Success_ShouldOpenChangePassword()
         {
-            // Arrange
             var mockWin = new Mock<IWindowService>();
             var mockNewAcc = new Mock<IVerificationCodeManagerService>();
             var mockReset = new Mock<IPasswordResetManagerService>();
@@ -106,10 +101,8 @@ namespace Test.ViewModelsTests
                 EnteredCode = "999999"
             };
 
-            // Act
             vm.VerifyCodeCommand.Execute(null);
 
-            // Assert
             mockWin.Verify(w => w.ShowChangePasswordWindow("user@ex.com", "999999"), Times.Once);
             mockWin.Verify(w => w.CloseWindow(vm), Times.Once);
         }
@@ -117,7 +110,6 @@ namespace Test.ViewModelsTests
         [Fact]
         public void Verify_WhenInvalid_ShouldSetErrorProperty()
         {
-            // Arrange
             var mockWin = new Mock<IWindowService>();
             var mockNewAcc = new Mock<IVerificationCodeManagerService>();
             var mockReset = new Mock<IPasswordResetManagerService>();
@@ -134,10 +126,8 @@ namespace Test.ViewModelsTests
                 EnteredCode = "000000"
             };
 
-            // Act
             vm.VerifyCodeCommand.Execute(null);
 
-            // Assert
             Assert.NotNull(vm.EnteredCodeError);
             Assert.Equal(PASSWORD_LIS_Client.Properties.Langs.Lang.codeIncorrectOrExpiredText, vm.EnteredCodeError);
         }
@@ -145,7 +135,6 @@ namespace Test.ViewModelsTests
         [Fact]
         public void Resend_WhenAccountActivation_Success_ShouldShowInfoPopup()
         {
-            // Arrange
             var mockWin = new Mock<IWindowService>();
             var mockNewAcc = new Mock<IVerificationCodeManagerService>();
             var mockReset = new Mock<IPasswordResetManagerService>();
@@ -157,10 +146,8 @@ namespace Test.ViewModelsTests
             mockNewAcc.Object,
             mockReset.Object);
 
-            // Act
             vm.ResendCodeCommand.Execute(null);
 
-            // Assert
             mockWin.Verify(w => w.ShowPopUp(
             PASSWORD_LIS_Client.Properties.Langs.Lang.codeSentTitleText,
             PASSWORD_LIS_Client.Properties.Langs.Lang.newCodeSentText,
@@ -170,7 +157,6 @@ namespace Test.ViewModelsTests
         [Fact]
         public void Resend_WhenPasswordReset_Failure_ShouldWarn()
         {
-            // Arrange
             var mockWin = new Mock<IWindowService>();
             var mockNewAcc = new Mock<IVerificationCodeManagerService>();
             var mockReset = new Mock<IPasswordResetManagerService>();
@@ -185,10 +171,8 @@ namespace Test.ViewModelsTests
             mockNewAcc.Object,
             mockReset.Object);
 
-            // Act
             vm.ResendCodeCommand.Execute(null);
 
-            // Assert
             mockWin.Verify(w => w.ShowPopUp(
             PASSWORD_LIS_Client.Properties.Langs.Lang.timeLimitTitleText,
             PASSWORD_LIS_Client.Properties.Langs.Lang.waitAMinuteForCodeText,
@@ -198,7 +182,6 @@ namespace Test.ViewModelsTests
         [Fact]
         public void Verify_WhenTimeout_ShouldShowTimeoutWarning()
         {
-            // Arrange
             var mockWin = new Mock<IWindowService>();
             var mockNewAcc = new Mock<IVerificationCodeManagerService>();
             var mockReset = new Mock<IPasswordResetManagerService>();
@@ -215,10 +198,8 @@ namespace Test.ViewModelsTests
                 EnteredCode = "111111"
             };
 
-            // Act
             vm.VerifyCodeCommand.Execute(null);
 
-            // Assert
             mockWin.Verify(w => w.ShowPopUp(
             PASSWORD_LIS_Client.Properties.Langs.Lang.timeLimitTitleText,
             PASSWORD_LIS_Client.Properties.Langs.Lang.serverTimeoutText,
@@ -228,7 +209,6 @@ namespace Test.ViewModelsTests
         [Fact]
         public void EnteredCode_WhenEmpty_ShouldSetError()
         {
-            // Arrange
             var mockWin = new Mock<IWindowService>();
             var mockNewAcc = new Mock<IVerificationCodeManagerService>();
             var mockReset = new Mock<IPasswordResetManagerService>();
@@ -241,7 +221,6 @@ namespace Test.ViewModelsTests
 
             vm.EnteredCode = string.Empty;
 
-            // Assert
             Assert.NotNull(vm.EnteredCodeError);
             Assert.Equal(PASSWORD_LIS_Client.Properties.Langs.Lang.requiredFieldsText, vm.EnteredCodeError);
         }
@@ -249,7 +228,6 @@ namespace Test.ViewModelsTests
         [Fact]
         public void EnteredCode_WhenLessThanSixDigits_ShouldSetError()
         {
-            // Arrange
             var mockWin = new Mock<IWindowService>();
             var mockNewAcc = new Mock<IVerificationCodeManagerService>();
             var mockReset = new Mock<IPasswordResetManagerService>();
@@ -262,7 +240,6 @@ namespace Test.ViewModelsTests
 
             vm.EnteredCode = "12345";
 
-            // Assert
             Assert.NotNull(vm.EnteredCodeError);
             Assert.Equal(PASSWORD_LIS_Client.Properties.Langs.Lang.codeIncorrectOrExpiredText, vm.EnteredCodeError);
         }
@@ -270,7 +247,6 @@ namespace Test.ViewModelsTests
         [Fact]
         public void EnteredCode_WhenValid_ShouldClearError()
         {
-            // Arrange
             var mockWin = new Mock<IWindowService>();
             var mockNewAcc = new Mock<IVerificationCodeManagerService>();
             var mockReset = new Mock<IPasswordResetManagerService>();
@@ -283,14 +259,12 @@ namespace Test.ViewModelsTests
 
             vm.EnteredCode = "123456";
 
-            // Assert
             Assert.Null(vm.EnteredCodeError);
         }
 
         [Fact]
         public void CanVerify_WhenCodeInvalid_ShouldBeFalse()
         {
-            // Arrange
             var mockWin = new Mock<IWindowService>();
             var mockNewAcc = new Mock<IVerificationCodeManagerService>();
             var mockReset = new Mock<IPasswordResetManagerService>();
@@ -303,14 +277,12 @@ namespace Test.ViewModelsTests
 
             vm.EnteredCode = "12345";
 
-            // Assert
             Assert.False(vm.VerifyCodeCommand.CanExecute(null));
         }
 
         [Fact]
         public void CanVerify_WhenCodeValid_ShouldBeTrue()
         {
-            // Arrange
             var mockWin = new Mock<IWindowService>();
             var mockNewAcc = new Mock<IVerificationCodeManagerService>();
             var mockReset = new Mock<IPasswordResetManagerService>();
@@ -323,7 +295,6 @@ namespace Test.ViewModelsTests
 
             vm.EnteredCode = "123456";
 
-            // Assert
             Assert.True(vm.VerifyCodeCommand.CanExecute(null));
         }
     }
