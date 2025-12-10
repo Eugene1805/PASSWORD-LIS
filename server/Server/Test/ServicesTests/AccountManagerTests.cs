@@ -33,7 +33,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task CreateAccount_ShouldCompleteSuccessfully_WhenDependenciesSucceed()
         {
-            // Arrange
             NewAccountDTO newAccountDto = new NewAccountDTO { Email = "test@example.com", Password = "Password123!" };
             string generatedCode = "123456";
 
@@ -43,7 +42,6 @@ namespace Test.ServicesTests
             mockCodeService.Setup(service => service.GenerateAndStoreCode(newAccountDto.Email,
                 CodeType.EmailVerification)).Returns(generatedCode);
 
-            // Act
             await accountManager.CreateAccountAsync(newAccountDto);
 
             int repoCalls = mockRepo.Invocations.Count(i => 
@@ -80,14 +78,12 @@ namespace Test.ServicesTests
                 GeneratedCode = notifCodeArg
             };
 
-            // Assert
             Assert.Equal(expected, actual);
         }
 
         [Fact]
         public async Task CreateAccount_ShouldSucceed_WhenDataIsValid()
         {
-            // Arrange
             NewAccountDTO newAccountDto = new NewAccountDTO
             {
                 Email = "newuser@example.com",
@@ -104,7 +100,6 @@ namespace Test.ServicesTests
             mockCodeService.Setup(s => s.GenerateAndStoreCode(newAccountDto.Email, CodeType.EmailVerification))
                             .Returns(verificationCode);
 
-            // Act
             await accountManager.CreateAccountAsync(newAccountDto);
 
             UserAccount? createdAccount = mockRepo.Invocations
@@ -147,7 +142,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task CreateAccount_ShouldThrowFaultException_WhenAccountAlreadyExists()
         {
-            // Arrange
             NewAccountDTO newAccountDto = new NewAccountDTO
             {
                 Email = "duplicate@example.com",
@@ -157,7 +151,6 @@ namespace Test.ServicesTests
             mockRepo.Setup(repo => repo.CreateAccountAsync(It.IsAny<UserAccount>()))
                      .ThrowsAsync(new DuplicateAccountException("User already exist"));
 
-            // Act
             FaultException<ServiceErrorDetailDTO> exception = await
                 Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => accountManager.CreateAccountAsync(newAccountDto)
@@ -188,7 +181,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task CreateAccount_ShouldThrowFaultException_WhenDatabaseFails()
         {
-            // Arrange
             NewAccountDTO newAccountDto = new NewAccountDTO
             {
                 Email = "test@example.com",
@@ -198,7 +190,6 @@ namespace Test.ServicesTests
             mockRepo.Setup(repo => repo.CreateAccountAsync(It.IsAny<UserAccount>()))
                      .ThrowsAsync(new System.Data.Entity.Infrastructure.DbUpdateException("Error de BD"));
 
-            // Act
             FaultException<ServiceErrorDetailDTO> exception = await 
                 Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => accountManager.CreateAccountAsync(newAccountDto)
@@ -229,7 +220,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task CreateAccount_ShouldMapFields_AndHashPassword()
         {
-            // Arrange
             NewAccountDTO dto = new NewAccountDTO
             {
                 Email = "map@test.com",
@@ -247,7 +237,6 @@ namespace Test.ServicesTests
             mockCodeService.Setup(c => c.GenerateAndStoreCode(dto.Email, CodeType.EmailVerification))
                             .Returns("999999");
 
-            // Act
             await accountManager.CreateAccountAsync(dto);
 
             var expected = new
@@ -279,7 +268,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task CreateAccount_ShouldReturnUnexpectedFault_WhenCodeGenerationFails()
         {
-            // Arrange
             NewAccountDTO dto = new NewAccountDTO { Email = "code@fail.com", Password = "P@ssw0rd!" };
 
             mockRepo.Setup(r => r.CreateAccountAsync(It.IsAny<UserAccount>()))
@@ -288,7 +276,6 @@ namespace Test.ServicesTests
             mockCodeService.Setup(c => c.GenerateAndStoreCode(dto.Email, CodeType.EmailVerification))
                             .Throws(new Exception("code generation failed"));
 
-            // Act
             FaultException<ServiceErrorDetailDTO> ex = await 
                 Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => accountManager.CreateAccountAsync(dto)
@@ -319,7 +306,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task CreateAccount_ShouldThrow_WhenNotificationServiceFails()
         {
-            // Arrange
             NewAccountDTO dto = new NewAccountDTO { Email = "notify@fail.com", Password = "P@ssw0rd!" };
             mockRepo.Setup(r => r.CreateAccountAsync(It.IsAny<UserAccount>()))
                      .Returns(Task.CompletedTask);
@@ -329,7 +315,6 @@ namespace Test.ServicesTests
             mockNotification.Setup(n => n.SendAccountVerificationEmailAsync(dto.Email, It.IsAny<string>()))
                               .ThrowsAsync(new System.Net.Mail.SmtpException("SMTP server error"));
 
-            // Act
             FaultException<ServiceErrorDetailDTO> exception = await 
                 Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => accountManager.CreateAccountAsync(dto)
@@ -360,13 +345,11 @@ namespace Test.ServicesTests
         [Fact]
         public async Task IsNicknameInUse_ShouldReturnRepositoryResult_WhenNicknameIsNotNull()
         {
-            // Arrange
             string nickname = "ExistingUser";
 
             mockRepo.Setup(repo => repo.IsNicknameInUse(nickname))
                     .ReturnsAsync(true);
 
-            // Act
             bool result = await accountManager.IsNicknameInUse(nickname);
 
             var expected = new
@@ -381,18 +364,14 @@ namespace Test.ServicesTests
                 RepoCalls = mockRepo.Invocations.Count(i => i.Method.Name == nameof(IAccountRepository.IsNicknameInUse))
             };
 
-            // Assert
             Assert.Equal(expected, actual);
         }
 
         [Fact]
         public async Task IsNicknameInUse_ShouldReturnFalse_WhenNicknameIsNull()
         {
-            // Arrange
             string? nickname = null;
 
-
-            // Act
             bool result = await accountManager.IsNicknameInUse(nickname);
 
             var expected = new
@@ -407,20 +386,17 @@ namespace Test.ServicesTests
                 RepoCalls = mockRepo.Invocations.Count(i => i.Method.Name == nameof(IAccountRepository.IsNicknameInUse))
             };
 
-            // Assert
             Assert.Equal(expected, actual);
         }
 
         [Fact]
         public async Task IsNicknameInUse_ShouldThrowFaultException_WhenDatabaseFails()
         {
-            // Arrange
             string nickname = "ErrorUser";
 
             mockRepo.Setup(repo => repo.IsNicknameInUse(nickname))
                     .ThrowsAsync(new EntityException("Connection failed"));
 
-            // Act
             FaultException<ServiceErrorDetailDTO> exception = await 
                 Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => accountManager.IsNicknameInUse(nickname)
@@ -439,7 +415,6 @@ namespace Test.ServicesTests
                 i.Method.Name == nameof(IAccountRepository.IsNicknameInUse))
             };
 
-            // Assert
             Assert.Equal(expected, actual);
         }
     }

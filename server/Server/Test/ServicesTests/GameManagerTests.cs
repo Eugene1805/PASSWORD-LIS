@@ -73,15 +73,12 @@ namespace Test.ServicesTests
         [Fact]
         public void CreateMatch_ShouldSucceed_WithFourPlayers_AndFailOnDuplicate()
         {
-            // Arrange
             var (sut, _) = CreateSut();
             var players = MakePlayers();
 
-            // Act
             var ok = sut?.CreateMatch("ABCDE", players);
             var dup = sut?.CreateMatch("ABCDE", players);
 
-            // Assert
             Assert.True(ok);
             Assert.False(dup);
         }
@@ -89,16 +86,13 @@ namespace Test.ServicesTests
         [Fact]
         public void CreateMatch_ShouldFail_WithInvalidPlayersCount()
         {
-            // Arrange
             var (sut, _) = CreateSut();
 
-            // Act
             var nullList = sut.CreateMatch("CODE1", null);
             var less = sut.CreateMatch("CODE2", new List<PlayerDTO> { new PlayerDTO() });
             var more = sut.CreateMatch("CODE3", new List<PlayerDTO> { new PlayerDTO(),
                 new PlayerDTO(), new PlayerDTO(), new PlayerDTO(), new PlayerDTO() });
 
-            // Assert
             Assert.False(nullList);
             Assert.False(less);
             Assert.False(more);
@@ -107,7 +101,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task SubscribeToMatch_ShouldBroadcastInit_AndSendFirstWordToBothTeams_ClueAndGuesser()
         {
-            // Arrange
             var (sut, queue) = CreateSut();
             var players = MakePlayers();
             Assert.True(sut.CreateMatch("GAME1", players));
@@ -123,13 +116,11 @@ namespace Test.ServicesTests
 
             mockWordRepository.Setup(w => w.GetRandomWordsAsync(It.IsAny<int>())).ReturnsAsync(MakeWords());
 
-            // Act
             await sut.SubscribeToMatchAsync("GAME1",1);
             await sut.SubscribeToMatchAsync("GAME1",2);
             await sut.SubscribeToMatchAsync("GAME1",3);
             await sut.SubscribeToMatchAsync("GAME1",4);
 
-            // Assert
             redClue.Verify(c => c.OnMatchInitialized(It.IsAny<MatchInitStateDTO>()), Times.Once);
             blueClue.Verify(c => c.OnMatchInitialized(It.IsAny<MatchInitStateDTO>()), Times.Once);
             redGuess.Verify(c => c.OnMatchInitialized(It.IsAny<MatchInitStateDTO>()), Times.Once);
@@ -140,7 +131,6 @@ namespace Test.ServicesTests
             redGuess.Verify(c => c.OnNewRoundStarted(It.IsAny<RoundStartStateDTO>()), Times.Once);
             blueGuess.Verify(c => c.OnNewRoundStarted(It.IsAny<RoundStartStateDTO>()), Times.Once);
 
-            
             redClue.Verify(c => c.OnNewPassword(It.Is<PasswordWordDTO>(p => p.EnglishWord == "WORD1")), Times.Once);
             blueClue.Verify(c => c.OnNewPassword(It.Is<PasswordWordDTO>(p => p.EnglishWord == "WORD1")), Times.Once);
 
@@ -155,10 +145,8 @@ namespace Test.ServicesTests
         [Fact]
         public async Task SubscribeToMatch_ShouldThrow_WhenMatchMissing()
         {
-            // Arrange
             var (sut, _) = CreateSut();
 
-            // Act + Assert
             await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(async () 
                 => await sut.SubscribeToMatchAsync("NOPE",1));
         }
@@ -166,13 +154,11 @@ namespace Test.ServicesTests
         [Fact]
         public async Task SubscribeToMatch_ShouldThrow_WhenUnauthorizedPlayer()
         {
-            // Arrange
             var (sut, queue) = CreateSut();
             var players = MakePlayers();
             sut.CreateMatch("GAME2", players);
             queue.Enqueue(new Mock<IGameManagerCallback>());
 
-            // Act + Assert
             await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(async () 
                 => await sut.SubscribeToMatchAsync("GAME2",999));
         }
@@ -180,7 +166,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task SubscribeToMatch_ShouldThrow_WhenAlreadyConnected()
         {
-            // Arrange
             var (sut, queue) = CreateSut();
             var players = MakePlayers();
             sut.CreateMatch("GAME3", players);
@@ -188,7 +173,6 @@ namespace Test.ServicesTests
             await sut.SubscribeToMatchAsync("GAME3",1);
             queue.Enqueue(new Mock<IGameManagerCallback>());
 
-            // Act + Assert
             await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(async () 
                 => await sut.SubscribeToMatchAsync("GAME3",1));
         }
@@ -196,7 +180,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task SubscribeToMatch_ShouldThrow_WhenWrongStatus()
         {
-            // Arrange
             var (sut, queue) = CreateSut();
             var players = MakePlayers();
             sut.CreateMatch("GAME4", players);
@@ -217,7 +200,6 @@ namespace Test.ServicesTests
             await sut.SubscribeToMatchAsync("GAME4",3);
             await sut.SubscribeToMatchAsync("GAME4",4);
 
-            // Act + Assert
             await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(async ()
                 => await sut.SubscribeToMatchAsync("GAME4",1));
         }
@@ -225,7 +207,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task SubmitClueAsync_ShouldDeliverToPartner_WhenValid()
         {
-            // Arrange
             var (sut, queue) = CreateSut();
             var players = MakePlayers();
             sut.CreateMatch("GAME5", players);
@@ -246,10 +227,8 @@ namespace Test.ServicesTests
             await sut.SubscribeToMatchAsync("GAME5",3);
             await sut.SubscribeToMatchAsync("GAME5",4);
 
-            // Act
             await sut.SubmitClueAsync("GAME5",1, "my clue");
 
-            // Assert
             redGuess.Verify(c => c.OnClueReceived("my clue"), Times.Once);
             redClue.Verify(c => c.OnClueReceived(It.IsAny<string>()), Times.Never);
             blueClue.Verify(c => c.OnClueReceived(It.IsAny<string>()), Times.Never);
@@ -259,10 +238,8 @@ namespace Test.ServicesTests
         [Fact]
         public async Task SubmitClueAsync_ShouldNoop_WhenInvalidInputsOrState()
         {
-            // Arrange
             var (sut, queue) = CreateSut();
 
-            // Act
             await sut.SubmitClueAsync("NOPE",1, "x");
 
             var players = MakePlayers();
@@ -282,17 +259,14 @@ namespace Test.ServicesTests
             await sut.SubscribeToMatchAsync("GAME5b",3);
             await sut.SubscribeToMatchAsync("GAME5b",4);
 
-            // Act
             await sut.SubmitClueAsync("GAME5b",1, "   ");
 
-            // Assert
             redGuess.Verify(c => c.OnClueReceived(It.IsAny<string>()), Times.Never);
         }
 
         [Fact]
         public async Task SubmitGuessAsync_ShouldBroadcastCorrect_AndAdvanceWord()
         {
-            // Arrange
             var (sut, queue) = CreateSut();
             var players = MakePlayers();
             sut.CreateMatch("GAME6", players);
@@ -313,10 +287,8 @@ namespace Test.ServicesTests
             await sut.SubscribeToMatchAsync("GAME6",3);
             await sut.SubscribeToMatchAsync("GAME6",4);
 
-            // Act
             await sut.SubmitGuessAsync("GAME6",3, "WORD1");
 
-            // Assert
             redClue.Verify(c => c.OnGuessResult(It.Is<GuessResultDTO>(r => r.IsCorrect && r.Team == MatchTeam.RedTeam)),
                 Times.Once);
             blueClue.Verify(c => c.OnGuessResult(It.IsAny<GuessResultDTO>()), Times.Once);
@@ -332,7 +304,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task SubmitGuessAsync_ShouldNotifyOnlyTeam_WhenIncorrect()
         {
-            // Arrange
             var (sut, queue) = CreateSut();
             var players = MakePlayers();
             sut.CreateMatch("GAME7", players);
@@ -353,10 +324,8 @@ namespace Test.ServicesTests
             await sut.SubscribeToMatchAsync("GAME7",3);
             await sut.SubscribeToMatchAsync("GAME7",4);
 
-            // Act
             await sut.SubmitGuessAsync("GAME7",3, "WRONG");
 
-            // Assert
             redGuess.Verify(c => c.OnGuessResult(It.Is<GuessResultDTO>(r => 
             !r.IsCorrect && r.Team == MatchTeam.RedTeam)), Times.Once);
             redClue.Verify(c => c.OnGuessResult(It.IsAny<GuessResultDTO>()), Times.Once);
@@ -367,7 +336,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task SubmitGuessAsync_ShouldNoop_WhenInvalidInputsOrState()
         {
-            // Arrange
             var (sut, queue) = CreateSut();
 
             await sut.SubmitGuessAsync("NOPE", 3, "WORD1");
@@ -388,21 +356,19 @@ namespace Test.ServicesTests
             await sut.SubscribeToMatchAsync("GAME7b",2);
             await sut.SubscribeToMatchAsync("GAME7b",3);
             await sut.SubscribeToMatchAsync("GAME7b",4);
-            //Act
+
             await sut.SubmitGuessAsync("GAME7b", 3, "   ");
             redClue.Verify(c => c.OnGuessResult(It.IsAny<GuessResultDTO>()), Times.Never);
             redGuess.Verify(c => c.OnGuessResult(It.IsAny<GuessResultDTO>()), Times.Never);
 
             await sut.SubmitGuessAsync("GAME7b", 1, "WORD1");
 
-            // Assert 
             redClue.Verify(c => c.OnGuessResult(It.IsAny<GuessResultDTO>()), Times.Never);
         }
 
         [Fact]
         public async Task ValidationPhase_ShouldSendHistory_ToOppositeTeam_AndProcessVotes_WhenAllVoted()
         {
-            // Arrange
             var (sut, queue) = CreateSut();
             var players = MakePlayers();
             sut.CreateMatch("GAME8", players);
@@ -423,7 +389,6 @@ namespace Test.ServicesTests
             await sut.SubscribeToMatchAsync("GAME8",3);
             await sut.SubscribeToMatchAsync("GAME8",4);
 
-            
             var matchesField = typeof(GameManager).GetField("matches", BindingFlags.NonPublic | BindingFlags.Instance);
             var dictObj = matchesField?.GetValue(sut);
             var dictType = dictObj?.GetType();
@@ -437,7 +402,6 @@ namespace Test.ServicesTests
             var matchStateType = matchStateObj?.GetType();
             var redHistoryProp = matchStateType?.GetProperty("RedTeamTurnHistory");
 
-            
             var history = new List<TurnHistoryDTO>
             {
                 new TurnHistoryDTO { TurnId = 0, Password = 
@@ -447,7 +411,6 @@ namespace Test.ServicesTests
             };
             redHistoryProp?.SetValue(matchStateObj, history);
 
-            // Act
             var startValidation = typeof(GameManager).GetMethod("StartValidationPhaseAsync",
                 BindingFlags.NonPublic | BindingFlags.Instance);
 
@@ -464,7 +427,6 @@ namespace Test.ServicesTests
             redClue.Verify(c => c.OnBeginRoundValidation(It.Is<List<TurnHistoryDTO>>(l => l.Count == 0)), Times.Once);
             redGuess.Verify(c => c.OnBeginRoundValidation(It.Is<List<TurnHistoryDTO>>(l => l.Count == 0)), Times.Once);
 
-           
             var votesBlueClue = new List<ValidationVoteDTO> { new ValidationVoteDTO { TurnId =0, 
                 PenalizeSynonym = true } };
             var votesBlueGuess = new List<ValidationVoteDTO> { new ValidationVoteDTO { TurnId =1,
@@ -478,14 +440,12 @@ namespace Test.ServicesTests
 
             await Task.Delay(100);
 
-            // Assert
             redClue.Verify(c => c.OnValidationComplete(It.Is<ValidationResultDTO>(v => v.TotalPenaltyApplied == 3)),
                 Times.Once);
             redGuess.Verify(c => c.OnValidationComplete(It.IsAny<ValidationResultDTO>()), Times.Once);
             blueClue.Verify(c => c.OnValidationComplete(It.IsAny<ValidationResultDTO>()), Times.Once);
             blueGuess.Verify(c => c.OnValidationComplete(It.IsAny<ValidationResultDTO>()), Times.Once);
 
-            
             redClue.Verify(c => c.OnNewRoundStarted(It.Is<RoundStartStateDTO>(r => r.CurrentRound == 2)), Times.Once);
             redGuess.Verify(c => c.OnNewRoundStarted(It.Is<RoundStartStateDTO>(r => r.CurrentRound == 2)), Times.Once);
             blueClue.Verify(c => c.OnNewRoundStarted(It.Is<RoundStartStateDTO>(r => r.CurrentRound == 2)), Times.Once);
@@ -495,7 +455,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task SuddenDeath_CorrectGuess_ShouldFinishMatchAndDeclareWinner()
         {
-            // Arrange
             var (sut, queue) = CreateSut();
             var players = MakePlayers();
             sut.CreateMatch("GAME9", players);
@@ -545,10 +504,8 @@ namespace Test.ServicesTests
 
             redClue.Verify(c => c.OnSuddenDeathStarted(), Times.Once);
 
-            // Act
             await sut.SubmitGuessAsync("GAME9",3, "WORD26");
 
-            // Assert
             redClue.Verify(c => c.OnMatchOver(It.Is<MatchSummaryDTO>(s => s.WinnerTeam == MatchTeam.RedTeam)), 
                 Times.Once);
             blueClue.Verify(c => c.OnMatchOver(It.IsAny<MatchSummaryDTO>()), Times.Once);
@@ -559,7 +516,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task PassTurnAsync_ShouldAdvanceWord_OncePerTeam_AndNotifyPartner()
         {
-            // Arrange
             var (sut, queue) = CreateSut();
             var players = MakePlayers();
             sut.CreateMatch("GAME10", players);
@@ -580,30 +536,25 @@ namespace Test.ServicesTests
             await sut.SubscribeToMatchAsync("GAME10",3);
             await sut.SubscribeToMatchAsync("GAME10",4);
 
-            // Act
             await sut.PassTurnAsync("GAME10", 1);
 
-            // Assert
             redClue.Verify(c => c.OnNewPassword(It.Is<PasswordWordDTO>(p => p.EnglishWord == "WORD2")), 
                 Times.AtLeastOnce);
             redGuess.Verify(c => c.OnNewPassword(It.Is<PasswordWordDTO>(p => p.EnglishDescription == "ED2")), 
                 Times.AtLeastOnce);
             redGuess.Verify(c => c.OnClueReceived(It.Is<string>(s => s.Contains("passed"))), Times.Once);
 
-            
+
             await sut.PassTurnAsync("GAME10", 1);
 
-            // Assert
             redClue.Verify(c => c.OnNewPassword(It.Is<PasswordWordDTO>(p => p.EnglishWord == "WORD3")), Times.Never);
         }
 
         [Fact]
         public async Task PassTurnAsync_ShouldNoop_WhenInvalid()
         {
-            // Arrage
             var (sut, queue) = CreateSut();
 
-            // Act
             await sut.PassTurnAsync("NOPE", 1);
 
             var players = MakePlayers();
@@ -621,16 +572,13 @@ namespace Test.ServicesTests
             await sut.SubscribeToMatchAsync("GAME10b",2);
             await sut.SubscribeToMatchAsync("GAME10b",3);
             await sut.SubscribeToMatchAsync("GAME10b",4);
-            // Act
             await sut.PassTurnAsync("GAME10b", 3);
-            // Assert
             redGuess.Verify(c => c.OnClueReceived(It.IsAny<string>()), Times.Never);
         }
 
         [Fact]
         public async Task Disconnection_DuringCallback_ShouldCancelMatch()
         {
-            // Arrange
             var (sut, queue) = CreateSut();
             var players = MakePlayers();
             sut.CreateMatch("GAME11", players);
@@ -650,7 +598,6 @@ namespace Test.ServicesTests
 
             mockWordRepository.Setup(w => w.GetRandomWordsAsync(It.IsAny<int>())).ReturnsAsync(MakeWords());
 
-            // Act
             await sut.SubscribeToMatchAsync("GAME11",1);
             await sut.SubscribeToMatchAsync("GAME11",2);
             await sut.SubscribeToMatchAsync("GAME11",3);
@@ -658,7 +605,6 @@ namespace Test.ServicesTests
 
             await Task.Delay(100);
 
-            // Assert
             blueClue.Verify(c => c.OnMatchCancelled(It.Is<string>(s => s.Contains("disconnected"))), Times.AtLeastOnce);
             redGuess.Verify(c => c.OnMatchCancelled(It.IsAny<string>()), Times.AtLeastOnce);
             blueGuess.Verify(c => c.OnMatchCancelled(It.IsAny<string>()), Times.AtLeastOnce);
@@ -667,20 +613,15 @@ namespace Test.ServicesTests
         [Fact]
         public async Task PassTurnAsync_ShouldComplete()
         {
-            // Arrange
             var (sut, queue) = CreateSut();
 
-            // Act + Assert
             await sut.PassTurnAsync("ANY",1);
 
-            // Arrange
             var cb = new Mock<IGameManagerCallback>();
             queue.Enqueue(cb);
 
-            // Act
             await sut.PassTurnAsync("ANY",1);
 
-            // Assert
             cb.VerifyNoOtherCalls();
         }
     }

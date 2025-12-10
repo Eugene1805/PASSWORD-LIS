@@ -28,7 +28,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task LoginAsync_ShouldReturnUserDTO_WhenCredentialsAreValidAndPlayerExists()
         {
-            // Arrange
             var email = "test@example.com";
             var password = "ValidPassword123!";
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
@@ -39,7 +38,6 @@ namespace Test.ServicesTests
 
             mockRepo.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync(mockAccount);
 
-            // Act
             var result = await loginManager.LoginAsync(email, password);
 
             var expected = new { NotNull = true, UserAccountId = mockAccount.Id, PlayerId = mockPlayer.Id, 
@@ -48,35 +46,29 @@ namespace Test.ServicesTests
                 PlayerId = result.PlayerId, Nickname = result.Nickname, 
                 Calls = mockRepo.Invocations.Count(i => 
                 i.Method.Name == nameof(IAccountRepository.GetUserByEmailAsync)) };
-            // Assert
             Assert.Equal(expected, actual);
         }
 
         [Fact]
         public async Task LoginAsync_ShouldReturnInvalidDTO_WhenUserNotFound()
         {
-            // Arrange
             var email = "nonexistent@example.com";
             var password = "password";
 
             mockRepo.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync((UserAccount?)null);
 
-            // Act
             var result = await loginManager.LoginAsync(email, password);
 
-            
             var expected = new { NotNull = true, UserAccountId = -1, Calls = 1 };
             var actual = new { NotNull = result != null, UserAccountId = result!.UserAccountId,
                 Calls = mockRepo.Invocations.Count(i => 
                 i.Method.Name == nameof(IAccountRepository.GetUserByEmailAsync)) };
-            // Assert
             Assert.Equal(expected, actual);
         }
 
         [Fact]
         public async Task LoginAsync_ShouldReturnInvalidDTO_WhenPasswordIsInvalid()
         {
-            // Arrange
             var email = "test@example.com";
             var correctPassword = "ValidPassword123!";
             var wrongPassword = "WrongPassword!";
@@ -87,22 +79,18 @@ namespace Test.ServicesTests
 
             mockRepo.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync(mockAccount);
 
-            // Act
             var result = await loginManager.LoginAsync(email, wrongPassword);
 
-            
             var expected = new { NotNull = true, UserAccountId = -1, Calls = 1 };
             var actual = new { NotNull = result != null, UserAccountId = result!.UserAccountId,
                 Calls = mockRepo.Invocations.Count(i => 
                 i.Method.Name == nameof(IAccountRepository.GetUserByEmailAsync)) };
-            // Assert
             Assert.Equal(expected, actual);
         }
 
         [Fact]
         public async Task LoginAsync_ShouldReturnInvalidDTO_WhenUserHasNoPlayerAssociated()
         {
-            // Arrange
             var email = "test@example.com";
             var password = "ValidPassword123!";
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
@@ -111,33 +99,28 @@ namespace Test.ServicesTests
 
             mockRepo.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync(mockAccount);
 
-            // Act
             var result = await loginManager.LoginAsync(email, password);
 
             var expected = new { NotNull = true, UserAccountId = -1, Calls = 1 };
             var actual = new { NotNull = result != null, UserAccountId = result!.UserAccountId,
                 Calls = mockRepo.Invocations.Count(i => 
                 i.Method.Name == nameof(IAccountRepository.GetUserByEmailAsync)) };
-            // Assert
             Assert.Equal(expected, actual);
         }
 
         [Fact]
         public async Task LoginAsync_ShouldThrowFaultException_WhenRepositoryThrowsDbException_Specific()
         {
-            // Arrange
             var email = "db_error@example.com";
             var password = "password";
 
             mockRepo.Setup(repo => repo.GetUserByEmailAsync(email))
                     .ThrowsAsync(new DbUpdateException("Error de conexión simulado", new Exception()));
 
-            // Act & Assert
             var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => loginManager.LoginAsync(email, password)
             );
 
-            // Assert
             Assert.Equal(ServiceErrorCode.DatabaseError, ex.Detail.Code);
             mockRepo.Verify(repo => repo.GetUserByEmailAsync(email), Times.Once);
         }
@@ -145,7 +128,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task LoginAsync_ShouldThrowFaultException_WhenBcryptFailsOrOtherGeneralException()
         {
-            // Arrange
             var email = "test@example.com";
             var password = "ValidPassword123!";
             var invalidHash = "formato_invalido_de_hash";
@@ -160,12 +142,10 @@ namespace Test.ServicesTests
 
             mockRepo.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync(mockAccount);
 
-            // Act & Assert
             var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => loginManager.LoginAsync(email, password)
             );
 
-            // Assert
             Assert.Equal(ServiceErrorCode.UnexpectedError, ex.Detail.Code);
             mockRepo.Verify(repo => repo.GetUserByEmailAsync(email), Times.Once);
         }
@@ -173,7 +153,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task IsAccountVerifiedAsync_ShouldReturnTrue_WhenUserExistsAndIsVerified()
         {
-            // Arrange
             var email = "verified@example.com";
             var mockAccount = new UserAccount
             {
@@ -186,10 +165,8 @@ namespace Test.ServicesTests
 
             mockRepo.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync(mockAccount);
 
-            // Act
             var result = await loginManager.IsAccountVerifiedAsync(email);
 
-            // Assert
             Assert.True(result);
             mockRepo.Verify(repo => repo.GetUserByEmailAsync(email), Times.Once);
         }
@@ -197,7 +174,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task IsAccountVerifiedAsync_ShouldReturnFalse_WhenUserExistsAndIsNotVerified()
         {
-            // Arrange
             var email = "unverified@example.com";
             var mockAccount = new UserAccount
             {
@@ -210,10 +186,8 @@ namespace Test.ServicesTests
 
             mockRepo.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync(mockAccount);
 
-            // Act
             var result = await loginManager.IsAccountVerifiedAsync(email);
 
-            // Assert
             Assert.False(result);
             mockRepo.Verify(repo => repo.GetUserByEmailAsync(email), Times.Once);
         }
@@ -221,15 +195,12 @@ namespace Test.ServicesTests
         [Fact]
         public async Task IsAccountVerifiedAsync_ShouldReturnFalse_WhenUserNotFound()
         {
-            // Arrange
             var email = "notfound@example.com";
 
             mockRepo.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync((UserAccount?)null);
 
-            // Act
             var result = await loginManager.IsAccountVerifiedAsync(email);
 
-            // Assert
             Assert.False(result);
             mockRepo.Verify(repo => repo.GetUserByEmailAsync(email), Times.Once);
         }
@@ -237,13 +208,11 @@ namespace Test.ServicesTests
         [Fact]
         public async Task IsAccountVerifiedAsync_ShouldThrowFaultException_WhenRepositoryThrowsDbException()
         {
-            // Arrange
             var email = "error@example.com";
 
             mockRepo.Setup(repo => repo.GetUserByEmailAsync(email))
                 .ThrowsAsync(new DbUpdateException("Database error", new Exception()));
 
-            // Act & Assert
             var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => loginManager.IsAccountVerifiedAsync(email)
             );
@@ -255,13 +224,11 @@ namespace Test.ServicesTests
         [Fact]
         public async Task IsAccountVerifiedAsync_ShouldThrowFaultException_WhenUnexpectedErrorOccurs()
         {
-            // Arrange
             var email = "error@example.com";
 
             mockRepo.Setup(repo => repo.GetUserByEmailAsync(email))
                 .ThrowsAsync(new Exception("Unexpected error"));
 
-            // Act & Assert
             var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => loginManager.IsAccountVerifiedAsync(email)
             );
@@ -273,17 +240,14 @@ namespace Test.ServicesTests
         [Fact]
         public async Task SendVerificationCodeAsync_ShouldSend_WhenUserExistsAndNotVerified()
         {
-            // Arrange
             var email = "code@ex.com";
             var account = new UserAccount { Email = email, EmailVerified = false, 
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("x"), Player = new List<Player>() };
             mockRepo.Setup(r => r.GetUserByEmailAsync(email)).ReturnsAsync(account);
             mockCodeService.Setup(c => c.GenerateAndStoreCode(email, CodeType.EmailVerification)).Returns("123456");
 
-            // Act
             await loginManager.SendVerificationCodeAsync(email);
 
-            // Assert
             mockCodeService.Verify(c => c.GenerateAndStoreCode(email, CodeType.EmailVerification), Times.Once);
             mockNotification.Verify(n => n.SendAccountVerificationEmailAsync(email, "123456"), Times.Once);
         }
@@ -291,16 +255,13 @@ namespace Test.ServicesTests
         [Fact]
         public async Task SendVerificationCodeAsync_ShouldNotSend_WhenUserVerified()
         {
-            // Arrange
             var email = "verified@ex.com";
             var account = new UserAccount { Email = email, EmailVerified = true,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("x"), Player = new List<Player>() };
             mockRepo.Setup(r => r.GetUserByEmailAsync(email)).ReturnsAsync(account);
 
-            // Act
             await loginManager.SendVerificationCodeAsync(email);
 
-            // Assert
             mockCodeService.Verify(c => c.GenerateAndStoreCode(It.IsAny<string>(), It.IsAny<CodeType>()), Times.Never);
             mockNotification.Verify(n => n.SendAccountVerificationEmailAsync(It.IsAny<string>(),
                 It.IsAny<string>()), Times.Never);
@@ -309,14 +270,11 @@ namespace Test.ServicesTests
         [Fact]
         public async Task SendVerificationCodeAsync_ShouldNotSend_WhenUserNotFound()
         {
-            // Arrange
             var email = "missing@ex.com";
             mockRepo.Setup(r => r.GetUserByEmailAsync(email)).ReturnsAsync((UserAccount?)null);
 
-            // Act
             await loginManager.SendVerificationCodeAsync(email);
 
-            // Assert
             mockCodeService.Verify(c => c.GenerateAndStoreCode(It.IsAny<string>(), It.IsAny<CodeType>()), Times.Never);
             mockNotification.Verify(n => n.SendAccountVerificationEmailAsync(It.IsAny<string>(), 
                 It.IsAny<string>()), Times.Never);
@@ -325,11 +283,9 @@ namespace Test.ServicesTests
         [Fact]
         public async Task SendVerificationCodeAsync_ShouldThrowFault_WhenRepositoryThrows()
         {
-            // Arrange
             var email = "error@ex.com";
             mockRepo.Setup(r => r.GetUserByEmailAsync(email)).ThrowsAsync(new Exception("db fail"));
 
-            // Act & Assert
             var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(() => 
             loginManager.SendVerificationCodeAsync(email));
             Assert.Equal(ServiceErrorCode.UnexpectedError, ex.Detail.Code);
@@ -338,12 +294,10 @@ namespace Test.ServicesTests
         [Fact]
         public async Task SendVerificationCodeAsync_ShouldThrowFault_WhenDbExceptionOccurs()
         {
-            // Arrange
             var email = "dberror@ex.com";
             mockRepo.Setup(r => r.GetUserByEmailAsync(email)).ThrowsAsync(new DbUpdateException("Database error",
                 new Exception()));
 
-            // Act & Assert
             var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(()
                 => loginManager.SendVerificationCodeAsync(email));
             Assert.Equal(ServiceErrorCode.DatabaseError, ex.Detail.Code);
@@ -352,7 +306,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task LoginAsync_ShouldMapAllUserProperties_WhenLoginSuccessful()
         {
-            // Arrange
             var email = "fulltest@example.com";
             var password = "ValidPassword123!";
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
@@ -365,10 +318,8 @@ namespace Test.ServicesTests
 
             mockRepo.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync(mockAccount);
 
-            // Act
             var result = await loginManager.LoginAsync(email, password);
 
-            // Assert
             var expected = new { NotNull = true, UserAccountId = 1, PlayerId = 10, Nickname = "testuser", 
                 Email = email, FirstName = "Test", LastName = "User", PhotoId = 5, SocialCount = 2, 
                 Instagram = "user@instagram.com", Facebook = "user@facebook.com" };
@@ -383,7 +334,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task LoginAsync_ShouldMapPhotoIdAsZero_WhenPhotoIdIsNull()
         {
-            // Arrange
             var email = "nophoto@example.com";
             var password = "ValidPassword123!";
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
@@ -401,10 +351,8 @@ namespace Test.ServicesTests
 
             mockRepo.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync(mockAccount);
 
-            // Act
             var result = await loginManager.LoginAsync(email, password);
 
-            // Assert
             Assert.NotNull(result);
             Assert.Equal(0, result.PhotoId);
         }
@@ -412,7 +360,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task LoginAsync_ShouldReturnInvalidDTO_WhenPlayerIsNull()
         {
-            // Arrange
             var email = "nullplayer@example.com";
             var password = "ValidPassword123!";
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
@@ -428,10 +375,8 @@ namespace Test.ServicesTests
 
             mockRepo.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync(mockAccount);
 
-            // Act
             var result = await loginManager.LoginAsync(email, password);
 
-            // Assert
             Assert.NotNull(result);
             Assert.Equal(-1, result.UserAccountId);
         }

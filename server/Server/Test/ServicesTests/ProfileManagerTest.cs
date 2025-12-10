@@ -23,7 +23,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task UpdateProfile_ShouldReturnUpdatedDTO_WhenRepositorySucceeds()
         {
-            // Arrange
             var inputDto = new UserDTO
             {
                 PlayerId = 1,
@@ -39,10 +38,8 @@ namespace Test.ServicesTests
                 It.IsAny<List<SocialAccount>>()
             )).ReturnsAsync(true);
 
-            // Act
             var resultDto = await profileManager.UpdateProfileAsync(inputDto);
 
-            // Assert
             Assert.NotNull(resultDto);
             Assert.Same(inputDto, resultDto);
             mockRepo.Verify(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(),
@@ -52,17 +49,14 @@ namespace Test.ServicesTests
         [Fact]
         public async Task UpdateProfile_ShouldReturnNull_WhenRepositoryReturnsFalse()
         {
-            // Arrange
             var inputDto = new UserDTO { PlayerId = 99, FirstName = "FName", LastName = "LName" };
 
             mockRepo.Setup(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(),
                 It.IsAny<List<SocialAccount>>()))
                     .ReturnsAsync(false);
 
-            // Act
             var resultDto = await profileManager.UpdateProfileAsync(inputDto);
 
-            // Assert
             Assert.Null(resultDto);
             mockRepo.Verify(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(), 
                 It.IsAny<List<SocialAccount>>()), Times.Once);
@@ -71,7 +65,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task UpdateProfile_ShouldThrowFaultExceptionWithDatabaseError_WhenRepositoryThrowsDbUpdateException()
         {
-            // Arrange
             var inputDto = new UserDTO { PlayerId = 1, FirstName = "FName", LastName = "LName" };
             var dbUpdateEx = new DbUpdateException("Simulated SaveChanges error", new Exception());
 
@@ -79,7 +72,6 @@ namespace Test.ServicesTests
                 It.IsAny<List<SocialAccount>>()))
                     .ThrowsAsync(dbUpdateEx);
 
-            // Act & Assert
             var faultEx = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => profileManager.UpdateProfileAsync(inputDto)
             );
@@ -93,7 +85,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task UpdateProfile_ShouldThrowFaultExceptionWithDatabaseError_WhenRepositoryThrowsDbException()
         {
-            // Arrange
             var inputDto = new UserDTO { PlayerId = 1, FirstName = "FName", LastName = "LName" };
             var dbEx = new DbUpdateException("Simulated connection error", new Exception());
 
@@ -101,7 +92,6 @@ namespace Test.ServicesTests
                 It.IsAny<List<SocialAccount>>()))
                     .ThrowsAsync(dbEx);
 
-            // Act & Assert
             var faultEx = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => profileManager.UpdateProfileAsync(inputDto)
             );
@@ -115,14 +105,12 @@ namespace Test.ServicesTests
         [Fact]
         public async Task UpdateProfile_ShouldThrowFaultExceptionWithUnexpectedError_WhenRepositoryThrowsGeneralException()
         {
-            // Arrange
             var inputDto = new UserDTO { PlayerId = 1, FirstName = "FName", LastName = "LName" };
             var generalEx = new Exception("Simulated unexpected error");
 
             mockRepo.Setup(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(), 
                 It.IsAny<List<SocialAccount>>())).ThrowsAsync(generalEx);
 
-            // Act & Assert
             var faultEx = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => profileManager.UpdateProfileAsync(inputDto)
             );
@@ -149,13 +137,10 @@ namespace Test.ServicesTests
         [InlineData(-1)]
         public async Task UpdateProfile_ShouldReturnNull_WhenPlayerIdIsInvalid(int invalidPlayerId)
         {
-            // Arrange
             var inputDto = new UserDTO { PlayerId = invalidPlayerId, FirstName = "FName", LastName = "LName" };
 
-            // Act
             var resultDto = await profileManager.UpdateProfileAsync(inputDto);
 
-            // Assert
             Assert.Null(resultDto);
             mockRepo.Verify(repo => repo.UpdateUserProfileAsync(It.IsAny<int>(), It.IsAny<UserAccount>(), 
                 It.IsAny<List<SocialAccount>>()), Times.Never);
@@ -164,7 +149,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task UpdateProfile_ShouldCallRepositoryWithCorrectlyMappedData_WhenInputIsValid()
         {
-            // Arrange
             var inputDto = new UserDTO
             {
                 PlayerId = 5,
@@ -185,10 +169,8 @@ namespace Test.ServicesTests
                 .Callback<int, UserAccount, List<SocialAccount>>((id, ua, sa) => { capturedAccount = ua; capturedSocials = sa; })
                 .ReturnsAsync(true);
 
-            // Act
             await profileManager.UpdateProfileAsync(inputDto);
 
-            // Assert
             var expected = (
                 AccountNotNull: true,
                 FirstName: (string?)inputDto.FirstName,

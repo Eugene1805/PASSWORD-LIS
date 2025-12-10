@@ -10,7 +10,6 @@ namespace Test.DataTests
         [Fact]
         public void TestDatabaseConnection_WithValidCredentials_ShouldConnectSuccessfully()
         {
-            // Arrange
             var sqlBuilder = new SqlConnectionStringBuilder
             {
                 DataSource = Environment.GetEnvironmentVariable("DB_SERVER_PASSWORDLIS") ?? "localhost",
@@ -27,10 +26,8 @@ namespace Test.DataTests
                 Metadata = "res://*/Model.PasswordLISModel.csdl|res://*/Model.PasswordLISModel.ssdl|res://*/Model.PasswordLISModel.msl"
             };
 
-            // Act 
             using var ctx = new PasswordLISEntities(entityBuilder.ToString());
 
-            // Assert
             Assert.True(ctx.Database.Exists(), "Coult not connect to the Database");
         }
     }

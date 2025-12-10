@@ -12,11 +12,8 @@ namespace Test.UtilsTests
             bool eventInvoked = false;
             Action handler = () => eventInvoked = true;
             Messenger.UserLoggedOut += handler;
-
             Messenger.SendUserLoggedOut();
-
             Assert.True(eventInvoked);
-
             Messenger.Unsubscribe(handler);
         }
 
@@ -27,15 +24,11 @@ namespace Test.UtilsTests
             Action handler1 = () => invokeCount++;
             Action handler2 = () => invokeCount++;
             Action handler3 = () => invokeCount++;
-            
             Messenger.UserLoggedOut += handler1;
             Messenger.UserLoggedOut += handler2;
             Messenger.UserLoggedOut += handler3;
-
             Messenger.SendUserLoggedOut();
-
             Assert.Equal(3, invokeCount);
-
             Messenger.Unsubscribe(handler1);
             Messenger.Unsubscribe(handler2);
             Messenger.Unsubscribe(handler3);
@@ -47,10 +40,8 @@ namespace Test.UtilsTests
             bool eventInvoked = false;
             Action handler = () => eventInvoked = true;
             Messenger.UserLoggedOut += handler;
-
             Messenger.Unsubscribe(handler);
             Messenger.SendUserLoggedOut();
-
             Assert.False(eventInvoked);
         }
 
@@ -58,7 +49,6 @@ namespace Test.UtilsTests
         public void Unsubscribe_WithNonExistentHandler_ShouldNotThrowException()
         {
             Action handler = () => { };
-
             var exception = Record.Exception(() => Messenger.Unsubscribe(handler));
             Assert.Null(exception);
         }
@@ -68,10 +58,8 @@ namespace Test.UtilsTests
         {
             Action handler = () => { };
             Messenger.UserLoggedOut += handler;
-
             Messenger.Unsubscribe(handler);
             var exception = Record.Exception(() => Messenger.Unsubscribe(handler));
-
             Assert.Null(exception);
         }
 
@@ -81,13 +69,10 @@ namespace Test.UtilsTests
             int invokeCount = 0;
             Action handler = () => invokeCount++;
             Messenger.UserLoggedOut += handler;
-
             Messenger.SendUserLoggedOut();
             Messenger.SendUserLoggedOut();
             Messenger.SendUserLoggedOut();
-
             Assert.Equal(3, invokeCount);
-
             Messenger.Unsubscribe(handler);
         }
 
@@ -97,15 +82,11 @@ namespace Test.UtilsTests
             int invokeCount = 0;
             Action handler1 = () => invokeCount++;
             Action handler2 = () => invokeCount += 10;
-            
             Messenger.UserLoggedOut += handler1;
             Messenger.UserLoggedOut += handler2;
-
             Messenger.Unsubscribe(handler1);
             Messenger.SendUserLoggedOut();
-
-            Assert.Equal(10, invokeCount); 
-
+            Assert.Equal(10, invokeCount);
             Messenger.Unsubscribe(handler2);
         }
 
@@ -114,15 +95,11 @@ namespace Test.UtilsTests
         {
             int invokeCount = 0;
             Action handler = () => invokeCount++;
-            
             Messenger.UserLoggedOut += handler;
             Messenger.Unsubscribe(handler);
             Messenger.UserLoggedOut += handler;
-
             Messenger.SendUserLoggedOut();
-
             Assert.Equal(1, invokeCount);
-
             Messenger.Unsubscribe(handler);
         }
     }

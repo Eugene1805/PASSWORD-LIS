@@ -14,7 +14,6 @@ namespace Test.ViewModelsTests
         [Fact]
         public void CanVerify_BlocksWhenBusyOrEmpty()
         {
-            
             var mockWin = new Mock<IWindowService>();
             var mockNewAcc = new Mock<IVerificationCodeManagerService>();
             var mockReset = new Mock<IPasswordResetManagerService>();
@@ -25,7 +24,6 @@ namespace Test.ViewModelsTests
             mockNewAcc.Object,
             mockReset.Object);
             vm.EnteredCode = string.Empty;
-            
             Assert.False(vm.VerifyCodeCommand.CanExecute(null));
             vm.EnteredCode = "123456";
             vm.IsBusy = true;
@@ -35,7 +33,6 @@ namespace Test.ViewModelsTests
         [Fact]
         public void Verify_WhenEmpty_ShouldNotExecute()
         {
-
             var mockWin = new Mock<IWindowService>();
             var mockNewAcc = new Mock<IVerificationCodeManagerService>();
             var mockReset = new Mock<IPasswordResetManagerService>();
@@ -46,9 +43,7 @@ namespace Test.ViewModelsTests
             mockNewAcc.Object,
             mockReset.Object);
             vm.EnteredCode = string.Empty;
-
             vm.VerifyCodeCommand.Execute(null);
-
             mockNewAcc.Verify(s => s.VerifyEmailAsync(It.IsAny<EmailVerificationDTO>()), Times.Never);
         }
 
@@ -70,9 +65,7 @@ namespace Test.ViewModelsTests
             {
                 EnteredCode = "999999"
             };
-
             vm.VerifyCodeCommand.Execute(null);
-
             mockWin.Verify(w => w.ShowPopUp(
             PASSWORD_LIS_Client.Properties.Langs.Lang.profileUpdatedTitleText,
             PASSWORD_LIS_Client.Properties.Langs.Lang.successfulSignUpText,
@@ -100,9 +93,7 @@ namespace Test.ViewModelsTests
             {
                 EnteredCode = "999999"
             };
-
             vm.VerifyCodeCommand.Execute(null);
-
             mockWin.Verify(w => w.ShowChangePasswordWindow("user@ex.com", "999999"), Times.Once);
             mockWin.Verify(w => w.CloseWindow(vm), Times.Once);
         }
@@ -125,9 +116,7 @@ namespace Test.ViewModelsTests
             {
                 EnteredCode = "000000"
             };
-
             vm.VerifyCodeCommand.Execute(null);
-
             Assert.NotNull(vm.EnteredCodeError);
             Assert.Equal(PASSWORD_LIS_Client.Properties.Langs.Lang.codeIncorrectOrExpiredText, vm.EnteredCodeError);
         }
@@ -145,9 +134,7 @@ namespace Test.ViewModelsTests
             mockWin.Object,
             mockNewAcc.Object,
             mockReset.Object);
-
             vm.ResendCodeCommand.Execute(null);
-
             mockWin.Verify(w => w.ShowPopUp(
             PASSWORD_LIS_Client.Properties.Langs.Lang.codeSentTitleText,
             PASSWORD_LIS_Client.Properties.Langs.Lang.newCodeSentText,
@@ -170,9 +157,7 @@ namespace Test.ViewModelsTests
             mockWin.Object,
             mockNewAcc.Object,
             mockReset.Object);
-
             vm.ResendCodeCommand.Execute(null);
-
             mockWin.Verify(w => w.ShowPopUp(
             PASSWORD_LIS_Client.Properties.Langs.Lang.timeLimitTitleText,
             PASSWORD_LIS_Client.Properties.Langs.Lang.waitAMinuteForCodeText,
@@ -197,9 +182,7 @@ namespace Test.ViewModelsTests
             {
                 EnteredCode = "111111"
             };
-
             vm.VerifyCodeCommand.Execute(null);
-
             mockWin.Verify(w => w.ShowPopUp(
             PASSWORD_LIS_Client.Properties.Langs.Lang.timeLimitTitleText,
             PASSWORD_LIS_Client.Properties.Langs.Lang.serverTimeoutText,
@@ -218,9 +201,7 @@ namespace Test.ViewModelsTests
             mockWin.Object,
             mockNewAcc.Object,
             mockReset.Object);
-
             vm.EnteredCode = string.Empty;
-
             Assert.NotNull(vm.EnteredCodeError);
             Assert.Equal(PASSWORD_LIS_Client.Properties.Langs.Lang.requiredFieldsText, vm.EnteredCodeError);
         }
@@ -237,9 +218,7 @@ namespace Test.ViewModelsTests
             mockWin.Object,
             mockNewAcc.Object,
             mockReset.Object);
-
             vm.EnteredCode = "12345";
-
             Assert.NotNull(vm.EnteredCodeError);
             Assert.Equal(PASSWORD_LIS_Client.Properties.Langs.Lang.codeIncorrectOrExpiredText, vm.EnteredCodeError);
         }
@@ -256,9 +235,7 @@ namespace Test.ViewModelsTests
             mockWin.Object,
             mockNewAcc.Object,
             mockReset.Object);
-
             vm.EnteredCode = "123456";
-
             Assert.Null(vm.EnteredCodeError);
         }
 
@@ -274,9 +251,7 @@ namespace Test.ViewModelsTests
             mockWin.Object,
             mockNewAcc.Object,
             mockReset.Object);
-
             vm.EnteredCode = "12345";
-
             Assert.False(vm.VerifyCodeCommand.CanExecute(null));
         }
 
@@ -292,9 +267,7 @@ namespace Test.ViewModelsTests
             mockWin.Object,
             mockNewAcc.Object,
             mockReset.Object);
-
             vm.EnteredCode = "123456";
-
             Assert.True(vm.VerifyCodeCommand.CanExecute(null));
         }
     }

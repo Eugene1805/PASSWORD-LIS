@@ -21,7 +21,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task GetTop_WhenRepositoryReturnsTeams_ShouldMapToTeamDTOsCorrectly()
         {
-            // Arrange
             var numberOfTeams = 2;
             var teamsFromDb = new List<Team>
             {
@@ -46,7 +45,6 @@ namespace Test.ServicesTests
 
             mockStatisticsRepository.Setup(repo => repo.GetTopTeamsAsync(numberOfTeams)).ReturnsAsync(teamsFromDb);
 
-            // Act
             var result = await topPlayersManager.GetTopAsync(numberOfTeams);
 
             var expected = (
@@ -71,21 +69,17 @@ namespace Test.ServicesTests
                 SecondPlayersCount: result?.ElementAtOrDefault(1)?.PlayersNicknames.Count ?? -1,
                 SecondPlayer: result?.ElementAtOrDefault(1)?.PlayersNicknames.FirstOrDefault()
             );
-            // Assert 
             Assert.Equal(expected, actual);
         }
 
         [Fact]
         public async Task GetTop_WhenRepositoryReturnsEmptyList_ShouldReturnEmptyList()
         {
-            // Arrange
             var numberOfTeams = 5;
             mockStatisticsRepository.Setup(repo => repo.GetTopTeamsAsync(numberOfTeams)).ReturnsAsync(new List<Team>());
 
-            // Act
             var result = await topPlayersManager.GetTopAsync(numberOfTeams);
 
-            // Assert
             Assert.Equal((NotNull: true, Empty: true, Count: 0), (NotNull: result != null, Empty: result!.Count == 0,
                 Count: result.Count));
         }
@@ -93,15 +87,12 @@ namespace Test.ServicesTests
         [Fact]
         public async Task GetTop_WhenTeamHasNoPlayers_ShouldMapToEmptyNicknameList()
         {
-            // Arrange
             var numberOfTeams = 1;
             var teamsFromDb = new List<Team> { new Team { TotalPoints = 50, Player = new List<Player>() } };
             mockStatisticsRepository.Setup(repo => repo.GetTopTeamsAsync(numberOfTeams)).ReturnsAsync(teamsFromDb);
 
-            // Act
             var result = await topPlayersManager.GetTopAsync(numberOfTeams);
 
-            // Assert
             Assert.Equal((Count: 1, Score: 50, NicknamesCount: 0), (Count: result.Count, Score: result[0].Score, 
                 NicknamesCount: result[0].PlayersNicknames.Count));
         }
@@ -109,12 +100,10 @@ namespace Test.ServicesTests
         [Fact]
         public async Task GetTop_WhenRepositoryThrowsException_ShouldThrowFaultException()
         {
-            // Arrange
             var numberOfTeams = 3;
             mockStatisticsRepository.Setup(repo => repo.GetTopTeamsAsync(numberOfTeams)).
                 ThrowsAsync(new System.Exception("Simulated Database error"));
 
-            // Act & Assert
             FaultException<ServiceErrorDetailDTO>? ex = null;
             try 
             { 
@@ -130,14 +119,11 @@ namespace Test.ServicesTests
         [Fact]
         public async Task GetTop_WhenRepositoryReturnsNull_ShouldReturnEmptyList()
         {
-            // Arrange
             var numberOfTeams = 2;
             mockStatisticsRepository.Setup(r => r.GetTopTeamsAsync(numberOfTeams)).ReturnsAsync((List<Team>)null!);
 
-            // Act
             var result = await topPlayersManager.GetTopAsync(numberOfTeams);
 
-            // Assert
             Assert.Equal((NotNull: true, Empty: true, Count: 0), (NotNull: result != null, Empty: result!.Count == 0,
                 Count: result.Count));
         }
@@ -145,7 +131,6 @@ namespace Test.ServicesTests
         [Fact]
         public async Task GetTop_WhenAPlayerHasNullUserAccount_ShouldThrowDataIntegrityFault()
         {
-            // Arrange
             var numberOfTeams = 1;
             var teams = new List<Team>
             {
@@ -159,24 +144,20 @@ namespace Test.ServicesTests
 
             mockStatisticsRepository.Setup(r => r.GetTopTeamsAsync(numberOfTeams)).ReturnsAsync(teams);
 
-            // Act & Assert
             var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => topPlayersManager.GetTopAsync(numberOfTeams)
             );
 
-            // Assert
             Assert.Equal("DATA_INTEGRITY_ERROR", ex.Detail.ErrorCode);
         }
 
         [Fact]
         public async Task GetTop_WhenTeamPlayerCollectionIsNull_ShouldThrowDataIntegrityFault()
         {
-            // Arrange
             var numberOfTeams = 1;
             var teams = new List<Team> { new Team { Id = 20, TotalPoints = 10, Player = null! } };
             mockStatisticsRepository.Setup(r => r.GetTopTeamsAsync(numberOfTeams)).ReturnsAsync(teams);
 
-            // Act & Assert
             var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
                 () => topPlayersManager.GetTopAsync(numberOfTeams)
             );
@@ -189,11 +170,9 @@ namespace Test.ServicesTests
         [InlineData(-1)]
         public async Task GetTop_WithNonPositiveNumber_ShouldThrowFaultException_WhenRepositoryRejects(int n)
         {
-            // Arrange
             mockStatisticsRepository.Setup(r => r.GetTopTeamsAsync(n)).
                 ThrowsAsync(new ArgumentOutOfRangeException(string.Format("{0}", n)));
 
-            // Act
             FaultException<ServiceErrorDetailDTO>? ex = null;
             try 
             { 
@@ -204,20 +183,16 @@ namespace Test.ServicesTests
                 ex = e; 
             }
 
-            // Assert
             Assert.Equal((Threw: true, Code: "STATISTICS_ERROR"), (Threw: ex != null, Code: ex?.Detail.ErrorCode));
         }
 
         [Fact]
         public async Task GetTop_WithZero_ShouldReturnEmpty_WhenRepositoryReturnsEmpty()
         {
-            // Arrange
             mockStatisticsRepository.Setup(r => r.GetTopTeamsAsync(0)).ReturnsAsync(new List<Team>());
 
-            // Act
             var result = await topPlayersManager.GetTopAsync(0);
 
-            // Assert
             Assert.Equal((NotNull: true, Empty: true, Count: 0), (NotNull: result != null, Empty: result!.Count == 0,
                 Count: result.Count));
         }
