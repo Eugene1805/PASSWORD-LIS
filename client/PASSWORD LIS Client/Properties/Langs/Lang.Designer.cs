@@ -1393,6 +1393,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A player has disconnected from the match.
+        /// </summary>
+        public static string playerDisconnectedText {
+            get {
+                return ResourceManager.GetString("playerDisconnectedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No player was found with that email address.
         /// </summary>
         public static string playerNotFoundText {

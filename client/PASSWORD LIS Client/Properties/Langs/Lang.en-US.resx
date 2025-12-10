@@ -871,4 +871,7 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="generateReportText" xml:space="preserve">
     <value>Generate report</value>
   </data>
+  <data name="playerDisconnectedText" xml:space="preserve">
+    <value>A player has disconnected from the match</value>
+  </data>
 </root>

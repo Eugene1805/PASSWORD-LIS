@@ -303,10 +303,48 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
                 isMatchEnding = true;
 
+                log.WarnFormat("Match cancelled. Server reason: {0}", reason);
 
-                windowService.ShowPopUp(Properties.Langs.Lang.matchCancelledText, reason, PopUpIcon.Warning);
+                string localizedMessage = GetLocalizedCancellationMessage(reason);
+
+                windowService.ShowPopUp(Properties.Langs.Lang.matchCancelledText, localizedMessage, PopUpIcon.Warning);
                 ForceReturnToLogin();
             });
+        }
+
+        private string GetLocalizedCancellationMessage(string serverReason)
+        {
+            if (string.IsNullOrEmpty(serverReason))
+            {
+                return Properties.Langs.Lang.unexpectedErrorText;
+            }
+
+            string reasonUpper = serverReason.ToUpperInvariant();
+
+            if (reasonUpper.Contains("PLAYER_DISCONNECTED") || reasonUpper.Contains("PLAYER_LEFT") ||
+                reasonUpper.Contains("HAS DISCONNECTED"))
+            {
+                return Properties.Langs.Lang.playerDisconnectedText;
+            }
+
+            if (reasonUpper.Contains("HOST_LEFT") || reasonUpper.Contains("HOST_DISCONNECTED"))
+            {
+                return Properties.Langs.Lang.hostLeftText;
+            }
+
+            if (reasonUpper.Contains("SERVER_ERROR") || reasonUpper.Contains("INTERNAL_ERROR") ||
+                reasonUpper.Contains("INTERNAL SERVER ERROR") || reasonUpper.Contains("NOT ENOUGH WORDS"))
+            {
+                return Properties.Langs.Lang.unexpectedServerErrorText;
+            }
+
+            if (reasonUpper.Contains("TIMEOUT") || reasonUpper.Contains("CONNECTION_LOST"))
+            {
+                return Properties.Langs.Lang.connectionUnexpected;
+            }
+
+            log.WarnFormat("Unknown cancellation reason received: {0}", serverReason);
+            return Properties.Langs.Lang.unexpectedErrorText;
         }
 
         private void OnNewPasswordReceived(PasswordWordDTO password)

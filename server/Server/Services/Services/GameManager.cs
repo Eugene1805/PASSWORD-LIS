@@ -176,7 +176,7 @@ namespace Services.Services
             var allVotesIn = TryRegisterVote(session, senderPlayerId, sender.Player.Team, votes);
             if (allVotesIn == null)
             {
-                return; // already voted
+                return;
             }
 
             if (allVotesIn.Value)
@@ -232,7 +232,8 @@ namespace Services.Services
             return true;
         }
 
-        private  static bool? TryRegisterVote(MatchSession session, int senderPlayerId, MatchTeam team, List<ValidationVoteDTO> votes)
+        private  static bool? TryRegisterVote(MatchSession session, int senderPlayerId, MatchTeam team,
+            List<ValidationVoteDTO> votes)
         {
             bool? allVotesIn = false;
             lock (session.ReceivedVotes)
@@ -563,7 +564,7 @@ namespace Services.Services
                     removedMatch.Dispose();
                 }
 
-            }, "Error guardando los resultados de la partida en la base de datos.");
+            }, "Error saving results in the database.");
         }
 
         private async Task  BroadcastAndHandleDisconnectsAsync(MatchSession session,
@@ -599,8 +600,8 @@ namespace Services.Services
                 session.StopTimers();
 
                 await BroadcastAndHandleDisconnectsAsync(session, cb => cb.OnMatchCancelled(
-                    string.Format("Player {0} has disconnected.", disconnectedPlayer.Player.Nickname)));
-
+                    "PLAYER_DISCONNECTED"));
+                log.WarnFormat("Player {0} has disconnected.", disconnectedPlayer.Player.Nickname);
                 matches.TryRemove(session.GameCode, out _);
             }
         }
