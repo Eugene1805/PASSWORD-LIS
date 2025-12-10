@@ -418,7 +418,7 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
     <value>Se produjo un error inesperado en el servidor.</value>
   </data>
   <data name="unexpectedErrorText" xml:space="preserve">
-    <value>Ocurrió un error inesperado.</value>
+    <value>Ocurrió un error inesperado, el servidor probablemente no este disponible.</value>
   </data>
   <data name="linkUnavailableText" xml:space="preserve">
     <value>El enlace no esta disponible actualmente</value>
@@ -864,5 +864,8 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
   </data>
   <data name="connectionLostValidationText" xml:space="preserve">
     <value>Conexión perdida durante la validación</value>
+  </data>
+  <data name="generateReportText" xml:space="preserve">
+    <value>Generar reporte</value>
   </data>
 </root>

@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PASSWORD_LIS_Client.Views"
+        xmlns:util="clr-namespace:PASSWORD_LIS_Client.Utils"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         Title="ReportWindow" Height="350" Width="400">
@@ -21,7 +22,7 @@
                  Text="{Binding ReportReason, UpdateSourceTrigger=PropertyChanged}"
                  Style="{StaticResource reportTextBoxStyle}" 
                  />
-                <Button Content="Generate Report" 
+                <Button Content="{util:Translate generateReportText}" 
                     Width="150" 
                     Height="40"
                     HorizontalAlignment="Center" 

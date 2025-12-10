@@ -418,7 +418,7 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
     <value>An unexpected server error occurred.</value>
   </data>
   <data name="unexpectedErrorText" xml:space="preserve">
-    <value>An unexpected error occurred.</value>
+    <value>An unexpected error occurred, the server might be down.</value>
   </data>
   <data name="linkUnavailableText" xml:space="preserve">
     <value>The link is not currently available</value>
@@ -867,5 +867,8 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   </data>
   <data name="connectionLostValidationText" xml:space="preserve">
     <value>Connection lost during validation</value>
+  </data>
+  <data name="generateReportText" xml:space="preserve">
+    <value>Generate report</value>
   </data>
 </root>
