@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Data.DAL;
 using Data.DAL.Implementations;
 using Xunit;
 
@@ -28,7 +29,8 @@ namespace TestsEF.DataTests
                 blueIds = ctx.Player.OrderBy(p => p.Id).Skip(3).Take(2).Select(p => p.Id).ToList();
             }
 
-            await repository.SaveMatchResultAsync(10, 7, redIds, blueIds);
+            var matchResultData = new MatchResultData(10, 7, redIds, blueIds);
+            await repository.SaveMatchResultAsync(matchResultData);
 
 
             using (var verifyCtx = NewContext())
@@ -50,16 +52,18 @@ namespace TestsEF.DataTests
         public async Task SaveMatchResultAsync_NullRedIds_ThrowsArgumentNullException()
         {
             var blueIds = GetFirstPlayerIds(2);
+            var matchResultData = new MatchResultData(5, 5, null, blueIds);
             await Assert.ThrowsAsync<System.ArgumentNullException>(() 
-                => repository.SaveMatchResultAsync(5, 5, null, blueIds));
+                => repository.SaveMatchResultAsync(matchResultData));
         }
 
         [Fact]
         public async Task SaveMatchResultAsync_NullBlueIds_ThrowsArgumentNullException()
         {
             var redIds = GetFirstPlayerIds(2);
+            var matchResultData = new MatchResultData(5, 5, redIds, null);
             await Assert.ThrowsAsync<System.ArgumentNullException>(() 
-                => repository.SaveMatchResultAsync(5, 5, redIds, null));
+                => repository.SaveMatchResultAsync(matchResultData));
         }
 
         [Fact]
@@ -76,8 +80,9 @@ namespace TestsEF.DataTests
                 initialTeamCount = ctx.Team.Count();
             }
 
+            var matchResultData = new MatchResultData(3, 4, redIds, blueIds);
             var ex = await Assert.ThrowsAsync<System.InvalidOperationException>(() 
-                => repository.SaveMatchResultAsync(3, 4, redIds, blueIds));
+                => repository.SaveMatchResultAsync(matchResultData));
             Assert.Contains("9999", ex.Message);
 
             using (var verifyCtx = NewContext())
@@ -99,7 +104,8 @@ namespace TestsEF.DataTests
             var redIds = new List<int> { shared, playerIds[1] };
             var blueIds = new List<int> { shared, playerIds[2], playerIds[3] };
 
-            await repository.SaveMatchResultAsync(8, 9, redIds, blueIds);
+            var matchResultData = new MatchResultData(8, 9, redIds, blueIds);
+            await repository.SaveMatchResultAsync(matchResultData);
 
             using (var verifyCtx = NewContext())
             {

@@ -15,19 +15,15 @@ namespace Data.DAL.Implementations
         {
             this.contextFactory = contextFactory;
         }
-        public async Task SaveMatchResultAsync(
-            int redScore,
-            int blueScore,
-            IEnumerable<int> redTeamPlayerIds,
-            IEnumerable<int> blueTeamPlayerIds)
+        public async Task SaveMatchResultAsync(MatchResultData matchResultData)
         {
-            if (redTeamPlayerIds == null) 
+            if (matchResultData.RedTeamPlayerIds == null) 
             {
-                throw new ArgumentNullException(nameof(redTeamPlayerIds));
+                throw new ArgumentNullException(nameof(matchResultData.RedTeamPlayerIds));
             }
-            if (blueTeamPlayerIds == null)
+            if (matchResultData.BlueTeamPlayerIds == null)
             {
-                throw new ArgumentNullException(nameof(blueTeamPlayerIds));
+                throw new ArgumentNullException(nameof(matchResultData.BlueTeamPlayerIds));
             }
 
             using (var context = contextFactory.CreateDbContext())
@@ -42,7 +38,8 @@ namespace Data.DAL.Implementations
                     };
                     context.Match.Add(newMatch);
 
-                    var allRegisteredPlayerIds = redTeamPlayerIds.Concat(blueTeamPlayerIds).Distinct().ToList();
+                    var allRegisteredPlayerIds = matchResultData.RedTeamPlayerIds
+                        .Concat(matchResultData.BlueTeamPlayerIds).Distinct().ToList();
 
                     var playersFromDb = await context.Player
                        .Where(p => allRegisteredPlayerIds.Contains(p.Id))
@@ -61,16 +58,16 @@ namespace Data.DAL.Implementations
                     var redTeamEntity = new Team
                     {
                         Match = newMatch,
-                        TotalPoints = redScore
+                        TotalPoints = matchResultData.RedScore
                     };
 
                     var blueTeamEntity = new Team
                     {
                         Match = newMatch,
-                        TotalPoints = blueScore
+                        TotalPoints = matchResultData.BlueScore
                     };
 
-                    foreach (var playerId in redTeamPlayerIds)
+                    foreach (var playerId in matchResultData.RedTeamPlayerIds)
                     {
                         if (!playerById.TryGetValue(playerId, out Player player))
                         {
@@ -78,7 +75,7 @@ namespace Data.DAL.Implementations
                         }
                         redTeamEntity.Player.Add(player);
                     }
-                    foreach (var playerId in blueTeamPlayerIds)
+                    foreach (var playerId in matchResultData.BlueTeamPlayerIds)
                     {
                         if (!playerById.TryGetValue(playerId, out Player player))
                         {

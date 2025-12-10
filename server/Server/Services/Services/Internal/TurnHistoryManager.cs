@@ -6,16 +6,16 @@ namespace Services.Services.Internal
 {
     public class TurnHistoryManager
     {
-        public void RecordClue(MatchSession session, MatchTeam team, PasswordWord password, string clue)
+        public void RecordClue(MatchSession session, TurnClueData turnClueData)
         {
             var historyItem = new TurnHistoryDTO
             {
-                TurnId = GetCurrentWordIndex(session, team),
-                Password = DTOMapper.ToWordDTO(password),
-                ClueUsed = clue
+                TurnId = GetCurrentWordIndex(session, turnClueData.Team),
+                Password = DTOMapper.ToWordDTO(turnClueData.Password),
+                ClueUsed = turnClueData.Clue
             };
 
-            AddToTeamHistory(session, team, historyItem);
+            AddToTeamHistory(session, turnClueData.Team, historyItem);
         }
 
         public void RecordPass(MatchSession session, MatchTeam team, PasswordWord password)
@@ -25,7 +25,8 @@ namespace Services.Services.Internal
                 return;
             }
 
-            RecordClue(session, team, password, "[]");
+            var turnClueData = new TurnClueData(team, password, "[]");
+            RecordClue(session, turnClueData);
         }
 
         public bool HasTeamPassed(MatchSession session, MatchTeam team)

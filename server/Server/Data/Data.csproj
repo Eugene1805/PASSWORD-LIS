@@ -76,6 +76,7 @@
     <Compile Include="DAL\Interfaces\IReportRepository.cs" />
     <Compile Include="DAL\Interfaces\IStatisticsRepository.cs" />
     <Compile Include="DAL\Interfaces\IWordRepository.cs" />
+    <Compile Include="DAL\MatchResultData.cs" />
     <Compile Include="Exceptions\DuplicateAccountException.cs" />
     <Compile Include="Model\Ban.cs">
       <DependentUpon>PasswordLISModel.tt</DependentUpon>

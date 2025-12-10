@@ -49,26 +49,27 @@ namespace Services.Services.Internal
             }
         }
 
-        public async Task SendPassTurnUpdatesAsync(MatchSession session, ActivePlayer sender,
-            PasswordWord nextWord, Func<MatchSession, int, Task> onDisconnection)
+        public async Task SendPassTurnUpdatesAsync(MatchSession session, PassTurnData passTurnData,
+            Func<MatchSession, int, Task> onDisconnection)
         {
             try
             {
-                GameBroadcaster.SendToPlayer(sender, cb => cb.OnNewPassword(DTOMapper.ToWordDTO(nextWord)));
+                GameBroadcaster.SendToPlayer(passTurnData.Sender,
+                    cb => cb.OnNewPassword(DTOMapper.ToWordDTO(passTurnData.NextWord)));
             }
             catch
             {
-                await onDisconnection(session, sender.Player.Id);
+                await onDisconnection(session, passTurnData.Sender.Player.Id);
             }
 
-            var partner = session.GetPartner(sender);
+            var partner = session.GetPartner(passTurnData.Sender);
             if (partner?.Callback != null)
             {
                 try
                 {
                     GameBroadcaster.SendToPlayer(partner, cb =>
                     {
-                        cb.OnNewPassword(DTOMapper.ToMaskedWordDTO(nextWord));
+                        cb.OnNewPassword(DTOMapper.ToMaskedWordDTO(passTurnData.NextWord));
                         cb.OnClueReceived("Your partner passed the word.");
                     });
                 }
@@ -79,10 +80,10 @@ namespace Services.Services.Internal
             }
         }
 
-        public async Task NotifyPartnerOfClueAsync(MatchSession session, ActivePlayer sender, string clue,
+        public async Task NotifyPartnerOfClueAsync(MatchSession session, ClueData clueData,
             Func<MatchSession, int, Task> onDisconnection)
         {
-            var partner = session.GetPartner(sender);
+            var partner = session.GetPartner(clueData.Sender);
             if (partner?.Callback == null)
             {
                 return;
@@ -90,7 +91,7 @@ namespace Services.Services.Internal
 
             try
             {
-                GameBroadcaster.SendToPlayer(partner, cb => cb.OnClueReceived(clue));
+                GameBroadcaster.SendToPlayer(partner, cb => cb.OnClueReceived(clueData.Clue));
             }
             catch
             {

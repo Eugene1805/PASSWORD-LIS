@@ -1,5 +1,4 @@
 using Data.Model;
-using Services.Contracts;
 using Services.Contracts.DTOs;
 using Services.Contracts.Enums;
 using System;
@@ -40,15 +39,20 @@ namespace Services.Services.Internal
             await context.WordDistributor.SendNextWordToTeamAsync(session, team, context.OnDisconnection);
         }
 
-        public async Task HandleIncorrectGuessAsync(MatchSession session, ActivePlayer sender,
-            MatchTeam team, int currentScore, Func<MatchSession, int, Task> onDisconnection)
+        public async Task HandleIncorrectGuessAsync(MatchSession session, IncorrectGuessData guessData,
+            Func<MatchSession, int, Task> onDisconnection)
         {
-            var resultDto = new GuessResultDTO { IsCorrect = false, Team = team, NewScore = currentScore };
-            var clueGuy = session.GetPlayerByRole(team, PlayerRole.ClueGuy);
+            var resultDto = new GuessResultDTO
+            {
+                IsCorrect = false,
+                Team = guessData.Team,
+                NewScore = guessData.CurrentScore
+            };
+            var clueGuy = session.GetPlayerByRole(guessData.Team, PlayerRole.ClueGuy);
 
             try
             {
-                GameBroadcaster.SendToPlayer(sender, cb => cb.OnGuessResult(resultDto));
+                GameBroadcaster.SendToPlayer(guessData.Sender, cb => cb.OnGuessResult(resultDto));
                 if (clueGuy?.Callback != null)
                 {
                     GameBroadcaster.SendToPlayer(clueGuy, cb => cb.OnGuessResult(resultDto));
@@ -56,7 +60,7 @@ namespace Services.Services.Internal
             }
             catch
             {
-                await onDisconnection(session, sender.Player.Id);
+                await onDisconnection(session, guessData.Sender.Player.Id);
                 if (clueGuy?.Player != null)
                 {
                     await onDisconnection(session, clueGuy.Player.Id);

@@ -1,4 +1,5 @@
-﻿using Data.DAL.Interfaces;
+﻿using Data.DAL;
+using Data.DAL.Interfaces;
 using Data.Model;
 using log4net;
 using Services.Contracts;
@@ -88,7 +89,8 @@ namespace Services.Services
                 turnHistoryManager.ApplyPassAndAdvance(session, team);
 
                 var nextWord = session.GetCurrentPassword(team);
-                await wordDistributor.SendPassTurnUpdatesAsync(session, sender, nextWord, HandlePlayerDisconnectionAsync);
+                var passTurnData = new PassTurnData(sender, nextWord);
+                await wordDistributor.SendPassTurnUpdatesAsync(session, passTurnData, HandlePlayerDisconnectionAsync);
             }, context: "GameManager: PassTurnAsync");
         }
 
@@ -101,9 +103,11 @@ namespace Services.Services
 
                 var (session, sender, currentPassword) = context.Value;
 
-                turnHistoryManager.RecordClue(session, sender.Player.Team, currentPassword, clue);
+                var turnClueData = new TurnClueData(sender.Player.Team, currentPassword, clue);
+                turnHistoryManager.RecordClue(session, turnClueData);
 
-                await wordDistributor.NotifyPartnerOfClueAsync(session, sender, clue, HandlePlayerDisconnectionAsync);
+                var clueData = new ClueData(sender, clue);
+                await wordDistributor.NotifyPartnerOfClueAsync(session, clueData, HandlePlayerDisconnectionAsync);
             }, context: "GameManager: SubmitClueAsync");
         }
 
@@ -133,8 +137,8 @@ namespace Services.Services
                 }
                 else
                 {
-                    await guessHandler.HandleIncorrectGuessAsync(session, sender, team, currentScore,
-                        HandlePlayerDisconnectionIfFailed);
+                    var incorrectData = new IncorrectGuessData(sender, team, currentScore);
+                    await guessHandler.HandleIncorrectGuessAsync(session, incorrectData, HandlePlayerDisconnectionIfFailed);
                 }
             }, context: "GameManager: SubmitGuessAsync");
         }
@@ -151,7 +155,8 @@ namespace Services.Services
 
                 await ExecuteSafeAsync(session, async () =>
                 {
-                    await ProcessVoteInternalAsync(session, senderPlayerId, votes, gameCode);
+                    var voteData = new VoteSubmissionData(senderPlayerId, votes, gameCode);
+                    await ProcessVoteInternalAsync(session, voteData);
                 }, "Error while processing the round");
 
             }, context: "GameManager: SubmitValidationVotesAsync");
@@ -218,19 +223,20 @@ namespace Services.Services
             return true;
         }
 
-        private async Task ProcessVoteInternalAsync(MatchSession session, int senderPlayerId, List<ValidationVoteDTO> votes, string gameCode)
+        private async Task ProcessVoteInternalAsync(MatchSession session, VoteSubmissionData voteData)
         {
-            if (!IsSessionInValidating(session, gameCode))
+            if (!IsSessionInValidating(session, voteData.GameCode))
             {
                 return;
             }
 
-            if (!TryGetActiveSender(session, senderPlayerId, gameCode, out var sender))
+            if (!TryGetActiveSender(session, voteData.SenderPlayerId, voteData.GameCode, out var sender))
             {
                 return;
             }
 
-            var allVotesIn = TryRegisterVote(session, senderPlayerId, sender.Player.Team, votes);
+            var voteRegData = new VoteRegistrationData(voteData.SenderPlayerId, sender.Player.Team, voteData.Votes);
+            var allVotesIn = TryRegisterVote(session, voteRegData);
             if (allVotesIn == null)
             {
                 return;
@@ -238,13 +244,13 @@ namespace Services.Services
 
             if (allVotesIn.Value)
             {
-                log.InfoFormat("All votes received for game {0}. Processing...", gameCode);
+                log.InfoFormat("All votes received for game {0}. Processing...", voteData.GameCode);
                 session.StopTimers();
                 await ProcessVotesAsync(session);
             }
             else
             {
-                log.InfoFormat("Vote received for game '{0}'. Waiting for others.", gameCode);
+                log.InfoFormat("Vote received for game '{0}'. Waiting for others.", voteData.GameCode);
             }
         }
 
@@ -289,19 +295,18 @@ namespace Services.Services
             return true;
         }
 
-        private  static bool? TryRegisterVote(MatchSession session, int senderPlayerId, MatchTeam team,
-            List<ValidationVoteDTO> votes)
+        private  static bool? TryRegisterVote(MatchSession session, VoteRegistrationData voteRegData)
         {
             bool? allVotesIn = false;
             lock (session.ReceivedVotes)
             {
-                if (session.PlayersWhoVoted.Contains(senderPlayerId))
+                if (session.PlayersWhoVoted.Contains(voteRegData.SenderPlayerId))
                 {
                     return null;
                 }
 
-                session.PlayersWhoVoted.Add(senderPlayerId);
-                session.ReceivedVotes.Add((team, votes));
+                session.PlayersWhoVoted.Add(voteRegData.SenderPlayerId);
+                session.ReceivedVotes.Add((voteRegData.Team, voteRegData.Votes));
 
                 if (session.PlayersWhoVoted.Count >= session.ActivePlayers.Count)
                 {
@@ -311,7 +316,6 @@ namespace Services.Services
             return allVotesIn;
         }
 
-       
         private async Task StartGameInternalAsync(MatchSession session)
         {
 
@@ -514,8 +518,12 @@ namespace Services.Services
             {
                 log.InfoFormat("Saving match result for game {0}...", session.GameCode);
 
-                await matchRepository.SaveMatchResultAsync(session.RedTeamScore, session.BlueTeamScore,
-                    registeredRedPlayerIds, registeredBluePlayerIds);
+                var matchResultData = new MatchResultData(
+                    session.RedTeamScore, 
+                    session.BlueTeamScore,
+                    registeredRedPlayerIds, 
+                    registeredBluePlayerIds);
+                await matchRepository.SaveMatchResultAsync(matchResultData);
 
                 if (winner.HasValue)
                 {
