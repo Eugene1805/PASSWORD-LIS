@@ -25,6 +25,7 @@ namespace Services.Services
         private readonly IWordRepository wordRepository;
         private readonly IMatchRepository matchRepository;
         private readonly IPlayerRepository playerRepository;
+        private readonly TurnHistoryManager turnHistoryManager = new TurnHistoryManager();
         private static readonly ILog log = LogManager.GetLogger(typeof(GameManager));
 
         private const int RoundDurationSeconds = 40;
@@ -75,15 +76,14 @@ namespace Services.Services
                 }
 
                 var team = sender.Player.Team;
-                if (HasTeamAlreadyPassed(session, team))
+                if (turnHistoryManager.HasTeamPassed(session, team))
                 {
                     return;
                 }
 
                 var currentPassword = session.GetCurrentPassword(team);
-                AddPassHistoryIfNeeded(session, team, currentPassword);
-
-                ApplyPassAndAdvance(session, team);
+                turnHistoryManager.RecordPass(session, team, currentPassword);
+                turnHistoryManager.ApplyPassAndAdvance(session, team);
 
                 var nextWord = session.GetCurrentPassword(team);
                 await SendPassTurnUpdatesAsync(session, sender, nextWord);
@@ -99,7 +99,7 @@ namespace Services.Services
 
                 var (session, sender, currentPassword) = context.Value;
 
-                RecordClueHistory(session, sender, clue, currentPassword);
+                turnHistoryManager.RecordClue(session, sender.Player.Team, currentPassword, clue);
 
                 await NotifyPartnerOfClueAsync(session, sender, clue);
             }, context: "GameManager: SubmitClueAsync");
@@ -678,48 +678,6 @@ namespace Services.Services
             }
             return sender;
         }
-        private static bool HasTeamAlreadyPassed(MatchSession session, MatchTeam team)
-        {
-            if ((team == MatchTeam.RedTeam && session.RedTeamPassedThisRound) ||
-                (team == MatchTeam.BlueTeam && session.BlueTeamPassedThisRound))
-            {
-                return true;
-            }
-            return false;
-        }
-        private static void AddPassHistoryIfNeeded(MatchSession session, MatchTeam team, PasswordWord currentPassword)
-        {
-            if (currentPassword != null && currentPassword.Id != -1)
-            {
-                var historyItem = new TurnHistoryDTO
-                {
-                    TurnId = (team == MatchTeam.RedTeam) ? session.RedTeamWordIndex : session.BlueTeamWordIndex,
-                    Password = DTOMapper.ToWordDTO(currentPassword),
-                    ClueUsed = "[]"
-                };
-                if (team == MatchTeam.RedTeam)
-                {
-                    session.RedTeamTurnHistory.Add(historyItem);
-                }
-                else
-                {
-                    session.BlueTeamTurnHistory.Add(historyItem);
-                }
-            }
-        }
-        private static void ApplyPassAndAdvance(MatchSession session, MatchTeam team)
-        {
-            if (team == MatchTeam.RedTeam)
-            {
-                session.RedTeamPassedThisRound = true;
-                session.RedTeamWordIndex++;
-            }
-            else
-            {
-                session.BlueTeamPassedThisRound = true;
-                session.BlueTeamWordIndex++;
-            }
-        }
         private async Task SendPassTurnUpdatesAsync(MatchSession session, ActivePlayer sender, PasswordWord nextWord)
         {
             try
@@ -788,14 +746,7 @@ namespace Services.Services
             }
             session.AddScore(team);
 
-            if (team == MatchTeam.RedTeam)
-            {
-                session.RedTeamWordIndex++;
-            }
-            else
-            {
-                session.BlueTeamWordIndex++;
-            }
+            turnHistoryManager.AdvanceWordIndex(session, team);
 
             int newScore = (team == MatchTeam.RedTeam) ? session.RedTeamScore : session.BlueTeamScore;
             var resultDto = new GuessResultDTO { IsCorrect = true, Team = team, NewScore = newScore };
@@ -875,27 +826,6 @@ namespace Services.Services
                 return null;
             }
             return (session, sender, currentPassword);
-        }
-
-        private void RecordClueHistory(MatchSession session, ActivePlayer sender, 
-            string clue, PasswordWord currentPassword)
-        {
-            var team = sender.Player.Team;
-            var historyItem = new TurnHistoryDTO
-            {
-                TurnId = (team == MatchTeam.RedTeam) ? session.RedTeamWordIndex : session.BlueTeamWordIndex,
-                Password = DTOMapper.ToWordDTO(currentPassword),
-                ClueUsed = clue
-            };
-
-            if (team == MatchTeam.RedTeam)
-            {
-                session.RedTeamTurnHistory.Add(historyItem);
-            }
-            else
-            {
-                session.BlueTeamTurnHistory.Add(historyItem);
-            }
         }
 
         private async Task NotifyPartnerOfClueAsync(MatchSession session, ActivePlayer sender, string clue)
