@@ -17,14 +17,14 @@ namespace PASSWORD_LIS_Client.ViewModels
         public string NewPassword
         {
             get => this.newPassword;
-            set { this.newPassword = value; OnPropertyChanged(); }
+            set { this.newPassword = value; ValidateNewPassword(); OnPropertyChanged(); }
         }
 
         private string confirmPassword;
         public string ConfirmPassword
         {
             get => this.confirmPassword;
-            set { this.confirmPassword = value; OnPropertyChanged(); }
+            set { this.confirmPassword = value; ValidateConfirmPassword(); OnPropertyChanged(); }
         }
 
         private bool isBusy;
@@ -32,6 +32,20 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             get => this.isBusy;
             set { this.isBusy = value; OnPropertyChanged(); }
+        }
+
+        private string newPasswordError;
+        public string NewPasswordError
+        {
+            get => newPasswordError;
+            set { newPasswordError = value; OnPropertyChanged(); }
+        }
+
+        private string confirmPasswordError;
+        public string ConfirmPasswordError
+        {
+            get => confirmPasswordError;
+            set { confirmPasswordError = value; OnPropertyChanged(); }
         }
 
         public RelayCommand ChangePasswordCommand { get; }
@@ -48,12 +62,12 @@ namespace PASSWORD_LIS_Client.ViewModels
         private bool CanChangePassword()
         {
             return !this.IsBusy && !string.IsNullOrWhiteSpace(this.NewPassword) && 
-                !string.IsNullOrWhiteSpace(this.ConfirmPassword);
+                !string.IsNullOrWhiteSpace(this.ConfirmPassword) && AreFieldsValid();
         }
 
         private async Task ChangePasswordAsync()
         {
-            if (!IsInputValid())
+            if (!AreFieldsValid())
             {
                 return;
             }
@@ -103,21 +117,43 @@ namespace PASSWORD_LIS_Client.ViewModels
             this.windowService.CloseWindow(this);
         }
 
-        private bool IsInputValid()
+        private bool AreFieldsValid()
         {
-            if (string.IsNullOrWhiteSpace(this.ConfirmPassword) || string.IsNullOrWhiteSpace(this.NewPassword))
-            {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
-                    Properties.Langs.Lang.requiredFieldsText, PopUpIcon.Warning);
-                return false;
-            }
+            bool isPasswordValid = ValidateNewPassword();
+            bool isConfirmPasswordValid = ValidateConfirmPassword();
+            return isPasswordValid && isConfirmPasswordValid;
+        }
 
-            if (!ValidationUtils.PasswordsMatch(this.ConfirmPassword, this.NewPassword))
+        private bool ValidateNewPassword()
+        {
+            if (string.IsNullOrWhiteSpace(NewPassword))
             {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
-                    Properties.Langs.Lang.matchingPasswordErrorText, PopUpIcon.Warning);
+                NewPasswordError = Properties.Langs.Lang.userPasswordRequirementsText;
                 return false;
             }
+            if (!ValidationUtils.ArePasswordRequirementsMet(NewPassword))
+            {
+                NewPasswordError = Properties.Langs.Lang.userPasswordRequirementsText;
+                return false;
+            }
+            NewPasswordError = null;
+            ValidateConfirmPassword();
+            return true;
+        }
+
+        private bool ValidateConfirmPassword()
+        {
+            if (string.IsNullOrWhiteSpace(ConfirmPassword))
+            {
+                ConfirmPasswordError = Properties.Langs.Lang.matchingPasswordErrorText;
+                return false;
+            }
+            if (!ValidationUtils.PasswordsMatch(NewPassword, ConfirmPassword))
+            {
+                ConfirmPasswordError = Properties.Langs.Lang.matchingPasswordErrorText;
+                return false;
+            }
+            ConfirmPasswordError = null;
             return true;
         }
     }

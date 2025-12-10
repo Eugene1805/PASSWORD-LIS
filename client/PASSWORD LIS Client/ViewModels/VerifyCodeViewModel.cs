@@ -18,7 +18,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         public string EnteredCode
         {
             get => this.enteredCode;
-            set { this.enteredCode = value; OnPropertyChanged(); }
+            set { this.enteredCode = value; ValidateEnteredCode(); OnPropertyChanged(); }
         }
 
         private bool isBusy;
@@ -26,6 +26,13 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             get => this.isBusy;
             set { this.isBusy = value; OnPropertyChanged(); }
+        }
+
+        private string enteredCodeError;
+        public string EnteredCodeError
+        {
+            get => enteredCodeError;
+            set { enteredCodeError = value; OnPropertyChanged(); }
         }
 
         public RelayCommand VerifyCodeCommand { get; }
@@ -46,15 +53,13 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private bool CanVerify()
         {
-            return !this.IsBusy && !string.IsNullOrWhiteSpace(this.EnteredCode);
+            return !this.IsBusy && !string.IsNullOrWhiteSpace(this.EnteredCode) && ValidateEnteredCode();
         }
 
         private async Task VerifyCodeAsync()
         {
-            if (string.IsNullOrWhiteSpace(this.enteredCode))
+            if (!ValidateEnteredCode())
             {
-                this.windowService.ShowPopUp(Properties.Langs.Lang.codeWordText,
-                            Properties.Langs.Lang.requiredFieldsText, PopUpIcon.Warning);
                 return;
             }
             this.IsBusy = true;
@@ -64,8 +69,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 
                 if (!isCodeValid)
                 {
-                    this.windowService.ShowPopUp(Properties.Langs.Lang.verificationFailedTitleText,
-                                Properties.Langs.Lang.codeIncorrectOrExpiredText, PopUpIcon.Error);
+                    EnteredCodeError = Properties.Langs.Lang.codeIncorrectOrExpiredText;
                 }
                 if (isCodeValid && this.reason == VerificationReason.AccountActivation)
                 {
@@ -151,6 +155,22 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
                 return success;
             });
+        }
+
+        private bool ValidateEnteredCode()
+        {
+            if (string.IsNullOrWhiteSpace(EnteredCode))
+            {
+                EnteredCodeError = Properties.Langs.Lang.requiredFieldsText;
+                return false;
+            }
+            if (EnteredCode.Length != 6)
+            {
+                EnteredCodeError = Properties.Langs.Lang.codeIncorrectOrExpiredText;
+                return false;
+            }
+            EnteredCodeError = null;
+            return true;
         }
     }
 }

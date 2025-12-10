@@ -43,6 +43,7 @@
             <TextBox x:Name="verificationCodeTextBox"  MaxLength="6"
                      Text="{Binding EnteredCode, UpdateSourceTrigger=PropertyChanged}"
                      Style="{StaticResource primaryTextBoxStyle}" Width="220"/>
+            <TextBlock Text="{Binding EnteredCodeError}" Style="{StaticResource errorTextBlockStyle}" Margin="5,0,0,10" Width="220"/>
             <Button x:Name="verifyCodeButton"
                 Content="{utils:Translate verifyCodeText}" 
                 Style="{StaticResource LoadingButtonStyle}"
