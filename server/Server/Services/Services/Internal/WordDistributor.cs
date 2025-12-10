@@ -13,21 +13,20 @@ namespace Services.Services.Internal
         public async Task DistributeWordToTeamAsync(MatchSession session, MatchTeam team,
             Func<MatchSession, int, Task> onDisconnection)
         {
-            var clueGuy = session.GetPlayerByRole(team, PlayerRole.ClueGuy);
-            var guesser = session.GetPlayerByRole(team, PlayerRole.Guesser);
+            var teamPlayers = GetTeamPlayers(session, team);
             var word = session.GetCurrentPassword(team);
 
             try
             {
-                SendFullWordToClueGuy(clueGuy, word);
-                SendMaskedWordToGuesser(guesser, word);
+                SendFullWordToClueGuy(teamPlayers.ClueGuy, word);
+                SendMaskedWordToGuesser(teamPlayers.Guesser, word);
             }
             catch (Exception ex)
             {
                 log.WarnFormat("Player disconnected during word distribution in match {0}: {1}",
                     session.GameCode, ex.Message);
 
-                await HandleDistributionDisconnections(session, clueGuy, guesser, onDisconnection);
+                await HandleDistributionDisconnections(session, teamPlayers, onDisconnection);
             }
         }
 
@@ -35,17 +34,16 @@ namespace Services.Services.Internal
             Func<MatchSession, int, Task> onDisconnection)
         {
             var nextWord = session.GetCurrentPassword(team);
-            var clueGuy = session.GetPlayerByRole(team, PlayerRole.ClueGuy);
-            var guesser = session.GetPlayerByRole(team, PlayerRole.Guesser);
+            var teamPlayers = GetTeamPlayers(session, team);
 
             try
             {
-                SendFullWordToClueGuy(clueGuy, nextWord);
-                SendMaskedWordToGuesser(guesser, nextWord);
+                SendFullWordToClueGuy(teamPlayers.ClueGuy, nextWord);
+                SendMaskedWordToGuesser(teamPlayers.Guesser, nextWord);
             }
             catch
             {
-                await HandleNextWordDisconnections(session, clueGuy, guesser, onDisconnection);
+                await HandleNextWordDisconnections(session, teamPlayers, onDisconnection);
             }
         }
 
@@ -99,6 +97,13 @@ namespace Services.Services.Internal
             }
         }
 
+        private static TeamPlayers GetTeamPlayers(MatchSession session, MatchTeam team)
+        {
+            var clueGuy = session.GetPlayerByRole(team, PlayerRole.ClueGuy);
+            var guesser = session.GetPlayerByRole(team, PlayerRole.Guesser);
+            return new TeamPlayers(clueGuy, guesser);
+        }
+
         private static void SendFullWordToClueGuy(ActivePlayer clueGuy, PasswordWord word)
         {
             if (clueGuy?.Callback != null)
@@ -116,28 +121,28 @@ namespace Services.Services.Internal
         }
 
         private static async Task HandleDistributionDisconnections(MatchSession session,
-            ActivePlayer clueGuy, ActivePlayer guesser, Func<MatchSession, int, Task> onDisconnection)
+            TeamPlayers teamPlayers, Func<MatchSession, int, Task> onDisconnection)
         {
-            if (clueGuy?.Player != null)
+            if (teamPlayers.ClueGuy?.Player != null)
             {
-                await onDisconnection(session, clueGuy.Player.Id);
+                await onDisconnection(session, teamPlayers.ClueGuy.Player.Id);
             }
-            if (guesser?.Player != null)
+            if (teamPlayers.Guesser?.Player != null)
             {
-                await onDisconnection(session, guesser.Player.Id);
+                await onDisconnection(session, teamPlayers.Guesser.Player.Id);
             }
         }
 
         private static async Task HandleNextWordDisconnections(MatchSession session,
-            ActivePlayer clueGuy, ActivePlayer guesser, Func<MatchSession, int, Task> onDisconnection)
+            TeamPlayers teamPlayers, Func<MatchSession, int, Task> onDisconnection)
         {
-            if (clueGuy?.Callback != null)
+            if (teamPlayers.ClueGuy?.Callback != null)
             {
-                await onDisconnection(session, clueGuy.Player.Id);
+                await onDisconnection(session, teamPlayers.ClueGuy.Player.Id);
             }
-            if (guesser?.Callback != null)
+            if (teamPlayers.Guesser?.Callback != null)
             {
-                await onDisconnection(session, guesser.Player.Id);
+                await onDisconnection(session, teamPlayers.Guesser.Player.Id);
             }
         }
     }

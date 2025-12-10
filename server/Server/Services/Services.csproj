@@ -136,6 +136,7 @@
     <Compile Include="Services\Internal\MatchSession.cs" />
     <Compile Include="Services\Internal\PassTurnData.cs" />
     <Compile Include="Services\Internal\RulesEngine.cs" />
+    <Compile Include="Services\Internal\TeamPlayers.cs" />
     <Compile Include="Services\Internal\TurnClueData.cs" />
     <Compile Include="Services\Internal\TurnHistoryManager.cs" />
     <Compile Include="Services\Internal\VoteRegistrationData.cs" />
