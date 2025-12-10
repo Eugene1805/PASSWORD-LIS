@@ -20,42 +20,42 @@ namespace PASSWORD_LIS_Client.ViewModels
         public string FirstName
         {
             get => firstName;
-            set { firstName = value; OnPropertyChanged(); }
+            set { firstName = value; ValidateFirstName(); OnPropertyChanged(); }
         }
 
         private string lastName;
         public string LastName
         {
             get => lastName;
-            set { lastName = value; OnPropertyChanged(); }
+            set { lastName = value; ValidateLastName(); OnPropertyChanged(); }
         }
 
         private string nickname;
         public string Nickname
         {
             get => nickname;
-            set { nickname = value; OnPropertyChanged(); }
+            set { nickname = value; ValidateNickname(); OnPropertyChanged(); }
         }
 
         private string email;
         public string Email
         {
             get => email;
-            set { email = value; OnPropertyChanged(); }
+            set { email = value; ValidateEmail(); OnPropertyChanged(); }
         }
 
         private string password;
         public string Password
         {
             get => password;
-            set { password = value; OnPropertyChanged(); }
+            set { password = value; ValidatePassword(); OnPropertyChanged(); }
         }
 
         private string confirmPassword;
         public string ConfirmPassword
         {
             get => confirmPassword;
-            set { confirmPassword = value; OnPropertyChanged(); }
+            set { confirmPassword = value; ValidateConfirmPassword(); OnPropertyChanged(); }
         }
 
         private bool isSigningUp;
@@ -63,6 +63,48 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             get => isSigningUp;
             set { isSigningUp = value; OnPropertyChanged(); }
+        }
+
+        private string firstNameError;
+        public string FirstNameError
+        {
+            get => firstNameError;
+            set { firstNameError = value; OnPropertyChanged(); }
+        }
+
+        private string lastNameError;
+        public string LastNameError
+        {
+            get => lastNameError;
+            set { lastNameError = value; OnPropertyChanged(); }
+        }
+
+        private string nicknameError;
+        public string NicknameError
+        {
+            get => nicknameError;
+            set { nicknameError = value; OnPropertyChanged(); }
+        }
+
+        private string emailError;
+        public string EmailError
+        {
+            get => emailError;
+            set { emailError = value; OnPropertyChanged(); }
+        }
+
+        private string passwordError;
+        public string PasswordError
+        {
+            get => passwordError;
+            set { passwordError = value; OnPropertyChanged(); }
+        }
+
+        private string confirmPasswordError;
+        public string ConfirmPasswordError
+        {
+            get => confirmPasswordError;
+            set { confirmPasswordError = value; OnPropertyChanged(); }
         }
 
         public string TCLink { get; }
@@ -110,7 +152,8 @@ namespace PASSWORD_LIS_Client.ViewModels
                    !string.IsNullOrEmpty(LastName) &&
                    !string.IsNullOrEmpty(Nickname) &&
                    !string.IsNullOrEmpty(Password) &&
-                   !string.IsNullOrEmpty(ConfirmPassword);
+                   !string.IsNullOrEmpty(ConfirmPassword) &&
+                   AreFieldsValid();
         }
 
         private void NavigateToLogin(object obj)
@@ -170,12 +213,18 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private async Task<bool> IsInputValid()
         {
+            bool isValid = AreFieldsValid();
+
+            if (!isValid)
+            {
+                return false;
+            }
+
             try
             {
                 if (await client.IsNicknameInUseAsync(nickname))
                 {
-                    windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
-                        Properties.Langs.Lang.nicknameInUseText, PopUpIcon.Warning);
+                    NicknameError = Properties.Langs.Lang.nicknameInUseText;
                     return false;
                 }
             }
@@ -186,24 +235,131 @@ namespace PASSWORD_LIS_Client.ViewModels
                 return false;
             }
 
-            if (!ValidationUtils.IsValidEmail(Email))
+            return true;
+        }
+
+        private bool AreFieldsValid()
+        {
+            bool isFirstNameValid = ValidateFirstName();
+            bool isLastNameValid = ValidateLastName();
+            bool isNicknameValid = ValidateNickname();
+            bool isEmailValid = ValidateEmail();
+            bool isPasswordValid = ValidatePassword();
+            bool isConfirmPasswordValid = ValidateConfirmPassword();
+
+            return isFirstNameValid && isLastNameValid && isNicknameValid && 
+                   isEmailValid && isPasswordValid && isConfirmPasswordValid;
+        }
+
+        private bool ValidateFirstName()
+        {
+            if (string.IsNullOrWhiteSpace(FirstName))
             {
-                windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
-                    Properties.Langs.Lang.invalidEmailErrorText, PopUpIcon.Warning);
+                FirstNameError = Properties.Langs.Lang.emptyFirstNameText;
                 return false;
             }
-            if (!ValidationUtils.PasswordsMatch(Password, ConfirmPassword))
+            if (FirstName.Length > 50)
             {
-                windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
-                    Properties.Langs.Lang.matchingPasswordErrorText, PopUpIcon.Warning);
+                FirstNameError = Properties.Langs.Lang.firstNameTooLongText;
+                return false;
+            }
+            if (!ValidationUtils.ContainsOnlyLetters(FirstName))
+            {
+                FirstNameError = Properties.Langs.Lang.nameInvalidCharsText;
+                return false;
+            }
+            FirstNameError = null;
+            return true;
+        }
+
+        private bool ValidateLastName()
+        {
+            if (string.IsNullOrWhiteSpace(LastName))
+            {
+                LastNameError = Properties.Langs.Lang.emptyLastNameText;
+                return false;
+            }
+            if (LastName.Length > 80)
+            {
+                LastNameError = Properties.Langs.Lang.lastNameTooLongText;
+                return false;
+            }
+            if (!ValidationUtils.ContainsOnlyLetters(LastName))
+            {
+                LastNameError = Properties.Langs.Lang.lastNameInvalidCharsText;
+                return false;
+            }
+            LastNameError = null;
+            return true;
+        }
+
+        private bool ValidateNickname()
+        {
+            if (string.IsNullOrWhiteSpace(Nickname))
+            {
+                NicknameError = Properties.Langs.Lang.emptyNicknameText;
+                return false;
+            }
+            if (Nickname.Length > 50)
+            {
+                NicknameError = Properties.Langs.Lang.nicknameTooLongText;
+                return false;
+            }
+            NicknameError = null;
+            return true;
+        }
+
+        private bool ValidateEmail()
+        {
+            if (string.IsNullOrWhiteSpace(Email))
+            {
+                EmailError = Properties.Langs.Lang.emptyFirstNameText;
+                return false;
+            }
+            if (Email.Length > 100)
+            {
+                EmailError = Properties.Langs.Lang.emailTooLongText;
+                return false;
+            }
+            if (!ValidationUtils.IsValidEmail(Email))
+            {
+                EmailError = Properties.Langs.Lang.invalidEmailFormatText;
+                return false;
+            }
+            EmailError = null;
+            return true;
+        }
+
+        private bool ValidatePassword()
+        {
+            if (string.IsNullOrWhiteSpace(Password))
+            {
+                PasswordError = Properties.Langs.Lang.userPasswordRequirementsText;
                 return false;
             }
             if (!ValidationUtils.ArePasswordRequirementsMet(Password))
             {
-                windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
-                    Properties.Langs.Lang.userPasswordRequirementsText, PopUpIcon.Warning);
+                PasswordError = Properties.Langs.Lang.userPasswordRequirementsText;
                 return false;
             }
+            PasswordError = null;
+            ValidateConfirmPassword();
+            return true;
+        }
+
+        private bool ValidateConfirmPassword()
+        {
+            if (string.IsNullOrWhiteSpace(ConfirmPassword))
+            {
+                ConfirmPasswordError = Properties.Langs.Lang.matchingPasswordErrorText;
+                return false;
+            }
+            if (!ValidationUtils.PasswordsMatch(Password, ConfirmPassword))
+            {
+                ConfirmPasswordError = Properties.Langs.Lang.matchingPasswordErrorText;
+                return false;
+            }
+            ConfirmPasswordError = null;
             return true;
         }
     }
