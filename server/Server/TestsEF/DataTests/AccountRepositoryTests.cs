@@ -9,11 +9,11 @@ namespace TestsEF.DataTests
 {
     public class AccountRepositoryTests : DataTestsBase
     {
-        private readonly AccountRepository _repository;
+        private readonly AccountRepository repository;
 
         public AccountRepositoryTests()
         {
-            _repository = CreateAccountRepository();
+            repository = CreateAccountRepository();
         }
 
         [Fact]
@@ -21,7 +21,7 @@ namespace TestsEF.DataTests
         {
             var newAccount = CreateValidUser("new@test.com", "Newbie");
 
-            await _repository.CreateAccountAsync(newAccount);
+            await repository.CreateAccountAsync(newAccount);
 
             Assert.Equal(1, Context.UserAccount.Count());
             Assert.Equal(1, Context.Player.Count());
@@ -40,7 +40,7 @@ namespace TestsEF.DataTests
             var newAccount = CreateValidUser("existing@test.com", "Newbie");
 
             var exception = await Assert.ThrowsAsync<Data.Exceptions.DuplicateAccountException>(() =>
-                _repository.CreateAccountAsync(newAccount)
+                repository.CreateAccountAsync(newAccount)
             );
 
             Assert.Equal("An account with the email 'existing@test.com' already exists.", exception.Message);
@@ -53,14 +53,14 @@ namespace TestsEF.DataTests
             Context.UserAccount.Add(existingAccount);
             Context.SaveChanges();
 
-            var result = _repository.AccountAlreadyExist("existing@test.com");
+            var result = repository.AccountAlreadyExist("existing@test.com");
             Assert.True(result);
         }
 
         [Fact]
         public void AccountAlreadyExist_WhenEmailDoesNotExist_ReturnsFalse()
         {
-            var result = _repository.AccountAlreadyExist("non-existing@test.com");
+            var result = repository.AccountAlreadyExist("non-existing@test.com");
             Assert.False(result);
         }
 
@@ -77,7 +77,7 @@ namespace TestsEF.DataTests
             Context.SocialAccount.Add(social);
             await Context.SaveChangesAsync();
 
-            var result = await _repository.GetUserByEmailAsync("user@test.com");
+            var result = await repository.GetUserByEmailAsync("user@test.com");
 
             Assert.NotNull(result);
             Assert.Equal("user@test.com", result.Email);
@@ -91,22 +91,20 @@ namespace TestsEF.DataTests
         [Fact]
         public async Task GetUserByEmail_WhenUserDoesNotExist_ReturnsNull()
         {
-            var result = await _repository.GetUserByEmailAsync("nouser@test.com");
+            var result = await repository.GetUserByEmailAsync("nouser@test.com");
             Assert.Null(result);
         }
 
         [Fact]
         public async Task VerifyEmail_WhenUserExists_UpdatesEmailVerifiedAndReturnsTrue()
         {
-            // Arrange: create the account using the repository's context to avoid cross-context tracking issues
             var user = CreateValidUser("verify@test.com", "VerifyUser");
             user.EmailVerified = false;
-            await _repository.CreateAccountAsync(user);
+            await repository.CreateAccountAsync(user);
 
-            // Act
-            var result = _repository.VerifyEmail("verify@test.com");
+            
+            var result = repository.VerifyEmail("verify@test.com");
 
-            // Assert
             Assert.True(result);
             using (var verifyCtx = NewContext())
             {
@@ -118,7 +116,7 @@ namespace TestsEF.DataTests
         [Fact]
         public void VerifyEmail_WhenUserDoesNotExist_ReturnsFalse()
         {
-            var result = _repository.VerifyEmail("nouser@test.com");
+            var result = repository.VerifyEmail("nouser@test.com");
 
             Assert.False(result);
             Assert.Equal(0, Context.UserAccount.Count());
@@ -154,11 +152,10 @@ namespace TestsEF.DataTests
                 new SocialAccount { Provider = "LinkedIn", Username = "NewLinkedIn" }
             };
 
-            var result = await _repository.UpdateUserProfileAsync(savedPlayerId, updatedUserData, updatedSocials);
+            var result = await repository.UpdateUserProfileAsync(savedPlayerId, updatedUserData, updatedSocials);
 
             Assert.True(result);
 
-            // Use a fresh context to avoid stale tracked entity from the shared Context
             using (var verifyCtx = NewContext())
             {
                 var userInDb = verifyCtx.UserAccount.Include("SocialAccount").First(u => u.Id == user.Id);

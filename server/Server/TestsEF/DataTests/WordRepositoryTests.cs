@@ -16,14 +16,13 @@ namespace TestsEF.DataTests
         [Fact]
         public async Task GetRandomWordsAsync_WhenDbHasMany_ReturnsExactCountDistinct()
         {
-            // Arrange
             SeedWords(10);
             var repo = CreateRepository();
 
-            // Act
+
             var result = await repo.GetRandomWordsAsync(5);
 
-            // Assert
+
             Assert.NotNull(result);
             Assert.Equal(5, result.Count);
             Assert.Equal(5, result.Select(w => w.EnglishWord).Distinct().Count());
@@ -33,14 +32,14 @@ namespace TestsEF.DataTests
         [Fact]
         public async Task GetRandomWordsAsync_WithZeroCount_ReturnsEmpty()
         {
-            // Arrange
+
             SeedWords(5);
             var repo = CreateRepository();
 
-            // Act
+
             var result = await repo.GetRandomWordsAsync(0);
 
-            // Assert
+
             Assert.NotNull(result);
             Assert.Empty(result);
         }
@@ -48,14 +47,14 @@ namespace TestsEF.DataTests
         [Fact]
         public async Task GetRandomWordsAsync_WhenDbHasLessThanRequested_ReturnsAllAvailable()
         {
-            // Arrange
+
             SeedWords(3);
             var repo = CreateRepository();
 
-            // Act
+
             var result = await repo.GetRandomWordsAsync(5);
 
-            // Assert
+
             Assert.NotNull(result);
             Assert.Equal(3, result.Count);
             var expected = new HashSet<string>(new[] { "W1", "W2", "W3" });
@@ -65,13 +64,12 @@ namespace TestsEF.DataTests
         [Fact]
         public async Task GetRandomWordsAsync_WhenDbEmpty_ReturnsEmpty()
         {
-            // Arrange
+
             var repo = CreateRepository();
 
-            // Act
+
             var result = await repo.GetRandomWordsAsync(5);
 
-            // Assert
             Assert.NotNull(result);
             Assert.Empty(result);
         }
@@ -79,14 +77,14 @@ namespace TestsEF.DataTests
         [Fact]
         public async Task GetRandomWordsAsync_RequestAll_ReturnsAll()
         {
-            // Arrange
+
             SeedWords(7);
             var repo = CreateRepository();
 
-            // Act
+
             var result = await repo.GetRandomWordsAsync(7);
 
-            // Assert
+
             Assert.NotNull(result);
             Assert.Equal(7, result.Count);
             var set = new HashSet<string>(result.Select(w => w.EnglishWord));

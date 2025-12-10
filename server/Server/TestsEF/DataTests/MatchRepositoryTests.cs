@@ -8,18 +8,19 @@ namespace TestsEF.DataTests
 {
     public class MatchRepositoryTests : DataTestsBase
     {
-        private readonly MatchRepository _repository;
+        private readonly MatchRepository repository;
 
         public MatchRepositoryTests()
         {
-            _repository = CreateMatchRepository();
-            SeedPlayers(6, emailPrefix: "player", nicknamePrefix: "Player", pointsSelector: i => i * 5, emailVerified: true);
+            repository = CreateMatchRepository();
+            SeedPlayers(6, emailPrefix: "player", nicknamePrefix: "Player",
+                pointsSelector: i => i * 5, emailVerified: true);
         }
 
         [Fact]
         public async Task SaveMatchResultAsync_ValidInputs_PersistsMatchTeamsAndRelations()
         {
-            // Arrange
+
             var redIds = GetFirstPlayerIds(3);
             List<int> blueIds;
             using (var ctx = NewContext())
@@ -27,10 +28,9 @@ namespace TestsEF.DataTests
                 blueIds = ctx.Player.OrderBy(p => p.Id).Skip(3).Take(2).Select(p => p.Id).ToList();
             }
 
-            // Act
-            await _repository.SaveMatchResultAsync(10, 7, redIds, blueIds);
+            await repository.SaveMatchResultAsync(10, 7, redIds, blueIds);
 
-            // Assert
+
             using (var verifyCtx = NewContext())
             {
                 var matches = verifyCtx.Match.Include("Team.Player").ToList();
@@ -50,14 +50,16 @@ namespace TestsEF.DataTests
         public async Task SaveMatchResultAsync_NullRedIds_ThrowsArgumentNullException()
         {
             var blueIds = GetFirstPlayerIds(2);
-            await Assert.ThrowsAsync<System.ArgumentNullException>(() => _repository.SaveMatchResultAsync(5, 5, null, blueIds));
+            await Assert.ThrowsAsync<System.ArgumentNullException>(() 
+                => repository.SaveMatchResultAsync(5, 5, null, blueIds));
         }
 
         [Fact]
         public async Task SaveMatchResultAsync_NullBlueIds_ThrowsArgumentNullException()
         {
             var redIds = GetFirstPlayerIds(2);
-            await Assert.ThrowsAsync<System.ArgumentNullException>(() => _repository.SaveMatchResultAsync(5, 5, redIds, null));
+            await Assert.ThrowsAsync<System.ArgumentNullException>(() 
+                => repository.SaveMatchResultAsync(5, 5, redIds, null));
         }
 
         [Fact]
@@ -74,7 +76,8 @@ namespace TestsEF.DataTests
                 initialTeamCount = ctx.Team.Count();
             }
 
-            var ex = await Assert.ThrowsAsync<System.InvalidOperationException>(() => _repository.SaveMatchResultAsync(3, 4, redIds, blueIds));
+            var ex = await Assert.ThrowsAsync<System.InvalidOperationException>(() 
+                => repository.SaveMatchResultAsync(3, 4, redIds, blueIds));
             Assert.Contains("9999", ex.Message);
 
             using (var verifyCtx = NewContext())
@@ -96,7 +99,7 @@ namespace TestsEF.DataTests
             var redIds = new List<int> { shared, playerIds[1] };
             var blueIds = new List<int> { shared, playerIds[2], playerIds[3] };
 
-            await _repository.SaveMatchResultAsync(8, 9, redIds, blueIds);
+            await repository.SaveMatchResultAsync(8, 9, redIds, blueIds);
 
             using (var verifyCtx = NewContext())
             {

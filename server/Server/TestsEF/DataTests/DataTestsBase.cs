@@ -42,7 +42,8 @@ namespace TestsEF.DataTests
 
         protected BanRepository CreateBanRepository() => new BanRepository(CreatePerRequestFactory());
 
-        protected FriendshipRepository CreateFriendshipRepository() => new FriendshipRepository(CreatePerRequestFactory());
+        protected FriendshipRepository CreateFriendshipRepository() 
+            => new FriendshipRepository(CreatePerRequestFactory());
 
         protected MatchRepository CreateMatchRepository() => new MatchRepository(CreatePerRequestFactory());
 
@@ -50,7 +51,8 @@ namespace TestsEF.DataTests
 
         protected ReportRepository CreateReportRepository() => new ReportRepository(CreatePerRequestFactory());
 
-        protected StatisticsRepository CreateStatisticsRepository() => new StatisticsRepository(CreatePerRequestFactory());
+        protected StatisticsRepository CreateStatisticsRepository() 
+            => new StatisticsRepository(CreatePerRequestFactory());
 
         protected WordRepository CreateWordRepository() => new WordRepository(CreatePerRequestFactory());
 
@@ -76,7 +78,8 @@ namespace TestsEF.DataTests
             };
         }
 
-        protected void SeedPlayers(int count, string emailPrefix = "user", string nicknamePrefix = "User", Func<int, int> pointsSelector = null, bool emailVerified = true)
+        protected void SeedPlayers(int count, string emailPrefix = "user", string nicknamePrefix = "User",
+            Func<int, int> pointsSelector = null, bool emailVerified = true)
         {
             for (int i = 1; i <= count; i++)
             {

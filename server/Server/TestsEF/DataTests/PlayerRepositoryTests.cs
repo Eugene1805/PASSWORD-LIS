@@ -8,11 +8,11 @@ namespace TestsEF.DataTests
 {
     public class PlayerRepositoryTests : DataTestsBase
     {
-        private readonly PlayerRepository _repository;
+        private readonly PlayerRepository repository;
 
         public PlayerRepositoryTests()
         {
-            _repository = CreatePlayerRepository();
+            repository = CreatePlayerRepository();
             SeedUsersAndPlayers();
         }
 
@@ -36,7 +36,7 @@ namespace TestsEF.DataTests
         [Fact]
         public async Task GetPlayerByEmailAsync_WhenEmailExists_ReturnsPlayerWithUserAccount()
         {
-            var player = await _repository.GetPlayerByEmailAsync("user2@test.com");
+            var player = await repository.GetPlayerByEmailAsync("user2@test.com");
 
             Assert.NotNull(player);
             Assert.True(player.Id > 0);
@@ -48,7 +48,7 @@ namespace TestsEF.DataTests
         [Fact]
         public async Task GetPlayerByEmailAsync_WhenEmailDoesNotExist_ReturnsSentinelPlayer()
         {
-            var player = await _repository.GetPlayerByEmailAsync("nope@test.com");
+            var player = await repository.GetPlayerByEmailAsync("nope@test.com");
 
             Assert.NotNull(player);
             Assert.Equal(-1, player.Id);
@@ -63,7 +63,7 @@ namespace TestsEF.DataTests
                 existingPlayerId = ctx.Player.First().Id;
             }
 
-            var player = await _repository.GetPlayerByIdAsync(existingPlayerId);
+            var player = await repository.GetPlayerByIdAsync(existingPlayerId);
 
             Assert.NotNull(player);
             Assert.Equal(existingPlayerId, player.Id);
@@ -74,7 +74,7 @@ namespace TestsEF.DataTests
         [Fact]
         public async Task GetPlayerByIdAsync_WhenIdDoesNotExist_ReturnsSentinelPlayer()
         {
-            var player = await _repository.GetPlayerByIdAsync(9999);
+            var player = await repository.GetPlayerByIdAsync(9999);
 
             Assert.NotNull(player);
             Assert.Equal(-1, player.Id);
@@ -92,7 +92,7 @@ namespace TestsEF.DataTests
                 originalPoints = p.TotalPoints;
             }
 
-            await _repository.UpdatePlayerTotalPointsAsync(targetId, 15);
+            await repository.UpdatePlayerTotalPointsAsync(targetId, 15);
 
             using (var verifyCtx = NewContext())
             {
@@ -105,12 +105,13 @@ namespace TestsEF.DataTests
         [Fact]
         public async Task UpdatePlayerTotalPointsAsync_WhenPlayerMissing_DoesNothing()
         {
-            await _repository.UpdatePlayerTotalPointsAsync(5555, 10);
+            await repository.UpdatePlayerTotalPointsAsync(5555, 10);
 
             using (var verifyCtx = NewContext())
             {
                 Assert.Null(verifyCtx.Player.Find(5555));
-                var player3 = verifyCtx.Player.Include("UserAccount").First(p => p.UserAccount.Email == "user3@test.com");
+                var player3 = verifyCtx.Player.Include("UserAccount")
+                    .First(p => p.UserAccount.Email == "user3@test.com");
                 Assert.Equal(30, player3.TotalPoints);
             }
         }

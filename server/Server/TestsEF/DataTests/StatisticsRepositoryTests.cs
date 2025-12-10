@@ -10,14 +10,14 @@ namespace TestsEF.DataTests
         [Fact]
         public async Task GetTopTeamsAsync_WhenMultipleTeams_ReturnsTopN_InDescendingOrder_WithIncludes()
         {
-            // Arrange
+
             SeedTeams((10, 2), (50, 3), (20, 1), (50, 2), (5, 4));
             var repo = CreateStatisticsRepository();
 
-            // Act
+           
             var result = await repo.GetTopTeamsAsync(3);
 
-            // Assert
+            
             Assert.NotNull(result);
             Assert.Equal(3, result.Count);
             Assert.True(result[0].TotalPoints >= result[1].TotalPoints);
@@ -41,14 +41,14 @@ namespace TestsEF.DataTests
         [Fact]
         public async Task GetTopTeamsAsync_WhenRequestExceedsAvailable_ReturnsAll()
         {
-            // Arrange
+
             SeedTeams((15, 1), (5, 1));
             var repo = CreateStatisticsRepository();
 
-            // Act
+
             var result = await repo.GetTopTeamsAsync(10);
 
-            // Assert
+
             Assert.NotNull(result);
             Assert.Equal(2, result.Count);
             Assert.Equal(new[] { 15, 5 }, result.Select(t => t.TotalPoints).ToArray());
@@ -57,14 +57,14 @@ namespace TestsEF.DataTests
         [Fact]
         public async Task GetTopTeamsAsync_RequestZero_ReturnsEmpty()
         {
-            // Arrange
+
             SeedTeams((10, 1), (8, 1));
             var repo = CreateStatisticsRepository();
 
-            // Act
+
             var result = await repo.GetTopTeamsAsync(0);
 
-            // Assert
+
             Assert.NotNull(result);
             Assert.Empty(result);
         }
@@ -72,13 +72,13 @@ namespace TestsEF.DataTests
         [Fact]
         public async Task GetTopTeamsAsync_WhenNoTeams_ReturnsEmpty()
         {
-            // Arrange
+
             var repo = CreateStatisticsRepository();
 
-            // Act
+
             var result = await repo.GetTopTeamsAsync(5);
 
-            // Assert
+
             Assert.NotNull(result);
             Assert.Empty(result);
         }

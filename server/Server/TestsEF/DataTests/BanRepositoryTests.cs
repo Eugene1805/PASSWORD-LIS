@@ -10,11 +10,11 @@ namespace TestsEF.DataTests
 {
     public class BanRepositoryTests : DataTestsBase
     {
-        private readonly BanRepository _repository;
+        private readonly BanRepository repository;
 
         public BanRepositoryTests()
         {
-            _repository = CreateRepository(factory => new BanRepository(factory));
+            repository = CreateRepository(factory => new BanRepository(factory));
             SeedPlayers(3, emailPrefix: "player", nicknamePrefix: "Player", pointsSelector: i => i * 5, emailVerified: true);
         }
 
@@ -26,7 +26,7 @@ namespace TestsEF.DataTests
             var end = start.AddHours(1);
             var ban = new Ban { PlayerId = playerId, StartTime = start, EndTime = end };
 
-            await _repository.AddBanAsync(ban);
+            await repository.AddBanAsync(ban);
 
             using (var verifyCtx = new PasswordLISEntities(Connection, false))
             {
@@ -48,9 +48,9 @@ namespace TestsEF.DataTests
                 StartTime = DateTime.UtcNow.AddMinutes(-5),
                 EndTime = DateTime.UtcNow.AddMinutes(30)
             };
-            await _repository.AddBanAsync(ban);
+            await repository.AddBanAsync(ban);
 
-            var active = await _repository.GetActiveBanForPlayerAsync(playerId);
+            var active = await repository.GetActiveBanForPlayerAsync(playerId);
 
             Assert.NotNull(active);
             Assert.Equal(playerId, active.PlayerId);
@@ -67,9 +67,9 @@ namespace TestsEF.DataTests
                 StartTime = DateTime.UtcNow.AddHours(-2),
                 EndTime = DateTime.UtcNow.AddHours(-1)
             };
-            await _repository.AddBanAsync(ban);
+            await repository.AddBanAsync(ban);
 
-            var active = await _repository.GetActiveBanForPlayerAsync(playerId);
+            var active = await repository.GetActiveBanForPlayerAsync(playerId);
             Assert.Null(active);
         }
 
@@ -82,7 +82,7 @@ namespace TestsEF.DataTests
                 playerId = ctx.Player.OrderBy(p => p.Id).Skip(1).First().Id;
             }
 
-            var active = await _repository.GetActiveBanForPlayerAsync(playerId);
+            var active = await repository.GetActiveBanForPlayerAsync(playerId);
             Assert.Null(active);
         }
     }
