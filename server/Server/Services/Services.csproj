@@ -129,6 +129,7 @@
     <Compile Include="Services\Internal\ActivePlayer.cs" />
     <Compile Include="Services\Internal\DTOMapper.cs" />
     <Compile Include="Services\Internal\GameBroadcaster.cs" />
+    <Compile Include="Services\Internal\GuessHandler.cs" />
     <Compile Include="Services\Internal\MatchSession.cs" />
     <Compile Include="Services\Internal\RulesEngine.cs" />
     <Compile Include="Services\Internal\TurnHistoryManager.cs" />

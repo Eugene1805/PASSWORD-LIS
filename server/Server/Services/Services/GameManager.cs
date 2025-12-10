@@ -27,6 +27,7 @@ namespace Services.Services
         private readonly IPlayerRepository playerRepository;
         private readonly TurnHistoryManager turnHistoryManager = new TurnHistoryManager();
         private readonly WordDistributor wordDistributor = new WordDistributor();
+        private readonly GuessHandler guessHandler = new GuessHandler();
         private static readonly ILog log = LogManager.GetLogger(typeof(GameManager));
 
         private const int RoundDurationSeconds = 40;
@@ -116,16 +117,18 @@ namespace Services.Services
                 var (session, sender, currentPassword) = context.Value;
                 var team = sender.Player.Team;
 
-                bool isCorrect = IsGuessCorrect(currentPassword, guess);
+                bool isCorrect = guessHandler.IsGuessCorrect(currentPassword, guess);
                 int currentScore = (team == MatchTeam.RedTeam) ? session.RedTeamScore : session.BlueTeamScore;
 
                 if (isCorrect)
                 {
-                    await HandleCorrectGuessAsync(session, team);
+                    await guessHandler.HandleCorrectGuessAsync(session, team, turnHistoryManager, wordDistributor,
+                        BroadcastAndHandleDisconnectsAsync, PersistAndNotifyGameEnd, HandlePlayerDisconnectionIfFailed);
                 }
                 else
                 {
-                    await HandleIncorrectGuessAsync(session, sender, team, currentScore);
+                    await guessHandler.HandleIncorrectGuessAsync(session, sender, team, currentScore,
+                        HandlePlayerDisconnectionIfFailed);
                 }
             }, context: "GameManager: SubmitGuessAsync");
         }
@@ -665,58 +668,6 @@ namespace Services.Services
             }
             return sender;
         }
-        private static bool IsGuessCorrect(PasswordWord currentPassword, string guess)
-        {
-            if (currentPassword == null)
-            {
-                return false;
-            }
-            return guess.Equals(currentPassword.EnglishWord, StringComparison.OrdinalIgnoreCase) ||
-                   guess.Equals(currentPassword.SpanishWord, StringComparison.OrdinalIgnoreCase);
-        }
-        private async Task HandleCorrectGuessAsync(MatchSession session, MatchTeam team)
-        {
-            if (session.Status == MatchStatus.SuddenDeath)
-            {
-                session.Status = MatchStatus.Finished;
-                session.StopTimers();
-                session.AddScore(team);
-                await PersistAndNotifyGameEnd(session, team);
-                return;
-            }
-            session.AddScore(team);
-
-            turnHistoryManager.AdvanceWordIndex(session, team);
-
-            int newScore = (team == MatchTeam.RedTeam) ? session.RedTeamScore : session.BlueTeamScore;
-            var resultDto = new GuessResultDTO { IsCorrect = true, Team = team, NewScore = newScore };
-            await BroadcastAndHandleDisconnectsAsync(session, cb => cb.OnGuessResult(resultDto));
-
-            await wordDistributor.SendNextWordToTeamAsync(session, team, HandlePlayerDisconnectionIfFailed);
-        }
-        private async Task HandleIncorrectGuessAsync(MatchSession session,
-            ActivePlayer sender, MatchTeam team, int currentScore)
-        {
-            var resultDto = new GuessResultDTO { IsCorrect = false, Team = team, NewScore = currentScore };
-            var clueGuy = session.GetPlayerByRole(team, PlayerRole.ClueGuy);
-            try
-            {
-                GameBroadcaster.SendToPlayer(sender, cb => cb.OnGuessResult(resultDto));
-                if (clueGuy?.Callback != null)
-                {
-                    GameBroadcaster.SendToPlayer(clueGuy, cb => cb.OnGuessResult(resultDto));
-                }
-            }
-            catch
-            {
-                await HandlePlayerDisconnectionIfFailed(session, sender.Player.Id);
-                if (clueGuy?.Player != null)
-                {
-                    await HandlePlayerDisconnectionIfFailed(session, clueGuy.Player.Id);
-                }
-            }
-        }
-
         private (MatchSession, ActivePlayer, PasswordWord)? ValidateAndGetClueContext(string gameCode,
             int senderId, string clue)
         {
