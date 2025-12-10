@@ -605,7 +605,8 @@ namespace Test.ServicesTests
 
             await Task.Delay(100);
 
-            blueClue.Verify(c => c.OnMatchCancelled(It.Is<string>(s => s.Contains("disconnected"))), Times.AtLeastOnce);
+            blueClue.Verify(c => c.OnMatchCancelled(It.Is<string>(s => s.Contains("PLAYER_DISCONNECTED"))), 
+                Times.AtLeastOnce);
             redGuess.Verify(c => c.OnMatchCancelled(It.IsAny<string>()), Times.AtLeastOnce);
             blueGuess.Verify(c => c.OnMatchCancelled(It.IsAny<string>()), Times.AtLeastOnce);
         }

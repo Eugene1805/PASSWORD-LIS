@@ -69,7 +69,7 @@ namespace Services.Services
                 }
 
                 var sender = GetPassTurnSender(session, senderPlayerId);
-                if (sender.Player == null)
+                if (sender == null)
                 {
                     return;
                 }
@@ -147,6 +147,53 @@ namespace Services.Services
             }, context: "GameManager: SubmitValidationVotesAsync");
         }
 
+        public async Task SubscribeToMatchAsync(string gameCode, int playerId)
+        {
+            await ExecuteAsync(async () =>
+            {
+                if (!matches.TryGetValue(gameCode, out MatchSession session))
+                {
+                    log.WarnFormat("SubscribeToMatchAsync failed - game '{0}' not found or already ended.", gameCode);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.MatchNotFoundOrEnded,
+                        "MATCH_NOT_FOUND_OR_ENDED", "The match does not exist or has already ended.");
+                }
+                if (session.Status != MatchStatus.WaitingForPlayers)
+                {
+                    log.WarnFormat("SubscribeToMatchAsync failed - game '{0}' already started or finishing.", gameCode);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.MatchAlreadyStartedOrFinishing,
+                        "MATCH_ALREADY_STARTED_OR_FINISHING", "The match has already started or is finishing.");
+                }
+                var expectedPlayer = session.ExpectedPlayers.FirstOrDefault(p => p.Id == playerId);
+                if (expectedPlayer == null)
+                {
+                    log.WarnFormat("SubscribeToMatchAsync unauthorized join attempt for player {0} in game '{1}'.",
+                        playerId, gameCode);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.NotAuthorizedToJoin,
+                        "NOT_AUTHORIZED_TO_JOIN", "You are not authorized to join this match.");
+                }
+                if (session.ActivePlayers.ContainsKey(playerId))
+                {
+                    log.WarnFormat("SubscribeToMatchAsync duplicate join for player {0} in game '{1}'.",
+                        playerId, gameCode);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.AlreadyInRoom,
+                        "ALREADY_IN_ROOM", "Player is already in the match.");
+                }
+                var callback = operationContext.GetCallbackChannel<IGameManagerCallback>();
+                var activePlayer = new ActivePlayer(callback, expectedPlayer);
+                if (!session.ActivePlayers.TryAdd(playerId, activePlayer))
+                {
+                    log.ErrorFormat("SubscribeToMatchAsync internal error adding player {0} to game '{1}'.",
+                        playerId, gameCode);
+                    throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError,
+                        "SUBSCRIPTION_ERROR", "Internal error while joining the match.");
+                }
+                if (session.ActivePlayers.Count == session.ExpectedPlayers.Count)
+                {
+                    await StartGameInternalAsync(session);
+                }
+            }, context: "GameManager: SubscribeToMatchAsync");
+        }
+
         private bool TryPrepareVoteSession(string gameCode, List<ValidationVoteDTO> votes, out MatchSession session)
         {
             session = null;
@@ -222,7 +269,7 @@ namespace Services.Services
         }
 
         private static bool TryGetActiveSender(MatchSession session, int senderPlayerId, string gameCode,
-            out (IGameManagerCallback Callback, PlayerDTO Player) sender)
+            out ActivePlayer sender)
         {
             if (!session.ActivePlayers.TryGetValue(senderPlayerId, out sender))
             {
@@ -254,52 +301,7 @@ namespace Services.Services
             return allVotesIn;
         }
 
-        public async Task SubscribeToMatchAsync(string gameCode, int playerId)
-        {
-            await ExecuteAsync(async () =>
-            {
-                if (!matches.TryGetValue(gameCode, out MatchSession session))
-                {
-                    log.WarnFormat("SubscribeToMatchAsync failed - game '{0}' not found or already ended.", gameCode);
-                    throw FaultExceptionFactory.Create(ServiceErrorCode.MatchNotFoundOrEnded,
-                        "MATCH_NOT_FOUND_OR_ENDED", "The match does not exist or has already ended.");
-                }
-                if (session.Status != MatchStatus.WaitingForPlayers)
-                {
-                    log.WarnFormat("SubscribeToMatchAsync failed - game '{0}' already started or finishing.", gameCode);
-                    throw FaultExceptionFactory.Create(ServiceErrorCode.MatchAlreadyStartedOrFinishing,
-                        "MATCH_ALREADY_STARTED_OR_FINISHING", "The match has already started or is finishing.");
-                }
-                var expectedPlayer = session.ExpectedPlayers.FirstOrDefault(p => p.Id == playerId);
-                if (expectedPlayer == null)
-                {
-                    log.WarnFormat("SubscribeToMatchAsync unauthorized join attempt for player {0} in game '{1}'.",
-                        playerId, gameCode);
-                    throw FaultExceptionFactory.Create(ServiceErrorCode.NotAuthorizedToJoin,
-                        "NOT_AUTHORIZED_TO_JOIN", "You are not authorized to join this match.");
-                }
-                if (session.ActivePlayers.ContainsKey(playerId))
-                {
-                    log.WarnFormat("SubscribeToMatchAsync duplicate join for player {0} in game '{1}'.",
-                        playerId, gameCode);
-                    throw FaultExceptionFactory.Create(ServiceErrorCode.AlreadyInRoom,
-                        "ALREADY_IN_ROOM", "Player is already in the match.");
-                }
-                var callback = operationContext.GetCallbackChannel<IGameManagerCallback>();
-                if (!session.ActivePlayers.TryAdd(playerId, (callback, expectedPlayer)))
-                {
-                    log.ErrorFormat("SubscribeToMatchAsync internal error adding player {0} to game '{1}'.",
-                        playerId, gameCode);
-                    throw FaultExceptionFactory.Create(ServiceErrorCode.SubscriptionError,
-                        "SUBSCRIPTION_ERROR", "Internal error while joining the match.");
-                }
-                if (session.ActivePlayers.Count == session.ExpectedPlayers.Count)
-                {
-                    await StartGameInternalAsync(session);
-                }
-            }, context: "GameManager: SubscribeToMatchAsync");
-        }
-
+       
         private async Task StartGameInternalAsync(MatchSession session)
         {
 
@@ -664,16 +666,15 @@ namespace Services.Services
             }
             return session;
         }
-        private static (IGameManagerCallback Callback, PlayerDTO Player) GetPassTurnSender(
-            MatchSession session, int playerId)
+        private static ActivePlayer GetPassTurnSender(MatchSession session, int playerId)
         {
             if (!session.ActivePlayers.TryGetValue(playerId, out var sender))
             {
-                return default((IGameManagerCallback, PlayerDTO));
+                return null;
             }
             if (sender.Player.Role != PlayerRole.ClueGuy)
             {
-                return default((IGameManagerCallback, PlayerDTO));
+                return null;
             }
             return sender;
         }
@@ -719,8 +720,7 @@ namespace Services.Services
                 session.BlueTeamWordIndex++;
             }
         }
-        private async Task SendPassTurnUpdatesAsync(MatchSession session,
-            (IGameManagerCallback Callback, PlayerDTO Player) sender, PasswordWord nextWord)
+        private async Task SendPassTurnUpdatesAsync(MatchSession session, ActivePlayer sender, PasswordWord nextWord)
         {
             try
             {
@@ -729,11 +729,10 @@ namespace Services.Services
             catch
             {
                 await HandlePlayerDisconnectionAsync(session, sender.Player.Id);
-                await HandlePlayerDisconnectionAsync(session, sender.Player.Id);
             }
 
             var partner = session.GetPartner(sender);
-            if (partner.Callback != null)
+            if (partner?.Callback != null)
             {
                 try
                 {
@@ -759,13 +758,12 @@ namespace Services.Services
             }
             return null;
         }
-        private static (IGameManagerCallback Callback, PlayerDTO Player)
-            GetValidGuesser(MatchSession session, int playerId)
+        private static ActivePlayer GetValidGuesser(MatchSession session, int playerId)
         {
             var sender = session.GetPlayerById(playerId);
-            if (sender.Player == null || sender.Player.Role != PlayerRole.Guesser)
+            if (sender == null || sender.Player.Role != PlayerRole.Guesser)
             {
-                return default((IGameManagerCallback, PlayerDTO));
+                return null;
             }
             return sender;
         }
@@ -830,14 +828,14 @@ namespace Services.Services
             }
         }
         private async Task HandleIncorrectGuessAsync(MatchSession session,
-            (IGameManagerCallback Callback, PlayerDTO Player) sender, MatchTeam team, int currentScore)
+            ActivePlayer sender, MatchTeam team, int currentScore)
         {
             var resultDto = new GuessResultDTO { IsCorrect = false, Team = team, NewScore = currentScore };
             var clueGuy = session.GetPlayerByRole(team, PlayerRole.ClueGuy);
             try
             {
                 GameBroadcaster.SendToPlayer(sender, cb => cb.OnGuessResult(resultDto));
-                if (clueGuy.Callback != null)
+                if (clueGuy?.Callback != null)
                 {
                     GameBroadcaster.SendToPlayer(clueGuy, cb => cb.OnGuessResult(resultDto));
                 }
@@ -845,15 +843,15 @@ namespace Services.Services
             catch
             {
                 await HandlePlayerDisconnectionIfFailed(session, sender.Player.Id);
-                if (clueGuy.Player != null)
+                if (clueGuy?.Player != null)
                 {
                     await HandlePlayerDisconnectionIfFailed(session, clueGuy.Player.Id);
                 }
             }
         }
 
-        private (MatchSession, (IGameManagerCallback Callback, PlayerDTO Player), PasswordWord)?
-            ValidateAndGetClueContext(string gameCode, int senderId, string clue)
+        private (MatchSession, ActivePlayer, PasswordWord)? ValidateAndGetClueContext(string gameCode,
+            int senderId, string clue)
         {
             if (string.IsNullOrWhiteSpace(clue))
             {
@@ -879,8 +877,8 @@ namespace Services.Services
             return (session, sender, currentPassword);
         }
 
-        private void RecordClueHistory(MatchSession session,
-            (IGameManagerCallback Callback, PlayerDTO Player) sender, string clue, PasswordWord currentPassword)
+        private void RecordClueHistory(MatchSession session, ActivePlayer sender, 
+            string clue, PasswordWord currentPassword)
         {
             var team = sender.Player.Team;
             var historyItem = new TurnHistoryDTO
@@ -900,11 +898,10 @@ namespace Services.Services
             }
         }
 
-        private async Task NotifyPartnerOfClueAsync(MatchSession session, (IGameManagerCallback Callback,
-            PlayerDTO Player) sender, string clue)
+        private async Task NotifyPartnerOfClueAsync(MatchSession session, ActivePlayer sender, string clue)
         {
             var partner = session.GetPartner(sender);
-            if (partner.Callback == null) return;
+            if (partner?.Callback == null) return;
 
             try
             {
@@ -916,8 +913,8 @@ namespace Services.Services
             }
         }
 
-        private (MatchSession, (IGameManagerCallback Callback, PlayerDTO Player), PasswordWord)?
-            ValidateAndGetGuessContext(string gameCode, int senderId, string guess)
+        private (MatchSession, ActivePlayer, PasswordWord)? ValidateAndGetGuessContext(
+            string gameCode, int senderId, string guess)
         {
             if (string.IsNullOrWhiteSpace(guess)) return null;
 
@@ -927,7 +924,7 @@ namespace Services.Services
                 return null;
             }
             var sender = GetValidGuesser(session, senderId);
-            if (sender.Player == null)
+            if (sender == null)
             {
                 return null;
             }

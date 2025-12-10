@@ -1,6 +1,5 @@
 ﻿using log4net;
 using Services.Contracts;
-using Services.Contracts.DTOs;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -13,8 +12,8 @@ namespace Services.Services.Internal
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(GameBroadcaster));
 
-        public static async Task<IEnumerable<int>> BroadcastAsync(
-            MatchSession match, Action<IGameManagerCallback> action)
+        public static async Task<IEnumerable<int>> BroadcastAsync(MatchSession match,
+            Action<IGameManagerCallback> action)
         {
             var disconnectedPlayers = new ConcurrentBag<int>();
 
@@ -35,8 +34,8 @@ namespace Services.Services.Internal
             await Task.WhenAll(tasks);
             return disconnectedPlayers;
         }
-        public static async Task BroadcastToGroupAsync(
-            IEnumerable<(IGameManagerCallback Callback, PlayerDTO Player)> targets,
+
+        public static async Task BroadcastToGroupAsync(IEnumerable<ActivePlayer> targets,
             Action<IGameManagerCallback> action)
         {
             var tasks = targets.Select(target => Task.Run(() =>
@@ -46,8 +45,7 @@ namespace Services.Services.Internal
             await Task.WhenAll(tasks);
         }
 
-        public static void SendToPlayer((IGameManagerCallback Callback, PlayerDTO Player) player,
-            Action<IGameManagerCallback> action)
+        public static void SendToPlayer(ActivePlayer player, Action<IGameManagerCallback> action)
         {
             if (player.Callback == null)
             {
