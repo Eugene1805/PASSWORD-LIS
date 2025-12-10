@@ -122,8 +122,14 @@ namespace Services.Services
 
                 if (isCorrect)
                 {
-                    await guessHandler.HandleCorrectGuessAsync(session, team, turnHistoryManager, wordDistributor,
-                        BroadcastAndHandleDisconnectsAsync, PersistAndNotifyGameEnd, HandlePlayerDisconnectionIfFailed);
+                    var guessContext = new GuessContext(
+                        turnHistoryManager,
+                        wordDistributor,
+                        BroadcastAndHandleDisconnectsAsync,
+                        PersistAndNotifyGameEnd,
+                        HandlePlayerDisconnectionIfFailed);
+
+                    await guessHandler.HandleCorrectGuessAsync(session, team, guessContext);
                 }
                 else
                 {

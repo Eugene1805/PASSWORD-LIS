@@ -19,29 +19,25 @@ namespace Services.Services.Internal
                    guess.Equals(currentPassword.SpanishWord, StringComparison.OrdinalIgnoreCase);
         }
 
-        public async Task HandleCorrectGuessAsync(MatchSession session, MatchTeam team,
-            TurnHistoryManager turnHistoryManager, WordDistributor wordDistributor,
-            Func<MatchSession, Action<IGameManagerCallback>, Task> broadcastAction,
-            Func<MatchSession, MatchTeam?, Task> onGameEnd,
-            Func<MatchSession, int, Task> onDisconnection)
+        public async Task HandleCorrectGuessAsync(MatchSession session, MatchTeam team, GuessContext context)
         {
             if (session.Status == MatchStatus.SuddenDeath)
             {
                 session.Status = MatchStatus.Finished;
                 session.StopTimers();
                 session.AddScore(team);
-                await onGameEnd(session, team);
+                await context.OnGameEnd(session, (MatchTeam?)team);
                 return;
             }
 
             session.AddScore(team);
-            turnHistoryManager.AdvanceWordIndex(session, team);
+            context.TurnHistoryManager.AdvanceWordIndex(session, team);
 
             int newScore = (team == MatchTeam.RedTeam) ? session.RedTeamScore : session.BlueTeamScore;
             var resultDto = new GuessResultDTO { IsCorrect = true, Team = team, NewScore = newScore };
 
-            await broadcastAction(session, cb => cb.OnGuessResult(resultDto));
-            await wordDistributor.SendNextWordToTeamAsync(session, team, onDisconnection);
+            await context.BroadcastAction(session, cb => cb.OnGuessResult(resultDto));
+            await context.WordDistributor.SendNextWordToTeamAsync(session, team, context.OnDisconnection);
         }
 
         public async Task HandleIncorrectGuessAsync(MatchSession session, ActivePlayer sender,
