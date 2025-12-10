@@ -4,6 +4,7 @@ using Services.Contracts.DTOs;
 using Services.Contracts.Enums;
 using Services.Util;
 using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Entity.Core;
 using System.Data.Entity.Infrastructure;
@@ -18,9 +19,12 @@ namespace Services.Services
     {
         protected readonly ILog logger;
         private const string DatabaseError = "DATABASE_ERROR";
+        private readonly Dictionary<Type, ExceptionHandlerConfig> exceptionHandlers;
+
         protected ServiceBase(ILog log) 
         {
             this.logger = log;
+            this.exceptionHandlers = BuildExceptionHandlers();
         }
 
         protected async Task<T> ExecuteAsync<T>(Func<Task<T>> func, string context = null)
@@ -76,53 +80,101 @@ namespace Services.Services
 
         private void HandleAndThrow(Exception ex, string context, bool useUpdateMessageForDbUpdate)
         {
-            switch (ex)
+            if (ex is DbUpdateException)
             {
-                case ArgumentNullException _:
-                    logger.Error($"{context} - Null argument.", ex);
-                    throw FaultExceptionFactory.Create(ServiceErrorCode.NullArgument,
-                        "NULL_ARGUMENT", "A null argument was received occurred.");
-                case InvalidOperationException _:
-                    logger.Error($"{context} - Invalid operation", ex);
-                    throw FaultExceptionFactory.Create(
-                        ServiceErrorCode.InvalidOperation,
-                        "INVALID_OPERATION", ex.Message);
-                case DuplicateAccountException dupEx:
-                    logger.Warn($"{context} - Duplicate.", dupEx);
-                    throw FaultExceptionFactory.Create(ServiceErrorCode.UserAlreadyExists,
-                        "USER_ALREADY_EXISTS", dupEx.Message);
-                case SecurityException _:
-                    logger.Error($"{context} - Security error.", ex);
-                    throw FaultExceptionFactory.Create(ServiceErrorCode.SecurityError, 
-                        "SECURITY_ERROR", "Could not load Enviroment variables");
-                case DbUpdateException _:
-                    logger.Error($"{context} - Database update error.", ex);
-                    var dbUpdateMsg = useUpdateMessageForDbUpdate
-                        ? "An error occurred while processing the update."
-                        : "An error occurred while processing the request.";
-                    throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError,
-                        DatabaseError, dbUpdateMsg);
-                case ConfigurationErrorsException _:
-                    logger.Error($"{context} - Email config error.", ex);
-                    throw FaultExceptionFactory.Create(ServiceErrorCode.EmailConfigurationError,
-                        "EMAIL_CONFIGURATION_ERROR", "Email service configuration error");
-                case FormatException _:
-                    logger.Error($"{context} - Email config format.", ex);
-                    throw FaultExceptionFactory.Create(ServiceErrorCode.FormatError,
-                        "FORMAT_ERROR", "Invalid email service configuration");
-                case SmtpException _:
-                    logger.Error($"{context} - SMTP error.", ex);
-                    throw FaultExceptionFactory.Create(ServiceErrorCode.EmailSendingError,
-                        "EMAIL_SENDING_ERROR", "Failed to send email");
-                case EntityException _:
-                    logger.Error($"{context} - Entity Framework error.", ex);
-                    throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError,
-                        DatabaseError, "An error occurred while processing the request.");
-                default:
-                    logger.Fatal($"{context} - Unexpected error.", ex);
-                    throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError,
-                        "UNEXPECTED_ERROR", "An unexpected server error occurred.");
+                HandleDbUpdateException(ex, context, useUpdateMessageForDbUpdate);
             }
+
+            var exceptionType = ex.GetType();
+            if (exceptionHandlers.TryGetValue(exceptionType, out var config))
+            {
+                config.LogAction(logger, context, ex);
+                throw FaultExceptionFactory.Create(config.ErrorCode, config.ErrorCodeString, config.MessageFactory(ex));
+            }
+
+            logger.Fatal($"{context} - Unexpected error.", ex);
+            throw FaultExceptionFactory.Create(ServiceErrorCode.UnexpectedError,
+                "UNEXPECTED_ERROR", "An unexpected server error occurred.");
+        }
+
+        private void HandleDbUpdateException(Exception ex, string context, bool useUpdateMessageForDbUpdate)
+        {
+            logger.Error($"{context} - Database update error.", ex);
+            var dbUpdateMsg = useUpdateMessageForDbUpdate
+                ? "An error occurred while processing the update."
+                : "An error occurred while processing the request.";
+            throw FaultExceptionFactory.Create(ServiceErrorCode.DatabaseError, DatabaseError, dbUpdateMsg);
+        }
+
+        private static Dictionary<Type, ExceptionHandlerConfig> BuildExceptionHandlers()
+        {
+            return new Dictionary<Type, ExceptionHandlerConfig>
+            {
+                {
+                    typeof(ArgumentNullException),
+                    new ExceptionHandlerConfig(
+                        (log, ctx, ex) => log.Error($"{ctx} - Null argument.", ex),
+                        ServiceErrorCode.NullArgument,
+                        "NULL_ARGUMENT",
+                        "A null argument was received occurred.")
+                },
+                {
+                    typeof(InvalidOperationException),
+                    new ExceptionHandlerConfig(
+                        (log, ctx, ex) => log.Error($"{ctx} - Invalid operation", ex),
+                        ServiceErrorCode.InvalidOperation,
+                        "INVALID_OPERATION",
+                        ex => ex.Message)
+                },
+                {
+                    typeof(DuplicateAccountException),
+                    new ExceptionHandlerConfig(
+                        (log, ctx, ex) => log.Warn($"{ctx} - Duplicate.", ex),
+                        ServiceErrorCode.UserAlreadyExists,
+                        "USER_ALREADY_EXISTS",
+                        ex => ex.Message)
+                },
+                {
+                    typeof(SecurityException),
+                    new ExceptionHandlerConfig(
+                        (log, ctx, ex) => log.Error($"{ctx} - Security error.", ex),
+                        ServiceErrorCode.SecurityError,
+                        "SECURITY_ERROR",
+                        "Could not load Enviroment variables")
+                },
+                {
+                    typeof(ConfigurationErrorsException),
+                    new ExceptionHandlerConfig(
+                        (log, ctx, ex) => log.Error($"{ctx} - Email config error.", ex),
+                        ServiceErrorCode.EmailConfigurationError,
+                        "EMAIL_CONFIGURATION_ERROR",
+                        "Email service configuration error")
+                },
+                {
+                    typeof(FormatException),
+                    new ExceptionHandlerConfig(
+                        (log, ctx, ex) => log.Error($"{ctx} - Email config format.", ex),
+                        ServiceErrorCode.FormatError,
+                        "FORMAT_ERROR",
+                        "Invalid email service configuration")
+                },
+                {
+                    typeof(SmtpException),
+                    new ExceptionHandlerConfig(
+                        (log, ctx, ex) => log.Error($"{ctx} - SMTP error.", ex),
+                        ServiceErrorCode.EmailSendingError,
+                        "EMAIL_SENDING_ERROR",
+                        "Failed to send email")
+                },
+                {
+                    typeof(EntityException),
+                    new ExceptionHandlerConfig(
+                        (log, ctx, ex) => log.Error($"{ctx} - Entity Framework error.", ex),
+                        ServiceErrorCode.DatabaseError,
+                        DatabaseError,
+                        "An error occurred while processing the request.")
+                }
+            };
         }
     }
 }
