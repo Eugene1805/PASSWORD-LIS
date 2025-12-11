@@ -1,7 +1,5 @@
-﻿using log4net;
-using PASSWORD_LIS_Client.Utils;
+﻿using PASSWORD_LIS_Client.Utils;
 using System;
-using System.Configuration;
 using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;

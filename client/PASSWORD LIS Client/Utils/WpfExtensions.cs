@@ -6,19 +6,19 @@ namespace PASSWORD_LIS_Client.Utils
 {
     public static class WpfExtensions
     {
-        public static IEnumerable<T> FindVisualChildren<T>(this DependencyObject depObj) where T : DependencyObject
+        public static IEnumerable<T> FindVisualChildren<T>(this DependencyObject dependencyObject) where T : DependencyObject
         {
-            if (depObj != null)
+            if (dependencyObject != null)
             {
-                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(dependencyObject); i++)
                 {
-                    DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
-                    if (child is T tChild)
+                    DependencyObject dependencyObjectChild = VisualTreeHelper.GetChild(dependencyObject, i);
+                    if (dependencyObjectChild is T childType)
                     {
-                        yield return tChild;
+                        yield return childType;
                     }
 
-                    foreach (T childOfChild in FindVisualChildren<T>(child))
+                    foreach (T childOfChild in FindVisualChildren<T>(dependencyObjectChild))
                     {
                         yield return childOfChild;
                     }

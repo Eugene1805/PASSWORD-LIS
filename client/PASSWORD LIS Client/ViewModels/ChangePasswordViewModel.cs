@@ -17,35 +17,57 @@ namespace PASSWORD_LIS_Client.ViewModels
         public string NewPassword
         {
             get => this.newPassword;
-            set { this.newPassword = value; ValidateNewPassword(); OnPropertyChanged(); }
+            set 
+            { 
+                this.newPassword = value; 
+                ValidateNewPassword(); 
+                OnPropertyChanged(); 
+            }
         }
 
         private string confirmPassword;
         public string ConfirmPassword
         {
             get => this.confirmPassword;
-            set { this.confirmPassword = value; ValidateConfirmPassword(); OnPropertyChanged(); }
+            set 
+            {
+                this.confirmPassword = value; 
+                ValidateConfirmPassword(); 
+                OnPropertyChanged(); 
+            }
         }
 
         private bool isBusy;
         public bool IsBusy
         {
             get => this.isBusy;
-            set { this.isBusy = value; OnPropertyChanged(); }
+            set 
+            { 
+                this.isBusy = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         private string newPasswordError;
         public string NewPasswordError
         {
             get => newPasswordError;
-            set { newPasswordError = value; OnPropertyChanged(); }
+            set 
+            { 
+                newPasswordError = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         private string confirmPasswordError;
         public string ConfirmPasswordError
         {
             get => confirmPasswordError;
-            set { confirmPasswordError = value; OnPropertyChanged(); }
+            set 
+            { 
+                confirmPasswordError = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         public RelayCommand ChangePasswordCommand { get; }

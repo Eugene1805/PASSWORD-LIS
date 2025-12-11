@@ -1,10 +1,7 @@
 ﻿using log4net;
-using PASSWORD_LIS_Client.GameManagerServiceReference;
 using PASSWORD_LIS_Client.ViewModels;
 using PASSWORD_LIS_Client.Views;
-using PASSWORD_LIS_Client.WaitingRoomManagerServiceReference;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -101,7 +98,6 @@ namespace PASSWORD_LIS_Client.Utils
                 {
                     log.Error("mainFrame is null in NavigateTo!");
 
-                    // Fallback: usar el Frame de MainWindow directamente
                     if (Application.Current.MainWindow is MainWindow mainWindow && mainWindow.mainFrame != null)
                     {
                         log.Info("Using MainWindow's mainFrame as fallback");

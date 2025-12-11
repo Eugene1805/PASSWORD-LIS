@@ -4,9 +4,10 @@ namespace PASSWORD_LIS_Client.Utils
 {
     public static class ButtonProperties
     {
+        private const string BusyFlag = "IsBusy";
         public static readonly DependencyProperty IsBusyProperty =
             DependencyProperty.RegisterAttached(
-                "IsBusy",
+                BusyFlag,
                 typeof(bool),
                 typeof(ButtonProperties),
                 new PropertyMetadata(false));

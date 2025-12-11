@@ -5,7 +5,6 @@ namespace PASSWORD_LIS_Client.Utils
 {
     public static class ProfanityFilter
     {
-        private const string CensoredReplacement = "****";
 
         private static readonly HashSet<string> ProhibitedWords = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase)
         {
@@ -54,6 +53,9 @@ namespace PASSWORD_LIS_Client.Utils
             "huevon",
             "huevón"
         };
+
+        private const string CensoredReplacement = "****";
+
 
         public static string Clean(string message)
         {

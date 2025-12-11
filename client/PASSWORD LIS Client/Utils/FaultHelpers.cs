@@ -9,56 +9,53 @@ namespace PASSWORD_LIS_Client.Utils
 {
     public static class FaultHelpers
     {
-        public static bool TryConvertToTypedFault<T>(FaultException ex, out FaultException<T> typedFault) where T : class
+        public static bool TryConvertToTypedFault<T>(FaultException faultException, out FaultException<T> typedFault) where T : class
         {
             typedFault = null;
-            if (ex == null) return false;
+            if (faultException == null)
+            {
+                return false;
+            }
 
+            MessageFault messageFault = faultException.CreateMessageFault();
+            if (!messageFault.HasDetail)
+            {
+                return false;
+            }
             try
             {
-                MessageFault mf = ex.CreateMessageFault();
-                if (!mf.HasDetail) return false;
-
-                try
-                {
-                    T detail = mf.GetDetail<T>();
-                    typedFault = new FaultException<T>(detail, ex.Reason);
-                    return true;
-                }
-                catch
-                {
-                    var reader = mf.GetReaderAtDetailContents();
-                    var serializer = new DataContractSerializer(typeof(T));
-                    var obj = serializer.ReadObject(reader, verifyObjectName: false);
-                    if (obj is T casted)
-                    {
-                        typedFault = new FaultException<T>(casted, ex.Reason);
-                        return true;
-                    }
-                }
+                T detail = messageFault.GetDetail<T>();
+                typedFault = new FaultException<T>(detail, faultException.Reason);
+                return true;
             }
             catch
             {
-                // swallow and return false
+                var reader = messageFault.GetReaderAtDetailContents();
+                var serializer = new DataContractSerializer(typeof(T));
+                var readObject = serializer.ReadObject(reader, verifyObjectName: false);
+                if (readObject is T casted)
+                {
+                    typedFault = new FaultException<T>(casted, faultException.Reason);
+                    return true;
+                }
             }
-
             return false;
         }
 
 
-        public static string GetErrorCodeFromFault(FaultException ex)
+        public static string GetErrorCodeFromFault(FaultException faultException)
         {
-            if (ex == null)
+            if (faultException == null)
             {
                 return null;
             } 
             
-            var mf = ex.CreateMessageFault();
-            if (!mf.HasDetail)
+            var messageFault = faultException.CreateMessageFault();
+            if (!messageFault.HasDetail)
             {
                 return null;
             } 
-            var reader = mf.GetReaderAtDetailContents();
+            var reader = messageFault.GetReaderAtDetailContents();
             var xml = reader.ReadOuterXml();
             if (string.IsNullOrWhiteSpace(xml))
             { 

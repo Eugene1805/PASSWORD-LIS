@@ -5,7 +5,6 @@ using PASSWORD_LIS_Client.Views;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Configuration;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.ServiceModel;
@@ -47,11 +46,11 @@ namespace PASSWORD_LIS_Client.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        protected async Task<T> ExecuteAsync<T>(Func<Task<T>> func)
+        protected async Task<T> ExecuteAsync<T>(Func<Task<T>> function)
         {
             try
             {
-                return await func();
+                return await function();
             }
             catch (FaultException<ServiceErrorDetailDTO> ex)
             {
@@ -85,9 +84,9 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
         }
 
-        protected async Task ExecuteAsync(Func<Task> func)
+        protected async Task ExecuteAsync(Func<Task> function)
         {
-            await ExecuteAsync(async () => { await func(); return true; });
+            await ExecuteAsync(async () => { await function(); return true; });
         }
 
         protected void Execute(Action action)
@@ -166,11 +165,11 @@ namespace PASSWORD_LIS_Client.ViewModels
             };
         }
 
-        private static string ExtractMessageFromFault(FaultException ex)
+        private static string ExtractMessageFromFault(FaultException faultException)
         {
             try
             {
-                var messageFault = ex.CreateMessageFault();
+                var messageFault = faultException.CreateMessageFault();
                 if (!messageFault.HasDetail)
                 {
                     return null;
@@ -186,9 +185,9 @@ namespace PASSWORD_LIS_Client.ViewModels
                         string.Equals(node.Name.LocalName, "message", StringComparison.OrdinalIgnoreCase))
                     ?.Value;
             }
-            catch (Exception extractEx)
+            catch (Exception ex)
             {
-                log.DebugFormat("Failed to extract message from fault XML: {0}", extractEx.Message);
+                log.DebugFormat("Failed to extract message from fault XML: {0}", ex.Message);
                 return null;
             }
         }
@@ -223,21 +222,14 @@ namespace PASSWORD_LIS_Client.ViewModels
                 return null;
             }
 
-            try
+            // Pattern to match service name from URL like: net.tcp://localhost:8105/FriendsManager
+            var regex = new Regex(@"net\.tcp://[^/]+/(\w+)", RegexOptions.IgnoreCase,
+                TimeSpan.FromMilliseconds(MaximumTimeForRegexInSeconds));
+            var match = regex.Match(exceptionMessage);
+
+            if (match.Success && match.Groups.Count > 1)
             {
-                // Pattern to match service name from URL like: net.tcp://localhost:8105/FriendsManager
-                var regex = new Regex(@"net\.tcp://[^/]+/(\w+)", RegexOptions.IgnoreCase,
-                    TimeSpan.FromMilliseconds(MaximumTimeForRegexInSeconds));
-                var match = regex.Match(exceptionMessage);
-                
-                if (match.Success && match.Groups.Count > 1)
-                {
-                    return match.Groups[1].Value;
-                }
-            }
-            catch (Exception)
-            {
-                // If regex fails, return null to use default message
+                return match.Groups[1].Value;
             }
 
             return null;

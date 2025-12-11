@@ -8,6 +8,7 @@ namespace PASSWORD_LIS_Client.Converters
 {
     public class NicknamesConverter : IValueConverter
     {
+        private const string ConcatenationSymbol = " & ";
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             // We use IEnumerable<string> because it works with List<T> & arrays T[]
@@ -15,9 +16,9 @@ namespace PASSWORD_LIS_Client.Converters
             {
                 if (!nombres.Any())
                 {
-                    return "";
+                    return string.Empty;
                 }
-                return string.Join(" & ", nombres);
+                return string.Join(ConcatenationSymbol, nombres);
             }
             return string.Empty;
         }

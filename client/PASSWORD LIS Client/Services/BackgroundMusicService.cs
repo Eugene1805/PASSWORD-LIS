@@ -7,7 +7,10 @@ namespace PASSWORD_LIS_Client.Services
     public class BackgroundMusicService : IDisposable
     {
         private readonly MediaPlayer player;
+        private const int MinimumVolume = 0;
+        private const int MaximumVolume = 1;
         private bool disposed;
+
 
         public double Volume
         {
@@ -15,13 +18,13 @@ namespace PASSWORD_LIS_Client.Services
             set
             {
                 double clamped;
-                if (value < 0)
+                if (value < MinimumVolume)
                 {
-                    clamped = 0;
+                    clamped = MinimumVolume;
                 }
-                else if (value > 1)
+                else if (value > MaximumVolume)
                 {
-                    clamped = 1;
+                    clamped = MaximumVolume;
                 }
                 else
                 {
@@ -37,8 +40,9 @@ namespace PASSWORD_LIS_Client.Services
 
         public BackgroundMusicService()
         {
+            var uriBackGroundMusic = new Uri("Resources/BackgroundMusic.mp3", UriKind.Relative);
             player = new MediaPlayer();
-            player.Open(new Uri("Resources/BackgroundMusic.mp3", UriKind.Relative));
+            player.Open(uriBackGroundMusic);
             player.MediaEnded += OnMediaEnded;
 
             player.Volume = Settings.Default.MusicVolume;

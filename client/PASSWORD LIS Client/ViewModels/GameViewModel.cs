@@ -237,7 +237,6 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand PassTurnCommand { get; }
         public ICommand RequestHintCommand { get; }
 
-
         public GameViewModel(IGameManagerService gameManagerService, IWindowService windowService, 
             string gameCode, WaitingRoomManagerServiceReference.PlayerDTO waitingRoomPlayer) : base(windowService)
         {
@@ -247,7 +246,6 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             currentPlayer = InitializePlayer(waitingRoomPlayer);
             CurrentPlayerRole = currentPlayer.Role;
-
             serverGuardian = CreateServerGuardian();
 
             SubscribeToGameEvents();
@@ -256,7 +254,6 @@ namespace PASSWORD_LIS_Client.ViewModels
               (_) => CanSendClueText());
             SubmitGuessCommand = new RelayCommand(async (_) => await SendGuessAsync(),
                 (_) => CanSendGuessText());
-
             PassTurnCommand = new RelayCommand(async (_) => await PassTurnAsync(), (_) => CanPassTurn);
             RequestHintCommand = new RelayCommand((_) => RequestHint());
         }
