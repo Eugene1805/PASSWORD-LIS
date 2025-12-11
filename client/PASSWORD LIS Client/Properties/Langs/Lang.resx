@@ -897,4 +897,7 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="topPlayersManagerServiceDownText" xml:space="preserve">
     <value>The statistics service is unavailable. Please try again later.</value>
   </data>
+  <data name="couldNotVerifyAccountText" xml:space="preserve">
+    <value>We were unable to verify that your account does not have an active ban. Please try again later.</value>
+  </data>
 </root>

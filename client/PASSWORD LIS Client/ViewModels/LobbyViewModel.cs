@@ -5,6 +5,7 @@ using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.Views;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.ServiceModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -300,13 +301,11 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             await ExecuteAsync(async () =>
             {
-                bool isBanned = await reportManagerService.IsPlayerBannedAsync(SessionManager.CurrentUser.PlayerId);
-                if (isBanned)
+                if (await IsCurrentPlayerBannedAsync(Properties.Langs.Lang.cantCreateMatchText))
                 {
-                    windowService.ShowPopUp(Properties.Langs.Lang.bannedAccountText,
-                        Properties.Langs.Lang.cantCreateMatchText, PopUpIcon.Warning);
                     return;
                 }
+                
                 string newGameCode = await waitingRoomManagerService.CreateRoomAsync(SessionManager.CurrentUser.Email);
 
                 if (!string.IsNullOrEmpty(newGameCode))
@@ -349,12 +348,8 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
                 else
                 {
-                    bool isBanned = await reportManagerService.IsPlayerBannedAsync(
-                        SessionManager.CurrentUser.PlayerId);
-                    if (isBanned)
+                    if (await IsCurrentPlayerBannedAsync(Properties.Langs.Lang.cantJoinMatchText))
                     {
-                        windowService.ShowPopUp(Properties.Langs.Lang.bannedAccountText, 
-                            Properties.Langs.Lang.cantJoinMatchText, PopUpIcon.Warning);
                         return;
                     }
                     var playerId = await waitingRoomManagerService.JoinRoomAsRegisteredPlayerAsync(
@@ -385,6 +380,27 @@ namespace PASSWORD_LIS_Client.ViewModels
                         Properties.Langs.Lang.unexpectedServerErrorText, PopUpIcon.Warning);
                 }
             });
+        }
+
+        private async Task<bool> IsCurrentPlayerBannedAsync(string actionMessage)
+        {
+            try
+            {
+                bool isBanned = await reportManagerService.IsPlayerBannedAsync(SessionManager.CurrentUser.PlayerId);
+                if (isBanned)
+                {
+                    windowService.ShowPopUp(Properties.Langs.Lang.bannedAccountText, actionMessage, PopUpIcon.Warning);
+                }
+                return isBanned;
+            }
+            catch
+            {
+                windowService.ShowPopUp(
+                    Properties.Langs.Lang.errorTitleText,
+                    Properties.Langs.Lang.couldNotVerifyAccountText,
+                    PopUpIcon.Error);
+                return true;
+            }
         }
     }
 }
