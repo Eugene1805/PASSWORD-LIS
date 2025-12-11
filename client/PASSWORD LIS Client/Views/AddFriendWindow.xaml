@@ -7,7 +7,7 @@
         xmlns:utils="clr-namespace:PASSWORD_LIS_Client.Utils"
         xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
         mc:Ignorable="d"
-        Title="{utils:Translate addFriendTitleText}" Height="250" Width="500"
+        Title="{utils:Translate addFriendTitleText}" Height="260" Width="500"
         WindowStartupLocation="CenterScreen">
    
     <Grid>

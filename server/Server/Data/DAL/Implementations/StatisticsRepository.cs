@@ -25,7 +25,7 @@ namespace Data.DAL.Implementations
                     .Take(numberOfTeams)
                     .ToListAsync();
 
-                return topTeamsEntities;
+                return topTeamsEntities ?? new List<Team>();
             }
         }
     }

@@ -6,6 +6,7 @@ using Services.Contracts.DTOs;
 using Services.Contracts.Enums;
 using Services.Util;
 using System.Collections.Generic;
+using System.Data.Entity.Core;
 using System.Linq;
 using System.ServiceModel;
 using System.Threading.Tasks;
