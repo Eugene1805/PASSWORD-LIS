@@ -8,10 +8,10 @@ namespace PASSWORD_LIS_Client.Commands
         private readonly Action<object> execute;
         private readonly Predicate<object> canExecute;
 
-        public RelayCommand(Action<object> execute, Predicate<object> canExecute = null)
+        public RelayCommand(Action<object> Execute, Predicate<object> CanExecute = null)
         {
-            this.execute = execute ?? throw new ArgumentNullException(nameof(execute));
-            this.canExecute = canExecute;
+            this.execute = Execute ?? throw new ArgumentNullException(nameof(Execute));
+            this.canExecute = CanExecute;
         }
 
         public bool CanExecute(object parameter)

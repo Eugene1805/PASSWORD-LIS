@@ -49,10 +49,10 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         public ICommand SendRequestCommand { get; }
 
-        public AddFriendViewModel(IFriendsManagerService friendsService, IWindowService windowService) 
-            : base(windowService)
+        public AddFriendViewModel(IFriendsManagerService FriendsService, IWindowService WindowService) 
+            : base(WindowService)
         {
-            this.friendsService = friendsService;
+            this.friendsService = FriendsService;
             SendRequestCommand = new RelayCommand(async (_) => await SendRequestAsync(), (_) => !IsSending);
         }
 

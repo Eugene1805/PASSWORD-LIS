@@ -27,7 +27,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         public string Nickname
         {
             get => nickname;
-            set { nickname = value; OnPropertyChanged(); }
+            set 
+            { 
+                nickname = value; OnPropertyChanged(); 
+            }
         }
 
         private string firstName;
@@ -58,7 +61,11 @@ namespace PASSWORD_LIS_Client.ViewModels
         public int PhotoId
         {
             get => photoId;
-            set { photoId = value; OnPropertyChanged(); }
+            set 
+            { 
+                photoId = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         private string facebook;
@@ -112,13 +119,20 @@ namespace PASSWORD_LIS_Client.ViewModels
         private bool isEditMode;
         public bool IsEditMode { 
             get => isEditMode; 
-            set { isEditMode = value; OnPropertyChanged(); } 
+            set 
+            { 
+                isEditMode = value; 
+                OnPropertyChanged(); 
+            } 
         }
 
         private bool isSaving;
         public bool IsSaving { 
             get => isSaving; 
-            set { isSaving = value; OnPropertyChanged(); } 
+            set { 
+                isSaving = value; 
+                OnPropertyChanged(); 
+            } 
         }
 
         private string firstNameError;

@@ -11,7 +11,6 @@ namespace PASSWORD_LIS_Client.Converters
         private const string ConcatenationSymbol = " & ";
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            // We use IEnumerable<string> because it works with List<T> & arrays T[]
             if (value is IEnumerable<string> nombres)
             {
                 if (!nombres.Any())

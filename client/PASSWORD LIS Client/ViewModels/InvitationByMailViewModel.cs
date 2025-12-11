@@ -41,13 +41,13 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         public ICommand SendInvitationCommand { get; }
 
-        public InvitationByMailViewModel(IWaitingRoomManagerService roomManagerClient,
-            IWindowService windowService, string gameCode, string inviterNickname) : base(windowService)
+        public InvitationByMailViewModel(IWaitingRoomManagerService RoomManagerClient,
+            IWindowService WindowService, string GameCode, string InviterNickname) : base(WindowService)
         {
-            this.roomManagerClient = roomManagerClient;
-            this.windowService = windowService;
-            this.gameCode = gameCode;
-            this.inviterNickname = inviterNickname;
+            this.roomManagerClient = RoomManagerClient;
+            this.windowService = WindowService;
+            this.gameCode = GameCode;
+            this.inviterNickname = InviterNickname;
 
             SendInvitationCommand = new RelayCommand(async (_) => await SendInvitationAsync(), (_) => !IsSending);
         }

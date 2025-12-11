@@ -9,9 +9,9 @@ namespace PASSWORD_LIS_Client.Utils
     {
         public string Key { get; set; }
 
-        public TranslateExtension(string key)
+        public TranslateExtension(string Key)
         {
-            Key = key;
+            this.Key = Key;
         }
 
         public override object ProvideValue(IServiceProvider serviceProvider)
