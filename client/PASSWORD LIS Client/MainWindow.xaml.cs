@@ -1,15 +1,11 @@
-﻿using PASSWORD_LIS_Client.Services;
-using PASSWORD_LIS_Client.Utils;
+﻿using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.ViewModels;
 using PASSWORD_LIS_Client.Views;
-using System;
 using System.Windows;
+using System.Windows.Input;
 
 namespace PASSWORD_LIS_Client
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         public MainWindow()
@@ -23,7 +19,8 @@ namespace PASSWORD_LIS_Client
         {
             if (SessionManager.IsUserLoggedIn())
             {
-                var lobbyViewModel = new LobbyViewModel(App.WindowService, App.FriendsManagerService, App.WaitRoomManagerService, App.ReportManagerService);
+                var lobbyViewModel = new LobbyViewModel(App.WindowService, App.FriendsManagerService, 
+                    App.WaitRoomManagerService, App.ReportManagerService);
 
                 var lobbyPage = new LobbyPage { DataContext = lobbyViewModel };
 
@@ -39,5 +36,14 @@ namespace PASSWORD_LIS_Client
 
         }
 
+        private void MainFrame_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Back || 
+                e.Key == Key.BrowserBack || 
+                e.Key == Key.BrowserForward)
+            {
+                e.Handled = true;
+            }
+        }
     }
 }

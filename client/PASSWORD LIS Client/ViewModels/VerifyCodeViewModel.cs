@@ -12,7 +12,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         private readonly VerificationReason reason;
         private readonly IVerificationCodeManagerService newAccountClient;
         private readonly IPasswordResetManagerService resetPasswordClient;
-
+        private const int CodeLength = 6;
         public string Email { get; }
         private string enteredCode;
         public string EnteredCode
@@ -164,7 +164,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 EnteredCodeError = Properties.Langs.Lang.requiredFieldsText;
                 return false;
             }
-            if (EnteredCode.Length != 6)
+            if (EnteredCode.Length != CodeLength)
             {
                 EnteredCodeError = Properties.Langs.Lang.codeIncorrectOrExpiredText;
                 return false;
