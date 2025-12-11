@@ -260,7 +260,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 {
                     await roomManagerClient.SendMessageAsync(this.gameCode, new ChatMessageDTO
                     {
-                        Message = CurrentMessage,
+                        Message = ProfanityFilter.Clean(CurrentMessage),
                         SenderNickname = SessionManager.CurrentUser.Nickname
                     });
                 });
