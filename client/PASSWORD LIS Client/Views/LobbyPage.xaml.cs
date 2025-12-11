@@ -12,7 +12,7 @@ namespace PASSWORD_LIS_Client.Views
             this.Loaded += LobbyPageLoaded;
         }
 
-        private void LobbyPageLoaded(object sender, RoutedEventArgs e)
+        private void LobbyPageLoaded(object sender, RoutedEventArgs events)
         {
             if (DataContext is LobbyViewModel viewModel)
             {

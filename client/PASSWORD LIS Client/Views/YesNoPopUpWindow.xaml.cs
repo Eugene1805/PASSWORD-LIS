@@ -12,13 +12,13 @@ namespace PASSWORD_LIS_Client.Views
             DataContextChanged += OnDataContextChanged;
         }
 
-        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs events)
         {
-            if (e.OldValue is YesNoPopUpViewModel oldViewModel)
+            if (events.OldValue is YesNoPopUpViewModel oldViewModel)
             {
                 oldViewModel.CloseRequested -= HandleViewModelCloseRequested;
             }
-            if (e.NewValue is YesNoPopUpViewModel newViewModel)
+            if (events.NewValue is YesNoPopUpViewModel newViewModel)
             {
                 newViewModel.CloseRequested += HandleViewModelCloseRequested;
             }
@@ -30,13 +30,13 @@ namespace PASSWORD_LIS_Client.Views
             this.Close();
         }
 
-        protected override void OnClosed(EventArgs e)
+        protected override void OnClosed(EventArgs events)
         {
             if (DataContext is YesNoPopUpViewModel currentViewModel)
             {
                 currentViewModel.CloseRequested -= HandleViewModelCloseRequested;
             }
-            base.OnClosed(e);
+            base.OnClosed(events);
         }
     }
 }

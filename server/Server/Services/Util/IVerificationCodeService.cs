@@ -32,6 +32,7 @@ namespace Services.Util
         private const int CodeLength = 6;
         private const int CodeValidityMinutes = 5;
         public const int RequestColdownSeconds = 60;
+        private const int InvalidCodeLengthLimit = 0;
         private static string GetKey(string identifier, CodeType type)
         {
             if (string.IsNullOrWhiteSpace(identifier))
@@ -94,7 +95,8 @@ namespace Services.Util
         {
             lock (lockObject)
             {
-                if (codes.TryGetValue(GetKey(identifier, type), out CodeInfo existingCode) && existingCode.Type == type)
+                if (codes.TryGetValue(GetKey(identifier, type),
+                    out CodeInfo existingCode) && existingCode.Type == type)
                 {
                     return DateTime.UtcNow.Subtract(existingCode.CreationTime).TotalSeconds >= RequestColdownSeconds;
                 }
@@ -104,9 +106,11 @@ namespace Services.Util
 
         private string GenerateRandomCode(int length)
         {
-            if (length <= 0)
+            const int MinimumCodeValue = 100000;
+            const int MaximumCodeValue = 999999;
+            if (length <= InvalidCodeLengthLimit)
             {
-                return random.Next(100000, 999999).ToString();
+                return random.Next(MinimumCodeValue, MaximumCodeValue).ToString();
             }
             const string AllowedDigits = "0123456789";
 

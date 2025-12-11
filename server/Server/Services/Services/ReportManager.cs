@@ -18,6 +18,7 @@ namespace Services.Services
     public class ReportManager : ServiceBase, IReportManager
     {
         private const int ReportsForBan = 3;
+        private const int ValidPlayerIdLimit = 0;
         private static readonly TimeSpan BanDuration = TimeSpan.FromHours(1);
 
         private readonly ConcurrentDictionary<int, (IReportManagerCallback Callback, Timer BanTimer)> connectedClients;
@@ -153,7 +154,8 @@ namespace Services.Services
 
         private static void ValidateReportPayload(ReportDTO reportDTO)
         {
-            if (reportDTO == null || reportDTO.ReporterPlayerId <= 0 || reportDTO.ReportedPlayerId <= 0
+            if (reportDTO == null || 
+                reportDTO.ReporterPlayerId <= ValidPlayerIdLimit || reportDTO.ReportedPlayerId <= ValidPlayerIdLimit
                 || reportDTO.ReporterPlayerId == reportDTO.ReportedPlayerId)
             {
                 throw FaultExceptionFactory.Create(ServiceErrorCode.InvalidReportPayload,
@@ -165,13 +167,13 @@ namespace Services.Services
             int reportedId)
         {
             var reporter = await playerRepository.GetPlayerByIdAsync(reporterId);
-            if (reporter == null || reporter.Id <= 0)
+            if (reporter == null || reporter.Id <= ValidPlayerIdLimit)
             {
                 throw FaultExceptionFactory.Create(ServiceErrorCode.ReporterNotFound,
                     "REPORTER_NOT_FOUND", "Reporter player not found.");
             }
             var reported = await playerRepository.GetPlayerByIdAsync(reportedId);
-            if (reported == null || reported.Id <= 0)
+            if (reported == null || reported.Id <= ValidPlayerIdLimit)
             {
                 throw FaultExceptionFactory.Create(ServiceErrorCode.ReportedPlayerNotFound,
                     "REPORTED_PLAYER_NOT_FOUND", "Reported player not found.");

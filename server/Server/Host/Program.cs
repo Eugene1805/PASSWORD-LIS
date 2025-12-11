@@ -167,14 +167,7 @@ namespace Host
 
         private static void SafeAbort(ServiceHost host)
         {
-            try
-            {
-                host?.Abort();
-            }
-            catch
-            {
-                // Swallow any abort exceptions to avoid crashing the process during cleanup.
-            }
+            host?.Abort();
         }
     }
 }

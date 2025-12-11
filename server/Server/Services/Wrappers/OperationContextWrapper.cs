@@ -10,7 +10,6 @@ namespace Services.Wrappers
     {
         public T GetCallbackChannel<T>()
         {
-            // Return default(T) when there is no current OperationContext to avoid NRE
             var current = OperationContext.Current;
             return current != null ? current.GetCallbackChannel<T>() : default;
         }

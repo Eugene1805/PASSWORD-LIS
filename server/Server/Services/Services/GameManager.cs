@@ -39,6 +39,9 @@ namespace Services.Services
         private const int PointsPerWin = 10;
         private const int PlayersPerMatch = 4;
         private const int SuddenDeathWordsBuffer = 15;
+        private const int TimeLimit = 0;
+        private const int RegisteredPlayerIdLimit = 0;
+        private const int InitialRoundIndex = 1;
 
         public GameManager(IOperationContextWrapper contextWrapper, IWordRepository wordRepository,
             IMatchRepository matchRepository, IPlayerRepository playerRepository) : base(log)
@@ -99,8 +102,10 @@ namespace Services.Services
             await ExecuteAsync(async () =>
             {
                 var context = ValidateAndGetClueContext(gameCode, senderPlayerId, clue);
-                if (context == null) return;
-
+                if (context == null)
+                {
+                    return;
+                }
                 var (session, sender, currentPassword) = context.Value;
 
                 var turnClueData = new TurnClueData(sender.Player.Team, currentPassword, clue);
@@ -116,8 +121,10 @@ namespace Services.Services
             await ExecuteAsync(async () =>
             {
                 var context = ValidateAndGetGuessContext(gameCode, senderPlayerId, guess);
-                if (context == null) return;
-
+                if (context == null)
+                {
+                    return;
+                }
                 var (session, sender, currentPassword) = context.Value;
                 var team = sender.Player.Team;
 
@@ -347,7 +354,7 @@ namespace Services.Services
             session.Status = MatchStatus.InProgress;
             session.CurrentRound++;
 
-            if (session.CurrentRound > 1)
+            if (session.CurrentRound > InitialRoundIndex)
             {
                 foreach (var playerEntry in session.ActivePlayers.Values.Select(playerEntry => playerEntry.Player))
                 {
@@ -385,7 +392,7 @@ namespace Services.Services
             }
             int newTime = session.DecrementSecondsLeft();
             await BroadcastAndHandleDisconnectsAsync(session, cb => cb.OnTimerTick(newTime));
-            if (newTime <= 0)
+            if (newTime <= TimeLimit)
             {
                 if (session.Status == MatchStatus.SuddenDeath)
                 {
@@ -426,7 +433,7 @@ namespace Services.Services
             int newTime = session.DecrementValidationSecondsLeft();
             await BroadcastAndHandleDisconnectsAsync(session, cb => cb.OnValidationTimerTick(newTime));
 
-            if (newTime <= 0)
+            if (newTime <= TimeLimit)
             {
                 session.StopTimers();
                 await ProcessVotesAsync(session);
@@ -511,9 +518,9 @@ namespace Services.Services
         private async Task PersistAndNotifyGameEnd(MatchSession session, MatchTeam? winner)
         {
             var registeredRedPlayerIds = session.GetPlayersByTeam(MatchTeam.RedTeam)
-                .Where(p => p.Player.Id > 0).Select(p => p.Player.Id).ToList();
+                .Where(p => p.Player.Id > RegisteredPlayerIdLimit).Select(p => p.Player.Id).ToList();
             var registeredBluePlayerIds = session.GetPlayersByTeam(MatchTeam.BlueTeam)
-                .Where(p => p.Player.Id > 0).Select(p => p.Player.Id).ToList();
+                .Where(p => p.Player.Id > RegisteredPlayerIdLimit).Select(p => p.Player.Id).ToList();
             await ExecuteSafeAsync(session, async () =>
             {
                 log.InfoFormat("Saving match result for game {0}...", session.GameCode);

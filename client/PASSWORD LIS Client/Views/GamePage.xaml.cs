@@ -11,9 +11,9 @@ namespace PASSWORD_LIS_Client.Views
             gameContentFrame.Navigated += GameContentFrameNavigated;
         }
 
-        private void GameContentFrameNavigated(object sender, NavigationEventArgs e)
+        private void GameContentFrameNavigated(object sender, NavigationEventArgs events)
         {
-            if (e.Content is Page page)
+            if (events.Content is Page page)
             {
                 page.DataContext = this.DataContext;
             }

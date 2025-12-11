@@ -76,7 +76,7 @@
                 <TextBox x:Name="passwordToGuessTextBox"
                          Style="{StaticResource primaryTextBoxStyle}" Margin="20,10"
                          Text="{Binding CurrentGuessText, UpdateSourceTrigger=PropertyChanged}"
-                         IsEnabled="{Binding CanSendGuess}" TextChanged="passwordToGuessTextBox_TextChanged"/>
+                         IsEnabled="{Binding CanSendGuess}" />
                 <TextBlock Style="{StaticResource errorTextBlockStyle}" Margin="25,0,20,5"
                            Text="{Binding CurrentGuessError}" TextWrapping="Wrap"/>
 

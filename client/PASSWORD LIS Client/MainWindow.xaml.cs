@@ -36,15 +36,15 @@ namespace PASSWORD_LIS_Client
 
         }
 
-        private void MainFramePreviewKeyDown(object sender, KeyEventArgs e)
+        private void MainFramePreviewKeyDown(object sender, KeyEventArgs events)
         {
-            if (e.Key == Key.BrowserBack || e.Key == Key.BrowserForward)
+            if (events.Key == Key.BrowserBack || events.Key == Key.BrowserForward)
             {
-                e.Handled = true;
+                events.Handled = true;
                 return;
             }
 
-            if (e.Key == Key.Back)
+            if (events.Key == Key.Back)
             {
                 var focusedElement = Keyboard.FocusedElement;
                 
@@ -55,7 +55,7 @@ namespace PASSWORD_LIS_Client
 
                 if (!isInTextInput)
                 {
-                    e.Handled = true;
+                    events.Handled = true;
                 }
             }
         }

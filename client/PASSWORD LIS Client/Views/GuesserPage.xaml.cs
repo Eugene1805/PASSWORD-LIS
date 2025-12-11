@@ -9,9 +9,5 @@ namespace PASSWORD_LIS_Client.Views
             InitializeComponent();
         }
 
-        private void passwordToGuessTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-
-        }
     }
 }

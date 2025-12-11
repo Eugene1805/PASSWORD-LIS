@@ -8,6 +8,7 @@ using Services.Wrappers;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO.Pipes;
 using System.Linq;
 using System.ServiceModel;
 using System.Threading;
@@ -36,7 +37,11 @@ namespace Services.Services
         private readonly IAccountRepository accountRepository;
         private readonly INotificationService notificationService;
         private static int guestIdCounter = 0;
+        private const int InvalidPlayerId = -1;
+        private const int DefaultPhotoId = 0;
+        private const int ValidPlayerIdLimit = 0;
         private const int MaxPlayersPerGame = 4;
+        private const int GameCodeLength = 5;
         private static readonly Random random = new Random();
         private static readonly TimeSpan CallbackTimeout = TimeSpan.FromSeconds(5);
 
@@ -66,7 +71,7 @@ namespace Services.Services
                 }
 
                 var playerId = await JoinRoomAsRegisteredPlayerAsync(gameCode, email);
-                if (playerId > 0)
+                if (playerId > ValidPlayerIdLimit)
                 {
                     newGame.HostPlayerId = playerId;
                     log.InfoFormat("Game '{0}' created. Host player id: {1}.", gameCode, playerId);
@@ -100,7 +105,7 @@ namespace Services.Services
                 var callback = operationContext.GetCallbackChannel<IWaitingRoomCallback>();
 
                 var playerEntity = await repository.GetPlayerByEmailAsync(email);
-                if (playerEntity == null || playerEntity.Id < 0)
+                if (playerEntity == null || playerEntity.Id < ValidPlayerIdLimit)
                 {
                     log.WarnFormat("Join as registered failed: player not found for email '{0}' in game '{1}'.",
                         email, gameCode);
@@ -119,7 +124,7 @@ namespace Services.Services
                 var playerDto = new PlayerDTO
                 {
                     Id = playerEntity.Id,
-                    PhotoId = playerEntity.UserAccount.PhotoId ?? 0,
+                    PhotoId = playerEntity.UserAccount.PhotoId ?? DefaultPhotoId,
                     Nickname = playerEntity.UserAccount.Nickname
                 };
 
@@ -133,7 +138,7 @@ namespace Services.Services
                 {
                     log.InfoFormat("Player {0} joined room '{1}' as registered.", playerDto.Id, gameCode);
                 }
-                return success ? playerDto.Id : -1;
+                return success ? playerDto.Id : InvalidPlayerId;
             }, context:"WaitingRoomManager: JoinAsRegisteredPlayerAsync" );
         }
 
@@ -470,7 +475,7 @@ namespace Services.Services
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             lock (random)
             {
-                return new string(Enumerable.Repeat(chars, 5)
+                return new string(Enumerable.Repeat(chars, GameCodeLength)
                     .Select(s => chars[random.Next(chars.Length)]).ToArray());
             }
         }

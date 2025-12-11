@@ -6,6 +6,8 @@ namespace Services.Services.Internal
 {
     public class TurnHistoryManager
     {
+        private const int InvalidPasswordId = -1;
+        private const string PassIdentifier = "[]";
         public void RecordClue(MatchSession session, TurnClueData turnClueData)
         {
             var historyItem = new TurnHistoryDTO
@@ -20,12 +22,12 @@ namespace Services.Services.Internal
 
         public void RecordPass(MatchSession session, MatchTeam team, PasswordWord password)
         {
-            if (password == null || password.Id == -1)
+            if (password == null || password.Id == InvalidPasswordId)
             {
                 return;
             }
 
-            var turnClueData = new TurnClueData(team, password, "[]");
+            var turnClueData = new TurnClueData(team, password, PassIdentifier);
             RecordClue(session, turnClueData);
         }
 

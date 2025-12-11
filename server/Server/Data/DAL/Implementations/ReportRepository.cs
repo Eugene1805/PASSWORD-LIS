@@ -42,7 +42,8 @@ namespace Data.DAL.Implementations
             }
         }
 
-        public async Task<bool> HasReporterReportedSinceAsync(int reporterPlayerId, int reportedPlayerId, DateTime? since)
+        public async Task<bool> HasReporterReportedSinceAsync(int reporterPlayerId, 
+            int reportedPlayerId, DateTime? since)
         {
             using (var context = contextFactory.CreateDbContext())
             {

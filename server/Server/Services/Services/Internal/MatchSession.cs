@@ -5,6 +5,7 @@ using Services.Contracts.Enums;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Threading;
 
@@ -44,7 +45,11 @@ namespace Services.Services.Internal
         public HashSet<int> PlayersWhoVoted { get; } = new HashSet<int>();
         private readonly object lockObj = new object();
         private bool disposed;
-
+        private const int InvalidPasswordId = -1;
+        private const int TickIntervalMilliseconds = 1000;
+        private const int MinumimPenalization = 0;
+        private const int InitialWordIndex = 0;
+        private const int SkippedWordsInRound = 1;
         public MatchSession(string gameCode, List<PlayerDTO> expectedPlayers)
         {
             GameCode = gameCode;
@@ -69,8 +74,8 @@ namespace Services.Services.Internal
         {
             lock (lockObj)
             {
-                RedTeamScore = Math.Max(0, RedTeamScore - redPenalty);
-                BlueTeamScore = Math.Max(0, BlueTeamScore - bluePenalty);
+                RedTeamScore = Math.Max(MinumimPenalization, RedTeamScore - redPenalty);
+                BlueTeamScore = Math.Max(MinumimPenalization, BlueTeamScore - bluePenalty);
             }
         }
 
@@ -82,7 +87,7 @@ namespace Services.Services.Internal
             {
                 return list[index];
             }
-            return new PasswordWord { Id = -1 };
+            return new PasswordWord { Id = InvalidPasswordId };
         }
 
         public ActivePlayer GetPlayerById(int id)
@@ -109,12 +114,12 @@ namespace Services.Services.Internal
 
         public void LoadWordsForRound(int wordsPerRound)
         {
-            int skipCount = (CurrentRound - 1) * wordsPerRound;
+            int skipCount = (CurrentRound - SkippedWordsInRound) * wordsPerRound;
             RedTeamWords = AllRedWords.Skip(skipCount).Take(wordsPerRound).ToList();
             BlueTeamWords = AllBlueWords.Skip(skipCount).Take(wordsPerRound).ToList();
 
-            RedTeamWordIndex = 0;
-            BlueTeamWordIndex = 0;
+            RedTeamWordIndex = InitialWordIndex;
+            BlueTeamWordIndex = InitialWordIndex;
         }
 
         public bool LoadNextSuddenDeathWord(int totalRegularWords)
@@ -130,8 +135,8 @@ namespace Services.Services.Internal
 
             SuddenDeathWordOffset++;
 
-            RedTeamWordIndex = 0;
-            BlueTeamWordIndex = 0;
+            RedTeamWordIndex = InitialWordIndex;
+            BlueTeamWordIndex = InitialWordIndex;
             return true;
         }
 
@@ -139,14 +144,14 @@ namespace Services.Services.Internal
         {
             roundTimer?.Dispose();
             SecondsLeft = durationSeconds;
-            roundTimer = new Timer(callback, state, 1000, 1000);
+            roundTimer = new Timer(callback, state, TickIntervalMilliseconds, TickIntervalMilliseconds);
         }
 
         public void StartValidationTimer(TimerCallback callback, object state, int durationSeconds)
         {
             validationTimer?.Dispose();
             ValidationSecondsLeft = durationSeconds;
-            validationTimer = new Timer(callback, state, 1000, 1000);
+            validationTimer = new Timer(callback, state, TickIntervalMilliseconds, TickIntervalMilliseconds);
         }
 
         public void StopTimers()
