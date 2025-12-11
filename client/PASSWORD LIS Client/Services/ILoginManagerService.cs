@@ -1,5 +1,4 @@
 ﻿using PASSWORD_LIS_Client.LoginManagerServiceReference;
-using System.ServiceModel;
 using System.Threading.Tasks;
 
 namespace PASSWORD_LIS_Client.Services
