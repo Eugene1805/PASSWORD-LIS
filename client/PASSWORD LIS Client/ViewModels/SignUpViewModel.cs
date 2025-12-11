@@ -15,10 +15,10 @@ namespace PASSWORD_LIS_Client.ViewModels
     public class SignUpViewModel : BaseViewModel
     {
         private readonly IAccountManagerService client;
-        private const int MaxFirstNameLength = 50;
-        private const int MaxLastNameLength = 80;
-        private const int MaxNicknameLength = 50;
-        private const int MaxEmailLength = 100;
+        private const int MaximumFirstNameLength = 50;
+        private const int MaximumLastNameLength = 80;
+        private const int MaximumNicknameLength = 50;
+        private const int MaximumEmailLength = 100;
 
         private string firstName;
         public string FirstName
@@ -262,7 +262,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 FirstNameError = Properties.Langs.Lang.emptyFirstNameText;
                 return false;
             }
-            if (FirstName.Length > MaxFirstNameLength)
+            if (FirstName.Length > MaximumFirstNameLength)
             {
                 FirstNameError = Properties.Langs.Lang.firstNameTooLongText;
                 return false;
@@ -283,7 +283,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 LastNameError = Properties.Langs.Lang.emptyLastNameText;
                 return false;
             }
-            if (LastName.Length > MaxLastNameLength)
+            if (LastName.Length > MaximumLastNameLength)
             {
                 LastNameError = Properties.Langs.Lang.lastNameTooLongText;
                 return false;
@@ -304,7 +304,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 NicknameError = Properties.Langs.Lang.emptyNicknameText;
                 return false;
             }
-            if (Nickname.Length > MaxNicknameLength)
+            if (Nickname.Length > MaximumNicknameLength)
             {
                 NicknameError = Properties.Langs.Lang.nicknameTooLongText;
                 return false;
@@ -320,7 +320,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 EmailError = Properties.Langs.Lang.emptyFirstNameText;
                 return false;
             }
-            if (Email.Length > MaxEmailLength)
+            if (Email.Length > MaximumEmailLength)
             {
                 EmailError = Properties.Langs.Lang.emailTooLongText;
                 return false;

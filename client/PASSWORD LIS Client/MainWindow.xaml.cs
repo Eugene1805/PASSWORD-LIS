@@ -36,7 +36,7 @@ namespace PASSWORD_LIS_Client
 
         }
 
-        private void MainFrame_PreviewKeyDown(object sender, KeyEventArgs e)
+        private void MainFramePreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.BrowserBack || e.Key == Key.BrowserForward)
             {

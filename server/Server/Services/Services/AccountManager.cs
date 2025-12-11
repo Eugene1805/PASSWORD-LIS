@@ -39,6 +39,7 @@ namespace Services.Services
                     Email = newAccount.Email,
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword(newAccount.Password),
                     Nickname = newAccount.Nickname,
+                    CreatedAt = System.DateTime.Now
                 };
                 await repository.CreateAccountAsync(userAccount);
                 log.InfoFormat("Account succesfully created for: '{0}'", userAccount.Email);
