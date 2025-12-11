@@ -9,6 +9,7 @@ namespace PASSWORD_LIS_Client.Utils
 {
     public static class FaultHelpers
     {
+        private static readonly string[] FaultCodeNames = { "ErrorCode", "errorCode", "Code", "code" };
         public static bool TryConvertToTypedFault<T>(FaultException faultException, out FaultException<T> typedFault) where T : class
         {
             typedFault = null;
@@ -22,6 +23,7 @@ namespace PASSWORD_LIS_Client.Utils
             {
                 return false;
             }
+
             try
             {
                 T detail = messageFault.GetDetail<T>();
@@ -32,8 +34,8 @@ namespace PASSWORD_LIS_Client.Utils
             {
                 var reader = messageFault.GetReaderAtDetailContents();
                 var serializer = new DataContractSerializer(typeof(T));
-                var readObject = serializer.ReadObject(reader, verifyObjectName: false);
-                if (readObject is T casted)
+                var deserializedObject = serializer.ReadObject(reader, verifyObjectName: false);
+                if (deserializedObject is T casted)
                 {
                     typedFault = new FaultException<T>(casted, faultException.Reason);
                     return true;
@@ -55,19 +57,19 @@ namespace PASSWORD_LIS_Client.Utils
             {
                 return null;
             } 
+
             var reader = messageFault.GetReaderAtDetailContents();
-            var xml = reader.ReadOuterXml();
-            if (string.IsNullOrWhiteSpace(xml))
+            var xmlContent = reader.ReadOuterXml();
+            if (string.IsNullOrWhiteSpace(xmlContent))
             { 
                 return null; 
             }
 
-            var x = XElement.Parse(xml);
-            var names = new[] { "ErrorCode", "errorCode", "Code", "code" };
-            foreach (var n in names)
+            var rootElement = XElement.Parse(xmlContent);
+            foreach (var elementName in FaultCodeNames)
             {
-                var node = x.Descendants().FirstOrDefault(d => 
-                string.Equals(d.Name.LocalName, n, StringComparison.OrdinalIgnoreCase));
+                var node = rootElement.Descendants().FirstOrDefault(d =>
+                    string.Equals(d.Name.LocalName, elementName, StringComparison.OrdinalIgnoreCase));
                 if (node != null)
                 {
                     return node.Value;
@@ -75,6 +77,5 @@ namespace PASSWORD_LIS_Client.Utils
             }
             return null;
         }
-    
     }
 }

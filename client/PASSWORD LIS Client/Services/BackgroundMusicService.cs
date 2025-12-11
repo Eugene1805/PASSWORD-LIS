@@ -6,32 +6,30 @@ namespace PASSWORD_LIS_Client.Services
 {
     public class BackgroundMusicService : IDisposable
     {
-        private readonly MediaPlayer player;
+        private readonly MediaPlayer mediaPlayer;
+        private bool disposed;
         private const int MinimumVolume = 0;
         private const int MaximumVolume = 1;
-        private bool disposed;
-
-
         public double Volume
         {
-            get => player.Volume;
+            get => mediaPlayer.Volume;
             set
             {
-                double clamped;
+                double clampedVolume;
                 if (value < MinimumVolume)
                 {
-                    clamped = MinimumVolume;
+                    clampedVolume = MinimumVolume;
                 }
                 else if (value > MaximumVolume)
                 {
-                    clamped = MaximumVolume;
+                    clampedVolume = MaximumVolume;
                 }
                 else
                 {
-                    clamped = value;
+                    clampedVolume = value;
                 }
-                player.Volume = clamped;
-                Settings.Default.MusicVolume = clamped;
+                mediaPlayer.Volume = clampedVolume;
+                Settings.Default.MusicVolume = clampedVolume;
                 Settings.Default.Save();
             }
         }
@@ -41,24 +39,24 @@ namespace PASSWORD_LIS_Client.Services
         public BackgroundMusicService()
         {
             var uriBackGroundMusic = new Uri("Resources/BackgroundMusic.mp3", UriKind.Relative);
-            player = new MediaPlayer();
-            player.Open(uriBackGroundMusic);
-            player.MediaEnded += OnMediaEnded;
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.Open(uriBackGroundMusic);
+            mediaPlayer.MediaEnded += OnMediaEnded;
 
-            player.Volume = Settings.Default.MusicVolume;
+            mediaPlayer.Volume = Settings.Default.MusicVolume;
         }
 
         private void OnMediaEnded(object sender, EventArgs e)
         {
-            player.Position = TimeSpan.Zero;
-            player.Play();
+            mediaPlayer.Position = TimeSpan.Zero;
+            mediaPlayer.Play();
         }
 
         public void Play()
         {
             if (!IsPlaying)
             {
-                player.Play();
+                mediaPlayer.Play();
                 IsPlaying = true;
             }
         }
@@ -67,14 +65,14 @@ namespace PASSWORD_LIS_Client.Services
         {
             if (IsPlaying)
             {
-                player.Pause();
+                mediaPlayer.Pause();
                 IsPlaying = false;
             }
         }
 
         public void Stop()
         {
-            player.Stop();
+            mediaPlayer.Stop();
             IsPlaying = false;
         }
 
@@ -87,22 +85,20 @@ namespace PASSWORD_LIS_Client.Services
 
             if (disposing)
             {
-                player.MediaEnded -= OnMediaEnded;
+                mediaPlayer.MediaEnded -= OnMediaEnded;
                 try
                 {
                     if (IsPlaying)
                     {
-                        player.Stop();
+                        mediaPlayer.Stop();
                         IsPlaying = false;
                     }
                 }
                 finally
                 {
-                    player.Close();
-                }
-                
+                    mediaPlayer.Close();
+                }               
             }
-
             disposed = true;
         }
 
