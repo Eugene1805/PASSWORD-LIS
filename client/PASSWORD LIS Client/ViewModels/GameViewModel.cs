@@ -61,6 +61,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         private const int ServerCheckIntervalSeconds = 10;
         private const int ServerTimeoutThresholdSeconds = 6;
         private const int SnackbarDurationMilliseconds = 3000;
+        private const int InitialGameScore = 0;
         private const string EndGameMarker = "END";
         private const string WaitingPlaceholder = "...";
         private const string SpanishLanguagePrefix = "es";
@@ -318,7 +319,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
                     CurrentRoundText = string.Format(Properties.Langs.Lang.currentRoundText, currentRoundIndex);
                     CurrentWordCountText = string.Format(Properties.Langs.Lang.currentWordText, currentWordIndex);
-                    TeamPointsText = string.Format(Properties.Langs.Lang.teamPointsText, 0);
+                    TeamPointsText = string.Format(Properties.Langs.Lang.teamPointsText, InitialGameScore);
 
                     IsLoading = false;
                 }
@@ -472,7 +473,8 @@ namespace PASSWORD_LIS_Client.ViewModels
 
                 CurrentClue = clue;
 
-                bool isPassMessage = clue.ToLower().Contains(PassTurnKeywordEnglish) || clue.ToLower().Contains(PassTurnKeywordSpanish) ;
+                bool isPassMessage = clue.ToLower().Contains(PassTurnKeywordEnglish) 
+                || clue.ToLower().Contains(PassTurnKeywordSpanish) ;
 
                 if (isPassMessage)
                 {
@@ -539,7 +541,8 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                int myNewScore = (currentPlayer.Team == MatchTeam.RedTeam) ? result.NewRedTeamScore : result.NewBlueTeamScore;
+                int myNewScore = (currentPlayer.Team == MatchTeam.RedTeam) 
+                ? result.NewRedTeamScore : result.NewBlueTeamScore;
                 TeamPointsText = string.Format(Properties.Langs.Lang.teamPointsText, myNewScore);
 
                 currentWordIndex = 1;
@@ -714,7 +717,8 @@ namespace PASSWORD_LIS_Client.ViewModels
                 return;
             }
 
-            if (string.IsNullOrEmpty(currentPasswordDto.SpanishDescription) && string.IsNullOrEmpty(currentPasswordDto.EnglishDescription))
+            if (string.IsNullOrEmpty(currentPasswordDto.SpanishDescription) 
+                && string.IsNullOrEmpty(currentPasswordDto.EnglishDescription))
             {
                 _ = ShowSnackbar(Properties.Langs.Lang.noClueAvailableText);
                 CanRequestHint = true;

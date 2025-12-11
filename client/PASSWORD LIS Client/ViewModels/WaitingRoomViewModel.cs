@@ -19,8 +19,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         private readonly IWaitingRoomManagerService roomManagerClient;
         private readonly IFriendsManagerService friendsManagerService;
         private readonly IReportManagerService reportManagerService;
-        private const int MaxPlayers = 4;
-        private const int MaxReports = 3;
+        private const int MaximumPlayers = 4;
+        private const int MaximumReports = 3;
+        private const int GuesstIdLimit = 0;
+        private const int DurationOfSnackbarMessage = 3000;
         private string lastReportReason;
         private PlayerDTO currentPlayer;
 
@@ -216,7 +218,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 return false;
             }
-            if (SessionManager.CurrentUser.PlayerId < 0)
+            if (SessionManager.CurrentUser.PlayerId < GuesstIdLimit)
             {
                 windowService.ShowPopUp(Properties.Langs.Lang.warningTitleText,
                     Properties.Langs.Lang.guestCantReportText, PopUpIcon.Warning);
@@ -228,7 +230,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                     Properties.Langs.Lang.noSelectedPlayerToReport, PopUpIcon.Warning);
                 return false;
             }
-            if (SelectedPlayer.Id < 0)
+            if (SelectedPlayer.Id < GuesstIdLimit)
             {
                 return false;
             }
@@ -303,7 +305,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
         private void UpdatePlayerCount()
         {
-            PlayerCountText = $"{ConnectedPlayers.Count}/{MaxPlayers}";
+            PlayerCountText = $"{ConnectedPlayers.Count}/{MaximumPlayers}";
             RelayCommand.RaiseCanExecuteChanged();
         }
         private async Task StartGameAsync()
@@ -316,7 +318,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private bool CanStartGame()
         {
-            return IsHost && ConnectedPlayers.Count == MaxPlayers;
+            return IsHost && ConnectedPlayers.Count == MaximumPlayers;
         }
         private void OnGameStarted()
         {
@@ -381,7 +383,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             SnackbarMessage = message;
             IsSnackbarVisible = true;
-            await Task.Delay(3000);
+            await Task.Delay(DurationOfSnackbarMessage);
             IsSnackbarVisible = false;
         }
         private void CopyGameCodeToClipboard()
@@ -506,7 +508,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             Application.Current.Dispatcher.Invoke(() =>
             {
                 var message = $"{lastReportReason} | " +
-                $"{Properties.Langs.Lang.currentReportsText}: {newReportCount}/{MaxReports}";
+                $"{Properties.Langs.Lang.currentReportsText}: {newReportCount}/{MaximumReports}";
                 _ = ShowSnackbarAsync(message);
             });
         }
