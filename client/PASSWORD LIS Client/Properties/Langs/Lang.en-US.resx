@@ -882,6 +882,7 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   </data>
   <data name="passwordTooLongText" xml:space="preserve">
     <value>The password cannot exceed 15 characteres</value>
+  </data>
   <data name="accountManagerServiceDownText" xml:space="preserve">
     <value>The account management service is unavailable. Please try again later.</value>
   </data>

@@ -70,10 +70,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
-<<<<<<< HEAD
-        ///   Busca una cadena traducida similar a Add Friend.
-=======
-        ///   Looks up a localized string similar to The account management service is unavailable. Please try again later..
+        ///   Busca una cadena traducida similar a The account management service is unavailable. Please try again later..
         /// </summary>
         public static string accountManagerServiceDownText {
             get {
@@ -82,8 +79,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add Friend.
->>>>>>> 85999cf27208fb54f0980a16aaaf36ff4f97a8b4
+        ///   Busca una cadena traducida similar a Add Friend.
         /// </summary>
         public static string addFriendTitleText {
             get {
@@ -785,7 +781,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The friends service is unavailable. Please try again later..
+        ///   Busca una cadena traducida similar a The friends service is unavailable. Please try again later..
         /// </summary>
         public static string friendsManagerServiceDownText {
             get {
@@ -794,7 +790,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Could not start game configuration..
+        ///   Busca una cadena traducida similar a Could not start game configuration..
         /// </summary>
         public static string gameCreationErrorText {
             get {
@@ -803,7 +799,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The game service is unavailable. Please try again later..
+        ///   Busca una cadena traducida similar a The game service is unavailable. Please try again later..
         /// </summary>
         public static string gameManagerServiceDownText {
             get {
@@ -812,7 +808,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Generate report.
+        ///   Busca una cadena traducida similar a Generate report.
         /// </summary>
         public static string generateReportText {
             get {
@@ -1082,7 +1078,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The room service is not available. Please try again later..
+        ///   Busca una cadena traducida similar a The room service is not available. Please try again later..
         /// </summary>
         public static string lobbyManagerServiceDownText {
             get {
@@ -1091,7 +1087,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Could not connect to the server. Please ensure the service is running..
+        ///   Busca una cadena traducida similar a Could not connect to the server. Please ensure the service is running..
         /// </summary>
         public static string loginConnectionErrorText {
             get {
@@ -1100,7 +1096,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The login service is unavailable. Please try again later..
+        ///   Busca una cadena traducida similar a The login service is unavailable. Please try again later..
         /// </summary>
         public static string loginManagerServiceDownText {
             get {
@@ -1109,7 +1105,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Log In.
+        ///   Busca una cadena traducida similar a Log In.
         /// </summary>
         public static string logInText {
             get {
@@ -1595,7 +1591,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The reporting service is unavailable. Please try again later..
+        ///   Busca una cadena traducida similar a The reporting service is unavailable. Please try again later..
         /// </summary>
         public static string reportManagerServiceDownText {
             get {
@@ -1604,7 +1600,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Report submitted.
+        ///   Busca una cadena traducida similar a Report submitted.
         /// </summary>
         public static string reportSummitedText {
             get {
@@ -2066,7 +2062,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The statistics service is unavailable. Please try again later..
+        ///   Busca una cadena traducida similar a The statistics service is unavailable. Please try again later..
         /// </summary>
         public static string topPlayersManagerServiceDownText {
             get {
@@ -2075,7 +2071,7 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Top Players.
+        ///   Busca una cadena traducida similar a Top Players.
         /// </summary>
         public static string topPlayersText {
             get {
