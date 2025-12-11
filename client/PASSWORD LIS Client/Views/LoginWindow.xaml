@@ -10,8 +10,8 @@
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
         MinHeight="400" MinWidth="400" 
-        Title="{utils:Translate logInText}" Height="600" Width="600"> 
-    
+        Title="{utils:Translate logInText}" Height="600" Width="600">
+
     <Grid>
         <Grid.Background>
             <ImageBrush ImageSource="/Resources/BackgroudImage.png"/>
@@ -66,8 +66,7 @@
                 Margin="0,15,0,10" 
                 HorizontalAlignment="Center"
                 Command="{Binding PlayAsGuestCommand}"
-                AutomationProperties.AutomationId="playAsGuestButton"
-                />
+                AutomationProperties.AutomationId="playAsGuestButton"/>
 
             <TextBlock Style="{StaticResource bodyTextBlockStyle}" TextWrapping="Wrap" HorizontalAlignment="Center">
             <Run Text="{utils:Translate noAccountText}"/>
@@ -75,8 +74,6 @@
                 <Run Text="{utils:Translate signUpText}"/>
             </Hyperlink>
             </TextBlock>
-
         </StackPanel>
     </Grid>
-   
 </Window>
