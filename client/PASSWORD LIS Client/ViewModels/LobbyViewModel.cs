@@ -104,16 +104,16 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand JoinGameCommand { get; }
         public ICommand CreateGameCommand { get; }
        
-        public LobbyViewModel(IWindowService windowService, IFriendsManagerService friendsManagerService, 
-            IWaitingRoomManagerService waitingRoomManagerService,IReportManagerService reportManagerService)
-            : base(windowService)
+        public LobbyViewModel(IWindowService WindowService, IFriendsManagerService FriendsManagerService, 
+            IWaitingRoomManagerService WaitingRoomManagerService,IReportManagerService ReportManagerService)
+            : base(WindowService)
         {
-            this.friendsManagerService = friendsManagerService;
-            this.waitingRoomManagerService = waitingRoomManagerService;
-            this.reportManagerService = reportManagerService;
+            this.friendsManagerService = FriendsManagerService;
+            this.waitingRoomManagerService = WaitingRoomManagerService;
+            this.reportManagerService = ReportManagerService;
 
-            friendsManagerService.FriendAdded += OnFriendAdded;
-            friendsManagerService.FriendRemoved += OnFriendRemoved;
+            FriendsManagerService.FriendAdded += OnFriendAdded;
+            FriendsManagerService.FriendRemoved += OnFriendRemoved;
 
 
             NavigateToProfileCommand = new RelayCommand(NavigateToProfile, (_) => !IsGuest);
@@ -125,15 +125,15 @@ namespace PASSWORD_LIS_Client.ViewModels
             ShowTopPlayersCommand = new RelayCommand(ShowTopPlayers);
             HowToPlayCommand = new RelayCommand(ShowHowToPlay);
             SettingsCommand = new RelayCommand(ShowSettings);
-            JoinGameCommand = new RelayCommand(async (param) => await JoinGameWithCodeAsync(), (_) => CanJoinGame());
-            CreateGameCommand = new RelayCommand(async (param) => await CreateGameAsync(), (_) => !IsGuest);
+            JoinGameCommand = new RelayCommand(async (_) => await JoinGameWithCodeAsync(), (_) => CanJoinGame());
+            CreateGameCommand = new RelayCommand(async (_) => await CreateGameAsync(), (_) => !IsGuest);
             LoadSessionData();
 
             if (SessionManager.IsUserLoggedIn() && !IsGuest)
             {
                 Execute(() =>
                 {
-                    friendsManagerService.SubscribeToFriendUpdatesAsync(SessionManager.CurrentUser.UserAccountId);
+                    FriendsManagerService.SubscribeToFriendUpdatesAsync(SessionManager.CurrentUser.UserAccountId);
                 });
                 
             }
@@ -419,4 +419,3 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
     }
 }
-

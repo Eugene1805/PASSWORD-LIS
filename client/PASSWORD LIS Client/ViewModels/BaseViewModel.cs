@@ -21,9 +21,9 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         public BaseViewModel() { }
 
-        public BaseViewModel(IWindowService windowService)
+        public BaseViewModel(IWindowService WindowService)
         {
-            this.windowService = windowService;
+            this.windowService = WindowService;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -86,7 +86,10 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         protected async Task ExecuteAsync(Func<Task> function)
         {
-            await ExecuteAsync(async () => { await function(); return true; });
+            await ExecuteAsync(async () => { 
+                await function(); 
+                return true; 
+            });
         }
 
         protected void Execute(Action action)
@@ -222,10 +225,9 @@ namespace PASSWORD_LIS_Client.ViewModels
                 return null;
             }
 
-            // Pattern to match service name from URL like: net.tcp://localhost:8105/FriendsManager
-            var regex = new Regex(@"net\.tcp://[^/]+/(\w+)", RegexOptions.IgnoreCase,
+            var serviceNameRegex = new Regex(@"net\.tcp://[^/]+/(\w+)", RegexOptions.IgnoreCase,
                 TimeSpan.FromMilliseconds(MaximumTimeForRegexInSeconds));
-            var match = regex.Match(exceptionMessage);
+            var match = serviceNameRegex.Match(exceptionMessage);
 
             if (match.Success && match.Groups.Count > 1)
             {

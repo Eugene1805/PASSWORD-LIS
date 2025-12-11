@@ -72,12 +72,12 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         public RelayCommand ChangePasswordCommand { get; }
 
-        public ChangePasswordViewModel(string email, string code, IWindowService windowService, 
-            IPasswordResetManagerService passwordResetService) : base(windowService)
+        public ChangePasswordViewModel(string Email, string Code, IWindowService WindowService, 
+            IPasswordResetManagerService PasswordResetService) : base(WindowService)
         {
-            this.email = email;
-            this.verificationCode = code;
-            this.passwordResetClient = passwordResetService;
+            this.email = Email;
+            this.verificationCode = Code;
+            this.passwordResetClient = PasswordResetService;
             this.ChangePasswordCommand = new RelayCommand(async (_) => await ChangePasswordAsync(),
                 (_) => CanChangePassword());
         }

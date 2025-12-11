@@ -21,11 +21,11 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         public ICommand BackToLobbyCommand { get; }
 
-        public GameEndViewModel(int redScore, int blueScore, IWindowService windowService)
-            : base(windowService)
+        public GameEndViewModel(int RedScore, int BlueScore, IWindowService WindowService)
+            : base(WindowService)
         {
-            RedTeamScore = string.Format(Properties.Langs.Lang.redTeamText + ": {0}", redScore);
-            BlueTeamScore = string.Format(Properties.Langs.Lang.blueTeamText + ": {0}", blueScore);
+            RedTeamScore = string.Format(Properties.Langs.Lang.redTeamText + ": {0}", RedScore);
+            BlueTeamScore = string.Format(Properties.Langs.Lang.blueTeamText + ": {0}", BlueScore);
 
             BackToLobbyCommand = new RelayCommand(BackToLobby);
         }

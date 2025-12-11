@@ -30,10 +30,10 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
         }
 
-        public MainWindowViewModel(IWindowService windowService, BackgroundMusicService backgroudMusicService)
-            : base(windowService)
+        public MainWindowViewModel(IWindowService WindowService, BackgroundMusicService BackgroudMusicService)
+            : base(WindowService)
         {
-            this.musicService = backgroudMusicService;
+            this.musicService = BackgroudMusicService;
             Messenger.UserLoggedOut += OnUserLoggedOut;
             this.volume = musicService.Volume;
 

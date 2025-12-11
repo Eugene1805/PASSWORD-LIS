@@ -36,7 +36,8 @@ namespace PASSWORD_LIS_Client.ViewModels
         private readonly Stopwatch serverPulseWatch = new Stopwatch();
         private readonly string currentLanguage;
 
-        private static readonly Dictionary<string, CancellationReason> CancellationReasonPatterns = new Dictionary<string, CancellationReason>
+        private static readonly Dictionary<string, CancellationReason> CancellationReasonPatterns = 
+            new Dictionary<string, CancellationReason>
         {
             { "PLAYER_DISCONNECTED", CancellationReason.PlayerDisconnected },
             { "PLAYER_LEFT", CancellationReason.PlayerDisconnected },
@@ -237,14 +238,14 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand PassTurnCommand { get; }
         public ICommand RequestHintCommand { get; }
 
-        public GameViewModel(IGameManagerService gameManagerService, IWindowService windowService, 
-            string gameCode, WaitingRoomManagerServiceReference.PlayerDTO waitingRoomPlayer) : base(windowService)
+        public GameViewModel(IGameManagerService GameManagerService, IWindowService WindowService, 
+            string GameCode, WaitingRoomManagerServiceReference.PlayerDTO WaitingRoomPlayer) : base(WindowService)
         {
-            this.gameManagerService = gameManagerService;
-            this.gameCode = gameCode;
+            this.gameManagerService = GameManagerService;
+            this.gameCode = GameCode;
             currentLanguage = Properties.Settings.Default.languageCode;
 
-            currentPlayer = InitializePlayer(waitingRoomPlayer);
+            currentPlayer = InitializePlayer(WaitingRoomPlayer);
             CurrentPlayerRole = currentPlayer.Role;
             serverGuardian = CreateServerGuardian();
 
@@ -402,9 +403,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private static CancellationReason FindMatchingReasonKey(string reasonUpper)
         {
-            return CancellationReasonPatterns
-                .FirstOrDefault(pattern => reasonUpper.Contains(pattern.Key))
-                .Value;
+            return CancellationReasonPatterns.FirstOrDefault(pattern => reasonUpper.Contains(pattern.Key)).Value;
         }
 
         private string GetMessageForReasonKey(CancellationReason reasonKey, string originalReason)

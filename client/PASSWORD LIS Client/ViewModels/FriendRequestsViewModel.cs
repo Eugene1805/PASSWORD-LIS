@@ -64,11 +64,11 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand RejectRequestCommand { get; }
 
 
-        public FriendRequestsViewModel(IFriendsManagerService friendsService, IWindowService windowService)
-            : base(windowService)
+        public FriendRequestsViewModel(IFriendsManagerService FriendsService, IWindowService WindowService)
+            : base(WindowService)
         {
-            this.friendsService = friendsService;
-            this.windowService = windowService;
+            this.friendsService = FriendsService;
+            this.windowService = WindowService;
             PendingRequests = new ObservableCollection<FriendDTO>();
             AcceptRequestCommand = new RelayCommand(async (_) =>
                 await RespondToRequest(true), (_) => SelectedRequest != null &&!IsLoading);

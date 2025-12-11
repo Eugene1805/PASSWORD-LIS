@@ -191,7 +191,6 @@ namespace PASSWORD_LIS_Client.Utils
         public void ReturnToLogin()
         {
             ShowLoginWindow();
-
             CloseMainWindow();
         }
     }

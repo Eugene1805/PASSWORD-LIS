@@ -72,10 +72,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand NavigateToSignUpCommand { get; }
         public ICommand NavigateToForgotPasswordCommand { get; }
 
-        public LoginViewModel(ILoginManagerService loginManagerService, IWindowService windowService) 
-            : base(windowService)
+        public LoginViewModel(ILoginManagerService LoginManagerService, IWindowService WindowService) 
+            : base(WindowService)
         {
-            this.loginManagerService = loginManagerService;
+            this.loginManagerService = LoginManagerService;
 
             LoginCommand = new RelayCommand(async (_) => await LoginAsync(), (_) => CanLogin());
             PlayAsGuestCommand = new RelayCommand(PlayAsGuest);
