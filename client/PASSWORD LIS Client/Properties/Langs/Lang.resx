@@ -897,4 +897,7 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="topPlayersManagerServiceDownText" xml:space="preserve">
     <value>The statistics service is unavailable. Please try again later.</value>
   </data>
+  <data name="savePenaltiesText" xml:space="preserve">
+    <value>Press the button to save your penalties</value>
+  </data>
 </root>

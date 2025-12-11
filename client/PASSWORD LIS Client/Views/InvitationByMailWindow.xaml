@@ -8,7 +8,7 @@
         xmlns:language="clr-namespace:PASSWORD_LIS_Client.Properties.Langs"
         mc:Ignorable="d"
         xmlns:converters="clr-namespace:PASSWORD_LIS_Client.Converters"
-        Title="{utils:Translate invitationMailText}" Height="250" Width="500"
+        Title="{utils:Translate invitationMailText}" Height="275" Width="500"
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
@@ -24,6 +24,9 @@
                 <TextBox Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" 
                          IsEnabled="{Binding IsSending, Converter={StaticResource InverseBooleanConverter}}"
                          Style="{StaticResource primaryTextBoxStyle}" Margin="20,10,20,10"/>
+                <TextBlock Text="{Binding EmailError}" 
+                           Style="{StaticResource errorTextBlockStyle}" 
+                           Margin="25,0,20,5"/>
                 <Button Style="{StaticResource primaryButtonStyle}" Margin="20,15,20,20" Height="30"
                         Command="{Binding SendInvitationCommand}"
                         IsEnabled="{Binding IsSending, Converter={StaticResource InverseBooleanConverter}}"

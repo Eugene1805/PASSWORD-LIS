@@ -148,6 +148,7 @@
     <Compile Include="UtilsTests\MessengerTests.cs" />
     <Compile Include="UtilsTests\SessionManagerTests.cs" />
     <Compile Include="UtilsTests\ValidationUtilsTests.cs" />
+    <Compile Include="ViewModelsTests\AddFriendViewModelTests.cs" />
     <Compile Include="ViewModelsTests\ChangePasswordViewModelTests.cs" />
     <Compile Include="ViewModelsTests\LobbyViewModelTests.cs" />
     <Compile Include="ViewModelsTests\LoginViewModelTests.cs" />

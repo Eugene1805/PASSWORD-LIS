@@ -20,8 +20,22 @@ namespace PASSWORD_LIS_Client.ViewModels
 {
     public class RoundValidationViewModel : BaseViewModel
     {
-        public ObservableCollection<ValidationTurnViewModel> TurnsToValidate { get; }
-        private int validationSeconds = 30; 
+        private readonly IGameManagerService gameManagerService;
+        private readonly string gameCode;
+        private readonly int playerId;
+        private readonly ILog log = LogManager.GetLogger(typeof(RoundValidationViewModel));
+        private readonly DispatcherTimer serverGuardian;
+        private readonly Stopwatch serverPulseWatch = new Stopwatch();
+
+        private bool isMatchEnding = false;
+        private bool validationReceived = false;
+
+        private const int DefaultValidationSeconds = 30;
+        private const int ServerCheckIntervalSeconds = 2;
+        private const int ServerTimeoutThresholdSeconds = 6;
+        private const string EndGameMarker = "END";
+
+        private int validationSeconds = DefaultValidationSeconds; 
         public int ValidationSeconds
         {
             get => validationSeconds;
@@ -48,19 +62,8 @@ namespace PASSWORD_LIS_Client.ViewModels
             get => emptyListMessage;
             set => SetProperty(ref emptyListMessage, value);
         }
-
+        public ObservableCollection<ValidationTurnViewModel> TurnsToValidate { get; private set; }
         public ICommand SubmitVotesCommand { get; }
-
-        private readonly IGameManagerService gameManagerService;
-        private readonly string gameCode;
-        private readonly int playerId;
-        private readonly ILog log = LogManager.GetLogger(typeof(RoundValidationViewModel));
-        private bool isMatchEnding = false;
-        private bool validationReceived = false;
-        private readonly DispatcherTimer serverGuardian;
-        private readonly Stopwatch serverPulseWatch = new Stopwatch();
-
-
         public RoundValidationViewModel(List<TurnHistoryDTO> turns, IGameManagerService gameManagerService, IWindowService windowService,
             string gameCode, int playerId, string language) : base(windowService)
         {
@@ -68,14 +71,29 @@ namespace PASSWORD_LIS_Client.ViewModels
             this.gameCode = gameCode;
             this.playerId = playerId;
 
-            serverGuardian = new DispatcherTimer
+            serverGuardian = CreateServerGuardian();
+            StartServerMonitoring();
+            SubscribeToServiceEvents();
+            InitializeValidationList(turns, language);
+
+            SubmitVotesCommand = new RelayCommand(async (_) => await SubmitVotesAsync(), (_) => CanSubmit);
+        }
+        private DispatcherTimer CreateServerGuardian()
+        {
+            var timer = new DispatcherTimer
             {
-                Interval = TimeSpan.FromSeconds(2)
+                Interval = TimeSpan.FromSeconds(ServerCheckIntervalSeconds)
             };
-            serverGuardian.Tick += CheckServerPulse;
+            timer.Tick += CheckServerPulse;
+            return timer;
+        }
+        private void StartServerMonitoring()
+        {
             serverPulseWatch.Restart();
             serverGuardian.Start();
-
+        }
+        private void SubscribeToServiceEvents()
+        {
             gameManagerService.ValidationTimerTick += OnValidationTimerTick;
             gameManagerService.ValidationComplete += OnValidationComplete;
             gameManagerService.MatchCancelled += OnMatchCancelled;
@@ -86,7 +104,10 @@ namespace PASSWORD_LIS_Client.ViewModels
                 clientChannel.Faulted += OnServerConnectionLost;
                 clientChannel.Closed += OnServerConnectionLost;
             }
+        }
 
+        private void InitializeValidationList(List<TurnHistoryDTO> turns, string language)
+        {
             if (turns == null || turns.Count == 0)
             {
                 IsListEmpty = true;
@@ -97,13 +118,11 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 IsListEmpty = false;
                 EmptyListMessage = string.Empty;
-                var groupedTurns = turns.Where(turn => turn.Password.EnglishWord != "END" && turn.Password.SpanishWord != "END")
+                var groupedTurns = turns.Where(turn => turn.Password.EnglishWord != EndGameMarker && turn.Password.SpanishWord != EndGameMarker)
                     .GroupBy(turn => turn.TurnId)
                     .Select(group => new ValidationTurnViewModel(group, language));
                 TurnsToValidate = new ObservableCollection<ValidationTurnViewModel>(groupedTurns);
             }
-
-            SubmitVotesCommand = new RelayCommand(async (_) => await SubmitVotesAsync(), (_) => CanSubmit);
         }
 
         private void OnValidationTimerTick(int secondsLeft)
@@ -129,9 +148,9 @@ namespace PASSWORD_LIS_Client.ViewModels
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     serverGuardian?.Stop();
-                    log.InfoFormat("Dispatcher invoked - starting cleanup");
-                    Cleanup();
-                    log.InfoFormat("Cleanup completed - calling GoBack");
+                    log.InfoFormat("Dispatcher invoked - starting StopServiceMonitoring");
+                    StopServiceMonitoring(); 
+                    log.InfoFormat("StopServiceMonitoring completed - calling GoBack");
                     windowService.GoBack();
                 });
             }
@@ -148,7 +167,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 serverGuardian?.Stop();
                 windowService.ShowPopUp(Properties.Langs.Lang.matchCancelledText,
                     reason, PopUpIcon.Warning);
-                Cleanup();
+                StopServiceMonitoring();
                 gameManagerService.Cleanup();
                 windowService.GoToLobby();
             });
@@ -259,12 +278,13 @@ namespace PASSWORD_LIS_Client.ViewModels
                 log.Error($"Error logging current state: {ex.Message}", ex);
             }
         }
-        private void Cleanup()
+        private void StopServiceMonitoring()
         {
             try
             {
                 serverGuardian?.Stop();
-                log.Info("Starting cleanup - unsubscribing from events");
+                log.Info("Starting StopServiceMonitoring - unsubscribing from events");
+
                 gameManagerService.ValidationTimerTick -= OnValidationTimerTick;
                 gameManagerService.ValidationComplete -= OnValidationComplete;
                 gameManagerService.MatchCancelled -= OnMatchCancelled;
@@ -276,11 +296,11 @@ namespace PASSWORD_LIS_Client.ViewModels
                     clientChannel.Closed -= OnServerConnectionLost;
                 }
 
-                log.Info("Cleanup completed successfully");
+                log.Info("StopServiceMonitoring completed successfully");
             }
             catch (Exception ex)
             {
-                log.Error($"Error during cleanup: {ex.Message}", ex);
+                log.Error($"Error during StopServiceMonitoring: {ex.Message}", ex);
             }
         }
         private void OnServerConnectionLost(object sender, EventArgs e)
@@ -300,7 +320,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                     Properties.Langs.Lang.connectionLostValidationText,
                     PopUpIcon.Error);
 
-                Cleanup();
+                StopServiceMonitoring();
                 App.ResetServices();
                 ForceReturnToLogin();
             });
@@ -308,7 +328,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void CheckServerPulse(object sender, EventArgs e)
         {
-            if (serverPulseWatch.IsRunning && serverPulseWatch.Elapsed.TotalSeconds > 6)
+            if (serverPulseWatch.IsRunning && serverPulseWatch.Elapsed.TotalSeconds > ServerTimeoutThresholdSeconds)
             {
                 serverGuardian.Stop();
                 OnServerConnectionLost(this, EventArgs.Empty);
@@ -341,7 +361,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
 
                 windowService.ShowPopUp(title, message, PopUpIcon.Error);
-                Cleanup();
+                StopServiceMonitoring();
                 gameManagerService.Cleanup();
 
                 ForceReturnToLogin();
@@ -351,12 +371,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         private void ForceReturnToLogin()
         {
             serverGuardian?.Stop();
-            Cleanup();
+            StopServiceMonitoring();
 
             App.ResetServices();
 
-
-            // 4. Navegar
             Application.Current.Dispatcher.Invoke(() =>
             {
                 windowService.ReturnToLogin();

@@ -13,6 +13,12 @@ namespace PASSWORD_LIS_Client.ViewModels
 {
     public class LobbyViewModel : BaseViewModel
     {
+        private readonly IFriendsManagerService friendsManagerService;
+        private readonly IWaitingRoomManagerService waitingRoomManagerService;
+        private readonly IReportManagerService reportManagerService;
+        private const int GameCodeLength = 5;
+        private const int MinimumValidPlayerId = 0;
+
         private string gameCodeToJoin;
         public string GameCodeToJoin
         {
@@ -27,14 +33,22 @@ namespace PASSWORD_LIS_Client.ViewModels
         public int PhotoId
         {
             get => photoId; 
-            set { photoId = value; OnPropertyChanged(); }
+            set 
+            { 
+                photoId = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         private bool isGuest;
         public bool IsGuest
         {
             get => isGuest; 
-            set { isGuest = value; OnPropertyChanged(); }
+            set 
+            { 
+                isGuest = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         private ObservableCollection<FriendDTO> friends;
@@ -63,14 +77,21 @@ namespace PASSWORD_LIS_Client.ViewModels
         public FriendDTO SelectedFriend
         {
             get => selectedFriend;
-            set { selectedFriend = value; OnPropertyChanged(); }
+            set 
+            { 
+                selectedFriend = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         private bool showNoFriendsMessage;
         public bool ShowNoFriendsMessage
         {
             get => showNoFriendsMessage;
-            set { SetProperty(ref showNoFriendsMessage, value); }
+            set 
+            { 
+                SetProperty(ref showNoFriendsMessage, value); 
+            }
         }
         public ICommand NavigateToProfileCommand { get; }
         public ICommand ViewFriendRequestsCommand { get; }
@@ -81,12 +102,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand SettingsCommand { get; }
         public ICommand JoinGameCommand { get; }
         public ICommand CreateGameCommand { get; }
-
-        private readonly IFriendsManagerService friendsManagerService;
-        private readonly IWaitingRoomManagerService waitingRoomManagerService;
-        private readonly IReportManagerService reportManagerService;
-        private const int GameCodeLength = 5;
-        
+       
         public LobbyViewModel(IWindowService windowService, IFriendsManagerService friendsManagerService, 
             IWaitingRoomManagerService waitingRoomManagerService,IReportManagerService reportManagerService)
             : base(windowService)
@@ -130,7 +146,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             var currentUser = SessionManager.CurrentUser;
             PhotoId = currentUser.PhotoId;
-            IsGuest = currentUser.PlayerId < 0;
+            IsGuest = currentUser.PlayerId < MinimumValidPlayerId;
 
             if (!IsGuest)
             {
@@ -192,7 +208,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             var addFriendViewModel = new AddFriendViewModel(App.FriendsManagerService, App.WindowService);
             var addFriendWindow = new AddFriendWindow { DataContext = addFriendViewModel };
             addFriendWindow.ShowDialog();
- 
         }
 
         private bool CanDeleteFriend()
@@ -359,7 +374,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                     }
                     var playerId = await waitingRoomManagerService.JoinRoomAsRegisteredPlayerAsync(
                         GameCodeToJoin, SessionManager.CurrentUser.Email);
-                    success = playerId > 0;
+                    success = playerId > MinimumValidPlayerId;
                 }
 
                 if (success)

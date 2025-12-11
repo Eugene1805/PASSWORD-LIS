@@ -11,11 +11,17 @@ namespace PASSWORD_LIS_Client.ViewModels
 {
     public class FriendRequestsViewModel : BaseViewModel
     {
+        private readonly IFriendsManagerService friendsService;
+
         private ObservableCollection<FriendDTO> pendingRequests;
         public ObservableCollection<FriendDTO> PendingRequests 
         { 
             get => pendingRequests; 
-            set { pendingRequests = value; OnPropertyChanged(); } 
+            set 
+            {
+                pendingRequests = value; 
+                OnPropertyChanged(); 
+            } 
         }
 
         private bool isLoading;
@@ -35,7 +41,11 @@ namespace PASSWORD_LIS_Client.ViewModels
         public bool ShowNoRequestsMessage
         {
             get => showNoRequestsMessage;
-            set { showNoRequestsMessage = value; OnPropertyChanged(); }
+            set 
+            { 
+                showNoRequestsMessage = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         private FriendDTO selectedRequest;
@@ -53,7 +63,6 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand AcceptRequestCommand { get; }
         public ICommand RejectRequestCommand { get; }
 
-        private readonly IFriendsManagerService friendsService;
 
         public FriendRequestsViewModel(IFriendsManagerService friendsService, IWindowService windowService)
             : base(windowService)
@@ -61,10 +70,10 @@ namespace PASSWORD_LIS_Client.ViewModels
             this.friendsService = friendsService;
             this.windowService = windowService;
             PendingRequests = new ObservableCollection<FriendDTO>();
-            AcceptRequestCommand = new RelayCommand(async (_) => 
-            await RespondToRequest(true), (_) => SelectedRequest != null &&!IsLoading);
-            RejectRequestCommand = new RelayCommand(async (_) => 
-            await RespondToRequest(false), (_) => SelectedRequest != null && !IsLoading);
+            AcceptRequestCommand = new RelayCommand(async (_) =>
+                await RespondToRequest(true), (_) => SelectedRequest != null &&!IsLoading);
+            RejectRequestCommand = new RelayCommand(async (_) =>
+                await RespondToRequest(false), (_) => SelectedRequest != null && !IsLoading);
 
             _ = LoadPendingRequestsAsync();
         }

@@ -1,5 +1,4 @@
-﻿using PASSWORD_LIS_Client.AccountManagerServiceReference;
-using PASSWORD_LIS_Client.Commands;
+﻿using PASSWORD_LIS_Client.Commands;
 using PASSWORD_LIS_Client.FriendsManagerServiceReference;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
@@ -11,41 +10,55 @@ namespace PASSWORD_LIS_Client.ViewModels
 {
     public class AddFriendViewModel : BaseViewModel
     {
+        private readonly IFriendsManagerService friendsService;
+        private const int MaximumEmailLength = 100;
+
         private string email;
         public string Email
         {
             get => email;
-            set { email = value; ValidateEmail(); OnPropertyChanged(); }
+            set 
+            { 
+                email = value; 
+                ValidateEmail(); 
+                OnPropertyChanged(); 
+            }
         }
 
         private string emailError;
         public string EmailError
         {
             get => emailError;
-            set { emailError = value; OnPropertyChanged(); }
+            set 
+            { 
+                emailError = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         private bool isSending;
         public bool IsSending
         {
             get => isSending;
-            set { isSending = value; OnPropertyChanged(); }
+            set 
+            { 
+                isSending = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         public ICommand SendRequestCommand { get; }
-
-        private readonly IFriendsManagerService friendsService;
 
         public AddFriendViewModel(IFriendsManagerService friendsService, IWindowService windowService) 
             : base(windowService)
         {
             this.friendsService = friendsService;
-            SendRequestCommand = new RelayCommand(async (_) => await SendRequestAsync(), (_) => !IsSending && !string.IsNullOrWhiteSpace(Email) && EmailError == null);
+            SendRequestCommand = new RelayCommand(async (_) => await SendRequestAsync(), (_) => !IsSending);
         }
 
         private async Task SendRequestAsync()
         {
-            if (!string.IsNullOrWhiteSpace(EmailError) || string.IsNullOrWhiteSpace(Email))
+            if (!ValidateEmail())
             {
                 return;
             }
@@ -101,27 +114,28 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
         }
 
-        private void ValidateEmail()
+        private bool ValidateEmail()
         {
             if (string.IsNullOrWhiteSpace(Email))
             {
-                EmailError = null;
-                return;
+                EmailError = Properties.Langs.Lang.emptyEmailText; 
+                return false;
             }
 
-            if (Email.Length > 100)
+            if (Email.Length > MaximumEmailLength)
             {
                 EmailError = Properties.Langs.Lang.emailTooLongText;
-                return;
+                return false;
             }
 
             if (!ValidationUtils.IsValidEmail(Email))
             {
                 EmailError = Properties.Langs.Lang.invalidEmailFormatText;
-                return;
+                return false;
             }
 
             EmailError = null;
+            return true;
         }
     }
 }

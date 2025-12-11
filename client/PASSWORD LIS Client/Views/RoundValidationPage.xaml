@@ -106,7 +106,14 @@
                        TextAlignment="Center"
                        TextWrapping="Wrap"/>
         </Grid>
-        
+
+        <TextBlock Text="{utils:Translate savePenaltiesText}"
+                   TextWrapping="Wrap"
+                   Grid.Row="3"
+                   Style="{StaticResource subtitleTextBlockStyle}"
+                   HorizontalAlignment="Left"
+                   VerticalAlignment="Center"/>
+
         <Button Content="{utils:Translate nextRoundText}"
                 Grid.Row="3"
                 Style="{StaticResource primaryButtonStyle}"

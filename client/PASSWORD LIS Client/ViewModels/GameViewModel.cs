@@ -25,14 +25,23 @@ namespace PASSWORD_LIS_Client.ViewModels
         private readonly ILog log = LogManager.GetLogger(typeof(GameViewModel));
         private readonly DispatcherTimer serverGuardian;
         private readonly Stopwatch serverPulseWatch = new Stopwatch();
+        private readonly string currentLanguage;
 
         private int currentWordIndex = 1;
-        private readonly string currentLanguage;
         private PasswordWordDTO currentPasswordDto;
         private bool isSuddenDeathActive = false;
         private bool isMatchEnding = false;
 
-        private const int MaxWordsPerRound = 5;
+        private const int MaximumWordsPerRound = 5;
+        private const int DefaultTimerSeconds = 60;
+        private const int ServerCheckIntervalSeconds = 10;
+        private const int ServerTimeoutThresholdSeconds = 6;
+        private const int SnackbarDurationMilliseconds = 3000;
+        private const string EndGameMarker = "END";
+        private const string WaitingPlaceholder = "...";
+        private const string SpanishLanguagePrefix = "es";
+        private const string PassTurnKeywordEnglish = "passed";
+        private const string PassTurnKeywordSpanish = "pasó";
 
         private bool isLoading = true;
         public bool IsLoading
@@ -48,7 +57,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             set => SetProperty(ref currentPlayerRole, value);
         }
 
-        private int timerSeconds = 60;
+        private int timerSeconds = DefaultTimerSeconds;
         public int TimerSeconds
         {
             get => timerSeconds;
@@ -83,7 +92,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             set => SetProperty(ref teamPointsText, value);
         }
 
-        private string currentPasswordWord = "...";
+        private string currentPasswordWord = WaitingPlaceholder;
         public string CurrentPasswordWord
         {
             get => currentPasswordWord;
@@ -192,34 +201,12 @@ namespace PASSWORD_LIS_Client.ViewModels
             this.gameCode = gameCode;
             currentLanguage = Properties.Settings.Default.languageCode;
 
-            currentPlayer = new PlayerDTO
-            {
-                Id = waitingRoomPlayer.Id,
-                Nickname = waitingRoomPlayer.Nickname,
-                PhotoId = waitingRoomPlayer.PhotoId,
-                Role = (PlayerRole)waitingRoomPlayer.Role,
-                Team = (MatchTeam)waitingRoomPlayer.Team
-            };
-
+            currentPlayer = InitializePlayer(waitingRoomPlayer);
             CurrentPlayerRole = currentPlayer.Role;
 
-            serverGuardian = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(10)
-            };
-            serverGuardian.Tick += CheckServerPulse;
+            serverGuardian = CreateServerGuardian();
 
-            gameManagerService.MatchInitialized += OnMatchInitialized;
-            gameManagerService.TimerTick += OnTimerTick;
-            gameManagerService.MatchCancelled += OnMatchCancelled;
-            gameManagerService.NewPasswordReceived += OnNewPasswordReceived;
-            gameManagerService.ClueReceived += OnClueReceived;
-            gameManagerService.GuessResult += OnGuessResult;
-            gameManagerService.ValidationComplete += OnValidationComplete;
-            gameManagerService.BeginRoundValidation += OnBeginRoundValidation;
-            gameManagerService.MatchOver += OnMatchOver;
-            gameManagerService.NewRoundStarted += OnNewRoundStarted;
-            gameManagerService.SuddenDeathStarted += OnSuddenDeathStarted;
+            SubscribeToGameEvents();
 
             SubmitClueCommand = new RelayCommand(async (_) => await SendClueAsync(), (_) => CanSendClue && !string.IsNullOrWhiteSpace(CurrentClueText));
             SubmitGuessCommand = new RelayCommand(async (_) => await SendGuessAsync(), (_) => CanSendGuess && !string.IsNullOrWhiteSpace(CurrentGuessText));
@@ -245,6 +232,42 @@ namespace PASSWORD_LIS_Client.ViewModels
                     HandleConnectionError(ex, Properties.Langs.Lang.errorSubscribingGameText);
                 }
             });
+        }
+
+        private PlayerDTO InitializePlayer(WaitingRoomManagerServiceReference.PlayerDTO waitingRoomPlayer)
+        {
+            return new PlayerDTO
+            {
+                Id = waitingRoomPlayer.Id,
+                Nickname = waitingRoomPlayer.Nickname,
+                PhotoId = waitingRoomPlayer.PhotoId,
+                Role = (PlayerRole)waitingRoomPlayer.Role,
+                Team = (MatchTeam)waitingRoomPlayer.Team
+            };
+        }
+        private DispatcherTimer CreateServerGuardian()
+        {
+            var timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(ServerCheckIntervalSeconds)
+            };
+            timer.Tick += CheckServerPulse;
+            return timer;
+        }
+
+        private void SubscribeToGameEvents()
+        {
+            gameManagerService.MatchInitialized += OnMatchInitialized;
+            gameManagerService.TimerTick += OnTimerTick;
+            gameManagerService.MatchCancelled += OnMatchCancelled;
+            gameManagerService.NewPasswordReceived += OnNewPasswordReceived;
+            gameManagerService.ClueReceived += OnClueReceived;
+            gameManagerService.GuessResult += OnGuessResult;
+            gameManagerService.ValidationComplete += OnValidationComplete;
+            gameManagerService.BeginRoundValidation += OnBeginRoundValidation;
+            gameManagerService.MatchOver += OnMatchOver;
+            gameManagerService.NewRoundStarted += OnNewRoundStarted;
+            gameManagerService.SuddenDeathStarted += OnSuddenDeathStarted;
         }
 
         private void OnMatchInitialized(MatchInitStateDTO state)
@@ -353,7 +376,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 currentPasswordDto = password;
 
-                bool isRoundEnded = password.EnglishWord == "END" || password.SpanishWord == "END";
+                bool isRoundEnded = password.EnglishWord == EndGameMarker || password.SpanishWord == EndGameMarker;
 
                 if (isRoundEnded && !isSuddenDeathActive)
                 {
@@ -375,16 +398,17 @@ namespace PASSWORD_LIS_Client.ViewModels
 
                 if (CurrentPlayerRole == PlayerRole.ClueGuy)
                 {
-                    CurrentPasswordWord = currentLanguage.StartsWith("es") ? password.SpanishWord : password.EnglishWord;
+                    CurrentPasswordWord = currentLanguage.StartsWith(SpanishLanguagePrefix) ? password.SpanishWord : password.EnglishWord;
                 }
                 else
                 {
-                    CurrentPasswordWord = "...";
+                    CurrentPasswordWord = WaitingPlaceholder;
                 }
 
                 CurrentClue = Properties.Langs.Lang.waitingAClueText;
                 CanSendClue = true;
                 CanSendGuess = false;
+
                 if (isSuddenDeathActive)
                 {
                     CurrentWordCountText = string.Empty;
@@ -412,15 +436,15 @@ namespace PASSWORD_LIS_Client.ViewModels
                     return;
                 }
 
-                if (currentPasswordDto == null || currentPasswordDto.EnglishWord == "END" ||
-                            currentPasswordDto.SpanishWord == "END")
+                if (currentPasswordDto == null || currentPasswordDto.EnglishWord == EndGameMarker ||
+                            currentPasswordDto.SpanishWord == EndGameMarker)
                 {
                     return;
                 }
 
                 CurrentClue = clue;
 
-                bool isPassMessage = clue.ToLower().Contains("passed") || clue.ToLower().Contains("pasó") ;
+                bool isPassMessage = clue.ToLower().Contains(PassTurnKeywordEnglish) || clue.ToLower().Contains(PassTurnKeywordSpanish) ;
 
                 if (isPassMessage)
                 {
@@ -456,9 +480,9 @@ namespace PASSWORD_LIS_Client.ViewModels
                 if (result.IsCorrect)
                 {
                     currentWordIndex++;
-                    if (currentWordIndex > MaxWordsPerRound)
+                    if (currentWordIndex > MaximumWordsPerRound)
                     {
-                        currentWordIndex = MaxWordsPerRound;
+                        currentWordIndex = MaximumWordsPerRound;
                     }
                     CurrentWordCountText = string.Format(Properties.Langs.Lang.currentWordText, currentWordIndex);
                     CurrentGuessText = string.Empty;
@@ -542,7 +566,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
                 if (CurrentPlayerRole == PlayerRole.ClueGuy && currentPasswordDto != null)
                 {
-                    if (currentLanguage.StartsWith("es"))
+                    if (currentLanguage.StartsWith(SpanishLanguagePrefix))
                     {
                         CurrentPasswordWord = currentPasswordDto.SpanishWord;
                     }
@@ -553,7 +577,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
                 else if (CurrentPlayerRole == PlayerRole.Guesser)
                 {
-                    CurrentPasswordWord = "...";
+                    CurrentPasswordWord = WaitingPlaceholder;
                 }
 
                 CanPassTurn = !isSuddenDeathActive;
@@ -610,8 +634,8 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             if (string.IsNullOrWhiteSpace(CurrentClue) ||
                 CurrentClue == Properties.Langs.Lang.waitingAClueText ||
-                CurrentClue.ToLower().Contains("passed") ||
-                CurrentClue.ToLower().Contains("pasó"))
+                CurrentClue.ToLower().Contains(PassTurnKeywordEnglish) ||
+                CurrentClue.ToLower().Contains(PassTurnKeywordSpanish))
             {
                 return;
             }
@@ -669,7 +693,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 return;
             }
 
-            string description = currentLanguage.StartsWith("es") ?
+            string description = currentLanguage.StartsWith(SpanishLanguagePrefix) ?
                 currentPasswordDto.SpanishDescription : currentPasswordDto.EnglishDescription;
 
             CurrentHintText = description;
@@ -744,7 +768,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private void CheckServerPulse(object sender, EventArgs e)
         {
-            if (serverPulseWatch.IsRunning && serverPulseWatch.Elapsed.TotalSeconds > 6)
+            if (serverPulseWatch.IsRunning && serverPulseWatch.Elapsed.TotalSeconds > ServerTimeoutThresholdSeconds)
             {
                 serverGuardian.Stop();
                 OnServerConnectionLost(this, EventArgs.Empty);
@@ -755,7 +779,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             SnackbarMessage = message;
             IsSnackbarVisible = true;
-            await Task.Delay(3000);
+            await Task.Delay(SnackbarDurationMilliseconds);
             IsSnackbarVisible = false;
         }
 

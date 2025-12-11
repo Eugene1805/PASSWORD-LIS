@@ -1,4 +1,5 @@
 using Moq;
+using PASSWORD_LIS_Client.FriendsManagerServiceReference;
 using PASSWORD_LIS_Client.Services;
 using PASSWORD_LIS_Client.Utils;
 using PASSWORD_LIS_Client.ViewModels;
@@ -203,6 +204,116 @@ namespace Test.ViewModelsTests
                 It.Is<string>(s => s == PASSWORD_LIS_Client.Properties.Langs.Lang.cantJoinMatchText),
                 PopUpIcon.Warning), Times.Once);
             Assert.DoesNotContain(mockWindow.Invocations, i => i.Method.Name == nameof(IWindowService.NavigateTo));
+        }
+
+        [Fact]
+        public void CanDeleteFriend_WhenGuestOrNoSelection_ShouldBeFalse()
+        {
+            var mockWindow = new Mock<IWindowService>();
+            var mockFriends = new Mock<IFriendsManagerService>();
+            var mockWaiting = new Mock<IWaitingRoomManagerService>();
+            var mockReport = new Mock<IReportManagerService>();
+
+            SessionManager.Login(LoggedUser(-1));
+            var vmGuest = new LobbyViewModel(mockWindow.Object, mockFriends.Object, mockWaiting.Object, mockReport.Object);
+            vmGuest.SelectedFriend = new FriendDTO { PlayerId = 10, Nickname = "Friend" };
+
+            Assert.False(vmGuest.DeleteFriendCommand.CanExecute(null));
+
+            SessionManager.Login(LoggedUser(1));
+            var vmUser = new LobbyViewModel(mockWindow.Object, mockFriends.Object, mockWaiting.Object, mockReport.Object);
+            vmUser.SelectedFriend = null;
+
+            Assert.False(vmUser.DeleteFriendCommand.CanExecute(null));
+        }
+
+        [Fact]
+        public void CanDeleteFriend_WhenUserLoggedInAndFriendSelected_ShouldBeTrue()
+        {
+            SessionManager.Login(LoggedUser(1));
+            var mockWindow = new Mock<IWindowService>();
+            var mockFriends = new Mock<IFriendsManagerService>();
+            var mockWaiting = new Mock<IWaitingRoomManagerService>();
+            var mockReport = new Mock<IReportManagerService>();
+
+            var vm = new LobbyViewModel(mockWindow.Object, mockFriends.Object, mockWaiting.Object, mockReport.Object);
+            vm.SelectedFriend = new FriendDTO { PlayerId = 10, Nickname = "Friend" };
+
+            Assert.True(vm.DeleteFriendCommand.CanExecute(null));
+        }
+
+        [Fact]
+        public async Task DeleteFriend_WhenUserCancelsConfirmation_ShouldNotCallService()
+        {
+            SessionManager.Login(LoggedUser(1));
+            var mockWindow = new Mock<IWindowService>();
+            var mockFriends = new Mock<IFriendsManagerService>();
+            var mockWaiting = new Mock<IWaitingRoomManagerService>();
+            var mockReport = new Mock<IReportManagerService>();
+
+            mockWindow.Setup(w => w.ShowYesNoPopUp(It.IsAny<string>(), It.IsAny<string>()))
+                      .Returns(false); 
+
+            var vm = new LobbyViewModel(mockWindow.Object, mockFriends.Object, mockWaiting.Object, mockReport.Object);
+            vm.SelectedFriend = new FriendDTO { PlayerId = 10, Nickname = "AmigoToDelete" };
+
+            await Task.Run(() => vm.DeleteFriendCommand.Execute(null));
+
+            mockFriends.Verify(f => f.DeleteFriendAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task DeleteFriend_WhenServiceReturnsSuccess_ShouldShowSuccessPopup()
+        {
+            SessionManager.Login(LoggedUser(1));
+            var mockWindow = new Mock<IWindowService>();
+            var mockFriends = new Mock<IFriendsManagerService>();
+            var mockWaiting = new Mock<IWaitingRoomManagerService>();
+            var mockReport = new Mock<IReportManagerService>();
+
+            mockWindow.Setup(w => w.ShowYesNoPopUp(It.IsAny<string>(), It.IsAny<string>()))
+                      .Returns(true); 
+
+            mockFriends.Setup(f => f.DeleteFriendAsync(It.IsAny<int>(), It.IsAny<int>()))
+                       .ReturnsAsync(true); 
+
+            var vm = new LobbyViewModel(mockWindow.Object, mockFriends.Object, mockWaiting.Object, mockReport.Object);
+            vm.SelectedFriend = new FriendDTO { PlayerId = 10, Nickname = "AmigoToDelete" };
+
+            await Task.Run(() => vm.DeleteFriendCommand.Execute(null));
+
+            mockFriends.Verify(f => f.DeleteFriendAsync(SessionManager.CurrentUser.PlayerId, 10), Times.Once);
+
+            mockWindow.Verify(w => w.ShowPopUp(
+                PASSWORD_LIS_Client.Properties.Langs.Lang.successTitleText,
+                PASSWORD_LIS_Client.Properties.Langs.Lang.successDeletionText,
+                PopUpIcon.Success), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteFriend_WhenServiceFails_ShouldShowErrorPopup()
+        {
+            SessionManager.Login(LoggedUser(1));
+            var mockWindow = new Mock<IWindowService>();
+            var mockFriends = new Mock<IFriendsManagerService>();
+            var mockWaiting = new Mock<IWaitingRoomManagerService>();
+            var mockReport = new Mock<IReportManagerService>();
+
+            mockWindow.Setup(w => w.ShowYesNoPopUp(It.IsAny<string>(), It.IsAny<string>()))
+                      .Returns(true); 
+
+            mockFriends.Setup(f => f.DeleteFriendAsync(It.IsAny<int>(), It.IsAny<int>()))
+                       .ReturnsAsync(false);
+
+            var vm = new LobbyViewModel(mockWindow.Object, mockFriends.Object, mockWaiting.Object, mockReport.Object);
+            vm.SelectedFriend = new FriendDTO { PlayerId = 10, Nickname = "AmigoToDelete" };
+
+            await Task.Run(() => vm.DeleteFriendCommand.Execute(null));
+
+            mockWindow.Verify(w => w.ShowPopUp(
+                PASSWORD_LIS_Client.Properties.Langs.Lang.errorTitleText,
+                PASSWORD_LIS_Client.Properties.Langs.Lang.couldNotRemoveFriendTitleText,
+                PopUpIcon.Error), Times.Once);
         }
     }
 }

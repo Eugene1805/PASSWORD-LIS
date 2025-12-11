@@ -1711,6 +1711,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Busca una cadena traducida similar a Press the button to save your penalties.
+        /// </summary>
+        public static string savePenaltiesText {
+            get {
+                return ResourceManager.GetString("savePenaltiesText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Busca una cadena traducida similar a Score.
         /// </summary>
         public static string scoreTopText {

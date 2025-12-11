@@ -5,6 +5,10 @@ namespace PASSWORD_LIS_Client.ViewModels
 {
     public class ValidationTurnViewModel : BaseViewModel
     {
+        private const string SpanishLanguageCode = "es";
+        private const string PassedTurnToken = "[]";
+        private const string ClueSeparator = ", ";
+
         public int TurnId { get; }
         public string Word { get; }
         public string Clues { get; }
@@ -31,7 +35,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             TurnId = firstTurn.TurnId;
             Language = language;
 
-            if (Language.StartsWith("es"))
+            if (Language.StartsWith(SpanishLanguageCode))
             {
                 Word = firstTurn.Password.SpanishWord;
             }
@@ -42,7 +46,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             var cluesList = turnGroup.Select(t => t.ClueUsed).ToList();
 
-            IsPassed = cluesList.Contains("[]");
+            IsPassed = cluesList.Contains(PassedTurnToken);
 
             if (IsPassed)
             {
@@ -50,7 +54,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
             else
             {
-                Clues = string.Join(", ", cluesList);
+                Clues = string.Join(ClueSeparator, cluesList);
             }
         }
     }

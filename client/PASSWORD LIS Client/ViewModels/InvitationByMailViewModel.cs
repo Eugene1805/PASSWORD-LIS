@@ -9,11 +9,27 @@ namespace PASSWORD_LIS_Client.ViewModels
 {
     public class InvitationByMailViewModel : BaseViewModel
     {
+        private readonly IWaitingRoomManagerService roomManagerClient;
+        private readonly string gameCode;
+        private readonly string inviterNickname;
+        private const int MaximumEmailLength = 100;
+
         private string email;
         public string Email
         {
             get => email;
-            set => SetProperty(ref email, value);
+            set
+            {
+                ValidateEmail();
+                SetProperty(ref email, value);
+            }
+        }
+
+        private string emailError;
+        public string EmailError
+        {
+            get => emailError;
+            set => SetProperty(ref emailError, value);
         }
 
         private bool isSending;
@@ -25,28 +41,24 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         public ICommand SendInvitationCommand { get; }
 
-        private readonly IWaitingRoomManagerService roomManagerClient;
-        private readonly string gameCode;
-        private readonly string inviterNickname;
-
-        public InvitationByMailViewModel (IWaitingRoomManagerService roomManagerClient,
-            IWindowService windowService, string gameCode, string inviterNickname): base(windowService)
+        public InvitationByMailViewModel(IWaitingRoomManagerService roomManagerClient,
+            IWindowService windowService, string gameCode, string inviterNickname) : base(windowService)
         {
             this.roomManagerClient = roomManagerClient;
             this.windowService = windowService;
             this.gameCode = gameCode;
             this.inviterNickname = inviterNickname;
 
-            SendInvitationCommand = new RelayCommand(async (_) => await SendInvitationAsync(), (_) => CanSend());
-        }
-
-        private bool CanSend()
-        {
-            return !IsSending && !string.IsNullOrWhiteSpace(Email) && ValidationUtils.IsValidEmail(Email);
+            SendInvitationCommand = new RelayCommand(async (_) => await SendInvitationAsync(), (_) => !IsSending);
         }
 
         private async Task SendInvitationAsync()
         {
+            if (!ValidateEmail())
+            {
+                return;
+            }
+
             IsSending = true;
             try
             {
@@ -64,6 +76,30 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 IsSending = false;
             }
+        }
+
+        private bool ValidateEmail()
+        {
+            if (string.IsNullOrWhiteSpace(Email))
+            {
+                EmailError = Properties.Langs.Lang.emptyEmailText;
+                return false;
+            }
+
+            if (Email.Length > MaximumEmailLength)
+            {
+                EmailError = Properties.Langs.Lang.emailTooLongText;
+                return false;
+            }
+
+            if (!ValidationUtils.IsValidEmail(Email))
+            {
+                EmailError = Properties.Langs.Lang.invalidEmailFormatText;
+                return false;
+            }
+
+            EmailError = null;
+            return true;
         }
     }
 }
