@@ -3,9 +3,6 @@ using System.Windows.Navigation;
 
 namespace PASSWORD_LIS_Client.Views
 {
-    /// <summary>
-    /// Lógica de interacción para GamePage.xaml
-    /// </summary>
     public partial class GamePage : Page
     {
         public GamePage()

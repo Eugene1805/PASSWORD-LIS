@@ -56,7 +56,8 @@ namespace PASSWORD_LIS_Client.ViewModels
             this.email = email;
             this.verificationCode = code;
             this.passwordResetClient = passwordResetService;
-            this.ChangePasswordCommand = new RelayCommand(async (_) => await ChangePasswordAsync(), (_) => CanChangePassword());
+            this.ChangePasswordCommand = new RelayCommand(async (_) => await ChangePasswordAsync(),
+                (_) => CanChangePassword());
         }
 
         private bool CanChangePassword()

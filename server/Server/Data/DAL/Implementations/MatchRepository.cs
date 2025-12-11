@@ -17,13 +17,9 @@ namespace Data.DAL.Implementations
         }
         public async Task SaveMatchResultAsync(MatchResultData matchResultData)
         {
-            if (matchResultData.RedTeamPlayerIds == null) 
+            if (matchResultData.RedTeamPlayerIds == null || matchResultData.BlueTeamPlayerIds == null) 
             {
-                throw new ArgumentNullException(nameof(matchResultData.RedTeamPlayerIds));
-            }
-            if (matchResultData.BlueTeamPlayerIds == null)
-            {
-                throw new ArgumentNullException(nameof(matchResultData.BlueTeamPlayerIds));
+                throw new ArgumentNullException(nameof(matchResultData));
             }
 
             using (var context = contextFactory.CreateDbContext())

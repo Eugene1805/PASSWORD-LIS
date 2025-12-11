@@ -4,9 +4,6 @@ using System.Windows.Media.Imaging;
 
 namespace PASSWORD_LIS_Client.Views
 {
-    /// <summary>
-    /// Interaction logic for PopUpWindow.xaml
-    /// </summary>
     public partial class PopUpWindow : Window
     {
         public PopUpWindow()

@@ -11,6 +11,10 @@
         MinHeight="800" MinWidth="1200"
         Title="PASSWORD LIS" Height="800" Width="1400">
     <Grid>
-        <Frame x:Name="mainFrame" NavigationUIVisibility="Hidden"/>
+        <Frame x:Name="mainFrame" 
+               NavigationUIVisibility="Hidden"
+               KeyboardNavigation.TabNavigation="None"
+               KeyboardNavigation.DirectionalNavigation="None"
+               PreviewKeyDown="MainFrame_PreviewKeyDown"/>
     </Grid>
 </Window>

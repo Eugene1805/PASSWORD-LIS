@@ -5,9 +5,6 @@ using PASSWORD_LIS_Client.Utils;
 
 namespace PASSWORD_LIS_Client.Views
 {
-    /// <summary>
-    /// Interaction logic for ChooseAvatarWindow.xaml
-    /// </summary>
     public partial class ChooseAvatarWindow : Window
     {
         public int SelectedAvatarId { get; private set; } = 0;
@@ -25,13 +22,11 @@ namespace PASSWORD_LIS_Client.Views
             {
                 SelectedAvatarId = int.Parse(checkedRadioButton.Tag.ToString());
                 DialogResult = true;
-
             }
             else
             {
                 DialogResult = false;
             }
-
             Close();
         }
     }
