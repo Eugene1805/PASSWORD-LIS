@@ -150,7 +150,8 @@
     <Compile Include="UtilsTests\ValidationUtilsTests.cs" />
     <Compile Include="ViewModelsTests\ChangePasswordViewModelTests.cs" />
     <Compile Include="ViewModelsTests\LobbyViewModelTests.cs" />
-    <Compile Include="ViewModelsTests\LoginViewModelTest.cs" />
+    <Compile Include="ViewModelsTests\LoginViewModelTests.cs" />
+    <Compile Include="ViewModelsTests\ProfileViewModelTests.cs" />
     <Compile Include="ViewModelsTests\ReportViewModelTests.cs" />
     <Compile Include="ViewModelsTests\RetrievePasswordViewModelTests.cs" />
     <Compile Include="ViewModelsTests\SettingsViewModelTests.cs" />

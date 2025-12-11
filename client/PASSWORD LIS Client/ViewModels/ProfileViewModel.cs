@@ -12,10 +12,16 @@ namespace PASSWORD_LIS_Client.ViewModels
 {
     public class ProfileViewModel : BaseViewModel
     {
+        private readonly IProfileManagerService profileManagerService;
+        private ProfileUserDTO originalState;
+
         private const string FacebookKey = "Facebook";
         private const string InstagramKey = "Instagram";
         private const string XKey = "X";
         private const string TikTokKey = "TikTok";
+        private const int MaximumFirstNameLength = 50;
+        private const int MaximumLastNameLength = 80;
+        private const int MaximumSocialMediaLength = 50;
 
         private string nickname;
         public string Nickname
@@ -28,14 +34,24 @@ namespace PASSWORD_LIS_Client.ViewModels
         public string FirstName
         {
             get => firstName;
-            set { firstName = value; ValidateFirstName(); OnPropertyChanged(); }
+            set 
+            { 
+                firstName = value; 
+                ValidateFirstName(); 
+                OnPropertyChanged(); 
+            }
         }
 
         private string lastName;
         public string LastName
         {
             get => lastName;
-            set { lastName = value; ValidateLastName(); OnPropertyChanged(); }
+            set 
+            { 
+                lastName = value; 
+                ValidateLastName(); 
+                OnPropertyChanged(); 
+            }
         }
 
         private int photoId;
@@ -49,28 +65,48 @@ namespace PASSWORD_LIS_Client.ViewModels
         public string Facebook
         {
             get => facebook;
-            set { facebook = value; ValidateFacebook(); OnPropertyChanged(); }
+            set 
+            { 
+                facebook = value; 
+                ValidateFacebook(); 
+                OnPropertyChanged(); 
+            }
         }
 
         private string instagram;
         public string Instagram
         {
             get => instagram;
-            set { instagram = value; ValidateInstagram(); OnPropertyChanged(); }
+            set 
+            { 
+                instagram = value; 
+                ValidateInstagram(); 
+                OnPropertyChanged(); 
+            }
         }
 
         private string xSocialMedia;
         public string XSocialMedia
         {
             get => xSocialMedia;
-            set { xSocialMedia = value; ValidateXSocialMedia(); OnPropertyChanged(); }
+            set 
+            { 
+                xSocialMedia = value; 
+                ValidateXSocialMedia(); 
+                OnPropertyChanged(); 
+            }
         }
 
         private string tiktok;
         public string Tiktok
         {
             get => tiktok;
-            set { tiktok = value; ValidateTiktok(); OnPropertyChanged(); }
+            set 
+            { 
+                tiktok = value; 
+                ValidateTiktok(); 
+                OnPropertyChanged(); 
+            }
         }
 
         private bool isEditMode;
@@ -84,30 +120,35 @@ namespace PASSWORD_LIS_Client.ViewModels
             get => isSaving; 
             set { isSaving = value; OnPropertyChanged(); } 
         }
+
         private string firstNameError;
         public string FirstNameError
         {
             get => firstNameError;
             set { firstNameError = value; OnPropertyChanged(); }
         }
+
         private string lastNameError;
         public string LastNameError
         {
             get => lastNameError;
             set { lastNameError = value; OnPropertyChanged(); }
         }
+
         private string facebookError;
         public string FacebookError
         {
             get => facebookError;
             set { facebookError = value; OnPropertyChanged(); }
         }
+
         private string instagramError;
         public string InstagramError
         {
             get => instagramError;
             set { instagramError = value; OnPropertyChanged(); }
         }
+
         private string xSocialMediaError;
         public string XSocialMediaError
         {
@@ -120,15 +161,11 @@ namespace PASSWORD_LIS_Client.ViewModels
             get => tiktokError;
             set { tiktokError = value; OnPropertyChanged(); }
         }
-
         public ICommand BackToLobbyCommand { get; }
         public ICommand EditProfileCommand { get; }
         public ICommand ChooseAnAvatarCommand { get; }
         public ICommand SaveChangesCommand { get; }
         public ICommand ChangePasswordCommand { get; }
-
-        private readonly IProfileManagerService profileManagerService;
-        private ProfileUserDTO originalState;
 
         public ProfileViewModel(IProfileManagerService profileManagerService, IWindowService windowService)
             : base(windowService)
@@ -143,7 +180,6 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             LoadProfileData();
         }
-
         private void LoadProfileData()
         {
             if (!SessionManager.IsUserLoggedIn())
@@ -160,18 +196,17 @@ namespace PASSWORD_LIS_Client.ViewModels
             if (currentUser.SocialAccounts != null)
             {
                 Facebook = currentUser.SocialAccounts.ContainsKey(FacebookKey) ? 
-                    currentUser.SocialAccounts[FacebookKey] : "";
+                    currentUser.SocialAccounts[FacebookKey] : string.Empty;
                 Instagram = currentUser.SocialAccounts.ContainsKey(InstagramKey) ?
-                    currentUser.SocialAccounts[InstagramKey] : "";
+                    currentUser.SocialAccounts[InstagramKey] : string.Empty;
                 XSocialMedia = currentUser.SocialAccounts.ContainsKey(XKey) ?
-                    currentUser.SocialAccounts[XKey] : "";
+                    currentUser.SocialAccounts[XKey] : string.Empty;
                 Tiktok = currentUser.SocialAccounts.ContainsKey(TikTokKey) ? 
-                    currentUser.SocialAccounts[TikTokKey] : "";
+                    currentUser.SocialAccounts[TikTokKey] : string.Empty;
             }
 
             SaveOriginalState();
         }
-
         private void EditProfile(object parameter)
         {
             IsEditMode = true; 
@@ -180,7 +215,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             windowService.ShowPopUp(Properties.Langs.Lang.editingModeTitleText,
                 Properties.Langs.Lang.editingModeActiveText, PopUpIcon.Information);
         }
-
         private void ChooseAnAvatar(object parameter)
         {
             var chooseAvatarWindow = new ChooseAvatarWindow();
@@ -189,14 +223,12 @@ namespace PASSWORD_LIS_Client.ViewModels
                 PhotoId = chooseAvatarWindow.SelectedAvatarId;
             }
         }
-        
         private bool CanSaveChanges()
         {
             return IsEditMode && !IsSaving &&
                 AreFieldsValid() &&
                 HasUnsavedChanges();
         }
-
         private async Task SaveChangesAsync()
         {
             if (!AreFieldsValid() || !SessionManager.IsUserLoggedIn())
@@ -224,7 +256,6 @@ namespace PASSWORD_LIS_Client.ViewModels
                 IsSaving = false;
             }
         }
-
         private void ChangePassword(object parameter)
         {
             var retrievePasswordViewModel = new RetrievePasswordViewModel(App.PasswordResetManagerService, windowService);
@@ -253,45 +284,28 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 return false;
             }
-            if (FirstName != originalState.FirstName)
-            {
-                return true;
-            }
-            if (LastName != originalState.LastName)
-            {
-                return true;
-            }
-            if (PhotoId != originalState.PhotoId)
-            {
-                return true;
-            }
-            string oldFacebook = originalState.SocialAccounts.ContainsKey(FacebookKey) ?
-                originalState.SocialAccounts[FacebookKey] : "";
-            string oldInstagram = originalState.SocialAccounts.ContainsKey(InstagramKey) ?
-                originalState.SocialAccounts[InstagramKey] : "";
-            string oldX = originalState.SocialAccounts.ContainsKey(XKey) ?
-                originalState.SocialAccounts[XKey] : "";
-            string oldTiktok = originalState.SocialAccounts.ContainsKey(TikTokKey) ?
-                originalState.SocialAccounts[TikTokKey] : "";
 
-            if ((Facebook ?? "") != oldFacebook)
-            {
-                return true;
-            }
-            if ((Instagram ?? "") != oldInstagram)
-            {
-                return true;
-            }
-            if ((XSocialMedia ?? "") != oldX)
-            {
-                return true;
-            }
-            if ((Tiktok ?? "") != oldTiktok)
-            {
-                return true;
-            }
-            return false;
+            bool hasBasicInformationChanged = FirstName != originalState.FirstName ||
+                                       LastName != originalState.LastName ||
+                                       PhotoId != originalState.PhotoId;
+
+            bool hasSocialMediaChanged = HasSocialAccountChanged(Facebook, FacebookKey) ||
+                                         HasSocialAccountChanged(Instagram, InstagramKey) ||
+                                         HasSocialAccountChanged(XSocialMedia, XKey) ||
+                                         HasSocialAccountChanged(Tiktok, TikTokKey);
+
+            return hasBasicInformationChanged || hasSocialMediaChanged;
         }
+
+        private bool HasSocialAccountChanged(string currentValue, string key)
+        {
+            string originalValue = originalState.SocialAccounts.ContainsKey(key)
+                ? originalState.SocialAccounts[key]
+                : string.Empty;
+
+            return (currentValue ?? string.Empty) != originalValue;
+        }
+
         private void BackToLobby(object parameter)
         {
             if (!IsEditMode)
@@ -343,7 +357,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             XSocialMediaError = null;
             TiktokError = null;
         }
-
         private bool AreFieldsValid()
         {
             bool isFirstNameValid = ValidateFirstName();
@@ -356,7 +369,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             
             return isFirstNameValid && isLastNameValid && isFacebookValid && isInstagramValid && isXValid && isTiktokValid;
         }
-
         private bool ValidateFirstName()
         {
             if (string.IsNullOrWhiteSpace(FirstName))
@@ -364,7 +376,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 FirstNameError = Properties.Langs.Lang.emptyFirstNameText;
                 return false;
             }
-            if (FirstName.Length > 50)
+            if (FirstName.Length > MaximumFirstNameLength)
             {
                 FirstNameError = Properties.Langs.Lang.firstNameTooLongText;
                 return false;
@@ -377,7 +389,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             FirstNameError = null;
             return true;
         }
-
         private bool ValidateLastName()
         {
             if (string.IsNullOrWhiteSpace(LastName))
@@ -385,7 +396,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 LastNameError = Properties.Langs.Lang.emptyLastNameText;
                 return false;
             }
-            if (LastName.Length > 80)
+            if (LastName.Length > MaximumLastNameLength)
             {
                 LastNameError = Properties.Langs.Lang.lastNameTooLongText;
                 return false;
@@ -400,9 +411,9 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
         private static string ValidateSocialMediaField(string socialMediaUsername)
         {
-            if (!string.IsNullOrEmpty(socialMediaUsername) && socialMediaUsername.Length > 50)
+            if (!string.IsNullOrEmpty(socialMediaUsername) && socialMediaUsername.Length > MaximumSocialMediaLength)
             {
-                return "El usuario no debe exceder los 50 caracteres.";
+                return Properties.Langs.Lang.usernameNotExceedFiftyCharacteresText;
             }
             return null;
         }
@@ -411,25 +422,21 @@ namespace PASSWORD_LIS_Client.ViewModels
             FacebookError = ValidateSocialMediaField(Facebook);
             return FacebookError == null;
         }
-
         private bool ValidateInstagram()
         {
             InstagramError = ValidateSocialMediaField(Instagram);
             return InstagramError == null;
         }
-
         private bool ValidateXSocialMedia()
         {
             XSocialMediaError = ValidateSocialMediaField(XSocialMedia);
             return XSocialMediaError == null;
         }
-
         private bool ValidateTiktok()
         {
             TiktokError = ValidateSocialMediaField(Tiktok);
             return TiktokError == null;
         }
-
         private ProfileUserDTO CollectUserData()
         {
            return new ProfileUserDTO
@@ -442,14 +449,13 @@ namespace PASSWORD_LIS_Client.ViewModels
                 LastName = this.LastName,
                 SocialAccounts = new Dictionary<string, string>()
                 {
-                    { "Facebook", this.Facebook },
-                    { "Instagram", this.Instagram },
-                    { "X", this.XSocialMedia },
-                    { "TikTok", this.Tiktok }
+                    { FacebookKey, this.Facebook },
+                    { InstagramKey, this.Instagram },
+                    { XKey, this.XSocialMedia },
+                    { TikTokKey, this.Tiktok }
                 }
             };
         }
-
         private void ProcessUpdateResponse(ProfileUserDTO resultDto)
         {
             if (resultDto != null)
@@ -473,7 +479,6 @@ namespace PASSWORD_LIS_Client.ViewModels
                     PopUpIcon.Error);
             }
         }
-
         private SessionUserDTO ConvertProfileDtoToSessionDto(ProfileUserDTO profileDto)
         {
             var sessionDto = new SessionUserDTO
