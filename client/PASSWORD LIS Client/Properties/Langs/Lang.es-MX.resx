@@ -871,6 +871,15 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
   <data name="playerDisconnectedText" xml:space="preserve">
     <value>Un jugador se ha desconectado de la partida</value>
   </data>
+  <data name="emptyEmailText" xml:space="preserve">
+    <value>El correo no puede estar vacío</value>
+  </data>
+  <data name="emptyPasswordText" xml:space="preserve">
+    <value>La contraseña no puede estar vacía</value>
+  </data>
+  <data name="passwordTooLongText" xml:space="preserve">
+    <value>La contraseña no puede exceder los 15 caracteres</value>
+  </data>
   <data name="accountManagerServiceDownText" xml:space="preserve">
     <value>El servicio de gestión de cuentas no está disponible. Por favor, intente más tarde.</value>
   </data>

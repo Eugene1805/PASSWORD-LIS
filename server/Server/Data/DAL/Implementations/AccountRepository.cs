@@ -19,12 +19,13 @@ namespace Data.DAL.Implementations
         public async Task CreateAccountAsync(UserAccount account)
         {
             var context = contextFactory.CreateDbContext();
-            
-                if ( await context.UserAccount.AnyAsync(a => a.Email == account.Email))
-                {
-                    throw new DuplicateAccountException($"An account with the email '{account.Email}' already exists.");
-                }
-                    context.UserAccount.Add(account);
+
+            if (await context.UserAccount.AnyAsync(a => a.Email == account.Email))
+            {
+                throw new DuplicateAccountException($"An account with the email '{account.Email}' already exists.");
+            }
+
+            context.UserAccount.Add(account);
                     context.Player.Add(new Player { UserAccount = account });
                     await context.SaveChangesAsync();
         }
@@ -35,10 +36,9 @@ namespace Data.DAL.Implementations
             {
                 return false;
             }
-            var context = contextFactory.CreateDbContext();
-            
-                return context.UserAccount.Any(a => a.Email == email);
 
+            var context = contextFactory.CreateDbContext();
+            return context.UserAccount.Any(a => a.Email == email);
         }
 
         public async Task<UserAccount> GetUserByEmailAsync(string email)
@@ -56,42 +56,37 @@ namespace Data.DAL.Implementations
         public bool VerifyEmail(string email)
         {
             var context = contextFactory.CreateDbContext();
-            
-                UserAccount user = context.UserAccount.FirstOrDefault(u => u.Email == email);
+            UserAccount user = context.UserAccount.FirstOrDefault(u => u.Email == email);
 
-                if (user == null)
-                {
-                    return false;
-                }
-                user.EmailVerified = true;
-                context.SaveChanges();
-                return true;
-            
+            if (user == null)
+            {
+                return false;
+            }
+
+            user.EmailVerified = true;
+            context.SaveChanges();
+            return true;
         }
 
         public bool ResetPassword(string email, string passwordHash)
         {
             var context = contextFactory.CreateDbContext();
-            
-                UserAccount user = context.UserAccount.FirstOrDefault(u => u.Email == email);
+            UserAccount user = context.UserAccount.FirstOrDefault(u => u.Email == email);
 
-                if (user == null)
-                {
-                    return false;
-                }
+            if (user == null)
+            {
+                return false;
+            }
 
-                user.PasswordHash = passwordHash;
-                context.SaveChanges();
-
-                return true;
-            
+            user.PasswordHash = passwordHash;
+            context.SaveChanges();
+            return true;
         }
         public async Task<bool> UpdateUserProfileAsync(int playerId, UserAccount updatedAccountData,
             List<SocialAccount> updatedSocialsAccounts)
         {
             using (var context = contextFactory.CreateDbContext())
             {
-
                 using (var transaction = context.Database.BeginTransaction())
                 {
                     try
@@ -146,6 +141,14 @@ namespace Data.DAL.Implementations
             }
         }
 
+        public async Task<bool> IsNicknameInUse(string nickname)
+        {
+            using (var context = contextFactory.CreateDbContext())
+            {
+                return await context.UserAccount.AnyAsync(p => p.Nickname == nickname);
+            }
+        }
+
         private static void UpdateSocialAccounts(PasswordLISEntities context, UserAccount userAccountToUpdate,
             List<SocialAccount> updatedSocialsAccounts)
         {
@@ -186,14 +189,6 @@ namespace Data.DAL.Implementations
                     updatedSocial.Username = updatedSocial.Username.Trim();
                     context.SocialAccount.Add(updatedSocial);
                 }
-            }
-        }
-
-        public async Task<bool> IsNicknameInUse(string nickname)
-        {
-            using (var context = contextFactory.CreateDbContext())
-            {
-                return await context.UserAccount.AnyAsync(p => p.Nickname == nickname);
             }
         }
     }
