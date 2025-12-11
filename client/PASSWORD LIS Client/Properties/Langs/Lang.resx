@@ -903,4 +903,19 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="couldNotVerifyAccountText" xml:space="preserve">
     <value>We were unable to verify that your account does not have an active ban. Please try again later.</value>
   </data>
+  <data name="clueCannotBeEmptyText" xml:space="preserve">
+    <value>Clue cannot be empty</value>
+  </data>
+  <data name="clueTooLongText" xml:space="preserve">
+    <value>The clue cannot exceed 50 characters</value>
+  </data>
+  <data name="guessCannotBeEmptyText" xml:space="preserve">
+    <value>Guess cannot be empty</value>
+  </data>
+  <data name="guessTooLongText" xml:space="preserve">
+    <value>The guess cannot exceed 50 characters</value>
+  </data>
+  <data name="partnerPassedWordText" xml:space="preserve">
+    <value>Your Partner passed the word</value>
+  </data>
 </root>

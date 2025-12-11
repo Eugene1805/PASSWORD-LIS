@@ -907,4 +907,19 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
   <data name="couldNotVerifyAccountText" xml:space="preserve">
     <value>No se pudo validar que tu cuenta no tuviera un baneo activo. Por favor, intenta más tarde.</value>
   </data>
+  <data name="clueCannotBeEmptyText" xml:space="preserve">
+    <value>La pista no puede ser vacía</value>
+  </data>
+  <data name="clueTooLongText" xml:space="preserve">
+    <value>La pista no puede superar los 50 caracteres</value>
+  </data>
+  <data name="guessCannotBeEmptyText" xml:space="preserve">
+    <value>La adivinanza no puede estar vacia</value>
+  </data>
+  <data name="guessTooLongText" xml:space="preserve">
+    <value>La adivinanza no puede exceder los 50 caracteres</value>
+  </data>
+  <data name="partnerPassedWordText" xml:space="preserve">
+    <value>Tu compañero pasó la palabra</value>
+  </data>
 </root>

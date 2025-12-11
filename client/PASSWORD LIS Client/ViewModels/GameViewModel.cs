@@ -57,6 +57,8 @@ namespace PASSWORD_LIS_Client.ViewModels
         private bool isMatchEnding = false;
 
         private const int MaximumWordsPerRound = 5;
+        private const int MaximumClueLength = 50;
+        private const int MaximumGuessLength = 50;
         private const int DefaultTimerSeconds = 60;
         private const int ServerCheckIntervalSeconds = 10;
         private const int ServerTimeoutThresholdSeconds = 6;
@@ -138,6 +140,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             set
             {
                 SetProperty(ref currentClueText, value);
+                ValidateClueText();
                 RelayCommand.RaiseCanExecuteChanged();
             }
         }
@@ -148,9 +151,25 @@ namespace PASSWORD_LIS_Client.ViewModels
             set
             {
                 SetProperty(ref currentGuessText, value);
+                ValidateGuessText();
                 RelayCommand.RaiseCanExecuteChanged();
             }
         }
+
+        private string currentClueError;
+        public string CurrentClueError
+        {
+            get => currentClueError;
+            set => SetProperty(ref currentClueError, value);
+        }
+
+        private string currentGuessError;
+        public string CurrentGuessError
+        {
+            get => currentGuessError;
+            set => SetProperty(ref currentGuessError, value);
+        } 
+
         private bool canSendClue = true;
         public bool CanSendClue
         {
@@ -233,10 +252,11 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             SubscribeToGameEvents();
 
-            SubmitClueCommand = new RelayCommand(async (_) => await SendClueAsync(), 
-                (_) => CanSendClue && !string.IsNullOrWhiteSpace(CurrentClueText));
-            SubmitGuessCommand = new RelayCommand(async (_) => await SendGuessAsync(), 
-                (_) => CanSendGuess && !string.IsNullOrWhiteSpace(CurrentGuessText));
+            SubmitClueCommand = new RelayCommand(async (_) => await SendClueAsync(),
+              (_) => CanSendClueText());
+            SubmitGuessCommand = new RelayCommand(async (_) => await SendGuessAsync(),
+                (_) => CanSendGuessText());
+
             PassTurnCommand = new RelayCommand(async (_) => await PassTurnAsync(), (_) => CanPassTurn);
             RequestHintCommand = new RelayCommand((_) => RequestHint());
         }
@@ -259,6 +279,16 @@ namespace PASSWORD_LIS_Client.ViewModels
                     HandleConnectionError(ex, Properties.Langs.Lang.errorSubscribingGameText);
                 }
             });
+        }
+
+        private bool CanSendClueText()
+        {
+            return CanSendClue;
+        }
+
+        private bool CanSendGuessText()
+        {
+            return CanSendGuess;
         }
 
         private PlayerDTO InitializePlayer(WaitingRoomManagerServiceReference.PlayerDTO waitingRoomPlayer)
@@ -471,18 +501,20 @@ namespace PASSWORD_LIS_Client.ViewModels
                     return;
                 }
 
-                CurrentClue = clue;
+                var possible = clue;
 
                 bool isPassMessage = clue.ToLower().Contains(PassTurnKeywordEnglish) 
                 || clue.ToLower().Contains(PassTurnKeywordSpanish) ;
 
                 if (isPassMessage)
                 {
+                    CurrentClue = Properties.Langs.Lang.partnerPassedWordText;
                     CanSendGuess = false;
                 }
                 else
                 {
                     CanSendGuess = true;
+                    CurrentClue = clue;
                 }
             });
         }
@@ -642,6 +674,11 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private async Task SendClueAsync()
         {
+            if (!ValidateClueText())
+            {
+                return;
+            }
+
             CanSendClue = false;
             await ExecuteAsync(async () =>
             {
@@ -663,8 +700,12 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
         private async Task SendGuessAsync()
         {
-            if (string.IsNullOrWhiteSpace(CurrentClue) ||
-                CurrentClue == Properties.Langs.Lang.waitingAClueText ||
+            if (!ValidateGuessText())
+            {
+                return;
+            }
+
+            if (CurrentClue == Properties.Langs.Lang.waitingAClueText ||
                 CurrentClue.ToLower().Contains(PassTurnKeywordEnglish) ||
                 CurrentClue.ToLower().Contains(PassTurnKeywordSpanish))
             {
@@ -863,6 +904,38 @@ namespace PASSWORD_LIS_Client.ViewModels
                 windowService.ShowPopUp(title, message, PopUpIcon.Error);
                 ForceReturnToLogin();
             });
+        }
+
+        private bool ValidateClueText()
+        {
+            if (string.IsNullOrWhiteSpace(CurrentClueText))
+            {
+                CurrentClueError = Properties.Langs.Lang.clueCannotBeEmptyText;
+                return false;
+            }
+            if (CurrentClueText.Length > MaximumClueLength)
+            {
+                CurrentClueError = Properties.Langs.Lang.clueTooLongText;
+                return false;
+            }
+            CurrentClueError = null;
+            return true;
+        }
+
+        private bool ValidateGuessText()
+        {
+            if (string.IsNullOrWhiteSpace(CurrentGuessText))
+            {
+                CurrentGuessError = Properties.Langs.Lang.guessCannotBeEmptyText;
+                return false;
+            }
+            if (CurrentGuessText.Length > MaximumGuessLength)
+            {
+                CurrentGuessError = Properties.Langs.Lang.guessTooLongText;
+                return false;
+            }
+            CurrentGuessError = null;
+            return true;
         }
     }
 }

@@ -72,8 +72,10 @@
                 <TextBox x:Name="clueGivenTextBox"
                          Style="{StaticResource primaryTextBoxStyle}" Margin="20,10"
                          Text="{Binding CurrentClueText, UpdateSourceTrigger=PropertyChanged}"
-                         MaxLength="50"
                          IsEnabled="{Binding CanSendClue}"/>
+                <TextBlock Style="{StaticResource errorTextBlockStyle}" Margin="25,0,20,5"
+                           Text="{Binding CurrentClueError}"
+                           TextWrapping="Wrap"/>
 
                 <Button Style="{StaticResource primaryButtonStyle}" Margin="20,10" Height="30"
                         Content="{utils:Translate sendText}"

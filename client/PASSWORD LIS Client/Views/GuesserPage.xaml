@@ -76,8 +76,9 @@
                 <TextBox x:Name="passwordToGuessTextBox"
                          Style="{StaticResource primaryTextBoxStyle}" Margin="20,10"
                          Text="{Binding CurrentGuessText, UpdateSourceTrigger=PropertyChanged}"
-                         MaxLength="50"
-                         IsEnabled="{Binding CanSendGuess}"/>
+                         IsEnabled="{Binding CanSendGuess}" TextChanged="passwordToGuessTextBox_TextChanged"/>
+                <TextBlock Style="{StaticResource errorTextBlockStyle}" Margin="25,0,20,5"
+                           Text="{Binding CurrentGuessError}" TextWrapping="Wrap"/>
 
                 <Button x:Name="sendPasswordToGuessButton" Style="{StaticResource primaryButtonStyle}" Margin="20,10" Height="30"
                         Content="{utils:Translate sendText}"
