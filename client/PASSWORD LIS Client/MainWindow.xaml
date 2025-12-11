@@ -15,6 +15,6 @@
                NavigationUIVisibility="Hidden"
                KeyboardNavigation.TabNavigation="None"
                KeyboardNavigation.DirectionalNavigation="None"
-               PreviewKeyDown="MainFrame_PreviewKeyDown"/>
+               PreviewKeyDown="MainFramePreviewKeyDown"/>
     </Grid>
 </Window>
