@@ -38,11 +38,25 @@ namespace PASSWORD_LIS_Client
 
         private void MainFrame_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Back || 
-                e.Key == Key.BrowserBack || 
-                e.Key == Key.BrowserForward)
+            if (e.Key == Key.BrowserBack || e.Key == Key.BrowserForward)
             {
                 e.Handled = true;
+                return;
+            }
+
+            if (e.Key == Key.Back)
+            {
+                var focusedElement = Keyboard.FocusedElement;
+                
+                bool isInTextInput = focusedElement is System.Windows.Controls.TextBox ||
+                                     focusedElement is System.Windows.Controls.PasswordBox ||
+                                     focusedElement is System.Windows.Controls.RichTextBox ||
+                                     focusedElement is System.Windows.Controls.Primitives.TextBoxBase;
+
+                if (!isInTextInput)
+                {
+                    e.Handled = true;
+                }
             }
         }
     }
