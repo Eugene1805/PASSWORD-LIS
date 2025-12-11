@@ -26,9 +26,9 @@ namespace Test.DataTests
                 Metadata = "res://*/Model.PasswordLISModel.csdl|res://*/Model.PasswordLISModel.ssdl|res://*/Model.PasswordLISModel.msl"
             };
 
-            using var ctx = new PasswordLISEntities(entityBuilder.ToString());
+            using var context = new PasswordLISEntities(entityBuilder.ToString());
 
-            Assert.True(ctx.Database.Exists(), "Coult not connect to the Database");
+            Assert.True(context.Database.Exists(), "Coult not connect to the Database");
         }
     }
 }

@@ -12,19 +12,19 @@ namespace Test.ServicesTests
 {
     public class AccountManagerTests
     {
-        private readonly Mock<IAccountRepository> mockRepo;
+        private readonly Mock<IAccountRepository> mockRepository;
         private readonly Mock<INotificationService> mockNotification;
         private readonly Mock<IVerificationCodeService> mockCodeService;
         private readonly AccountManager accountManager;
 
         public AccountManagerTests()
         {
-            mockRepo = new Mock<IAccountRepository>();
+            mockRepository = new Mock<IAccountRepository>();
             mockNotification = new Mock<INotificationService>();
             mockCodeService = new Mock<IVerificationCodeService>();
 
             accountManager = new AccountManager(
-                mockRepo.Object,
+                mockRepository.Object,
                 mockNotification.Object,
                 mockCodeService.Object
             );
@@ -36,7 +36,7 @@ namespace Test.ServicesTests
             NewAccountDTO newAccountDto = new NewAccountDTO { Email = "test@example.com", Password = "Password123!" };
             string generatedCode = "123456";
 
-            mockRepo.Setup(repo => repo.CreateAccountAsync(It.IsAny<UserAccount>()))
+            mockRepository.Setup(repo => repo.CreateAccountAsync(It.IsAny<UserAccount>()))
                      .Returns(Task.CompletedTask);
 
             mockCodeService.Setup(service => service.GenerateAndStoreCode(newAccountDto.Email,
@@ -44,13 +44,13 @@ namespace Test.ServicesTests
 
             await accountManager.CreateAccountAsync(newAccountDto);
 
-            int repoCalls = mockRepo.Invocations.Count(i => 
+            int repoCalls = mockRepository.Invocations.Count(i => 
             i.Method.Name == nameof(IAccountRepository.CreateAccountAsync));
             int codeCalls = mockCodeService.Invocations.Count(i => 
             i.Method.Name == nameof(IVerificationCodeService.GenerateAndStoreCode));
             int notificationCalls = mockNotification.Invocations.Count(i => 
             i.Method.Name == nameof(INotificationService.SendAccountVerificationEmailAsync));
-            string? repoEmailArg = (mockRepo.Invocations.First(i => 
+            string? repoEmailArg = (mockRepository.Invocations.First(i => 
             i.Method.Name == nameof(IAccountRepository.CreateAccountAsync)).Arguments[0] as UserAccount)?.Email;
 
             string? codeEmailArg = mockCodeService.Invocations[0].Arguments[0] as string;
@@ -94,7 +94,7 @@ namespace Test.ServicesTests
             };
             string verificationCode = "123456";
 
-            mockRepo.Setup(repo => repo.CreateAccountAsync(It.IsAny<UserAccount>()))
+            mockRepository.Setup(repo => repo.CreateAccountAsync(It.IsAny<UserAccount>()))
                      .Returns(Task.CompletedTask);
 
             mockCodeService.Setup(s => s.GenerateAndStoreCode(newAccountDto.Email, CodeType.EmailVerification))
@@ -102,7 +102,7 @@ namespace Test.ServicesTests
 
             await accountManager.CreateAccountAsync(newAccountDto);
 
-            UserAccount? createdAccount = mockRepo.Invocations
+            UserAccount? createdAccount = mockRepository.Invocations
                 .Where(i => i.Method.Name == nameof(IAccountRepository.CreateAccountAsync))
                 .Select(i => i.Arguments[0] as UserAccount)
                 .FirstOrDefault();
@@ -123,7 +123,7 @@ namespace Test.ServicesTests
 
             var actual = new
             {
-                RepoCalls = mockRepo.Invocations.Count(i => 
+                RepoCalls = mockRepository.Invocations.Count(i => 
                 i.Method.Name == nameof(IAccountRepository.CreateAccountAsync)),
                 CodeCalls = mockCodeService.Invocations.Count(i => 
                 i.Method.Name == nameof(IVerificationCodeService.GenerateAndStoreCode)),
@@ -148,7 +148,7 @@ namespace Test.ServicesTests
                 Password = "AValidPassword123!"
             };
 
-            mockRepo.Setup(repo => repo.CreateAccountAsync(It.IsAny<UserAccount>()))
+            mockRepository.Setup(repo => repo.CreateAccountAsync(It.IsAny<UserAccount>()))
                      .ThrowsAsync(new DuplicateAccountException("User already exist"));
 
             FaultException<ServiceErrorDetailDTO> exception = await
@@ -167,7 +167,7 @@ namespace Test.ServicesTests
             var actual = new
             {
                 ErrorCode = exception.Detail.ErrorCode,
-                RepoCalls = mockRepo.Invocations.Count(i => 
+                RepoCalls = mockRepository.Invocations.Count(i => 
                 i.Method.Name == nameof(IAccountRepository.CreateAccountAsync)),
                 CodeCalls = mockCodeService.Invocations.Count(i => 
                 i.Method.Name == nameof(IVerificationCodeService.GenerateAndStoreCode)),
@@ -187,7 +187,7 @@ namespace Test.ServicesTests
                 Password = "AValidPassword123!"
             };
 
-            mockRepo.Setup(repo => repo.CreateAccountAsync(It.IsAny<UserAccount>()))
+            mockRepository.Setup(repo => repo.CreateAccountAsync(It.IsAny<UserAccount>()))
                      .ThrowsAsync(new System.Data.Entity.Infrastructure.DbUpdateException("Error de BD"));
 
             FaultException<ServiceErrorDetailDTO> exception = await 
@@ -206,7 +206,7 @@ namespace Test.ServicesTests
             var actual = new
             {
                 ErrorCode = exception.Detail.ErrorCode,
-                RepoCalls = mockRepo.Invocations.Count(i => 
+                RepoCalls = mockRepository.Invocations.Count(i => 
                 i.Method.Name == nameof(IAccountRepository.CreateAccountAsync)),
                 CodeCalls = mockCodeService.Invocations.Count(i => 
                 i.Method.Name == nameof(IVerificationCodeService.GenerateAndStoreCode)),
@@ -230,7 +230,7 @@ namespace Test.ServicesTests
             };
 
             UserAccount? captured = null;
-            mockRepo.Setup(r => r.CreateAccountAsync(It.IsAny<UserAccount>()))
+            mockRepository.Setup(r => r.CreateAccountAsync(It.IsAny<UserAccount>()))
                      .Callback<UserAccount>(ua => captured = ua)
                      .Returns(Task.CompletedTask);
 
@@ -258,7 +258,7 @@ namespace Test.ServicesTests
                 LastName = captured?.LastName,
                 PasswordIsHashed = !string.IsNullOrWhiteSpace(captured?.PasswordHash),
                 PasswordNotRaw = captured?.PasswordHash != dto.Password,
-                RepoCalls = mockRepo.Invocations.Count(i => 
+                RepoCalls = mockRepository.Invocations.Count(i => 
                 i.Method.Name == nameof(IAccountRepository.CreateAccountAsync))
             };
 
@@ -270,7 +270,7 @@ namespace Test.ServicesTests
         {
             NewAccountDTO dto = new NewAccountDTO { Email = "code@fail.com", Password = "P@ssw0rd!" };
 
-            mockRepo.Setup(r => r.CreateAccountAsync(It.IsAny<UserAccount>()))
+            mockRepository.Setup(r => r.CreateAccountAsync(It.IsAny<UserAccount>()))
                      .Returns(Task.CompletedTask);
 
             mockCodeService.Setup(c => c.GenerateAndStoreCode(dto.Email, CodeType.EmailVerification))
@@ -292,7 +292,7 @@ namespace Test.ServicesTests
             var actual = new
             {
                 ErrorCode = ex.Detail.ErrorCode,
-                RepoCalls = mockRepo.Invocations.Count(i => 
+                RepoCalls = mockRepository.Invocations.Count(i => 
                 i.Method.Name == nameof(IAccountRepository.CreateAccountAsync)),
                 CodeCalls = mockCodeService.Invocations.Count(i => 
                 i.Method.Name == nameof(IVerificationCodeService.GenerateAndStoreCode)),
@@ -307,7 +307,7 @@ namespace Test.ServicesTests
         public async Task CreateAccount_ShouldThrow_WhenNotificationServiceFails()
         {
             NewAccountDTO dto = new NewAccountDTO { Email = "notify@fail.com", Password = "P@ssw0rd!" };
-            mockRepo.Setup(r => r.CreateAccountAsync(It.IsAny<UserAccount>()))
+            mockRepository.Setup(r => r.CreateAccountAsync(It.IsAny<UserAccount>()))
                      .Returns(Task.CompletedTask);
             mockCodeService.Setup(c => c.GenerateAndStoreCode(dto.Email, CodeType.EmailVerification))
                             .Returns("123456");
@@ -331,7 +331,7 @@ namespace Test.ServicesTests
             var actual = new
             {
                 ErrorCode = exception.Detail.ErrorCode,
-                RepoCalls = mockRepo.Invocations.Count(i => 
+                RepoCalls = mockRepository.Invocations.Count(i => 
                 i.Method.Name == nameof(IAccountRepository.CreateAccountAsync)),
                 CodeCalls = mockCodeService.Invocations.Count(i => 
                 i.Method.Name == nameof(IVerificationCodeService.GenerateAndStoreCode)),
@@ -347,7 +347,7 @@ namespace Test.ServicesTests
         {
             string nickname = "ExistingUser";
 
-            mockRepo.Setup(repo => repo.IsNicknameInUse(nickname))
+            mockRepository.Setup(repo => repo.IsNicknameInUse(nickname))
                     .ReturnsAsync(true);
 
             bool result = await accountManager.IsNicknameInUse(nickname);
@@ -361,7 +361,8 @@ namespace Test.ServicesTests
             var actual = new
             {
                 Result = result,
-                RepoCalls = mockRepo.Invocations.Count(i => i.Method.Name == nameof(IAccountRepository.IsNicknameInUse))
+                RepoCalls = mockRepository.Invocations.Count(
+                    i => i.Method.Name == nameof(IAccountRepository.IsNicknameInUse))
             };
 
             Assert.Equal(expected, actual);
@@ -383,7 +384,8 @@ namespace Test.ServicesTests
             var actual = new
             {
                 Result = result,
-                RepoCalls = mockRepo.Invocations.Count(i => i.Method.Name == nameof(IAccountRepository.IsNicknameInUse))
+                RepoCalls = mockRepository.Invocations.Count(
+                    i => i.Method.Name == nameof(IAccountRepository.IsNicknameInUse))
             };
 
             Assert.Equal(expected, actual);
@@ -394,7 +396,7 @@ namespace Test.ServicesTests
         {
             string nickname = "ErrorUser";
 
-            mockRepo.Setup(repo => repo.IsNicknameInUse(nickname))
+            mockRepository.Setup(repo => repo.IsNicknameInUse(nickname))
                     .ThrowsAsync(new EntityException("Connection failed"));
 
             FaultException<ServiceErrorDetailDTO> exception = await 
@@ -411,7 +413,7 @@ namespace Test.ServicesTests
             var actual = new
             {
                 ErrorCode = exception.Detail.ErrorCode,
-                RepoCalls = mockRepo.Invocations.Count(i => 
+                RepoCalls = mockRepository.Invocations.Count(i => 
                 i.Method.Name == nameof(IAccountRepository.IsNicknameInUse))
             };
 

@@ -11,13 +11,13 @@ namespace Test.ServicesTests
 {
     public class ProfileManagerTest
     {
-        private readonly Mock<IAccountRepository> mockRepo;
+        private readonly Mock<IAccountRepository> mockRepository;
         private readonly ProfileManager profileManager;
 
         public ProfileManagerTest()
         {
-            mockRepo = new Mock<IAccountRepository>();
-            profileManager = new ProfileManager(mockRepo.Object);
+            mockRepository = new Mock<IAccountRepository>();
+            profileManager = new ProfileManager(mockRepository.Object);
         }
 
         [Fact]
@@ -32,7 +32,7 @@ namespace Test.ServicesTests
                 SocialAccounts = new Dictionary<string, string> { { "X", "updatedX" } }
             };
 
-            mockRepo.Setup(repo => repo.UpdateUserProfileAsync(
+            mockRepository.Setup(repo => repo.UpdateUserProfileAsync(
                 It.Is<int>(id => id == inputDto.PlayerId),
                 It.IsAny<UserAccount>(),
                 It.IsAny<List<SocialAccount>>()
@@ -42,7 +42,7 @@ namespace Test.ServicesTests
 
             Assert.NotNull(resultDto);
             Assert.Same(inputDto, resultDto);
-            mockRepo.Verify(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(),
+            mockRepository.Verify(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(),
                 It.IsAny<List<SocialAccount>>()), Times.Once);
         }
 
@@ -51,14 +51,14 @@ namespace Test.ServicesTests
         {
             var inputDto = new UserDTO { PlayerId = 99, FirstName = "FName", LastName = "LName" };
 
-            mockRepo.Setup(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(),
+            mockRepository.Setup(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(),
                 It.IsAny<List<SocialAccount>>()))
                     .ReturnsAsync(false);
 
             var resultDto = await profileManager.UpdateProfileAsync(inputDto);
 
             Assert.Null(resultDto);
-            mockRepo.Verify(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(), 
+            mockRepository.Verify(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(), 
                 It.IsAny<List<SocialAccount>>()), Times.Once);
         }
 
@@ -68,7 +68,7 @@ namespace Test.ServicesTests
             var inputDto = new UserDTO { PlayerId = 1, FirstName = "FName", LastName = "LName" };
             var dbUpdateEx = new DbUpdateException("Simulated SaveChanges error", new Exception());
 
-            mockRepo.Setup(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(), 
+            mockRepository.Setup(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(), 
                 It.IsAny<List<SocialAccount>>()))
                     .ThrowsAsync(dbUpdateEx);
 
@@ -78,7 +78,7 @@ namespace Test.ServicesTests
 
             Assert.Equal(ServiceErrorCode.DatabaseError, faultEx.Detail.Code);
             Assert.Equal("DATABASE_ERROR", faultEx.Detail.ErrorCode);
-            mockRepo.Verify(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(),
+            mockRepository.Verify(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(),
                 It.IsAny<List<SocialAccount>>()), Times.Once);
         }
 
@@ -88,7 +88,7 @@ namespace Test.ServicesTests
             var inputDto = new UserDTO { PlayerId = 1, FirstName = "FName", LastName = "LName" };
             var dbEx = new DbUpdateException("Simulated connection error", new Exception());
 
-            mockRepo.Setup(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(),
+            mockRepository.Setup(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(),
                 It.IsAny<List<SocialAccount>>()))
                     .ThrowsAsync(dbEx);
 
@@ -98,7 +98,7 @@ namespace Test.ServicesTests
 
             Assert.Equal(ServiceErrorCode.DatabaseError, faultEx.Detail.Code);
             Assert.Equal("DATABASE_ERROR", faultEx.Detail.ErrorCode);
-            mockRepo.Verify(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(),
+            mockRepository.Verify(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(),
                 It.IsAny<List<SocialAccount>>()), Times.Once);
         }
 
@@ -108,7 +108,7 @@ namespace Test.ServicesTests
             var inputDto = new UserDTO { PlayerId = 1, FirstName = "FName", LastName = "LName" };
             var generalEx = new Exception("Simulated unexpected error");
 
-            mockRepo.Setup(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(), 
+            mockRepository.Setup(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(), 
                 It.IsAny<List<SocialAccount>>())).ThrowsAsync(generalEx);
 
             var faultEx = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
@@ -117,7 +117,7 @@ namespace Test.ServicesTests
 
             Assert.Equal(ServiceErrorCode.UnexpectedError, faultEx.Detail.Code);
             Assert.Equal("UNEXPECTED_ERROR", faultEx.Detail.ErrorCode);
-            mockRepo.Verify(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(),
+            mockRepository.Verify(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(),
                 It.IsAny<List<SocialAccount>>()), Times.Once);
         }
 
@@ -128,7 +128,7 @@ namespace Test.ServicesTests
             var result = await profileManager.UpdateProfileAsync(inputDto);
             Assert.Null(result);
 
-            mockRepo.Verify(repo => repo.UpdateUserProfileAsync(It.IsAny<int>(), It.IsAny<UserAccount>(),
+            mockRepository.Verify(repo => repo.UpdateUserProfileAsync(It.IsAny<int>(), It.IsAny<UserAccount>(),
                 It.IsAny<List<SocialAccount>>()), Times.Never);
         }
 
@@ -142,7 +142,7 @@ namespace Test.ServicesTests
             var resultDto = await profileManager.UpdateProfileAsync(inputDto);
 
             Assert.Null(resultDto);
-            mockRepo.Verify(repo => repo.UpdateUserProfileAsync(It.IsAny<int>(), It.IsAny<UserAccount>(), 
+            mockRepository.Verify(repo => repo.UpdateUserProfileAsync(It.IsAny<int>(), It.IsAny<UserAccount>(), 
                 It.IsAny<List<SocialAccount>>()), Times.Never);
         }
 
@@ -164,10 +164,10 @@ namespace Test.ServicesTests
             };
             UserAccount? capturedAccount = null;
             List<SocialAccount>? capturedSocials = null;
-            mockRepo.Setup(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(),
+            mockRepository.Setup(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(),
                 It.IsAny<List<SocialAccount>>()))
-                .Callback<int, UserAccount, List<SocialAccount>>((id, ua, sa) => { capturedAccount = ua; capturedSocials = sa; })
-                .ReturnsAsync(true);
+                .Callback<int, UserAccount, List<SocialAccount>>(
+                (id, ua, sa) => { capturedAccount = ua; capturedSocials = sa; }).ReturnsAsync(true);
 
             await profileManager.UpdateProfileAsync(inputDto);
 

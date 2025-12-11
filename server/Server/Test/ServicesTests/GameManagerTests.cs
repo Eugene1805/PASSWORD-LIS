@@ -56,18 +56,21 @@ namespace Test.ServicesTests
 
         private (GameManager sut, ConcurrentQueue<Mock<IGameManagerCallback>> callbacks) CreateSut()
         {
-            var cbQueue = new ConcurrentQueue<Mock<IGameManagerCallback>>();
+            var callbackQueue = new ConcurrentQueue<Mock<IGameManagerCallback>>();
             mockOperationContext
                 .Setup(o => o.GetCallbackChannel<IGameManagerCallback>())
                 .Returns(() =>
                 {
-                    if (cbQueue.TryDequeue(out var cb)) return cb.Object;
+                    if (callbackQueue.TryDequeue(out var cb))
+                    {
+                        return cb.Object;
+                    }
                     return new Mock<IGameManagerCallback>().Object;
                 });
 
             var sut = new GameManager(mockOperationContext.Object, mockWordRepository.Object,
                 mockMatchRepository.Object, mockPlayerRepository.Object);
-            return (sut, cbQueue);
+            return (sut, callbackQueue);
         }
 
         [Fact]
@@ -77,10 +80,10 @@ namespace Test.ServicesTests
             var players = MakePlayers();
 
             var ok = sut?.CreateMatch("ABCDE", players);
-            var dup = sut?.CreateMatch("ABCDE", players);
+            var duplicate = sut?.CreateMatch("ABCDE", players);
 
             Assert.True(ok);
-            Assert.False(dup);
+            Assert.False(duplicate);
         }
 
         [Fact]
