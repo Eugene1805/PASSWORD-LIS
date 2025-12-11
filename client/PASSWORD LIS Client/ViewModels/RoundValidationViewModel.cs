@@ -165,16 +165,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 return;
             }
             CanSubmit = false;
-            List<ValidationVoteDTO> votes = new List<ValidationVoteDTO>();
-            foreach (var turn in TurnsToValidate)
-            {
-                votes.Add(new ValidationVoteDTO
-                {
-                    TurnId = turn.TurnId,
-                    PenalizeMultiword = turn.PenalizeMultiword,
-                    PenalizeSynonym = turn.PenalizeSynonym
-                });
-            }
+            List<ValidationVoteDTO> votes = BuildValidationVotes();
 
             await ExecuteAsync(async () =>
             {
@@ -186,35 +177,71 @@ namespace PASSWORD_LIS_Client.ViewModels
                 }
                 catch (FaultException fe)
                 {
-                    log.Error($"FaultException in SubmitVotesAsync: {fe.Message}", fe);
-                    HandleConnectionError(fe, Properties.Langs.Lang.errorSendingVotesText);
-                    CanSubmit = true;
+                    HandleFaultException(fe);
                 }
                 catch (CommunicationException ce)
                 {
-                    if (isMatchEnding || validationReceived)
-                    {
-                        log.Info("CommunicationException was ignored because validation was already received or match is ending.");
-                        return;
-                    }
-
-                    log.Error($"CommunicationException in SubmitVotesAsync: {ce.Message}", ce);
-                    HandleConnectionError(ce, Properties.Langs.Lang.communicationErrorSendingVotesText);
-                    CanSubmit = true;
+                    HandleCommunicationException(ce);
                 }
                 catch (Exception ex)
                 {
-                    if (isMatchEnding || validationReceived)
-                    {
-                        log.Info("Generic Exception was ignored because validation was already received.");
-                        return;
-                    }
-                    log.Error($"Unexpected error in SubmitVotesAsync: {ex.Message}", ex);
-                    HandleConnectionError(ex, Properties.Langs.Lang.errorSendingVotesText);
-                    CanSubmit = true;
+                    HandleGenericException(ex);
                 }
             });
         }
+
+        private List<ValidationVoteDTO> BuildValidationVotes()
+        {
+            List<ValidationVoteDTO> votes = new List<ValidationVoteDTO>();
+            foreach (var turn in TurnsToValidate)
+            {
+                votes.Add(new ValidationVoteDTO
+                {
+                    TurnId = turn.TurnId,
+                    PenalizeMultiword = turn.PenalizeMultiword,
+                    PenalizeSynonym = turn.PenalizeSynonym
+                });
+            }
+            return votes;
+        }
+
+        private void HandleFaultException(FaultException fe)
+        {
+            log.Error($"FaultException in SubmitVotesAsync: {fe.Message}", fe);
+            HandleConnectionError(fe, Properties.Langs.Lang.errorSendingVotesText);
+            CanSubmit = true;
+        }
+
+        private void HandleCommunicationException(CommunicationException ce)
+        {
+            if (ShouldIgnoreException())
+            {
+                log.Info("CommunicationException was ignored because validation was already received or match is ending.");
+                return;
+            }
+
+            log.Error($"CommunicationException in SubmitVotesAsync: {ce.Message}", ce);
+            HandleConnectionError(ce, Properties.Langs.Lang.communicationErrorSendingVotesText);
+            CanSubmit = true;
+        }
+
+        private void HandleGenericException(Exception ex)
+        {
+            if (ShouldIgnoreException())
+            {
+                log.Info("Generic Exception was ignored because validation was already received.");
+                return;
+            }
+            log.Error($"Unexpected error in SubmitVotesAsync: {ex.Message}", ex);
+            HandleConnectionError(ex, Properties.Langs.Lang.errorSendingVotesText);
+            CanSubmit = true;
+        }
+
+        private bool ShouldIgnoreException()
+        {
+            return isMatchEnding || validationReceived;
+        }
+
         private void LogCurrentState()
         {
             try

@@ -70,6 +70,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The account management service is unavailable. Please try again later..
+        /// </summary>
+        public static string accountManagerServiceDownText {
+            get {
+                return ResourceManager.GetString("accountManagerServiceDownText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add Friend.
         /// </summary>
         public static string addFriendTitleText {
@@ -754,11 +763,29 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The friends service is unavailable. Please try again later..
+        /// </summary>
+        public static string friendsManagerServiceDownText {
+            get {
+                return ResourceManager.GetString("friendsManagerServiceDownText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not start game configuration..
         /// </summary>
         public static string gameCreationErrorText {
             get {
                 return ResourceManager.GetString("gameCreationErrorText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The game service is unavailable. Please try again later..
+        /// </summary>
+        public static string gameManagerServiceDownText {
+            get {
+                return ResourceManager.GetString("gameManagerServiceDownText", resourceCulture);
             }
         }
         
@@ -1033,11 +1060,29 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The room service is not available. Please try again later..
+        /// </summary>
+        public static string lobbyManagerServiceDownText {
+            get {
+                return ResourceManager.GetString("lobbyManagerServiceDownText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not connect to the server. Please ensure the service is running..
         /// </summary>
         public static string loginConnectionErrorText {
             get {
                 return ResourceManager.GetString("loginConnectionErrorText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The login service is unavailable. Please try again later..
+        /// </summary>
+        public static string loginManagerServiceDownText {
+            get {
+                return ResourceManager.GetString("loginManagerServiceDownText", resourceCulture);
             }
         }
         
@@ -1519,6 +1564,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The reporting service is unavailable. Please try again later..
+        /// </summary>
+        public static string reportManagerServiceDownText {
+            get {
+                return ResourceManager.GetString("reportManagerServiceDownText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Report submitted.
         /// </summary>
         public static string reportSummitedText {
@@ -1977,6 +2031,15 @@ namespace PASSWORD_LIS_Client.Properties.Langs {
         public static string timeLimitTitleText {
             get {
                 return ResourceManager.GetString("timeLimitTitleText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The statistics service is unavailable. Please try again later..
+        /// </summary>
+        public static string topPlayersManagerServiceDownText {
+            get {
+                return ResourceManager.GetString("topPlayersManagerServiceDownText", resourceCulture);
             }
         }
         

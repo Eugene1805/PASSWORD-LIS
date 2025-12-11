@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.ServiceModel;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -203,10 +204,78 @@ namespace PASSWORD_LIS_Client.ViewModels
         private void HandleEndpointNotFoundException(EndpointNotFoundException ex)
         {
             log.ErrorFormat("Endpoint not found exception caught. Message: {0}", ex.Message);
+            
+            var serviceName = ExtractServiceNameFromEndpointException(ex.Message);
+            var errorMessage = GetServiceDownMessage(serviceName);
+            
             windowService?.ShowPopUp(
                 Properties.Langs.Lang.connectionErrorTitleText,
-                Properties.Langs.Lang.serverConnectionInternetErrorText,
+                errorMessage,
                 PopUpIcon.Error);
+        }
+
+        private static string ExtractServiceNameFromEndpointException(string exceptionMessage)
+        {
+            if (string.IsNullOrEmpty(exceptionMessage))
+            {
+                return null;
+            }
+
+            try
+            {
+                // Pattern to match service name from URL like: net.tcp://localhost:8105/FriendsManager
+                var regex = new Regex(@"net\.tcp://[^/]+/(\w+)", RegexOptions.IgnoreCase);
+                var match = regex.Match(exceptionMessage);
+                
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    return match.Groups[1].Value;
+                }
+            }
+            catch (Exception)
+            {
+                // If regex fails, return null to use default message
+            }
+
+            return null;
+        }
+
+        private static string GetServiceDownMessage(string serviceName)
+        {
+            if (string.IsNullOrEmpty(serviceName))
+            {
+                return Properties.Langs.Lang.serverConnectionInternetErrorText;
+            }
+
+            switch (serviceName)
+            {
+                case "AccountManager":
+                case "PasswordReset":
+                case "ProfileManager":
+                case "VerificationCodeManager":
+                    return Properties.Langs.Lang.accountManagerServiceDownText;
+                
+                case "FriendsManager":
+                    return Properties.Langs.Lang.friendsManagerServiceDownText;
+                
+                case "GameManager":
+                    return Properties.Langs.Lang.gameManagerServiceDownText;
+                
+                case "WaitingRoomManager":
+                    return Properties.Langs.Lang.lobbyManagerServiceDownText;
+                
+                case "LoginManager":
+                    return Properties.Langs.Lang.loginManagerServiceDownText;
+                
+                case "ReportManager":
+                    return Properties.Langs.Lang.reportManagerServiceDownText;
+                
+                case "TopPlayersManager":
+                    return Properties.Langs.Lang.topPlayersManagerServiceDownText;
+                
+                default:
+                    return Properties.Langs.Lang.serverConnectionInternetErrorText;
+            }
         }
 
         private void HandleCommunicationException(CommunicationException ex)

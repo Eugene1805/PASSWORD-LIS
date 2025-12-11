@@ -65,12 +65,12 @@ namespace Services.Services.Internal
             AdvanceWordIndex(session, team);
         }
 
-        private static int GetCurrentWordIndex(MatchSession session, MatchTeam team)
+        private int GetCurrentWordIndex(MatchSession session, MatchTeam team)
         {
             return (team == MatchTeam.RedTeam) ? session.RedTeamWordIndex : session.BlueTeamWordIndex;
         }
 
-        private static void AddToTeamHistory(MatchSession session, MatchTeam team, TurnHistoryDTO historyItem)
+        private void AddToTeamHistory(MatchSession session, MatchTeam team, TurnHistoryDTO historyItem)
         {
             if (team == MatchTeam.RedTeam)
             {

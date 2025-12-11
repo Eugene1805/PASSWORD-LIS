@@ -97,14 +97,14 @@ namespace Services.Services.Internal
             }
         }
 
-        private static TeamPlayers GetTeamPlayers(MatchSession session, MatchTeam team)
+        private TeamPlayers GetTeamPlayers(MatchSession session, MatchTeam team)
         {
             var clueGuy = session.GetPlayerByRole(team, PlayerRole.ClueGuy);
             var guesser = session.GetPlayerByRole(team, PlayerRole.Guesser);
             return new TeamPlayers(clueGuy, guesser);
         }
 
-        private static void SendFullWordToClueGuy(ActivePlayer clueGuy, PasswordWord word)
+        private void SendFullWordToClueGuy(ActivePlayer clueGuy, PasswordWord word)
         {
             if (clueGuy?.Callback != null)
             {
@@ -112,7 +112,7 @@ namespace Services.Services.Internal
             }
         }
 
-        private static void SendMaskedWordToGuesser(ActivePlayer guesser, PasswordWord word)
+        private void SendMaskedWordToGuesser(ActivePlayer guesser, PasswordWord word)
         {
             if (guesser?.Callback != null)
             {
@@ -120,7 +120,7 @@ namespace Services.Services.Internal
             }
         }
 
-        private static async Task HandleDistributionDisconnections(MatchSession session,
+        private async Task HandleDistributionDisconnections(MatchSession session,
             TeamPlayers teamPlayers, Func<MatchSession, int, Task> onDisconnection)
         {
             if (teamPlayers.ClueGuy?.Player != null)
@@ -133,7 +133,7 @@ namespace Services.Services.Internal
             }
         }
 
-        private static async Task HandleNextWordDisconnections(MatchSession session,
+        private async Task HandleNextWordDisconnections(MatchSession session,
             TeamPlayers teamPlayers, Func<MatchSession, int, Task> onDisconnection)
         {
             if (teamPlayers.ClueGuy?.Callback != null)

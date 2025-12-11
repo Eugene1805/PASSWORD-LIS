@@ -871,4 +871,25 @@ Si ambos equipos logran un empate, se hará una muerte súbita, hasta que un equ
   <data name="playerDisconnectedText" xml:space="preserve">
     <value>Un jugador se ha desconectado de la partida</value>
   </data>
+  <data name="accountManagerServiceDownText" xml:space="preserve">
+    <value>El servicio de gestión de cuentas no está disponible. Por favor, intente más tarde.</value>
+  </data>
+  <data name="friendsManagerServiceDownText" xml:space="preserve">
+    <value>El servicio de amigos no está disponible. Por favor, intente más tarde.</value>
+  </data>
+  <data name="gameManagerServiceDownText" xml:space="preserve">
+    <value>El servicio de partidas no está disponible. Por favor, intente más tarde.</value>
+  </data>
+  <data name="lobbyManagerServiceDownText" xml:space="preserve">
+    <value>El servicio de salas no está disponible. Por favor, intente más tarde.</value>
+  </data>
+  <data name="loginManagerServiceDownText" xml:space="preserve">
+    <value>El servicio de inicio de sesión no está disponible. Por favor, intente más tarde.</value>
+  </data>
+  <data name="reportManagerServiceDownText" xml:space="preserve">
+    <value>El servicio de reportes no está disponible. Por favor, intente más tarde.</value>
+  </data>
+  <data name="topPlayersManagerServiceDownText" xml:space="preserve">
+    <value>El servicio de estadísticas no está disponible. Por favor, intente más tarde.</value>
+  </data>
 </root>

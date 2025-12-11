@@ -867,4 +867,25 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="playerDisconnectedText" xml:space="preserve">
     <value>A player has disconnected from the match</value>
   </data>
+  <data name="accountManagerServiceDownText" xml:space="preserve">
+    <value>The account management service is unavailable. Please try again later.</value>
+  </data>
+  <data name="friendsManagerServiceDownText" xml:space="preserve">
+    <value>The friends service is unavailable. Please try again later.</value>
+  </data>
+  <data name="gameManagerServiceDownText" xml:space="preserve">
+    <value>The game service is unavailable. Please try again later.</value>
+  </data>
+  <data name="lobbyManagerServiceDownText" xml:space="preserve">
+    <value>The room service is not available. Please try again later.</value>
+  </data>
+  <data name="loginManagerServiceDownText" xml:space="preserve">
+    <value>The login service is unavailable. Please try again later.</value>
+  </data>
+  <data name="reportManagerServiceDownText" xml:space="preserve">
+    <value>The reporting service is unavailable. Please try again later.</value>
+  </data>
+  <data name="topPlayersManagerServiceDownText" xml:space="preserve">
+    <value>The statistics service is unavailable. Please try again later.</value>
+  </data>
 </root>
