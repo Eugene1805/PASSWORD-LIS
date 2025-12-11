@@ -867,4 +867,13 @@ If both teams tie, a sudden death will occur until one team scores fewer points 
   <data name="playerDisconnectedText" xml:space="preserve">
     <value>A player has disconnected from the match</value>
   </data>
+  <data name="emptyEmailText" xml:space="preserve">
+    <value>The email cannot be empty</value>
+  </data>
+  <data name="emptyPasswordText" xml:space="preserve">
+    <value>The password cannot be empty</value>
+  </data>
+  <data name="passwordTooLongText" xml:space="preserve">
+    <value>The password cannot exceed 15 characteres</value>
+  </data>
 </root>
