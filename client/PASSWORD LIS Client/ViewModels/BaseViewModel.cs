@@ -5,6 +5,7 @@ using PASSWORD_LIS_Client.Views;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.ServiceModel;
@@ -216,6 +217,7 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private static string ExtractServiceNameFromEndpointException(string exceptionMessage)
         {
+            const int MaximumTimeForRegexInSeconds = 100;
             if (string.IsNullOrEmpty(exceptionMessage))
             {
                 return null;
@@ -224,7 +226,8 @@ namespace PASSWORD_LIS_Client.ViewModels
             try
             {
                 // Pattern to match service name from URL like: net.tcp://localhost:8105/FriendsManager
-                var regex = new Regex(@"net\.tcp://[^/]+/(\w+)", RegexOptions.IgnoreCase);
+                var regex = new Regex(@"net\.tcp://[^/]+/(\w+)", RegexOptions.IgnoreCase,
+                    TimeSpan.FromMilliseconds(MaximumTimeForRegexInSeconds));
                 var match = regex.Match(exceptionMessage);
                 
                 if (match.Success && match.Groups.Count > 1)

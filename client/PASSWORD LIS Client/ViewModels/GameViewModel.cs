@@ -19,6 +19,15 @@ namespace PASSWORD_LIS_Client.ViewModels
 {
     public class GameViewModel : BaseViewModel
     {
+        private enum CancellationReason
+        {
+            Unknown,
+            PlayerDisconnected,
+            HostLeft,
+            ServerError,
+            ConnectionLost
+        }
+
         private readonly IGameManagerService gameManagerService;
         private readonly string gameCode;
         private readonly PlayerDTO currentPlayer;
@@ -26,6 +35,21 @@ namespace PASSWORD_LIS_Client.ViewModels
         private readonly DispatcherTimer serverGuardian;
         private readonly Stopwatch serverPulseWatch = new Stopwatch();
         private readonly string currentLanguage;
+
+        private static readonly Dictionary<string, CancellationReason> CancellationReasonPatterns = new Dictionary<string, CancellationReason>
+        {
+            { "PLAYER_DISCONNECTED", CancellationReason.PlayerDisconnected },
+            { "PLAYER_LEFT", CancellationReason.PlayerDisconnected },
+            { "HAS DISCONNECTED", CancellationReason.PlayerDisconnected },
+            { "HOST_LEFT", CancellationReason.HostLeft },
+            { "HOST_DISCONNECTED", CancellationReason.HostLeft },
+            { "SERVER_ERROR", CancellationReason.ServerError },
+            { "INTERNAL_ERROR", CancellationReason.ServerError },
+            { "INTERNAL SERVER ERROR", CancellationReason.ServerError },
+            { "NOT ENOUGH WORDS", CancellationReason.ServerError },
+            { "TIMEOUT", CancellationReason.ConnectionLost },
+            { "CONNECTION_LOST", CancellationReason.ConnectionLost }
+        };
 
         private int currentWordIndex = 1;
         private PasswordWordDTO currentPasswordDto;
@@ -194,8 +218,8 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ICommand RequestHintCommand { get; }
 
 
-        public GameViewModel(IGameManagerService gameManagerService, IWindowService windowService, string gameCode, WaitingRoomManagerServiceReference.PlayerDTO waitingRoomPlayer) 
-            : base(windowService)
+        public GameViewModel(IGameManagerService gameManagerService, IWindowService windowService, 
+            string gameCode, WaitingRoomManagerServiceReference.PlayerDTO waitingRoomPlayer) : base(windowService)
         {
             this.gameManagerService = gameManagerService;
             this.gameCode = gameCode;
@@ -208,8 +232,10 @@ namespace PASSWORD_LIS_Client.ViewModels
 
             SubscribeToGameEvents();
 
-            SubmitClueCommand = new RelayCommand(async (_) => await SendClueAsync(), (_) => CanSendClue && !string.IsNullOrWhiteSpace(CurrentClueText));
-            SubmitGuessCommand = new RelayCommand(async (_) => await SendGuessAsync(), (_) => CanSendGuess && !string.IsNullOrWhiteSpace(CurrentGuessText));
+            SubmitClueCommand = new RelayCommand(async (_) => await SendClueAsync(), 
+                (_) => CanSendClue && !string.IsNullOrWhiteSpace(CurrentClueText));
+            SubmitGuessCommand = new RelayCommand(async (_) => await SendGuessAsync(), 
+                (_) => CanSendGuess && !string.IsNullOrWhiteSpace(CurrentGuessText));
             PassTurnCommand = new RelayCommand(async (_) => await PassTurnAsync(), (_) => CanPassTurn);
             RequestHintCommand = new RelayCommand((_) => RequestHint());
         }
@@ -342,32 +368,33 @@ namespace PASSWORD_LIS_Client.ViewModels
                 return Properties.Langs.Lang.unexpectedErrorText;
             }
 
-            string reasonUpper = serverReason.ToUpperInvariant();
+            var reasonKey = FindMatchingReasonKey(serverReason.ToUpperInvariant());
+            return GetMessageForReasonKey(reasonKey, serverReason);
+        }
 
-            if (reasonUpper.Contains("PLAYER_DISCONNECTED") || reasonUpper.Contains("PLAYER_LEFT") ||
-                reasonUpper.Contains("HAS DISCONNECTED"))
+        private static CancellationReason FindMatchingReasonKey(string reasonUpper)
+        {
+            return CancellationReasonPatterns
+                .FirstOrDefault(pattern => reasonUpper.Contains(pattern.Key))
+                .Value;
+        }
+
+        private string GetMessageForReasonKey(CancellationReason reasonKey, string originalReason)
+        {
+            switch (reasonKey)
             {
-                return Properties.Langs.Lang.playerDisconnectedText;
+                case CancellationReason.PlayerDisconnected:
+                    return Properties.Langs.Lang.playerDisconnectedText;
+                case CancellationReason.HostLeft:
+                    return Properties.Langs.Lang.hostLeftText;
+                case CancellationReason.ServerError:
+                    return Properties.Langs.Lang.unexpectedServerErrorText;
+                case CancellationReason.ConnectionLost:
+                    return Properties.Langs.Lang.connectionUnexpected;
+                default:
+                    log.WarnFormat("Unknown cancellation reason received: {0}", originalReason);
+                    return Properties.Langs.Lang.unexpectedErrorText;
             }
-
-            if (reasonUpper.Contains("HOST_LEFT") || reasonUpper.Contains("HOST_DISCONNECTED"))
-            {
-                return Properties.Langs.Lang.hostLeftText;
-            }
-
-            if (reasonUpper.Contains("SERVER_ERROR") || reasonUpper.Contains("INTERNAL_ERROR") ||
-                reasonUpper.Contains("INTERNAL SERVER ERROR") || reasonUpper.Contains("NOT ENOUGH WORDS"))
-            {
-                return Properties.Langs.Lang.unexpectedServerErrorText;
-            }
-
-            if (reasonUpper.Contains("TIMEOUT") || reasonUpper.Contains("CONNECTION_LOST"))
-            {
-                return Properties.Langs.Lang.connectionUnexpected;
-            }
-
-            log.WarnFormat("Unknown cancellation reason received: {0}", serverReason);
-            return Properties.Langs.Lang.unexpectedErrorText;
         }
 
         private void OnNewPasswordReceived(PasswordWordDTO password)
@@ -398,7 +425,8 @@ namespace PASSWORD_LIS_Client.ViewModels
 
                 if (CurrentPlayerRole == PlayerRole.ClueGuy)
                 {
-                    CurrentPasswordWord = currentLanguage.StartsWith(SpanishLanguagePrefix) ? password.SpanishWord : password.EnglishWord;
+                    CurrentPasswordWord = currentLanguage.StartsWith(SpanishLanguagePrefix) 
+                    ? password.SpanishWord : password.EnglishWord;
                 }
                 else
                 {
