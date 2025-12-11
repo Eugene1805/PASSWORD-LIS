@@ -20,16 +20,15 @@ namespace Services.Services
         private readonly IAccountRepository accountRepository;
         private readonly IOperationContextWrapper operationContext;
         private static readonly ILog log = LogManager.GetLogger(typeof(FriendsManager));
+        private const int InvalidUserId = 0;
         public FriendsManager(IFriendshipRepository friendshipRepository, IAccountRepository accountRepository, 
-            IOperationContextWrapper operationContext) :base(log)
+            IOperationContextWrapper operationContext) : base(log)
         {
             connectedClients = new ConcurrentDictionary<int, IFriendsCallback>();
             this.friendshipRepository = friendshipRepository;
             this.accountRepository = accountRepository;
             this.operationContext = operationContext;
         }
-
-
         public async Task<List<FriendDTO>> GetFriendsAsync(int userAccountId)
         {
             return await ExecuteAsync(async () =>
@@ -75,10 +74,12 @@ namespace Services.Services
             connectedClients[userAccountId] = callbackChannel;
 
             var communicationObject = (ICommunicationObject)callbackChannel;
-            communicationObject.Faulted += (sender, e) => {
+            communicationObject.Faulted += (sender, e) => 
+            {
                 connectedClients.TryRemove(userAccountId, out _);
             };
-            communicationObject.Closed += (sender, e) => {
+            communicationObject.Closed += (sender, e) => 
+            {
                 connectedClients.TryRemove(userAccountId, out _);
             };
 
@@ -91,7 +92,7 @@ namespace Services.Services
             return await ExecuteAsync(async () =>
             {
                 int requesterUserAccountId = GetUserAccountIdFromCallback();
-                if (requesterUserAccountId == 0)
+                if (requesterUserAccountId == InvalidUserId)
                 {
                     log.Warn("SendFriendRequestAsync failed: Could not obtain UserAccountId from callback.");
                     return FriendRequestResult.Failed;
@@ -107,7 +108,7 @@ namespace Services.Services
             return await ExecuteAsync(async () =>
             {
                 int userAccountId = GetUserAccountIdFromCallback();
-                if (userAccountId == 0)
+                if (userAccountId == InvalidUserId)
                 {
                     log.Warn("GetPendingRequestsAsync failed: Could not obtain UserAccountId from callback.");
                     return new List<FriendDTO>();
@@ -132,7 +133,7 @@ namespace Services.Services
             await ExecuteAsync(async () =>
             {
                 int addresseeUserAccountId = GetUserAccountIdFromCallback();
-                if (addresseeUserAccountId == 0)
+                if (addresseeUserAccountId == InvalidUserId)
                 {
                     log.Warn("RespondToFriendRequestAsync failed: Could not obtain UserAccountId from callback.");
                     return;

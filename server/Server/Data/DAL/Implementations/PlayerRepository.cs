@@ -9,19 +9,20 @@ namespace Data.DAL.Implementations
     public class PlayerRepository : IPlayerRepository
     {
         private readonly IDbContextFactory contextFactory;
+        private const int InvalidPlayerId = -1;
         public PlayerRepository(IDbContextFactory contextFactory)
         {
             this.contextFactory = contextFactory;
         }
         public async Task<Player> GetPlayerByEmailAsync(string email)
         {
-            using(var context = contextFactory.CreateDbContext())
+            using (var context = contextFactory.CreateDbContext())
             {
                 var userAccount = context.UserAccount.FirstOrDefault(u =>
                 u.Email.Equals(email));
                 if (userAccount == null)
                 {
-                    return new Player { Id = -1 };
+                    return new Player { Id = InvalidPlayerId };
                 }
                 return await context.Player
                            .Include("UserAccount")
@@ -36,7 +37,7 @@ namespace Data.DAL.Implementations
                 var player = await context.Player
                     .Include(p => p.UserAccount)
                     .FirstOrDefaultAsync(p => p.Id == playerId);
-                return player ?? new Player { Id = -1 };
+                return player ?? new Player { Id = InvalidPlayerId };
             }
         }
 

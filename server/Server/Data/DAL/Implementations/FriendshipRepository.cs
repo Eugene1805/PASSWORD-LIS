@@ -12,6 +12,8 @@ namespace Data.DAL.Implementations
     public class FriendshipRepository : IFriendshipRepository
     {
         private readonly IDbContextFactory contextFactory;
+        private const int PendingStatus = 0;
+        private const int AcceptedStatus = 1;
         public FriendshipRepository(IDbContextFactory contextFactory)
         {
             this.contextFactory = contextFactory;
@@ -29,12 +31,12 @@ namespace Data.DAL.Implementations
                 int playerId = player.Id;
 
                 var friendIdsFromRequesters = await context.Friendship
-                    .Where(f => f.AddresseeId == playerId && f.Status == 1)
+                    .Where(f => f.AddresseeId == playerId && f.Status == AcceptedStatus)
                     .Select(f => f.RequesterId)
                     .ToListAsync();
 
                 var friendIdsFromAddressees = await context.Friendship
-                    .Where(f => f.RequesterId == playerId && f.Status == 1)
+                    .Where(f => f.RequesterId == playerId && f.Status == AcceptedStatus)
                     .Select(f => f.AddresseeId)
                     .ToListAsync();
 
@@ -105,7 +107,7 @@ namespace Data.DAL.Implementations
                         {
                             RequesterId = requesterPlayerId,
                             AddresseeId = addresseePlayerId,
-                            Status = 0,
+                            Status = PendingStatus,
                             RequestedAt = DateTime.UtcNow
                         };
 
@@ -135,7 +137,7 @@ namespace Data.DAL.Implementations
 
                 return await context.Friendship
                     .Include(f => f.Player1.UserAccount)
-                    .Where(f => f.AddresseeId == player.Id && f.Status == 0)
+                    .Where(f => f.AddresseeId == player.Id && f.Status == PendingStatus)
                     .ToListAsync();
             }
         }
@@ -149,7 +151,8 @@ namespace Data.DAL.Implementations
                     try
                     {
                         var request = await context.Friendship.FirstOrDefaultAsync(f =>
-                        f.RequesterId == requesterPlayerId && f.AddresseeId == addresseePlayerId && f.Status == 0);
+                            f.RequesterId == requesterPlayerId && f.AddresseeId == addresseePlayerId
+                            && f.Status == PendingStatus);
 
                         if (request == null)
                         {
@@ -157,7 +160,7 @@ namespace Data.DAL.Implementations
                         }
                         if (accept)
                         {
-                            request.Status = 1;
+                            request.Status = AcceptedStatus;
                             request.RespondedAt = DateTime.UtcNow;
                             context.Entry(request).State = EntityState.Modified;
                         }
