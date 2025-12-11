@@ -10,9 +10,9 @@ namespace Data.DAL.Implementations
     public class BanRepository : IBanRepository
     {
         private readonly IDbContextFactory contextFactory;
-        public BanRepository(IDbContextFactory contextFactory)
+        public BanRepository(IDbContextFactory ContextFactory)
         {
-            this.contextFactory = contextFactory;
+            this.contextFactory = ContextFactory;
         }
         public async Task AddBanAsync(Ban newBan)
         {

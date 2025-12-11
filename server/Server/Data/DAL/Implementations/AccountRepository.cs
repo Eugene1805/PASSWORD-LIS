@@ -12,9 +12,9 @@ namespace Data.DAL.Implementations
     public class AccountRepository : IAccountRepository
     {
         private readonly IDbContextFactory contextFactory;
-        public AccountRepository(IDbContextFactory contextFactory)
+        public AccountRepository(IDbContextFactory ContextFactory)
         {
-            this.contextFactory = contextFactory;
+            this.contextFactory = ContextFactory;
         }
         public async Task CreateAccountAsync(UserAccount account)
         {
@@ -26,8 +26,8 @@ namespace Data.DAL.Implementations
             }
 
             context.UserAccount.Add(account);
-                    context.Player.Add(new Player { UserAccount = account });
-                    await context.SaveChangesAsync();
+            context.Player.Add(new Player { UserAccount = account });
+            await context.SaveChangesAsync();
         }
 
         public bool AccountAlreadyExist(string email)
@@ -141,7 +141,7 @@ namespace Data.DAL.Implementations
             }
         }
 
-        public async Task<bool> IsNicknameInUse(string nickname)
+        public async Task<bool> IsNicknameInUseAsync(string nickname)
         {
             using (var context = contextFactory.CreateDbContext())
             {

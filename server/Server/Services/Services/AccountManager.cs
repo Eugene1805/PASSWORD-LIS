@@ -47,7 +47,7 @@ namespace Services.Services
             }, context: "AccountManager: CreateAccountAsync");
         }
 
-        public async Task<bool> IsNicknameInUse(string nickname)
+        public async Task<bool> IsNicknameInUseAsync(string nickname)
         {
             if (nickname is null)
             {
@@ -55,8 +55,8 @@ namespace Services.Services
             }
             return await ExecuteAsync(() =>
             {
-                return repository.IsNicknameInUse(nickname);
-            }, context: "AccountManager: IsNickNameInUse");
+                return repository.IsNicknameInUseAsync(nickname);
+            }, context: "AccountManager: IsNickNameInUseAsync");
         }
 
         private async Task SendEmailVerification(string email)

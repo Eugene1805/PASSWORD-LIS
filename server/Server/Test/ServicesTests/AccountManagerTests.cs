@@ -343,14 +343,14 @@ namespace Test.ServicesTests
         }
 
         [Fact]
-        public async Task IsNicknameInUse_ShouldReturnRepositoryResult_WhenNicknameIsNotNull()
+        public async Task IsNicknameInUseAsync_ShouldReturnRepositoryResult_WhenNicknameIsNotNull()
         {
             string nickname = "ExistingUser";
 
-            mockRepository.Setup(repo => repo.IsNicknameInUse(nickname))
+            mockRepository.Setup(repo => repo.IsNicknameInUseAsync(nickname))
                     .ReturnsAsync(true);
 
-            bool result = await accountManager.IsNicknameInUse(nickname);
+            bool result = await accountManager.IsNicknameInUseAsync(nickname);
 
             var expected = new
             {
@@ -362,18 +362,18 @@ namespace Test.ServicesTests
             {
                 Result = result,
                 RepoCalls = mockRepository.Invocations.Count(
-                    i => i.Method.Name == nameof(IAccountRepository.IsNicknameInUse))
+                    i => i.Method.Name == nameof(IAccountRepository.IsNicknameInUseAsync))
             };
 
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public async Task IsNicknameInUse_ShouldReturnFalse_WhenNicknameIsNull()
+        public async Task IsNicknameInUseAsync_ShouldReturnFalse_WhenNicknameIsNull()
         {
             string? nickname = null;
 
-            bool result = await accountManager.IsNicknameInUse(nickname);
+            bool result = await accountManager.IsNicknameInUseAsync(nickname);
 
             var expected = new
             {
@@ -385,23 +385,23 @@ namespace Test.ServicesTests
             {
                 Result = result,
                 RepoCalls = mockRepository.Invocations.Count(
-                    i => i.Method.Name == nameof(IAccountRepository.IsNicknameInUse))
+                    i => i.Method.Name == nameof(IAccountRepository.IsNicknameInUseAsync))
             };
 
             Assert.Equal(expected, actual);
         }
 
         [Fact]
-        public async Task IsNicknameInUse_ShouldThrowFaultException_WhenDatabaseFails()
+        public async Task IsNicknameInUseAsync_ShouldThrowFaultException_WhenDatabaseFails()
         {
             string nickname = "ErrorUser";
 
-            mockRepository.Setup(repo => repo.IsNicknameInUse(nickname))
+            mockRepository.Setup(repo => repo.IsNicknameInUseAsync(nickname))
                     .ThrowsAsync(new EntityException("Connection failed"));
 
             FaultException<ServiceErrorDetailDTO> exception = await 
                 Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(
-                () => accountManager.IsNicknameInUse(nickname)
+                () => accountManager.IsNicknameInUseAsync(nickname)
             );
 
             var expected = new
@@ -414,7 +414,7 @@ namespace Test.ServicesTests
             {
                 ErrorCode = exception.Detail.ErrorCode,
                 RepoCalls = mockRepository.Invocations.Count(i => 
-                i.Method.Name == nameof(IAccountRepository.IsNicknameInUse))
+                i.Method.Name == nameof(IAccountRepository.IsNicknameInUseAsync))
             };
 
             Assert.Equal(expected, actual);

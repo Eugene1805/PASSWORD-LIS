@@ -107,12 +107,19 @@ namespace Services.Contracts
     [DataContract]
     public enum FriendRequestResult
     {
-        [EnumMember] Success,
-        [EnumMember] UserNotFound,
-        [EnumMember] AlreadyFriends,
-        [EnumMember] RequestAlreadySent,
-        [EnumMember] Failed,
-        [EnumMember] RequestAlreadyReceived,
-        [EnumMember] CannotAddSelf
+        [EnumMember] 
+        Success,
+        [EnumMember] 
+        UserNotFound,
+        [EnumMember] 
+        AlreadyFriends,
+        [EnumMember] 
+        RequestAlreadySent,
+        [EnumMember] 
+        Failed,
+        [EnumMember] 
+        RequestAlreadyReceived,
+        [EnumMember] 
+        CannotAddSelf
     }
 }

@@ -10,23 +10,25 @@ namespace Data.DAL.Implementations
     {
         private readonly IDbContextFactory contextFactory;
         private const int InvalidPlayerId = -1;
-        public PlayerRepository(IDbContextFactory contextFactory)
+        public PlayerRepository(IDbContextFactory ContextFactory)
         {
-            this.contextFactory = contextFactory;
+            this.contextFactory = ContextFactory;
         }
         public async Task<Player> GetPlayerByEmailAsync(string email)
         {
             using (var context = contextFactory.CreateDbContext())
             {
-                var userAccount = context.UserAccount.FirstOrDefault(u =>
-                u.Email.Equals(email));
+                var userAccount = context.UserAccount.FirstOrDefault(u => 
+                    u.Email.Equals(email));
+
                 if (userAccount == null)
                 {
                     return new Player { Id = InvalidPlayerId };
                 }
+
                 return await context.Player
-                           .Include("UserAccount")
-                           .FirstOrDefaultAsync(p => p.UserAccountId == userAccount.Id);
+                    .Include("UserAccount")
+                    .FirstOrDefaultAsync(p => p.UserAccountId == userAccount.Id);
             }
         }
 

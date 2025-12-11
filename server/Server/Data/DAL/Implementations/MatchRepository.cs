@@ -11,9 +11,9 @@ namespace Data.DAL.Implementations
     public class MatchRepository : IMatchRepository
     {
         private readonly IDbContextFactory contextFactory;
-        public MatchRepository(IDbContextFactory contextFactory)
+        public MatchRepository(IDbContextFactory ContextFactory)
         {
-            this.contextFactory = contextFactory;
+            this.contextFactory = ContextFactory;
         }
         public async Task SaveMatchResultAsync(MatchResultData matchResultData)
         {

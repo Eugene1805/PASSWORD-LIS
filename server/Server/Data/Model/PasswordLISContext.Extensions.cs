@@ -4,11 +4,11 @@ namespace Data.Model
 {
     public partial class PasswordLISEntities
     {
-        public PasswordLISEntities(string connectionString) : base(connectionString)
+        public PasswordLISEntities(string ConnectionString) : base(ConnectionString)
         {
         }
-        public PasswordLISEntities(DbConnection existingConnection, bool contextOwnsConnection)
-            : base(existingConnection, contextOwnsConnection)
+        public PasswordLISEntities(DbConnection ExistingConnection, bool ContextOwnsConnection)
+            : base(ExistingConnection, ContextOwnsConnection)
         {
         }
     }

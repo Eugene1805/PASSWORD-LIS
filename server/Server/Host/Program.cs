@@ -74,8 +74,7 @@ namespace Host
             var loginManagerInstance = new LoginManager(accountRepository, notificationService, codeService);
             var verificationManagerInstance = new VerificationCodeManager(accountRepository, notificationService, 
                 codeService);
-            var passwordResetManagerInstance = new PasswordResetManager(accountRepository, notificationService, 
-                
+            var passwordResetManagerInstance = new PasswordResetManager(accountRepository, notificationService,
                 codeService);
             var profileManagerInstance = new ProfileManager(accountRepository);
             var topPlayersManagerInstance = new TopPlayersManager(statisticsRepository);

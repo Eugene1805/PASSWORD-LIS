@@ -7,7 +7,7 @@ namespace Services.Contracts.DTOs
     public class TurnHistoryDTO
     {
         [DataMember]
-        public int TurnId { get; set; } // Temp ID for the votes
+        public int TurnId { get; set; }
         [DataMember]
         public PasswordWordDTO Password { get; set; }
         [DataMember]

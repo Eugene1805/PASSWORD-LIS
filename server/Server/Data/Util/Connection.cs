@@ -1,8 +1,6 @@
-﻿using log4net;
-using System;
+﻿using System;
 using System.Data.Entity.Core.EntityClient;
 using System.Data.SqlClient;
-using System.Runtime.CompilerServices;
 
 namespace Data.Util
 {

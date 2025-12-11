@@ -14,9 +14,9 @@ namespace Data.DAL.Implementations
         private readonly IDbContextFactory contextFactory;
         private const int PendingStatus = 0;
         private const int AcceptedStatus = 1;
-        public FriendshipRepository(IDbContextFactory contextFactory)
+        public FriendshipRepository(IDbContextFactory ContextFactory)
         {
-            this.contextFactory = contextFactory;
+            this.contextFactory = ContextFactory;
         }
         public async Task<List<UserAccount>> GetFriendsByUserAccountIdAsync(int userAccountId)
         {
@@ -158,6 +158,7 @@ namespace Data.DAL.Implementations
                         {
                             return false;
                         }
+
                         if (accept)
                         {
                             request.Status = AcceptedStatus;

@@ -26,6 +26,6 @@ namespace Services.Contracts
         /// <returns>True if the nickname is taken; otherwise, false.</returns>
         [OperationContract]
         [FaultContract(typeof(ServiceErrorDetailDTO))]
-        Task<bool> IsNicknameInUse(string nickname);
+        Task<bool> IsNicknameInUseAsync(string nickname);
     }
 }

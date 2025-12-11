@@ -10,14 +10,18 @@ namespace Data.DAL.Implementations
     public class ReportRepository : IReportRepository
     {
         private readonly IDbContextFactory contextFactory;
-        public ReportRepository(IDbContextFactory contextFactory)
+        public ReportRepository(IDbContextFactory ContextFactory)
         {
-            this.contextFactory = contextFactory;
+            this.contextFactory = ContextFactory;
         }
 
         public async Task AddReportAsync(Report report)
         {
-            if (report == null) throw new ArgumentNullException(nameof(report));
+            if (report == null)
+            {
+                throw new ArgumentNullException(nameof(report));
+            }
+
             using (var context = contextFactory.CreateDbContext())
             {
                 if (report.CreatedAt == default(DateTime))

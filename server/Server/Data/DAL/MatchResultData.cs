@@ -9,13 +9,13 @@ namespace Data.DAL
         public IEnumerable<int> RedTeamPlayerIds { get; }
         public IEnumerable<int> BlueTeamPlayerIds { get; }
 
-        public MatchResultData(int redScore, int blueScore, 
-            IEnumerable<int> redTeamPlayerIds, IEnumerable<int> blueTeamPlayerIds)
+        public MatchResultData(int RedScore, int BlueScore, 
+            IEnumerable<int> RedTeamPlayerIds, IEnumerable<int> BlueTeamPlayerIds)
         {
-            RedScore = redScore;
-            BlueScore = blueScore;
-            RedTeamPlayerIds = redTeamPlayerIds;
-            BlueTeamPlayerIds = blueTeamPlayerIds;
+            this.RedScore = RedScore;
+            this.BlueScore = BlueScore;
+            this.RedTeamPlayerIds = RedTeamPlayerIds;
+            this.BlueTeamPlayerIds = BlueTeamPlayerIds;
         }
     }
 }

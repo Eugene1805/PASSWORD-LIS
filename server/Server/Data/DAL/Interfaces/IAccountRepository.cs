@@ -15,7 +15,6 @@ namespace Data.DAL.Interfaces
             List<SocialAccount> updatedSocialsAccounts);
         Task <UserAccount> GetUserByPlayerIdAsync(int playerId);
         Task<UserAccount> GetUserByUserAccountIdAsync(int userAccountId);
-        Task<bool> IsNicknameInUse(string nickname);
-
+        Task<bool> IsNicknameInUseAsync(string nickname);
     }
 }
