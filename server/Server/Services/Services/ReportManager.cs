@@ -28,13 +28,13 @@ namespace Services.Services
         private readonly IOperationContextWrapper operationContext;
         private static readonly ILog log = LogManager.GetLogger(typeof(ReportManager));
 
-        public ReportManager(IReportRepository reportRepository, IPlayerRepository playerRepository,
-            IBanRepository banRepository,IOperationContextWrapper operationContext):base(log)
+        public ReportManager(IReportRepository ReportRepository, IPlayerRepository PlayerRepository,
+            IBanRepository BanRepository,IOperationContextWrapper OperationContext):base(log)
         {
-            this.reportRepository = reportRepository;
-            this.playerRepository = playerRepository;
-            this.banRepository = banRepository;
-            this.operationContext = operationContext;
+            this.reportRepository = ReportRepository;
+            this.playerRepository = PlayerRepository;
+            this.banRepository = BanRepository;
+            this.operationContext = OperationContext;
             connectedClients = new ConcurrentDictionary<int, (IReportManagerCallback, Timer)>();
         }
 

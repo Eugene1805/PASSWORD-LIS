@@ -6,16 +6,36 @@ namespace Services.Contracts.DTOs
     public class NewAccountDTO
     {
         [DataMember]
-        public string Email { get; set; }
+        public string Email 
+        { 
+            get; 
+            set; 
+        }
 
         [DataMember]
-        public string Password { get; set; }
+        public string Password 
+        { 
+            get; 
+            set; 
+        }
 
         [DataMember]
-        public string Nickname { get; set; }
+        public string Nickname 
+        { 
+            get; 
+            set; 
+        }
         [DataMember]
-        public string FirstName { get; set; }
+        public string FirstName 
+        { 
+            get; 
+            set; 
+        }
         [DataMember]
-        public string LastName { get; set; }
+        public string LastName 
+        { 
+            get; 
+            set; 
+        }
     }
 }

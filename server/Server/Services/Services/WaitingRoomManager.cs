@@ -21,11 +21,24 @@ namespace Services.Services
     {
         sealed class Room
         {
-            public string GameCode { get; set; }
-            public int HostPlayerId { get; set; }
-            public ConcurrentDictionary<int, (IWaitingRoomCallback, PlayerDTO)> Players { get; } =
-                new ConcurrentDictionary<int, (IWaitingRoomCallback, PlayerDTO)>();
-            public object Lock { get; } = new object();
+            public string GameCode 
+            { 
+                get; 
+                set; 
+            }
+            public int HostPlayerId 
+            { 
+                get;
+                set;
+            }
+            public ConcurrentDictionary<int, (IWaitingRoomCallback, PlayerDTO)> Players 
+            {
+                get;
+            } = new ConcurrentDictionary<int, (IWaitingRoomCallback, PlayerDTO)>();
+            public object Lock 
+            {
+                get;
+            } = new object();
         }
 
         private static readonly ILog log = LogManager.GetLogger(typeof(WaitingRoomManager));
@@ -36,24 +49,24 @@ namespace Services.Services
         private readonly IGameManager gameManager;
         private readonly IAccountRepository accountRepository;
         private readonly INotificationService notificationService;
+        private static readonly Random random = new Random();
+        private static readonly TimeSpan CallbackTimeout = TimeSpan.FromSeconds(5);
         private static int guestIdCounter = 0;
         private const int InvalidPlayerId = -1;
         private const int DefaultPhotoId = 0;
         private const int ValidPlayerIdLimit = 0;
         private const int MaxPlayersPerGame = 4;
         private const int GameCodeLength = 5;
-        private static readonly Random random = new Random();
-        private static readonly TimeSpan CallbackTimeout = TimeSpan.FromSeconds(5);
-
-        public WaitingRoomManager(IPlayerRepository playerRepository, IOperationContextWrapper operationContextWrapper,
-            IGameManager gameManager,IAccountRepository accountRepository, INotificationService notificationService)
+        
+        public WaitingRoomManager(IPlayerRepository PlayerRepository, IOperationContextWrapper OperationContextWrapper,
+            IGameManager GameManager,IAccountRepository AccountRepository, INotificationService NotificationService)
             : base(log)
         {
-            repository = playerRepository;
-            operationContext = operationContextWrapper;
-            this.gameManager = gameManager;
-            this.accountRepository = accountRepository;
-            this.notificationService = notificationService;
+            repository = PlayerRepository;
+            operationContext = OperationContextWrapper;
+            this.gameManager = GameManager;
+            this.accountRepository = AccountRepository;
+            this.notificationService = NotificationService;
         }
 
         public async Task<string> CreateRoomAsync(string email)
@@ -61,7 +74,10 @@ namespace Services.Services
             return await ExecuteAsync(async () =>
             {
                 var gameCode = GenerateGameCode();
-                var newGame = new Room { GameCode = gameCode };
+                var newGame = new Room 
+                { 
+                    GameCode = gameCode
+                };
 
                 if (!rooms.TryAdd(gameCode, newGame))
                 {

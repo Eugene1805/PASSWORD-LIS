@@ -7,10 +7,22 @@ namespace Services.Contracts.DTOs
     public class TurnHistoryDTO
     {
         [DataMember]
-        public int TurnId { get; set; }
+        public int TurnId 
+        { 
+            get;
+            set;
+        }
         [DataMember]
-        public PasswordWordDTO Password { get; set; }
+        public PasswordWordDTO Password 
+        { 
+            get;
+            set; 
+        }
         [DataMember]
-        public string ClueUsed { get; set; }
+        public string ClueUsed 
+        { 
+            get;
+            set;
+        }
     }
 }

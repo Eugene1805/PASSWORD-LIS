@@ -20,12 +20,12 @@ namespace Services.Services
         private const int InvalidUserId = -1;
         private const int DefaultPhotoId = 0;
 
-        public LoginManager(IAccountRepository accountRepository, INotificationService notificationService,
-            IVerificationCodeService verificationCodeService) : base(log)
+        public LoginManager(IAccountRepository AccountRepository, INotificationService NotificationService,
+            IVerificationCodeService VerificationCodeService) : base(log)
         {
-            this.accountRepository = accountRepository;
-            this.notificationService = notificationService;
-            this.verificationCodeService = verificationCodeService;
+            this.accountRepository = AccountRepository;
+            this.notificationService = NotificationService;
+            this.verificationCodeService = VerificationCodeService;
         }
 
         public async Task<UserDTO> LoginAsync(string email, string password)
@@ -38,7 +38,10 @@ namespace Services.Services
                 if (userAccount == null)
                 {
                     log.WarnFormat("Login failed (user not found) for: {0}", email);
-                    return new UserDTO { UserAccountId = InvalidUserId };
+                    return new UserDTO 
+                    { 
+                        UserAccountId = InvalidUserId 
+                    };
                 }
 
                 bool isPasswordValid = BCrypt.Net.BCrypt.Verify(password, userAccount.PasswordHash);

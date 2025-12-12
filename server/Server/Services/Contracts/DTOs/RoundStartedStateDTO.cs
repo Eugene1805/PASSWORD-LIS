@@ -7,9 +7,17 @@ namespace Services.Contracts.DTOs
     public class RoundStartStateDTO
     {
         [DataMember]
-        public int CurrentRound { get; set; }
+        public int CurrentRound 
+        { 
+            get;
+            set;
+        }
 
         [DataMember]
-        public List<PlayerDTO> PlayersWithNewRoles { get; set; }
+        public List<PlayerDTO> PlayersWithNewRoles 
+        { 
+            get;
+            set;
+        }
     }
 }

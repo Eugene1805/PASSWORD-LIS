@@ -5,15 +5,24 @@ namespace Services.Services.Internal
 {
     public class TurnClueData
     {
-        public MatchTeam Team { get; }
-        public PasswordWord Password { get; }
-        public string Clue { get; }
+        public MatchTeam Team 
+        { 
+            get;
+        }
+        public PasswordWord Password 
+        { 
+            get;
+        }
+        public string Clue 
+        { 
+            get;
+        }
 
-        public TurnClueData(MatchTeam team, PasswordWord password, string clue)
+        public TurnClueData(MatchTeam Team, PasswordWord Password, string Clue)
         {
-            Team = team;
-            Password = password;
-            Clue = clue;
+            this.Team = Team;
+            this.Password = Password;
+            this.Clue = Clue;
         }
     }
 }

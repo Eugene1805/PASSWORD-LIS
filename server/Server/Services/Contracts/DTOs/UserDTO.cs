@@ -7,28 +7,60 @@ namespace Services.Contracts.DTOs
     public class UserDTO
     {
         [DataMember]
-        public int UserAccountId { get; set; }
+        public int UserAccountId
+        {
+            get;
+            set;
+        }
 
         [DataMember]
-        public int PlayerId { get; set; }
+        public int PlayerId
+        {
+            get;
+            set;
+        }
 
         [DataMember]
-        public string Nickname { get; set; }
+        public string Nickname
+        {
+            get;
+            set;
+        }
 
         [DataMember]
-        public string Email { get; set; }
+        public string Email
+        {
+            get;
+            set;
+        }
 
         [DataMember]
-        public string FirstName { get; set; }
+        public string FirstName
+        {
+            get;
+            set;
+        }
+
+        [DataMember]
+        public string LastName 
+        { 
+            get; 
+            set;
+        }
         
         [DataMember]
-        public string LastName { get; set; }
-        
-        [DataMember]
-        public int PhotoId { get; set; }
+        public int PhotoId 
+        { 
+            get;
+            set;
+        }
 
         [DataMember]
-        public Dictionary<string, string> SocialAccounts { get; set; }
+        public Dictionary<string, string> SocialAccounts 
+        { 
+            get;
+            set;
+        }
 
     }
 }

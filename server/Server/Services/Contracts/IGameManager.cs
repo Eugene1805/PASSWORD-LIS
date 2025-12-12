@@ -98,28 +98,28 @@ namespace Services.Contracts
         /// </summary>
         /// <param name="password">The secret word for the turn.</param>
         [OperationContract(IsOneWay = true)]
-        void OnNewPassword(PasswordWordDTO password); // For the clue guy
+        void OnNewPassword(PasswordWordDTO password);
 
         /// <summary>
         /// Delivers a clue to the guesser.
         /// </summary>
         /// <param name="clue">The clue message.</param>
         [OperationContract(IsOneWay = true)]
-        void OnClueReceived(string clue); // For the guesser
+        void OnClueReceived(string clue);
 
         /// <summary>
         /// Announces whether a guess was correct and the updated team score.
         /// </summary>
         /// <param name="result">The guess result information.</param>
         [OperationContract(IsOneWay = true)]
-        void OnGuessResult(GuessResultDTO result); // For both teams
+        void OnGuessResult(GuessResultDTO result); 
 
         /// <summary>
         /// Starts the validation phase for validators and provides the turn history.
         /// </summary>
         /// <param name="turns">The list of turns to review and vote on.</param>
         [OperationContract(IsOneWay = true)]
-        void OnBeginRoundValidation(List<TurnHistoryDTO> turns); // FOr the validators
+        void OnBeginRoundValidation(List<TurnHistoryDTO> turns);
         /// <summary>
         /// Notifies clients about the remaining time in the current validation phase.
         /// </summary>
@@ -149,6 +149,6 @@ namespace Services.Contracts
         /// </summary>
         /// <param name="reason">The cancellation reason.</param>
         [OperationContract(IsOneWay = true)]
-        void OnMatchCancelled(string reason); // For desync or errors
+        void OnMatchCancelled(string reason);
     }
 }

@@ -7,16 +7,32 @@ namespace Services.Contracts.DTOs
     public class ValidationResultDTO
     {
         [DataMember]
-        public MatchTeam TeamThatWasValidated { get; set; }
+        public MatchTeam TeamThatWasValidated 
+        { 
+            get;
+            set;
+        }
 
         [DataMember]
-        public int TotalPenaltyApplied { get; set; }
+        public int TotalPenaltyApplied 
+        { 
+            get;
+            set;
+        }
 
         [DataMember]
-        public int NewRedTeamScore { get; set; }
+        public int NewRedTeamScore 
+        { 
+            get;
+            set;
+        }
 
         [DataMember]
-        public int NewBlueTeamScore { get; set; }
+        public int NewBlueTeamScore 
+        { 
+            get;
+            set;
+        }
 
     }
 }

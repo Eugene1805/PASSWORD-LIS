@@ -16,9 +16,9 @@ namespace Services.Services
         private readonly IAccountRepository repository;
         private static readonly ILog log = LogManager.GetLogger(typeof(ProfileManager));
 
-        public ProfileManager(IAccountRepository accountRepository) :base(log)
+        public ProfileManager(IAccountRepository AccountRepository) :base(log)
         {
-            repository = accountRepository;
+            repository = AccountRepository;
         }
 
         public async Task<UserDTO> UpdateProfileAsync(UserDTO updatedProfileData)
@@ -75,8 +75,11 @@ namespace Services.Services
                 return new List<SocialAccount>();
             }
             return socialAccountsDict
-                .Select(kvp => new SocialAccount { Provider = kvp.Key, Username = kvp.Value })
-                .ToList();
+                .Select(kvp => new SocialAccount 
+                { 
+                    Provider = kvp.Key, 
+                    Username = kvp.Value 
+                }).ToList();
         }
     }
 }

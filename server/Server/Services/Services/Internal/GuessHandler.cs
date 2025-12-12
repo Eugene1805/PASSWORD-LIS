@@ -33,7 +33,12 @@ namespace Services.Services.Internal
             context.TurnHistoryManager.AdvanceWordIndex(session, team);
 
             int newScore = (team == MatchTeam.RedTeam) ? session.RedTeamScore : session.BlueTeamScore;
-            var resultDto = new GuessResultDTO { IsCorrect = true, Team = team, NewScore = newScore };
+            var resultDto = new GuessResultDTO
+            {
+                IsCorrect = true,
+                Team = team,
+                NewScore = newScore
+            };
 
             await context.BroadcastAction(session, cb => cb.OnGuessResult(resultDto));
             await context.WordDistributor.SendNextWordToTeamAsync(session, team, context.OnDisconnection);

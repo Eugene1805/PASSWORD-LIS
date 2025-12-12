@@ -21,13 +21,13 @@ namespace Services.Services
         private readonly IOperationContextWrapper operationContext;
         private static readonly ILog log = LogManager.GetLogger(typeof(FriendsManager));
         private const int InvalidUserId = 0;
-        public FriendsManager(IFriendshipRepository friendshipRepository, IAccountRepository accountRepository, 
-            IOperationContextWrapper operationContext) : base(log)
+        public FriendsManager(IFriendshipRepository FriendshipRepository, IAccountRepository AccountRepository, 
+            IOperationContextWrapper OperationContext) : base(log)
         {
             connectedClients = new ConcurrentDictionary<int, IFriendsCallback>();
-            this.friendshipRepository = friendshipRepository;
-            this.accountRepository = accountRepository;
-            this.operationContext = operationContext;
+            this.friendshipRepository = FriendshipRepository;
+            this.accountRepository = AccountRepository;
+            this.operationContext = OperationContext;
         }
         public async Task<List<FriendDTO>> GetFriendsAsync(int userAccountId)
         {

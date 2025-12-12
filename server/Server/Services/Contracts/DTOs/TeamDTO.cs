@@ -7,9 +7,17 @@ namespace Services.Contracts.DTOs
     public class TeamDTO
     {
         [DataMember]
-        public int Score { get; set; }
+        public int Score 
+        { 
+            get;
+            set;
+        }
         [DataMember] 
-        public List<string> PlayersNicknames { get; set; }
+        public List<string> PlayersNicknames 
+        { 
+            get;
+            set;
+        }
 
     }
 }

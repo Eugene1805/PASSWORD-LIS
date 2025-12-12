@@ -26,7 +26,10 @@ namespace Data.DAL.Implementations
             }
 
             context.UserAccount.Add(account);
-            context.Player.Add(new Player { UserAccount = account });
+            context.Player.Add(new Player 
+            { 
+                UserAccount = account 
+            });
             await context.SaveChangesAsync();
         }
 

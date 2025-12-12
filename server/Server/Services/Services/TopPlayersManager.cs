@@ -18,9 +18,9 @@ namespace Services.Services
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(TopPlayersManager));
         private readonly IStatisticsRepository repository;
-        public TopPlayersManager(IStatisticsRepository statisticsRepository) :base(log)
+        public TopPlayersManager(IStatisticsRepository StatisticsRepository) :base(log)
         {
-            repository = statisticsRepository;
+            repository = StatisticsRepository;
         }
         public async Task<List<TeamDTO>> GetTopAsync(int numberOfTeams)
         {

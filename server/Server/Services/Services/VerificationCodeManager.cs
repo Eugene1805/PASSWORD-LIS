@@ -15,17 +15,17 @@ namespace Services.Services
         private readonly INotificationService notification;
         private readonly IVerificationCodeService codeService;
         private static readonly ILog log = LogManager.GetLogger(typeof(VerificationCodeManager));
-        public VerificationCodeManager(IAccountRepository accountRepository, INotificationService notificationService,
-            IVerificationCodeService verificationCodeService) : base(log)
+        public VerificationCodeManager(IAccountRepository AccountRepository, INotificationService NotificationService,
+            IVerificationCodeService VerificationCodeService) : base(log)
         {
-            repository = accountRepository;
-            notification = notificationService;
-            codeService = verificationCodeService;
+            repository = AccountRepository;
+            notification = NotificationService;
+            codeService = VerificationCodeService;
         }
         public bool VerifyEmail(EmailVerificationDTO emailVerificationDTO)
         {
             return Execute(()=>
-                {
+            {
                 bool isCodeValid = codeService.ValidateCode(
                     emailVerificationDTO.Email,
                     emailVerificationDTO.VerificationCode,
@@ -40,7 +40,7 @@ namespace Services.Services
 
                 log.WarnFormat("Email verification failed: invalid code for '{0}'.", emailVerificationDTO.Email);
                 return false;
-                }, context: "VerifyEmail: VerificationCodeManager");
+            }, context: "VerifyEmail: VerificationCodeManager");
         }
 
         public bool ResendVerificationCode(string email)

@@ -11,7 +11,11 @@ namespace Services.Services.Internal
         {
             if (entity == null || entity.Id == InvalidPasswordId)
             {
-                return new PasswordWordDTO { SpanishWord = EndWord, EnglishWord = EndWord };
+                return new PasswordWordDTO 
+                { 
+                    SpanishWord = EndWord, 
+                    EnglishWord = EndWord 
+                };
             }
             return new PasswordWordDTO
             {
@@ -26,7 +30,11 @@ namespace Services.Services.Internal
         {
             if (entity == null || entity.Id == InvalidPasswordId)
             {
-                return new PasswordWordDTO { SpanishWord = EndWord, EnglishWord = EndWord };
+                return new PasswordWordDTO 
+                { 
+                    SpanishWord = EndWord, 
+                    EnglishWord = EndWord 
+                };
             }
             return new PasswordWordDTO
             {
