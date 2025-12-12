@@ -71,8 +71,14 @@ namespace TestsEF.DataTests
             Context.UserAccount.Add(user);
             await Context.SaveChangesAsync();
 
-            var player = new Player { Id = 10, UserAccountId = user.Id };
-            var social = new SocialAccount { Provider = "GitHub", Username = "TestUser", UserAccountId = user.Id };
+            var player = new Player 
+            { 
+                Id = 10, UserAccountId = user.Id 
+            };
+            var social = new SocialAccount 
+            { 
+                Provider = "GitHub", Username = "TestUser", UserAccountId = user.Id 
+            };
             Context.Player.Add(player);
             Context.SocialAccount.Add(social);
             await Context.SaveChangesAsync();
@@ -130,8 +136,14 @@ namespace TestsEF.DataTests
             user.LastName = "OldLast";
             user.SocialAccount = new List<SocialAccount>
             {
-                new SocialAccount { Provider = "GitHub", Username = "OldGitHub" },
-                new SocialAccount { Provider = "Twitter", Username = "OldTwitter" }
+                new SocialAccount 
+                { 
+                    Provider = "GitHub", Username = "OldGitHub" 
+                },
+                new SocialAccount 
+                { 
+                    Provider = "Twitter", Username = "OldTwitter" 
+                }
             };
 
             var player = new Player { Id = 10, UserAccount = user };
@@ -148,8 +160,14 @@ namespace TestsEF.DataTests
             };
             var updatedSocials = new List<SocialAccount>
             {
-                new SocialAccount { Provider = "GitHub", Username = "NewGitHub" },
-                new SocialAccount { Provider = "LinkedIn", Username = "NewLinkedIn" }
+                new SocialAccount 
+                { 
+                    Provider = "GitHub", Username = "NewGitHub" 
+                },
+                new SocialAccount 
+                { 
+                    Provider = "LinkedIn", Username = "NewLinkedIn" 
+                }
             };
 
             var result = await repository.UpdateUserProfileAsync(savedPlayerId, updatedUserData, updatedSocials);
