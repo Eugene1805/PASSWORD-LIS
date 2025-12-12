@@ -24,7 +24,10 @@ namespace TestsEF.DataTests
             var playerId = GetFirstPlayerId();
             var start = DateTime.UtcNow;
             var end = start.AddHours(1);
-            var ban = new Ban { PlayerId = playerId, StartTime = start, EndTime = end };
+            var ban = new Ban 
+            { 
+                PlayerId = playerId, StartTime = start, EndTime = end 
+            };
 
             await repository.AddBanAsync(ban);
 
