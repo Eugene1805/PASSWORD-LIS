@@ -29,8 +29,20 @@ namespace Test.ServicesTests
                     TotalPoints = 100,
                     Player = new List<Player>
                     {
-                        new Player { UserAccount = new UserAccount { Nickname = "Player1" } },
-                        new Player { UserAccount = new UserAccount { Nickname = "Player2" } }
+                        new Player 
+                        { 
+                            UserAccount = new UserAccount 
+                            { 
+                                Nickname = "Player1" 
+                            } 
+                        },
+                        new Player 
+                        { 
+                            UserAccount = new UserAccount 
+                            { 
+                                Nickname = "Player2" 
+                            } 
+                        }
                     }
                 },
                 new Team
@@ -38,7 +50,13 @@ namespace Test.ServicesTests
                     TotalPoints = 90,
                     Player = new List<Player>
                     {
-                        new Player { UserAccount = new UserAccount { Nickname = "Player3" } }
+                        new Player 
+                        { 
+                            UserAccount = new UserAccount 
+                            { 
+                                Nickname = "Player3" 
+                            } 
+                        }
                     }
                 }
             };
@@ -88,7 +106,13 @@ namespace Test.ServicesTests
         public async Task GetTop_WhenTeamHasNoPlayers_ShouldMapToEmptyNicknameList()
         {
             var numberOfTeams = 1;
-            var teamsFromDb = new List<Team> { new Team { TotalPoints = 50, Player = new List<Player>() } };
+            var teamsFromDb = new List<Team> 
+            { 
+                new Team 
+                { 
+                    TotalPoints = 50, Player = new List<Player>()
+                } 
+            };
             mockStatisticsRepository.Setup(repo => repo.GetTopTeamsAsync(numberOfTeams)).ReturnsAsync(teamsFromDb);
 
             var result = await topPlayersManager.GetTopAsync(numberOfTeams);
@@ -138,7 +162,13 @@ namespace Test.ServicesTests
                 {
                     Id = 10,
                     TotalPoints = 12,
-                    Player = new List<Player> { new Player { Id = 5, UserAccount = null! } }
+                    Player = new List<Player> 
+                    {
+                        new Player 
+                        {
+                            Id = 5, UserAccount = null! 
+                        } 
+                    }
                 }
             };
 
@@ -155,7 +185,13 @@ namespace Test.ServicesTests
         public async Task GetTop_WhenTeamPlayerCollectionIsNull_ShouldThrowDataIntegrityFault()
         {
             var numberOfTeams = 1;
-            var teams = new List<Team> { new Team { Id = 20, TotalPoints = 10, Player = null! } };
+            var teams = new List<Team> 
+            { 
+                new Team 
+                { 
+                    Id = 20, TotalPoints = 10, Player = null! 
+                } 
+            };
             mockStatisticsRepository.Setup(r => r.GetTopTeamsAsync(numberOfTeams)).ReturnsAsync(teams);
 
             var ex = await Assert.ThrowsAsync<FaultException<ServiceErrorDetailDTO>>(

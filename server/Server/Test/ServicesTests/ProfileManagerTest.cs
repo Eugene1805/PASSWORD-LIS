@@ -53,7 +53,10 @@ namespace Test.ServicesTests
         [Fact]
         public async Task UpdateProfile_ShouldReturnNull_WhenRepositoryReturnsFalse()
         {
-            var inputDto = new UserDTO { PlayerId = 99, FirstName = "FName", LastName = "LName" };
+            var inputDto = new UserDTO 
+            { 
+                PlayerId = 99, FirstName = "FName", LastName = "LName" 
+            };
 
             mockRepository.Setup(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(),
                 It.IsAny<List<SocialAccount>>()))
@@ -69,7 +72,10 @@ namespace Test.ServicesTests
         [Fact]
         public async Task UpdateProfile_ShouldThrowFaultExceptionWithDatabaseError_WhenRepositoryThrowsDbUpdateException()
         {
-            var inputDto = new UserDTO { PlayerId = 1, FirstName = "FName", LastName = "LName" };
+            var inputDto = new UserDTO 
+            { 
+                PlayerId = 1, FirstName = "FName", LastName = "LName" 
+            };
             var dbUpdateEx = new DbUpdateException("Simulated SaveChanges error", new Exception());
 
             mockRepository.Setup(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(), 
@@ -89,7 +95,10 @@ namespace Test.ServicesTests
         [Fact]
         public async Task UpdateProfile_ShouldThrowFaultExceptionWithDatabaseError_WhenRepositoryThrowsDbException()
         {
-            var inputDto = new UserDTO { PlayerId = 1, FirstName = "FName", LastName = "LName" };
+            var inputDto = new UserDTO 
+            { 
+                PlayerId = 1, FirstName = "FName", LastName = "LName" 
+            };
             var dbEx = new DbUpdateException("Simulated connection error", new Exception());
 
             mockRepository.Setup(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(),
@@ -109,7 +118,10 @@ namespace Test.ServicesTests
         [Fact]
         public async Task UpdateProfile_ShouldThrowFaultExceptionWithUnexpectedError_WhenRepositoryThrowsGeneralException()
         {
-            var inputDto = new UserDTO { PlayerId = 1, FirstName = "FName", LastName = "LName" };
+            var inputDto = new UserDTO 
+            { 
+                PlayerId = 1, FirstName = "FName", LastName = "LName" 
+            };
             var generalEx = new Exception("Simulated unexpected error");
 
             mockRepository.Setup(repo => repo.UpdateUserProfileAsync(inputDto.PlayerId, It.IsAny<UserAccount>(), 
@@ -141,7 +153,10 @@ namespace Test.ServicesTests
         [InlineData(-1)]
         public async Task UpdateProfile_ShouldReturnNull_WhenPlayerIdIsInvalid(int invalidPlayerId)
         {
-            var inputDto = new UserDTO { PlayerId = invalidPlayerId, FirstName = "FName", LastName = "LName" };
+            var inputDto = new UserDTO 
+            { 
+                PlayerId = invalidPlayerId, FirstName = "FName", LastName = "LName" 
+            };
 
             var resultDto = await profileManager.UpdateProfileAsync(inputDto);
 
@@ -159,11 +174,20 @@ namespace Test.ServicesTests
                 FirstName = " Test ",
                 LastName = " User ",
                 PhotoId = 3,
-                SocialAccounts = new Dictionary<string, string?> {
-                    { "Facebook", "fbUser " },
-                    { "Instagram", "" },
-                    { "X", null },
-                    { "TikTok", " tiktokUser" }
+                SocialAccounts = new Dictionary<string, string?> 
+                {
+                    { 
+                        "Facebook", "fbUser " 
+                    },
+                    { 
+                        "Instagram", "" 
+                    },
+                    { 
+                        "X", null 
+                    },
+                    { 
+                        "TikTok", " tiktokUser" 
+                    }
                 }
             };
             UserAccount? capturedAccount = null;
