@@ -50,7 +50,11 @@ namespace TestsEF.DataTests
 
             Assert.NotNull(result);
             Assert.Equal(2, result.Count);
-            Assert.Equal(new[] { 15, 5 }, result.Select(t => t.TotalPoints).ToArray());
+            Assert.Equal(new[] 
+            { 
+                15, 
+                5 
+            }, result.Select(t => t.TotalPoints).ToArray());
         }
 
         [Fact]

@@ -57,7 +57,12 @@ namespace TestsEF.DataTests
 
             Assert.NotNull(result);
             Assert.Equal(3, result.Count);
-            var expected = new HashSet<string>(new[] { "W1", "W2", "W3" });
+            var expected = new HashSet<string>(new[] 
+            { 
+                "W1",
+                "W2",
+                "W3" 
+            });
             Assert.All(result, w => Assert.Contains(w.EnglishWord, expected));
         }
 
