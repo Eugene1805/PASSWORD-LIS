@@ -4,13 +4,19 @@ namespace Services.Services.Internal
 {
     public class PassTurnData
     {
-        public ActivePlayer Sender { get; }
-        public PasswordWord NextWord { get; }
+        public ActivePlayer Sender 
+        { 
+            get;
+        }
+        public PasswordWord NextWord
+        { 
+            get;
+        }
 
-        public PassTurnData(ActivePlayer sender, PasswordWord nextWord)
+        public PassTurnData(ActivePlayer Sender, PasswordWord NextWord)
         {
-            Sender = sender;
-            NextWord = nextWord;
+            this.Sender = Sender;
+            this.NextWord = NextWord;
         }
     }
 }

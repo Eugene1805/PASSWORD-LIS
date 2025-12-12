@@ -12,9 +12,9 @@ namespace Services.Util
     {
         private readonly IEmailSender sender;
 
-        public NotificationService(IEmailSender emailSender)
+        public NotificationService(IEmailSender EmailSender)
         {
-            sender = emailSender;
+            sender = EmailSender;
         }
 
         public Task SendAccountVerificationEmailAsync(string email, string code)

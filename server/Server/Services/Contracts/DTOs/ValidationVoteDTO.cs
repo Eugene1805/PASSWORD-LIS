@@ -6,10 +6,22 @@ namespace Services.Contracts.DTOs
     public class ValidationVoteDTO
     {
         [DataMember]
-        public int TurnId { get; set; }
+        public int TurnId 
+        { 
+            get;
+            set;
+        }
         [DataMember]
-        public bool PenalizeSynonym { get; set; }
+        public bool PenalizeSynonym 
+        { 
+            get;
+            set;
+        }
         [DataMember]
-        public bool PenalizeMultiword { get; set; }
+        public bool PenalizeMultiword 
+        { 
+            get;
+            set;
+        }
     }
 }

@@ -7,10 +7,22 @@ namespace Services.Contracts.DTOs
     public class MatchSummaryDTO
     {
         [DataMember]
-        public MatchTeam? WinnerTeam { get; set; }
+        public MatchTeam? WinnerTeam 
+        { 
+            get; 
+            set; 
+        }
         [DataMember]
-        public int RedScore { get; set; }
+        public int RedScore 
+        { 
+            get; 
+            set; 
+        }
         [DataMember]
-        public int BlueScore { get; set; }
+        public int BlueScore 
+        { 
+            get; 
+            set; 
+        }
     }
 }

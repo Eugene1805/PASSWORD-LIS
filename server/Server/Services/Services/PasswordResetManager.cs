@@ -14,12 +14,12 @@ namespace Services.Services
         private readonly INotificationService notification;
         private readonly IVerificationCodeService codeService;
         private static readonly ILog log = LogManager.GetLogger(typeof(PasswordResetManager));
-        public PasswordResetManager(IAccountRepository accountRepository, INotificationService notificationService,
-            IVerificationCodeService verificationCodeService) : base(log)
+        public PasswordResetManager(IAccountRepository AccountRepository, INotificationService NotificationService,
+            IVerificationCodeService VerificationCodeService) : base(log)
         {
-            repository = accountRepository;
-            notification = notificationService;
-            codeService = verificationCodeService;
+            repository = AccountRepository;
+            notification = NotificationService;
+            codeService = VerificationCodeService;
             
         }
         public bool RequestPasswordResetCode(EmailVerificationDTO emailVerificationDTO)

@@ -7,15 +7,35 @@ namespace Services.Contracts.DTOs
     public class PlayerDTO
     {
         [DataMember]
-        public int Id { get; set; }
+        public int Id 
+        { 
+            get;
+            set;
+        }
         [DataMember]
-        public string Nickname { get; set; }
+        public string Nickname 
+        { 
+            get;
+            set;
+        }
         [DataMember]
-        public int PhotoId { get; set; }
+        public int PhotoId 
+        { 
+            get;
+            set;
+        }
 
         [DataMember]
-        public PlayerRole Role { get; set; }
+        public PlayerRole Role 
+        { 
+            get;
+            set;
+        }
         [DataMember]
-        public MatchTeam Team { get; set; }
+        public MatchTeam Team 
+        { 
+            get;
+            set;
+        }
     }
 }

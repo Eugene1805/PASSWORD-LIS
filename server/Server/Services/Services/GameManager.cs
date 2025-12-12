@@ -43,13 +43,13 @@ namespace Services.Services
         private const int RegisteredPlayerIdLimit = 0;
         private const int InitialRoundIndex = 1;
 
-        public GameManager(IOperationContextWrapper contextWrapper, IWordRepository wordRepository,
-            IMatchRepository matchRepository, IPlayerRepository playerRepository) : base(log)
+        public GameManager(IOperationContextWrapper ContextWrapper, IWordRepository WordRepository,
+            IMatchRepository MatchRepository, IPlayerRepository PlayerRepository) : base(log)
         {
-            this.operationContext = contextWrapper;
-            this.wordRepository = wordRepository;
-            this.matchRepository = matchRepository;
-            this.playerRepository = playerRepository;
+            this.operationContext = ContextWrapper;
+            this.wordRepository = WordRepository;
+            this.matchRepository = MatchRepository;
+            this.playerRepository = PlayerRepository;
         }
 
         public bool CreateMatch(string gameCode, List<PlayerDTO> playersFromWaitingRoom)

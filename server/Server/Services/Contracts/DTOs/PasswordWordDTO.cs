@@ -6,15 +6,31 @@ namespace Services.Contracts.DTOs
     public class PasswordWordDTO
     {
         [DataMember]
-        public string EnglishWord { get; set; }
+        public string EnglishWord 
+        { 
+            get; 
+            set;
+        }
 
         [DataMember]
-        public string SpanishWord { get; set; }
+        public string SpanishWord 
+        { 
+            get; 
+            set;
+        }
 
         [DataMember]
-        public string SpanishDescription { get; set; }
+        public string SpanishDescription 
+        { 
+            get;
+            set;
+        }
 
         [DataMember]
-        public string EnglishDescription { get; set; }
+        public string EnglishDescription 
+        { 
+            get;
+            set;
+        }
     }
 }

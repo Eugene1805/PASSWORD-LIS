@@ -5,15 +5,24 @@ namespace Services.Services.Internal
 {
     public class VoteSubmissionData
     {
-        public int SenderPlayerId { get; }
-        public List<ValidationVoteDTO> Votes { get; }
-        public string GameCode { get; }
-
-        public VoteSubmissionData(int senderPlayerId, List<ValidationVoteDTO> votes, string gameCode)
+        public int SenderPlayerId 
+        { 
+            get; 
+        }
+        public List<ValidationVoteDTO> Votes
         {
-            SenderPlayerId = senderPlayerId;
-            Votes = votes;
-            GameCode = gameCode;
+            get;
+        }
+        public string GameCode 
+        { 
+            get;
+        }
+
+        public VoteSubmissionData(int SenderPlayerId, List<ValidationVoteDTO> Votes, string GameCode)
+        {
+            this.SenderPlayerId = SenderPlayerId;
+            this.Votes = Votes;
+            this.GameCode = GameCode;
         }
     }
 }

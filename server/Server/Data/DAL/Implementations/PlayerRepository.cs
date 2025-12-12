@@ -23,7 +23,10 @@ namespace Data.DAL.Implementations
 
                 if (userAccount == null)
                 {
-                    return new Player { Id = InvalidPlayerId };
+                    return new Player 
+                    { 
+                        Id = InvalidPlayerId 
+                    };
                 }
 
                 return await context.Player
@@ -39,7 +42,10 @@ namespace Data.DAL.Implementations
                 var player = await context.Player
                     .Include(p => p.UserAccount)
                     .FirstOrDefaultAsync(p => p.Id == playerId);
-                return player ?? new Player { Id = InvalidPlayerId };
+                return player ?? new Player 
+                { 
+                    Id = InvalidPlayerId 
+                };
             }
         }
 

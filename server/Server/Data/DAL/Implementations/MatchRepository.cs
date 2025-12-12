@@ -80,7 +80,11 @@ namespace Data.DAL.Implementations
                         blueTeamEntity.Player.Add(player);
                     }
 
-                    context.Team.AddRange(new[] { redTeamEntity, blueTeamEntity });
+                    context.Team.AddRange(new[] 
+                    { 
+                        redTeamEntity, 
+                        blueTeamEntity 
+                    });
 
                     await context.SaveChangesAsync();
 

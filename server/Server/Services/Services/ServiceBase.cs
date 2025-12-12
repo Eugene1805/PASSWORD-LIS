@@ -21,9 +21,9 @@ namespace Services.Services
         private const string DatabaseError = "DATABASE_ERROR";
         private readonly Dictionary<Type, ExceptionHandlerConfig> exceptionHandlers;
 
-        protected ServiceBase(ILog log) 
+        protected ServiceBase(ILog Log) 
         {
-            this.logger = log;
+            this.logger = Log;
             this.exceptionHandlers = BuildExceptionHandlers();
         }
 

@@ -7,6 +7,10 @@ namespace Services.Contracts.DTOs
     public class MatchInitStateDTO
     {
         [DataMember]
-        public List<PlayerDTO> Players { get; set; }
+        public List<PlayerDTO> Players 
+        { 
+            get; 
+            set; 
+        }
     }
 }

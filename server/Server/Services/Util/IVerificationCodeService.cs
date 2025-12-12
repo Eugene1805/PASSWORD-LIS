@@ -20,10 +20,26 @@ namespace Services.Util
     {
         sealed class CodeInfo
         {
-            public string Code { get; set; }
-            public DateTime CreationTime { get; set; }
-            public DateTime ExpirationTime { get; set; }
-            public CodeType Type { get; set; }
+            public string Code 
+            { 
+                get;
+                set;
+            }
+            public DateTime CreationTime 
+            { 
+                get;
+                set;
+            }
+            public DateTime ExpirationTime
+            {
+                get;
+                set;
+            }
+            public CodeType Type 
+            { 
+                get;
+                set;
+            }
         }
 
         private readonly object lockObject = new object();

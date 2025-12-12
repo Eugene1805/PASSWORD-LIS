@@ -6,12 +6,28 @@ namespace Services.Contracts.DTOs
     public class ReportDTO
     {
         [DataMember]
-        public int Id { get; set; }
+        public int Id 
+        { 
+            get;
+            set;
+        }
         [DataMember]
-        public int ReporterPlayerId { get; set; }
+        public int ReporterPlayerId 
+        { 
+            get;
+            set;
+        }
         [DataMember]
-        public int ReportedPlayerId { get; set; }
+        public int ReportedPlayerId 
+        { 
+            get;
+            set;
+        }
         [DataMember]
-        public string Reason { get; set; }
+        public string Reason 
+        { 
+            get;
+            set;
+        }
     }
 }
