@@ -19,7 +19,9 @@ namespace PASSWORD_LIS_Client.ViewModels
         private static readonly ILog log = LogManager.GetLogger(typeof(BaseViewModel));
         protected IWindowService windowService;
 
-        public BaseViewModel() { }
+        public BaseViewModel() 
+        { 
+        }
 
         public BaseViewModel(IWindowService WindowService)
         {

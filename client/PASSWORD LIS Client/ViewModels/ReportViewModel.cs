@@ -26,18 +26,25 @@ namespace PASSWORD_LIS_Client.ViewModels
                 RelayCommand.RaiseCanExecuteChanged();
             }
         }
-        public string TitleMessage { get; private set; }
+        public string TitleMessage 
+        { 
+            get; 
+            private set; 
+        }
 
-        public ICommand SubmitReportCommand { get; }
+        public ICommand SubmitReportCommand 
+        { 
+            get; 
+        }
 
-        public ReportViewModel(UserDTO reporter, PlayerDTO reportedPlayer, IWindowService windowService,
-            IReportManagerService reportManagerService) : base(windowService)
+        public ReportViewModel(UserDTO Reporter, PlayerDTO ReportedPlayer, IWindowService WindowService,
+            IReportManagerService ReportManagerService) : base(WindowService)
         {
-            this.reporter = reporter;
-            this.reportedPlayer = reportedPlayer;
-            this.reportManagerService = reportManagerService;
+            this.reporter = Reporter;
+            this.reportedPlayer = ReportedPlayer;
+            this.reportManagerService = ReportManagerService;
 
-            TitleMessage = $"{Properties.Langs.Lang.reportingText} {reportedPlayer.Nickname}";
+            TitleMessage = $"{Properties.Langs.Lang.reportingText} {ReportedPlayer.Nickname}";
 
             SubmitReportCommand = new RelayCommand(async (_) => await SubmitReportAsync(),
                 (_) => !string.IsNullOrWhiteSpace(ReportReason)

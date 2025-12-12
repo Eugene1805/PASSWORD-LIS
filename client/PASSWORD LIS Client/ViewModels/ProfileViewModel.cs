@@ -129,7 +129,8 @@ namespace PASSWORD_LIS_Client.ViewModels
         private bool isSaving;
         public bool IsSaving { 
             get => isSaving; 
-            set { 
+            set 
+            { 
                 isSaving = value; 
                 OnPropertyChanged(); 
             } 
@@ -139,52 +140,91 @@ namespace PASSWORD_LIS_Client.ViewModels
         public string FirstNameError
         {
             get => firstNameError;
-            set { firstNameError = value; OnPropertyChanged(); }
+            set 
+            { 
+                firstNameError = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         private string lastNameError;
         public string LastNameError
         {
             get => lastNameError;
-            set { lastNameError = value; OnPropertyChanged(); }
+            set 
+            { 
+                lastNameError = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         private string facebookError;
         public string FacebookError
         {
             get => facebookError;
-            set { facebookError = value; OnPropertyChanged(); }
+            set 
+            { 
+                facebookError = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         private string instagramError;
         public string InstagramError
         {
             get => instagramError;
-            set { instagramError = value; OnPropertyChanged(); }
+            set 
+            { 
+                instagramError = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         private string xSocialMediaError;
         public string XSocialMediaError
         {
             get => xSocialMediaError;
-            set { xSocialMediaError = value; OnPropertyChanged(); }
+            set 
+            { 
+                xSocialMediaError = value; 
+                OnPropertyChanged(); 
+            }
         }
         private string tiktokError;
         public string TiktokError
         {
             get => tiktokError;
-            set { tiktokError = value; OnPropertyChanged(); }
+            set 
+            { 
+                tiktokError = value; 
+                OnPropertyChanged(); 
+            }
         }
-        public ICommand BackToLobbyCommand { get; }
-        public ICommand EditProfileCommand { get; }
-        public ICommand ChooseAnAvatarCommand { get; }
-        public ICommand SaveChangesCommand { get; }
-        public ICommand ChangePasswordCommand { get; }
+        public ICommand BackToLobbyCommand 
+        { 
+            get; 
+        }
+        public ICommand EditProfileCommand 
+        { 
+            get; 
+        }
+        public ICommand ChooseAnAvatarCommand 
+        { 
+            get; 
+        }
+        public ICommand SaveChangesCommand 
+        { 
+            get; 
+        }
+        public ICommand ChangePasswordCommand 
+        { 
+            get; 
+        }
 
-        public ProfileViewModel(IProfileManagerService profileManagerService, IWindowService windowService)
-            : base(windowService)
+        public ProfileViewModel(IProfileManagerService ProfileManagerService, IWindowService WindowService)
+            : base(WindowService)
         {
-            this.profileManagerService = profileManagerService;
+            this.profileManagerService = ProfileManagerService;
 
             BackToLobbyCommand = new RelayCommand(BackToLobby);
             EditProfileCommand = new RelayCommand(EditProfile);
@@ -273,7 +313,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         private void ChangePassword(object parameter)
         {
             var retrievePasswordViewModel = new RetrievePasswordViewModel(App.PasswordResetManagerService, windowService);
-            var retrievePasswordWindow = new RetrievePasswordWindow { DataContext = retrievePasswordViewModel};
+            var retrievePasswordWindow = new RetrievePasswordWindow 
+            { 
+                DataContext = retrievePasswordViewModel
+            };
             retrievePasswordWindow.Show();
         }
         private void SaveOriginalState()
@@ -285,10 +328,18 @@ namespace PASSWORD_LIS_Client.ViewModels
                 PhotoId = this.PhotoId,
                 SocialAccounts = new Dictionary<string, string>
                 {
-                    { FacebookKey, this.Facebook },
-                    { InstagramKey, this.Instagram },
-                    { XKey, this.XSocialMedia },
-                    { TikTokKey, this.Tiktok }
+                    { 
+                        FacebookKey, this.Facebook 
+                    },
+                    { 
+                        InstagramKey, this.Instagram 
+                    },
+                    { 
+                        XKey, this.XSocialMedia 
+                    },
+                    { 
+                        TikTokKey, this.Tiktok 
+                    }
                 }
             };
         }
@@ -463,10 +514,18 @@ namespace PASSWORD_LIS_Client.ViewModels
                 LastName = this.LastName,
                 SocialAccounts = new Dictionary<string, string>()
                 {
-                    { FacebookKey, this.Facebook },
-                    { InstagramKey, this.Instagram },
-                    { XKey, this.XSocialMedia },
-                    { TikTokKey, this.Tiktok }
+                    { 
+                        FacebookKey, this.Facebook 
+                    },
+                    { 
+                        InstagramKey, this.Instagram 
+                    },
+                    { 
+                        XKey, this.XSocialMedia 
+                    },
+                    { 
+                        TikTokKey, this.Tiktok 
+                    }
                 }
             };
         }

@@ -4,7 +4,11 @@ namespace PASSWORD_LIS_Client.Utils
 {
     public static class SessionManager
     {
-        public static UserDTO CurrentUser { get; private set; }
+        public static UserDTO CurrentUser 
+        { 
+            get; 
+            private set; 
+        }
 
         public static void Login(UserDTO user)
         {

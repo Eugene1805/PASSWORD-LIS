@@ -24,103 +24,172 @@ namespace PASSWORD_LIS_Client.ViewModels
         public string FirstName
         {
             get => firstName;
-            set { firstName = value; ValidateFirstName(); OnPropertyChanged(); }
+            set 
+            { 
+                firstName = value; ValidateFirstName(); 
+                OnPropertyChanged(); 
+            }
         }
 
         private string lastName;
         public string LastName
         {
             get => lastName;
-            set { lastName = value; ValidateLastName(); OnPropertyChanged(); }
+            set 
+            { 
+                lastName = value; 
+                ValidateLastName(); 
+                OnPropertyChanged(); 
+            }
         }
 
         private string nickname;
         public string Nickname
         {
             get => nickname;
-            set { nickname = value; ValidateNickname(); OnPropertyChanged(); }
+            set 
+            { 
+                nickname = value; 
+                ValidateNickname(); 
+                OnPropertyChanged(); 
+            }
         }
 
         private string email;
         public string Email
         {
             get => email;
-            set { email = value; ValidateEmail(); OnPropertyChanged(); }
+            set 
+            { 
+                email = value; 
+                ValidateEmail(); 
+                OnPropertyChanged(); 
+            }
         }
 
         private string password;
         public string Password
         {
             get => password;
-            set { password = value; ValidatePassword(); OnPropertyChanged(); }
+            set 
+            { 
+                password = value; 
+                ValidatePassword(); 
+                OnPropertyChanged(); 
+            }
         }
 
         private string confirmPassword;
         public string ConfirmPassword
         {
             get => confirmPassword;
-            set { confirmPassword = value; ValidateConfirmPassword(); OnPropertyChanged(); }
+            set 
+            { 
+                confirmPassword = value; 
+                ValidateConfirmPassword(); 
+                OnPropertyChanged(); 
+            }
         }
 
         private bool isSigningUp;
         public bool IsSigningUp
         {
             get => isSigningUp;
-            set { isSigningUp = value; OnPropertyChanged(); }
+            set 
+            { 
+                isSigningUp = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         private string firstNameError;
         public string FirstNameError
         {
             get => firstNameError;
-            set { firstNameError = value; OnPropertyChanged(); }
+            set 
+            { 
+                firstNameError = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         private string lastNameError;
         public string LastNameError
         {
             get => lastNameError;
-            set { lastNameError = value; OnPropertyChanged(); }
+            set 
+            { 
+                lastNameError = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         private string nicknameError;
         public string NicknameError
         {
             get => nicknameError;
-            set { nicknameError = value; OnPropertyChanged(); }
+            set 
+            { 
+                nicknameError = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         private string emailError;
         public string EmailError
         {
             get => emailError;
-            set { emailError = value; OnPropertyChanged(); }
+            set 
+            { 
+                emailError = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         private string passwordError;
         public string PasswordError
         {
             get => passwordError;
-            set { passwordError = value; OnPropertyChanged(); }
+            set 
+            { 
+                passwordError = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         private string confirmPasswordError;
         public string ConfirmPasswordError
         {
             get => confirmPasswordError;
-            set { confirmPasswordError = value; OnPropertyChanged(); }
+            set 
+            { 
+                confirmPasswordError = value; 
+                OnPropertyChanged(); 
+            }
         }
 
-        public string TCLink { get; }
+        public string TCLink 
+        { 
+            get; 
+        }
 
-        public ICommand SignUpCommand { get; }
-        public ICommand NavigateToLoginCommand { get; }
-        public ICommand OpenTermsAndConditionsCommand { get; }
+        public ICommand SignUpCommand 
+        { 
+            get; 
+        }
+        public ICommand NavigateToLoginCommand 
+        { 
+            get; 
+        }
+        public ICommand OpenTermsAndConditionsCommand 
+        { 
+            get; 
+        }
 
-        public SignUpViewModel(IAccountManagerService accountManager, IWindowService windowService) 
-            : base(windowService)
+        public SignUpViewModel(IAccountManagerService AccountManager, IWindowService WindowService) 
+            : base(WindowService)
         {
-            this.client = accountManager;
+            this.client = AccountManager;
             TCLink = ConfigurationManager.AppSettings["TCPageURL"];
             SignUpCommand = new RelayCommand(async (_) => await SignUpAsync(), (_) => CanExecuteSignUp());
             NavigateToLoginCommand = new RelayCommand(NavigateToLogin);

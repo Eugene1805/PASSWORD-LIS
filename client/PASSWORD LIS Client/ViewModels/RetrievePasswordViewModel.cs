@@ -15,22 +15,33 @@ namespace PASSWORD_LIS_Client.ViewModels
         public string Email
         {
             get => this.email;
-            set { this.email = value; OnPropertyChanged(); }
+            set 
+            { 
+                this.email = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         private bool isBusy;
         public bool IsBusy
         {
             get => this.isBusy;
-            set { this.isBusy = value; OnPropertyChanged(); }
+            set 
+            { 
+                this.isBusy = value; 
+                OnPropertyChanged(); 
+            }
         }
 
-        public RelayCommand SendCodeCommand { get; }
+        public RelayCommand SendCodeCommand 
+        { 
+            get; 
+        }
 
-        public RetrievePasswordViewModel(IPasswordResetManagerService resetManagerService, IWindowService windowService) 
-            : base(windowService)
+        public RetrievePasswordViewModel(IPasswordResetManagerService ResetManagerService, IWindowService WindowService) 
+            : base(WindowService)
         {
-            this.passwordResetClient = resetManagerService;
+            this.passwordResetClient = ResetManagerService;
             this.SendCodeCommand = new RelayCommand(async (_) => await SendCodeAsync(), (_) => CanSendCode());
         }
 
@@ -71,7 +82,10 @@ namespace PASSWORD_LIS_Client.ViewModels
 
         private async Task<bool> TryRequestResetCodeAsync(string email)
         {
-            var requestDto = new EmailVerificationDTO { Email = email, VerificationCode = "" };
+            var requestDto = new EmailVerificationDTO {
+                Email = email, 
+                VerificationCode = string.Empty 
+            };
             bool success = await passwordResetClient.RequestPasswordResetCodeAsync(requestDto);
             return success;
         }

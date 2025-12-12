@@ -6,18 +6,30 @@ namespace PASSWORD_LIS_Client.ViewModels
 {
     internal class YesNoPopUpViewModel : BaseViewModel
     {
-        public string Title { get; }
-        public string Message { get; }
+        public string Title 
+        { 
+            get; 
+        }
+        public string Message 
+        { 
+            get; 
+        }
 
-        public ICommand YesCommand { get; }
-        public ICommand NoCommand { get; }
+        public ICommand YesCommand 
+        { 
+            get; 
+        }
+        public ICommand NoCommand 
+        { 
+            get; 
+        }
 
         public event Action<bool?> CloseRequested;
 
-        public YesNoPopUpViewModel(string title, string message)
+        public YesNoPopUpViewModel(string Title, string Message)
         {
-            Title = title; 
-            Message = message;
+            this.Title = Title; 
+            this.Message = Message;
 
             YesCommand = new RelayCommand(ExecuteYes);
             NoCommand = new RelayCommand(ExecuteNo);

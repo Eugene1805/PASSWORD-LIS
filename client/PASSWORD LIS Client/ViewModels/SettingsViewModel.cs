@@ -13,6 +13,8 @@ namespace PASSWORD_LIS_Client.ViewModels
     {
         private readonly IFriendsManagerService friendsManagerService;
         private readonly BackgroundMusicService backgroundMusicService;
+        private const string EnglishCultureCode = "en-US";
+        private const string SpanishCultureCode = "es-MX";
         private bool isEnglishSelected;
         public bool IsEnglishSelected
         {
@@ -21,7 +23,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 if (SetProperty(ref isEnglishSelected, value) && value)
                 {
-                    UpdateLanguage("en-US");
+                    UpdateLanguage(EnglishCultureCode);
                 }
             }
         }
@@ -34,7 +36,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 if (SetProperty(ref isSpanishSelected, value) && value)
                 {
-                    UpdateLanguage("es-MX");
+                    UpdateLanguage(SpanishCultureCode);
                 }
             }
         }
@@ -55,16 +57,23 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
         }
 
-        public ICommand LogoutCommand { get; }
+        public ICommand LogoutCommand 
+        { 
+            get; 
+        }
 
-        public bool WasLogoutSuccessful { get; private set; } = false;
+        public bool WasLogoutSuccessful 
+        { 
+            get; 
+            private set; 
+        } = false;
         
         public SettingsViewModel(IWindowService windowService, IFriendsManagerService friendsManagerService,
             BackgroundMusicService backgroundMusicService)
             : base(windowService)
         {
             var currentLang = Settings.Default.languageCode;
-            if (string.IsNullOrEmpty(currentLang) || currentLang == "en-US")
+            if (string.IsNullOrEmpty(currentLang) || currentLang == EnglishCultureCode)
             {
                 isEnglishSelected = true;
             }
@@ -87,12 +96,12 @@ namespace PASSWORD_LIS_Client.ViewModels
         }
         private void Logout(object parameter)
         {
-            if (SessionManager.IsUserLoggedIn() && SessionManager.CurrentUser.PlayerId >= 0)
+            int playerIdLimit = 0;
+            if (SessionManager.IsUserLoggedIn() && SessionManager.CurrentUser.PlayerId >= playerIdLimit)
             {
                 backgroundMusicService.Stop();
-
             }
-            if (SessionManager.IsUserLoggedIn() && SessionManager.CurrentUser.PlayerId > 0)  
+            if (SessionManager.IsUserLoggedIn() && SessionManager.CurrentUser.PlayerId > playerIdLimit)  
             {
                 _ = friendsManagerService.UnsubscribeFromFriendUpdatesAsync(SessionManager.CurrentUser.UserAccountId);
             }

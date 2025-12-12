@@ -94,15 +94,42 @@ namespace PASSWORD_LIS_Client.ViewModels
                 SetProperty(ref showNoFriendsMessage, value); 
             }
         }
-        public ICommand NavigateToProfileCommand { get; }
-        public ICommand ViewFriendRequestsCommand { get; }
-        public ICommand AddFriendCommand { get; }
-        public ICommand DeleteFriendCommand { get; }
-        public ICommand ShowTopPlayersCommand { get; }
-        public ICommand HowToPlayCommand { get; }
-        public ICommand SettingsCommand { get; }
-        public ICommand JoinGameCommand { get; }
-        public ICommand CreateGameCommand { get; }
+        public ICommand NavigateToProfileCommand 
+        { 
+            get; 
+        }
+        public ICommand ViewFriendRequestsCommand 
+        { 
+            get; 
+        }
+        public ICommand AddFriendCommand 
+        { 
+            get; 
+        }
+        public ICommand DeleteFriendCommand 
+        { 
+            get; 
+        }
+        public ICommand ShowTopPlayersCommand 
+        { 
+            get; 
+        }
+        public ICommand HowToPlayCommand 
+        { 
+            get; 
+        }
+        public ICommand SettingsCommand 
+        { 
+            get; 
+        }
+        public ICommand JoinGameCommand 
+        { 
+            get; 
+        }
+        public ICommand CreateGameCommand 
+        { 
+            get; 
+        }
        
         public LobbyViewModel(IWindowService WindowService, IFriendsManagerService FriendsManagerService, 
             IWaitingRoomManagerService WaitingRoomManagerService,IReportManagerService ReportManagerService)
@@ -159,7 +186,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         private void NavigateToProfile(object parameter)
         {
             var profileViewModel = new ProfileViewModel(App.ProfileManagerService, App.WindowService);
-            var profilePage = new ProfilePage { DataContext = profileViewModel };
+            var profilePage = new ProfilePage 
+            { 
+                DataContext = profileViewModel 
+            };
             windowService.NavigateTo(profilePage);
         }
 
@@ -199,7 +229,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         private void ViewFriendRequests(object parameter)
         {
             var friendRequestsViewModel = new FriendRequestsViewModel(App.FriendsManagerService, App.WindowService);
-            var friendRequestsWindow = new FriendRequestsWindow { DataContext = friendRequestsViewModel };
+            var friendRequestsWindow = new FriendRequestsWindow 
+            { 
+                DataContext = friendRequestsViewModel 
+            };
             friendRequestsWindow.ShowDialog();
 
             _ = LoadFriendsAsync();
@@ -207,7 +240,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         private void AddFriend(object parameter)
         {
             var addFriendViewModel = new AddFriendViewModel(App.FriendsManagerService, App.WindowService);
-            var addFriendWindow = new AddFriendWindow { DataContext = addFriendViewModel };
+            var addFriendWindow = new AddFriendWindow 
+            { 
+                DataContext = addFriendViewModel 
+            };
             addFriendWindow.ShowDialog();
         }
 
@@ -290,7 +326,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         private void ShowTopPlayers(object parameter)
         {
             var topPlayersViewModel = new TopPlayersViewModel(App.TopPlayersManagerService, App.WindowService);
-            var topPlayersWindow = new TopPlayersWindow { DataContext = topPlayersViewModel};
+            var topPlayersWindow = new TopPlayersWindow 
+            { 
+                DataContext = topPlayersViewModel
+            };
             topPlayersWindow.ShowDialog();
         }
         private static void ShowHowToPlay(object parameter)
@@ -303,7 +342,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             var settingsViewModel = new SettingsViewModel(App.WindowService, 
                 App.FriendsManagerService, App.BackgroundMusicService);
-            var settingsWindow = new SettingsWindow { DataContext = settingsViewModel };
+            var settingsWindow = new SettingsWindow 
+            { 
+                DataContext = settingsViewModel 
+            };
             settingsWindow.ShowDialog();
 
             if (settingsViewModel.WasLogoutSuccessful)
@@ -336,7 +378,10 @@ namespace PASSWORD_LIS_Client.ViewModels
                     }
                     else
                     {
-                        var waitingRoomPage = new WaitingRoomPage { DataContext = waitingRoomViewModel };
+                        var waitingRoomPage = new WaitingRoomPage 
+                        { 
+                            DataContext = waitingRoomViewModel 
+                        };
                         windowService.NavigateTo(waitingRoomPage);
                     }
                 }
@@ -385,7 +430,10 @@ namespace PASSWORD_LIS_Client.ViewModels
                     }
                     else
                     {
-                        var waitingRoomPage = new WaitingRoomPage { DataContext = waitingRoomViewModel };
+                        var waitingRoomPage = new WaitingRoomPage 
+                        { 
+                            DataContext = waitingRoomViewModel 
+                        };
                         windowService.NavigateTo(waitingRoomPage);
                     }
                 }

@@ -7,7 +7,11 @@ namespace PASSWORD_LIS_Client.Utils
 {
     public class TranslateExtension : MarkupExtension
     {
-        public string Key { get; set; }
+        public string Key 
+        { 
+            get; 
+            set; 
+        }
 
         public TranslateExtension(string Key)
         {

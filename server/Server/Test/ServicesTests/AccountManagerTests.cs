@@ -33,7 +33,11 @@ namespace Test.ServicesTests
         [Fact]
         public async Task CreateAccount_ShouldCompleteSuccessfully_WhenDependenciesSucceed()
         {
-            NewAccountDTO newAccountDto = new NewAccountDTO { Email = "test@example.com", Password = "Password123!" };
+            NewAccountDTO newAccountDto = new NewAccountDTO 
+            { 
+                Email = "test@example.com", 
+                Password = "Password123!" 
+            };
             string generatedCode = "123456";
 
             mockRepository.Setup(repo => repo.CreateAccountAsync(It.IsAny<UserAccount>()))

@@ -9,7 +9,10 @@ namespace PASSWORD_LIS_Client.Utils
 {
     public static class FaultHelpers
     {
-        private static readonly string[] FaultCodeNames = { "ErrorCode", "errorCode", "Code", "code" };
+        private static readonly string[] FaultCodeNames = 
+        {
+            "ErrorCode", "errorCode", "Code", "code" 
+        };
         public static bool TryConvertToTypedFault<T>(FaultException faultException, out FaultException<T> typedFault) where T : class
         {
             typedFault = null;

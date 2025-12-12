@@ -31,21 +31,36 @@ namespace Test.ServicesTests
             var email = "test@example.com";
             var password = "ValidPassword123!";
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
-            var mockPlayer = new Player { Id = 10 };
-            var mockAccount = new UserAccount { Id = 1, Nickname = "testuser", Email = email, 
+            var mockPlayer = new Player 
+            { 
+                Id = 10 
+            };
+            var mockAccount = new UserAccount 
+            { 
+                Id = 1, Nickname = "testuser", Email = email, 
                 FirstName = "Test", LastName = "User", PasswordHash = hashedPassword, 
-                PhotoId = 1, Player = new List<Player> { mockPlayer }, SocialAccount = new List<SocialAccount>() };
+                PhotoId = 1, Player = new List<Player> 
+                { 
+                    mockPlayer 
+                }, SocialAccount = new List<SocialAccount>() 
+            };
 
             mockRepository.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync(mockAccount);
 
             var result = await loginManager.LoginAsync(email, password);
 
-            var expected = new { NotNull = true, UserAccountId = mockAccount.Id, PlayerId = mockPlayer.Id, 
-                Nickname = mockAccount.Nickname, Calls = 1 };
-            var actual = new { NotNull = result != null, UserAccountId = result!.UserAccountId,
+            var expected = new 
+            {
+                NotNull = true, UserAccountId = mockAccount.Id, PlayerId = mockPlayer.Id, 
+                Nickname = mockAccount.Nickname, Calls = 1 
+            };
+            var actual = new 
+            { 
+                NotNull = result != null, UserAccountId = result!.UserAccountId,
                 PlayerId = result.PlayerId, Nickname = result.Nickname, 
                 Calls = mockRepository.Invocations.Count(i => 
-                i.Method.Name == nameof(IAccountRepository.GetUserByEmailAsync)) };
+                i.Method.Name == nameof(IAccountRepository.GetUserByEmailAsync)) 
+            };
             Assert.Equal(expected, actual);
         }
 
@@ -59,10 +74,16 @@ namespace Test.ServicesTests
 
             var result = await loginManager.LoginAsync(email, password);
 
-            var expected = new { NotNull = true, UserAccountId = -1, Calls = 1 };
-            var actual = new { NotNull = result != null, UserAccountId = result!.UserAccountId,
+            var expected = new 
+            { 
+                NotNull = true, UserAccountId = -1, Calls = 1 
+            };
+            var actual = new 
+            { 
+                NotNull = result != null, UserAccountId = result!.UserAccountId,
                 Calls = mockRepository.Invocations.Count(i => 
-                i.Method.Name == nameof(IAccountRepository.GetUserByEmailAsync)) };
+                i.Method.Name == nameof(IAccountRepository.GetUserByEmailAsync)) 
+            };
             Assert.Equal(expected, actual);
         }
 
@@ -73,18 +94,31 @@ namespace Test.ServicesTests
             var correctPassword = "ValidPassword123!";
             var wrongPassword = "WrongPassword!";
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(correctPassword);
-            var mockAccount = new UserAccount { Id = 1, Nickname = "testuser", 
-                Email = email, PasswordHash = hashedPassword, Player = new List<Player> { new Player { Id = 10 } },
-                SocialAccount = new List<SocialAccount>() };
+            var mockAccount = new UserAccount 
+            { 
+                Id = 1, Nickname = "testuser", 
+                Email = email, PasswordHash = hashedPassword, Player = new List<Player> 
+                { 
+                    new Player { Id = 10 
+                    } 
+                },
+                SocialAccount = new List<SocialAccount>() 
+            };
 
             mockRepository.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync(mockAccount);
 
             var result = await loginManager.LoginAsync(email, wrongPassword);
 
-            var expected = new { NotNull = true, UserAccountId = -1, Calls = 1 };
-            var actual = new { NotNull = result != null, UserAccountId = result!.UserAccountId,
+            var expected = new 
+            { 
+                NotNull = true, UserAccountId = -1, Calls = 1 
+            };
+            var actual = new 
+            { 
+                NotNull = result != null, UserAccountId = result!.UserAccountId,
                 Calls = mockRepository.Invocations.Count(i => 
-                i.Method.Name == nameof(IAccountRepository.GetUserByEmailAsync)) };
+                i.Method.Name == nameof(IAccountRepository.GetUserByEmailAsync)) 
+            };
             Assert.Equal(expected, actual);
         }
 
@@ -94,17 +128,26 @@ namespace Test.ServicesTests
             var email = "test@example.com";
             var password = "ValidPassword123!";
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
-            var mockAccount = new UserAccount { Id = 1, Nickname = "testuser", Email = email,
-                PasswordHash = hashedPassword, Player = new List<Player>(), SocialAccount = new List<SocialAccount>()};
+            var mockAccount = new UserAccount 
+            { 
+                Id = 1, Nickname = "testuser", Email = email,
+                PasswordHash = hashedPassword, Player = new List<Player>(), SocialAccount = new List<SocialAccount>()
+            };
 
             mockRepository.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync(mockAccount);
 
             var result = await loginManager.LoginAsync(email, password);
 
-            var expected = new { NotNull = true, UserAccountId = -1, Calls = 1 };
-            var actual = new { NotNull = result != null, UserAccountId = result!.UserAccountId,
+            var expected = new 
+            { 
+                NotNull = true, UserAccountId = -1, Calls = 1 
+            };
+            var actual = new 
+            { 
+                NotNull = result != null, UserAccountId = result!.UserAccountId,
                 Calls = mockRepository.Invocations.Count(i => 
-                i.Method.Name == nameof(IAccountRepository.GetUserByEmailAsync)) };
+                i.Method.Name == nameof(IAccountRepository.GetUserByEmailAsync)) 
+            };
             Assert.Equal(expected, actual);
         }
 
@@ -136,7 +179,13 @@ namespace Test.ServicesTests
                 Id = 1,
                 Email = email,
                 PasswordHash = invalidHash,
-                Player = new List<Player> { new Player { Id = 10 } },
+                Player = new List<Player> 
+                {
+                    new Player 
+                    { 
+                        Id = 10 
+                    } 
+                },
                 SocialAccount = new List<SocialAccount>()
             };
 
@@ -241,8 +290,11 @@ namespace Test.ServicesTests
         public async Task SendVerificationCodeAsync_ShouldSend_WhenUserExistsAndNotVerified()
         {
             var email = "code@ex.com";
-            var account = new UserAccount { Email = email, EmailVerified = false, 
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("x"), Player = new List<Player>() };
+            var account = new UserAccount 
+            { 
+                Email = email, EmailVerified = false, 
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("x"), Player = new List<Player>() 
+            };
             mockRepository.Setup(r => r.GetUserByEmailAsync(email)).ReturnsAsync(account);
             mockCodeService.Setup(c => c.GenerateAndStoreCode(email, CodeType.EmailVerification)).Returns("123456");
 
@@ -256,8 +308,11 @@ namespace Test.ServicesTests
         public async Task SendVerificationCodeAsync_ShouldNotSend_WhenUserVerified()
         {
             var email = "verified@ex.com";
-            var account = new UserAccount { Email = email, EmailVerified = true,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("x"), Player = new List<Player>() };
+            var account = new UserAccount 
+            { 
+                Email = email, EmailVerified = true,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("x"), Player = new List<Player>() 
+            };
             mockRepository.Setup(r => r.GetUserByEmailAsync(email)).ReturnsAsync(account);
 
             await loginManager.SendVerificationCodeAsync(email);
@@ -309,25 +364,49 @@ namespace Test.ServicesTests
             var email = "fulltest@example.com";
             var password = "ValidPassword123!";
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
-            var mockPlayer = new Player { Id = 10 };
-            var socialAccount1 = new SocialAccount { Provider = "Instagram", Username = "user@instagram.com" };
-            var socialAccount2 = new SocialAccount { Provider = "Facebook", Username = "user@facebook.com" };
-            var mockAccount = new UserAccount { Id = 1, Nickname = "testuser", Email = email, FirstName = "Test",
-                LastName = "User", PasswordHash = hashedPassword, PhotoId = 5, Player = new List<Player> { mockPlayer }, 
-                SocialAccount = new List<SocialAccount> { socialAccount1, socialAccount2 } };
+            var mockPlayer = new Player 
+            { 
+                Id = 10 
+            };
+            var socialAccount1 = new SocialAccount 
+            { 
+                Provider = "Instagram", Username = "user@instagram.com" 
+            };
+            var socialAccount2 = new SocialAccount 
+            { 
+                Provider = "Facebook", Username = "user@facebook.com" 
+            };
+            var mockAccount = new UserAccount 
+            { 
+                Id = 1, Nickname = "testuser", Email = email, FirstName = "Test",
+                LastName = "User", PasswordHash = hashedPassword, PhotoId = 5, Player = new List<Player> 
+                { 
+                    mockPlayer 
+                }, 
+                SocialAccount = new List<SocialAccount> 
+                { 
+                    socialAccount1, socialAccount2 
+                } 
+            };
 
             mockRepository.Setup(repo => repo.GetUserByEmailAsync(email)).ReturnsAsync(mockAccount);
 
             var result = await loginManager.LoginAsync(email, password);
 
-            var expected = new { NotNull = true, UserAccountId = 1, PlayerId = 10, Nickname = "testuser", 
+            var expected = new 
+            { 
+                NotNull = true, UserAccountId = 1, PlayerId = 10, Nickname = "testuser", 
                 Email = email, FirstName = "Test", LastName = "User", PhotoId = 5, SocialCount = 2, 
-                Instagram = "user@instagram.com", Facebook = "user@facebook.com" };
-            var actual = new { NotNull = result != null, UserAccountId = result!.UserAccountId,
+                Instagram = "user@instagram.com", Facebook = "user@facebook.com" 
+            };
+            var actual = new 
+            { 
+                NotNull = result != null, UserAccountId = result!.UserAccountId,
                 PlayerId = result.PlayerId, Nickname = result.Nickname, Email = result.Email, 
                 FirstName = result.FirstName, LastName = result.LastName, PhotoId = result.PhotoId,
                 SocialCount = result.SocialAccounts.Count, Instagram = result.SocialAccounts["Instagram"],
-                Facebook = result.SocialAccounts["Facebook"] };
+                Facebook = result.SocialAccounts["Facebook"] 
+            };
             Assert.Equal(expected, actual);
         }
 
@@ -337,7 +416,10 @@ namespace Test.ServicesTests
             var email = "nophoto@example.com";
             var password = "ValidPassword123!";
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
-            var mockPlayer = new Player { Id = 10 };
+            var mockPlayer = new Player 
+            { 
+                Id = 10 
+            };
             var mockAccount = new UserAccount
             {
                 Id = 1,
@@ -345,7 +427,10 @@ namespace Test.ServicesTests
                 Email = email,
                 PasswordHash = hashedPassword,
                 PhotoId = null,
-                Player = new List<Player> { mockPlayer },
+                Player = new List<Player> 
+                { 
+                    mockPlayer 
+                },
                 SocialAccount = new List<SocialAccount>()
             };
 
@@ -369,7 +454,10 @@ namespace Test.ServicesTests
                 Nickname = "testuser",
                 Email = email,
                 PasswordHash = hashedPassword,
-                Player = new List<Player?> { null },
+                Player = new List<Player?> 
+                { 
+                    null 
+                },
                 SocialAccount = new List<SocialAccount>()
             };
 

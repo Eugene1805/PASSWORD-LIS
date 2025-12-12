@@ -29,7 +29,11 @@ namespace Test.ServicesTests
                 FirstName = "UpdatedFName",
                 LastName = "UpdatedLName",
                 PhotoId = 2,
-                SocialAccounts = new Dictionary<string, string> { { "X", "updatedX" } }
+                SocialAccounts = new Dictionary<string, string> 
+                { 
+                    { "X", "updatedX" 
+                    } 
+                }
             };
 
             mockRepository.Setup(repo => repo.UpdateUserProfileAsync(

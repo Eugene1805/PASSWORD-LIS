@@ -15,7 +15,11 @@ namespace Test.ServicesTests.ServicesUtilTest
             string code = codeService.GenerateAndStoreCode(email, CodeType.EmailVerification);
 
 
-            var expected = new { NotNull = true, Length = 6, IsNumeric = true };
+            var expected = new 
+            { 
+                NotNull = true, Length = 6,
+                IsNumeric = true 
+            };
             var actual = new
             {
                 NotNull = code != null,

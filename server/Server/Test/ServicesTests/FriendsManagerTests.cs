@@ -39,15 +39,21 @@ namespace Test.ServicesTests
             {
                 Id = accountId,
                 Nickname = nick,
-                Player = [new Player { Id = playerId, UserAccountId = accountId, UserAccount = 
-                new UserAccount { Id = accountId, Nickname = nick } }]
+                Player = [new Player {
+                    Id = playerId, 
+                    UserAccountId = accountId, 
+                    UserAccount = new UserAccount 
+                    { 
+                        Id = accountId, 
+                        Nickname = nick 
+                    } 
+                }]
             };
         }
 
         [Fact]
         public async Task GetFriendsAsync_ShouldMapToDTOs()
         {
-
             var account2 = MakeAccount(2, 20, "B");
             var account3 = MakeAccount(3, 30, "C");
             friendshipRepository.Setup(r => r.GetFriendsByUserAccountIdAsync(1)).ReturnsAsync(new List<UserAccount> 
@@ -55,9 +61,18 @@ namespace Test.ServicesTests
 
             var list = await sut.GetFriendsAsync(1);
 
-            var expected = new { Count = 2, HasB = true, HasC = true };
-            var actual = new { Count = list.Count, HasB = list.Any(f => f.PlayerId == 20 && f.Nickname == "B"),
-                HasC = list.Any(f => f.PlayerId == 30 && f.Nickname == "C") };
+            var expected = new 
+            { 
+                Count = 2, 
+                HasB = true, 
+                HasC = true 
+            };
+            var actual = new 
+            { 
+                Count = list.Count, 
+                HasB = list.Any(f => f.PlayerId == 20 && f.Nickname == "B"),
+                HasC = list.Any(f => f.PlayerId == 30 && f.Nickname == "C") 
+            };
             Assert.Equal(expected, actual);
         }
 
@@ -211,9 +226,16 @@ namespace Test.ServicesTests
             contextWrapper.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(callbackA.Object);
             sut.SubscribeToFriendUpdatesAsync(200);
             var reqAcc = MakeAccount(201, 21, "Requester");
-            var friendReq = new Friendship { RequesterId = 21, Player1 = reqAcc.Player.First() };
+            var friendReq = new Friendship 
+            { 
+                RequesterId = 21, 
+                Player1 = reqAcc.Player.First() 
+            };
             friendshipRepository.Setup(r => r.GetPendingRequestsAsync(200))
-                .ReturnsAsync(new List<Friendship> { friendReq });
+                .ReturnsAsync(new List<Friendship> 
+                {
+                    friendReq 
+                });
             
             var list = await sut.GetPendingRequestsAsync();
             
@@ -313,7 +335,11 @@ namespace Test.ServicesTests
             
             contextWrapper.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(callbackA.Object);
             sut.SubscribeToFriendUpdatesAsync(300);
-            var requesterNoPlayer = new UserAccount { Id = 300, Nickname = "A", Player = new List<Player>() };
+            var requesterNoPlayer = new UserAccount 
+            { 
+                Id = 300, Nickname = "A", 
+                Player = new List<Player>() 
+            };
             var addressee = MakeAccount(310, 31, "B");
             accountRepository.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(requesterNoPlayer);
             accountRepository.Setup(a => a.GetUserByEmailAsync("b@test.com")).ReturnsAsync(addressee);
@@ -345,7 +371,12 @@ namespace Test.ServicesTests
             contextWrapper.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(callbackA.Object);
             sut.SubscribeToFriendUpdatesAsync(300);
             var requester = MakeAccount(300, 30, "A");
-            var addresseeNoPlayer = new UserAccount { Id = 310, Nickname = "B", Player = new List<Player>() };
+            var addresseeNoPlayer = new UserAccount 
+            { 
+                Id = 310, 
+                Nickname = "B", 
+                Player = new List<Player>() 
+            };
             accountRepository.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(requester);
             accountRepository.Setup(a => a.GetUserByEmailAsync("b@test.com")).ReturnsAsync(addresseeNoPlayer);
 
@@ -433,7 +464,12 @@ namespace Test.ServicesTests
 
             contextWrapper.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(callbackA.Object);
             sut.SubscribeToFriendUpdatesAsync(300);
-            var addresseeNoPlayer = new UserAccount { Id = 300, Nickname = "A", Player = new List<Player>() };
+            var addresseeNoPlayer = new UserAccount 
+            { 
+                Id = 300,
+                Nickname = "A", 
+                Player = new List<Player>() 
+            };
             accountRepository.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(addresseeNoPlayer);
 
             await sut.RespondToFriendRequestAsync(31, true);
@@ -483,7 +519,10 @@ namespace Test.ServicesTests
             accountRepository.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(requester);
             accountRepository.Setup(a => a.GetUserByEmailAsync("b@test.com")).ReturnsAsync(addressee);
             friendshipRepository.Setup(r => r.GetFriendsByUserAccountIdAsync(300))
-                .ReturnsAsync(new List<UserAccount> { addressee });
+                .ReturnsAsync(new List<UserAccount> 
+                {
+                    addressee 
+                });
             
             var result = await sut.SendFriendRequestAsync("b@test.com");
 
@@ -492,7 +531,13 @@ namespace Test.ServicesTests
             friendshipRepository.Setup(r => r.GetFriendsByUserAccountIdAsync(300))
                 .ReturnsAsync(new List<UserAccount>());
             friendshipRepository.Setup(r => r.GetPendingRequestsAsync(310))
-                .ReturnsAsync(new List<Friendship> { new Friendship { RequesterId = 30 } });
+                .ReturnsAsync(new List<Friendship> 
+                { 
+                    new Friendship 
+                    { 
+                        RequesterId = 30 
+                    } 
+                });
 
             result = await sut.SendFriendRequestAsync("b@test.com");
 
@@ -501,7 +546,13 @@ namespace Test.ServicesTests
             friendshipRepository.Setup(r => r.GetPendingRequestsAsync(310))
                 .ReturnsAsync(new List<Friendship>());
             friendshipRepository.Setup(r => r.GetPendingRequestsAsync(300))
-                .ReturnsAsync(new List<Friendship> { new Friendship { RequesterId = 31 } });
+                .ReturnsAsync(new List<Friendship> 
+                { 
+                    new Friendship 
+                    { 
+                        RequesterId = 31 
+                    } 
+                });
 
             result = await sut.SendFriendRequestAsync("b@test.com");
 
@@ -586,7 +637,12 @@ namespace Test.ServicesTests
             contextWrapper.Setup(c => c.GetCallbackChannel<IFriendsCallback>()).Returns(callbackB.Object);
             sut.SubscribeToFriendUpdatesAsync(310);
             var addresseeAcc = MakeAccount(300, 30, "Addressee");
-            var requesterNoPlayer = new UserAccount { Id = 310, Nickname = "B", Player = new List<Player>() };
+            var requesterNoPlayer = new UserAccount 
+            { 
+                Id = 310, 
+                Nickname = "B", 
+                Player = new List<Player>() 
+            };
             accountRepository.Setup(a => a.GetUserByUserAccountIdAsync(300)).ReturnsAsync(addresseeAcc);
             accountRepository.Setup(a => a.GetUserByPlayerIdAsync(31)).ReturnsAsync(requesterNoPlayer);
             friendshipRepository.Setup(r => r.RespondToFriendRequestAsync(31, 30, true)).ReturnsAsync(true);

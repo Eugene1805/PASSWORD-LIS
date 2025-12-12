@@ -233,10 +233,22 @@ namespace PASSWORD_LIS_Client.ViewModels
             set => SetProperty(ref isSuddenDeathVisible, value);
         }
 
-        public ICommand SubmitClueCommand { get; }
-        public ICommand SubmitGuessCommand { get; }
-        public ICommand PassTurnCommand { get; }
-        public ICommand RequestHintCommand { get; }
+        public ICommand SubmitClueCommand 
+        { 
+            get; 
+        }
+        public ICommand SubmitGuessCommand 
+        { 
+            get; 
+        }
+        public ICommand PassTurnCommand 
+        { 
+            get; 
+        }
+        public ICommand RequestHintCommand 
+        { 
+            get; 
+        }
 
         public GameViewModel(IGameManagerService GameManagerService, IWindowService WindowService, 
             string GameCode, WaitingRoomManagerServiceReference.PlayerDTO WaitingRoomPlayer) : base(WindowService)
@@ -558,8 +570,10 @@ namespace PASSWORD_LIS_Client.ViewModels
                 serverGuardian?.Stop();
                 var validationViewModel = new RoundValidationViewModel(
                 turns, gameManagerService, windowService, gameCode, currentPlayer.Id, currentLanguage);
-                var validationPage = new RoundValidationPage { DataContext = validationViewModel };
-
+                var validationPage = new RoundValidationPage 
+                { 
+                    DataContext = validationViewModel 
+                };
                 windowService.NavigateTo(validationPage);
 
             });

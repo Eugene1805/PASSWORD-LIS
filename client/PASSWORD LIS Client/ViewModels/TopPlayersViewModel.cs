@@ -14,21 +14,29 @@ namespace PASSWORD_LIS_Client.ViewModels
         public ObservableCollection<TeamDTO> TopTeams
         {
             get => topTeams;
-            set { topTeams = value; OnPropertyChanged(); }
+            set 
+            { 
+                topTeams = value; 
+                OnPropertyChanged(); 
+            }
         }
 
         private bool isLoading = true;
         public bool IsLoading
         {
             get => isLoading;
-            set { isLoading = value; OnPropertyChanged(); }
+            set 
+            { 
+                isLoading = value; 
+                OnPropertyChanged(); 
+            }
         }
 
-        public TopPlayersViewModel(ITopPlayersManagerService playersManagerService, IWindowService windowService)
-            : base(windowService)
+        public TopPlayersViewModel(ITopPlayersManagerService PlayersManagerService, IWindowService WindowService)
+            : base(WindowService)
         {
-            this.playersManagerClient = playersManagerService;
-            this.windowService = windowService;
+            this.playersManagerClient = PlayersManagerService;
+            this.windowService = WindowService;
             TopTeams = new ObservableCollection<TeamDTO>();
             _ = LoadTopPlayersAsync();
         }

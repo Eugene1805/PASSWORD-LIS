@@ -62,19 +62,26 @@ namespace PASSWORD_LIS_Client.ViewModels
             get => emptyListMessage;
             set => SetProperty(ref emptyListMessage, value);
         }
-        public ObservableCollection<ValidationTurnViewModel> TurnsToValidate { get; private set; }
-        public ICommand SubmitVotesCommand { get; }
-        public RoundValidationViewModel(List<TurnHistoryDTO> turns, IGameManagerService gameManagerService, IWindowService windowService,
-            string gameCode, int playerId, string language) : base(windowService)
+        public ObservableCollection<ValidationTurnViewModel> TurnsToValidate 
+        { 
+            get; 
+            private set; 
+        }
+        public ICommand SubmitVotesCommand 
+        { 
+            get; 
+        }
+        public RoundValidationViewModel(List<TurnHistoryDTO> Turns, IGameManagerService GameManagerService,
+            IWindowService WindowService,string GameCode, int PlayerId, string Language) : base(WindowService)
         {
-            this.gameManagerService = gameManagerService;
-            this.gameCode = gameCode;
-            this.playerId = playerId;
+            this.gameManagerService = GameManagerService;
+            this.gameCode = GameCode;
+            this.playerId = PlayerId;
 
             serverGuardian = CreateServerGuardian();
             StartServerMonitoring();
             SubscribeToServiceEvents();
-            InitializeValidationList(turns, language);
+            InitializeValidationList(Turns, Language);
 
             SubmitVotesCommand = new RelayCommand(async (_) => await SubmitVotesAsync(), (_) => CanSubmit);
         }
@@ -118,7 +125,8 @@ namespace PASSWORD_LIS_Client.ViewModels
             {
                 IsListEmpty = false;
                 EmptyListMessage = string.Empty;
-                var groupedTurns = turns.Where(turn => turn.Password.EnglishWord != EndGameMarker && turn.Password.SpanishWord != EndGameMarker)
+                var groupedTurns = turns.Where(
+                    turn => turn.Password.EnglishWord != EndGameMarker && turn.Password.SpanishWord != EndGameMarker)
                     .GroupBy(turn => turn.TurnId)
                     .Select(group => new ValidationTurnViewModel(group, language));
                 TurnsToValidate = new ObservableCollection<ValidationTurnViewModel>(groupedTurns);
@@ -143,8 +151,8 @@ namespace PASSWORD_LIS_Client.ViewModels
             try
             {
                 validationReceived = true;
-                log.InfoFormat("OnValidationComplete processing - Red: {0}, Blue: {1}", result.NewRedTeamScore, result.NewBlueTeamScore);
-                LogCurrentState();
+                log.InfoFormat("OnValidationComplete processing - Red: {0}, Blue: {1}",
+                    result.NewRedTeamScore, result.NewBlueTeamScore);
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     serverGuardian?.Stop();
@@ -261,23 +269,6 @@ namespace PASSWORD_LIS_Client.ViewModels
             return isMatchEnding || validationReceived;
         }
 
-        private void LogCurrentState()
-        {
-            try
-            {
-                log.InfoFormat("Current state - CanSubmit: {0}, TurnsCount: {1}", CanSubmit, TurnsToValidate.Count);
-                log.InfoFormat("Application.Current.MainWindow null: {0}", Application.Current?.MainWindow == null);
-
-                if (Application.Current?.MainWindow != null && Application.Current.MainWindow.Content is Frame frame)
-                {
-                    log.InfoFormat("Frame CanGoBack: {0}, Content: {1}", frame.CanGoBack, frame.Content?.GetType().Name);
-                }
-            }
-            catch (Exception ex)
-            {
-                log.Error($"Error logging current state: {ex.Message}", ex);
-            }
-        }
         private void StopServiceMonitoring()
         {
             try
@@ -335,7 +326,7 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
         }
 
-        private void HandleConnectionError(Exception ex, string customMessage)
+        private void HandleConnectionError(Exception exception, string customMessage)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -344,17 +335,17 @@ namespace PASSWORD_LIS_Client.ViewModels
 
                 serverGuardian?.Stop();
 
-                if (ex is TimeoutException)
+                if (exception is TimeoutException)
                 {
                     title = Properties.Langs.Lang.timeLimitTitleText;
                     message = Properties.Langs.Lang.serverTimeoutText;
                 }   
-                else if (ex is EndpointNotFoundException)
+                else if (exception is EndpointNotFoundException)
                 {
                     title = Properties.Langs.Lang.connectionErrorTitleText;
                     message = Properties.Langs.Lang.serverConnectionInternetErrorText;
                 }
-                else if (ex is CommunicationException)
+                else if (exception is CommunicationException)
                 {
                     title = Properties.Langs.Lang.networkErrorTitleText;
                     message = Properties.Langs.Lang.serverCommunicationErrorText;

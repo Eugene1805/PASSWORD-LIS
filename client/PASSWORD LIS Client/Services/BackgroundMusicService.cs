@@ -34,7 +34,11 @@ namespace PASSWORD_LIS_Client.Services
             }
         }
 
-        public bool IsPlaying { get; private set; }
+        public bool IsPlaying 
+        { 
+            get; 
+            private set; 
+        }
 
         public BackgroundMusicService()
         {

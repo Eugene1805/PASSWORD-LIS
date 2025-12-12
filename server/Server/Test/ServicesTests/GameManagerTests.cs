@@ -31,10 +31,22 @@ namespace Test.ServicesTests
         {
             return
             [
-                new PlayerDTO{ Id =1, Nickname = "RedClue", Team = MatchTeam.RedTeam, Role = PlayerRole.ClueGuy },
-                new PlayerDTO{ Id =2, Nickname = "BlueClue", Team = MatchTeam.BlueTeam, Role = PlayerRole.ClueGuy },
-                new PlayerDTO{ Id =3, Nickname = "RedGuess", Team = MatchTeam.RedTeam, Role = PlayerRole.Guesser },
-                new PlayerDTO{ Id =4, Nickname = "BlueGuess", Team = MatchTeam.BlueTeam, Role = PlayerRole.Guesser }
+                new PlayerDTO
+                { 
+                    Id =1, Nickname = "RedClue", Team = MatchTeam.RedTeam, Role = PlayerRole.ClueGuy 
+                },
+                new PlayerDTO
+                { 
+                    Id =2, Nickname = "BlueClue", Team = MatchTeam.BlueTeam, Role = PlayerRole.ClueGuy 
+                },
+                new PlayerDTO
+                { 
+                    Id =3, Nickname = "RedGuess", Team = MatchTeam.RedTeam, Role = PlayerRole.Guesser 
+                },
+                new PlayerDTO
+                { 
+                    Id =4, Nickname = "BlueGuess", Team = MatchTeam.BlueTeam, Role = PlayerRole.Guesser 
+                }
             ];
         }
 
@@ -92,9 +104,14 @@ namespace Test.ServicesTests
             var (sut, _) = CreateSut();
 
             var nullList = sut.CreateMatch("CODE1", null);
-            var less = sut.CreateMatch("CODE2", new List<PlayerDTO> { new PlayerDTO() });
-            var more = sut.CreateMatch("CODE3", new List<PlayerDTO> { new PlayerDTO(),
-                new PlayerDTO(), new PlayerDTO(), new PlayerDTO(), new PlayerDTO() });
+            var less = sut.CreateMatch("CODE2", new List<PlayerDTO> 
+            { 
+                new PlayerDTO() 
+            });
+            var more = sut.CreateMatch("CODE3", new List<PlayerDTO> 
+            { new PlayerDTO(),
+                new PlayerDTO(), new PlayerDTO(), new PlayerDTO(), new PlayerDTO() 
+            });
 
             Assert.False(nullList);
             Assert.False(less);
@@ -407,10 +424,22 @@ namespace Test.ServicesTests
 
             var history = new List<TurnHistoryDTO>
             {
-                new TurnHistoryDTO { TurnId = 0, Password = 
-                new PasswordWordDTO{ EnglishWord = "WORD1", SpanishWord = "PALABRA1"}, ClueUsed = "clue-0" },
-                new TurnHistoryDTO { TurnId = 1, Password = 
-                new PasswordWordDTO{ EnglishWord = "WORD2", SpanishWord = "PALABRA2"}, ClueUsed = "clue-1" },
+                new TurnHistoryDTO 
+                { 
+                    TurnId = 0, Password = 
+                new PasswordWordDTO
+                { 
+                    EnglishWord = "WORD1", SpanishWord = "PALABRA1"
+                }, ClueUsed = "clue-0" 
+                },
+                new TurnHistoryDTO 
+                { 
+                    TurnId = 1, Password = 
+                new PasswordWordDTO
+                { 
+                    EnglishWord = "WORD2", SpanishWord = "PALABRA2"
+                }, ClueUsed = "clue-1" 
+                },
             };
             redHistoryProp?.SetValue(matchStateObj, history);
 
@@ -430,10 +459,22 @@ namespace Test.ServicesTests
             redClue.Verify(c => c.OnBeginRoundValidation(It.Is<List<TurnHistoryDTO>>(l => l.Count == 0)), Times.Once);
             redGuess.Verify(c => c.OnBeginRoundValidation(It.Is<List<TurnHistoryDTO>>(l => l.Count == 0)), Times.Once);
 
-            var votesBlueClue = new List<ValidationVoteDTO> { new ValidationVoteDTO { TurnId =0, 
-                PenalizeSynonym = true } };
-            var votesBlueGuess = new List<ValidationVoteDTO> { new ValidationVoteDTO { TurnId =1,
-                PenalizeMultiword = true } };
+            var votesBlueClue = new List<ValidationVoteDTO> 
+            { 
+                new ValidationVoteDTO 
+                { 
+                    TurnId =0, 
+                    PenalizeSynonym = true 
+                } 
+            };
+            var votesBlueGuess = new List<ValidationVoteDTO> 
+            { 
+                new ValidationVoteDTO 
+                { 
+                    TurnId =1,
+                    PenalizeMultiword = true 
+                } 
+            };
             var emptyVotes = new List<ValidationVoteDTO>();
 
             await sut.SubmitValidationVotesAsync("GAME8",2, votesBlueClue); 

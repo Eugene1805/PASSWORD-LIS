@@ -70,7 +70,10 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
         }
 
-        public RelayCommand ChangePasswordCommand { get; }
+        public RelayCommand ChangePasswordCommand 
+        { 
+            get; 
+        }
 
         public ChangePasswordViewModel(string Email, string Code, IWindowService WindowService, 
             IPasswordResetManagerService PasswordResetService) : base(WindowService)

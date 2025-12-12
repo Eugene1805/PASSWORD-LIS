@@ -11,9 +11,18 @@ namespace PASSWORD_LIS_Client.ViewModels
         private readonly BackgroundMusicService musicService;
         private double volume;
 
-        public ICommand PlayCommand { get; }
-        public ICommand PauseCommand { get; }
-        public ICommand StopCommand { get; }
+        public ICommand PlayCommand 
+        { 
+            get; 
+        }
+        public ICommand PauseCommand 
+        { 
+            get; 
+        }
+        public ICommand StopCommand 
+        { 
+            get; 
+        }
 
         public double Volume
         {

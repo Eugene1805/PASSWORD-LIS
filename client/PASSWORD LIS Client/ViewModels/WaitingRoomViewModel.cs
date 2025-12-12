@@ -123,25 +123,52 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
         }
 
-        public ICommand SendMessageCommand { get; }
-        public ICommand LeaveRoomCommand { get; }
-        public ICommand ReportCommand { get; }
-        public ICommand StartGameCommand { get; }
-        public ICommand CopyGameCodeCommand { get; }
-        public ICommand InviteFriendCommand { get; }
-        public ICommand InviteByMailCommand { get; }
-        public ObservableCollection<string> ChatMessages { get; }
-        public ObservableCollection<PlayerDTO> ConnectedPlayers { get; }
+        public ICommand SendMessageCommand 
+        { 
+            get; 
+        }
+        public ICommand LeaveRoomCommand 
+        { 
+            get; 
+        }
+        public ICommand ReportCommand 
+        { 
+            get; 
+        }
+        public ICommand StartGameCommand 
+        { 
+            get; 
+        }
+        public ICommand CopyGameCodeCommand 
+        { 
+            get; 
+        }
+        public ICommand InviteFriendCommand 
+        { 
+            get; 
+        }
+        public ICommand InviteByMailCommand 
+        { 
+            get; 
+        }
+        public ObservableCollection<string> ChatMessages 
+        { 
+            get; 
+        }
+        public ObservableCollection<PlayerDTO> ConnectedPlayers 
+        { 
+            get; 
+        }
 
-        public WaitingRoomViewModel(IWaitingRoomManagerService roomManagerService, IWindowService windowService,
-            IFriendsManagerService friendsManagerService,IReportManagerService reportManagerService)
-            : base(windowService)
+        public WaitingRoomViewModel(IWaitingRoomManagerService RoomManagerService, IWindowService WindowService,
+            IFriendsManagerService FriendsManagerService,IReportManagerService ReportManagerService)
+            : base(WindowService)
         {
-            this.roomManagerClient = roomManagerService;
-            this.friendsManagerService = friendsManagerService;
-            this.reportManagerService = reportManagerService;
-            friendsManagerService.FriendAdded += OnFriendAdded;
-            friendsManagerService.FriendRemoved += OnFriendRemoved;
+            this.roomManagerClient = RoomManagerService;
+            this.friendsManagerService = FriendsManagerService;
+            this.reportManagerService = ReportManagerService;
+            FriendsManagerService.FriendAdded += OnFriendAdded;
+            FriendsManagerService.FriendRemoved += OnFriendRemoved;
 
             ChatMessages = new ObservableCollection<string>();
             ConnectedPlayers = new ObservableCollection<PlayerDTO>();
@@ -169,7 +196,7 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             this.GameCode = gameCode;
             this.IsHost = isHost;
-            this.IsGuest = SessionManager.CurrentUser == null || SessionManager.CurrentUser.PlayerId < 0;
+            this.IsGuest = SessionManager.CurrentUser == null || SessionManager.CurrentUser.PlayerId < GuesstIdLimit;
 
             await ExecuteAsync(async () =>
             {
@@ -337,7 +364,10 @@ namespace PASSWORD_LIS_Client.ViewModels
                     return;
                 }              
                 var gameViewModel = new GameViewModel(App.GameManagerService, windowService, gameCode, currentPlayer);
-                var gamePage = new GamePage { DataContext = gameViewModel };
+                var gamePage = new GamePage 
+                { 
+                    DataContext = gameViewModel 
+                };
                 windowService.NavigateTo(gamePage);
                 _ = gameViewModel.InitializeAsync();
             });
@@ -426,7 +456,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         {
             var showInvitationMailViewModel = new InvitationByMailViewModel(App.WaitRoomManagerService,
                 App.WindowService, GameCode, SessionManager.CurrentUser.Nickname);
-            var invitationWindow = new InvitationByMailWindow { DataContext = showInvitationMailViewModel };
+            var invitationWindow = new InvitationByMailWindow 
+            { 
+                DataContext = showInvitationMailViewModel 
+            };
             invitationWindow.ShowDialog();
         }
         private async Task LoadFriendsAsync()

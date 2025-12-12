@@ -39,7 +39,10 @@ namespace PASSWORD_LIS_Client.ViewModels
             set => SetProperty(ref isSending, value);
         }
 
-        public ICommand SendInvitationCommand { get; }
+        public ICommand SendInvitationCommand 
+        { 
+            get; 
+        }
 
         public InvitationByMailViewModel(IWaitingRoomManagerService RoomManagerClient,
             IWindowService WindowService, string GameCode, string InviterNickname) : base(WindowService)

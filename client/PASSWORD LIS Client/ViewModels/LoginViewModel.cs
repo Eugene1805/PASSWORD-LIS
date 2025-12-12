@@ -67,10 +67,22 @@ namespace PASSWORD_LIS_Client.ViewModels
             set { passwordError = value; OnPropertyChanged(); }
         }
 
-        public ICommand LoginCommand { get; }
-        public ICommand PlayAsGuestCommand { get; }
-        public ICommand NavigateToSignUpCommand { get; }
-        public ICommand NavigateToForgotPasswordCommand { get; }
+        public ICommand LoginCommand 
+        { 
+            get; 
+        }
+        public ICommand PlayAsGuestCommand 
+        { 
+            get; 
+        }
+        public ICommand NavigateToSignUpCommand 
+        { 
+            get; 
+        }
+        public ICommand NavigateToForgotPasswordCommand 
+        { 
+            get; 
+        }
 
         public LoginViewModel(ILoginManagerService LoginManagerService, IWindowService WindowService) 
             : base(WindowService)
@@ -169,7 +181,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         private void NavigateToSignUp(object parameter)
         {
             var signUpViewModel = new SignUpViewModel(App.AccountManagerService, windowService); 
-            var signUpWindow = new SignUpWindow { DataContext = signUpViewModel };
+            var signUpWindow = new SignUpWindow 
+            { 
+                DataContext = signUpViewModel 
+            };
             signUpWindow.Show();
             windowService.CloseWindow(this);
             windowService.CloseMainWindow();
@@ -178,7 +193,10 @@ namespace PASSWORD_LIS_Client.ViewModels
         private void NavigateToForgotPassword(object parameter)
         {
             var retrivePasswordViewModel = new RetrievePasswordViewModel(App.PasswordResetManagerService, windowService);
-            var retrievePasswordWindow = new RetrievePasswordWindow { DataContext = retrivePasswordViewModel};
+            var retrievePasswordWindow = new RetrievePasswordWindow 
+            { 
+                DataContext = retrivePasswordViewModel
+            };
             retrievePasswordWindow.ShowDialog();
             windowService.CloseWindow(this);
         }

@@ -60,8 +60,14 @@ namespace PASSWORD_LIS_Client.ViewModels
             } 
         }
 
-        public ICommand AcceptRequestCommand { get; }
-        public ICommand RejectRequestCommand { get; }
+        public ICommand AcceptRequestCommand 
+        { 
+            get; 
+        }
+        public ICommand RejectRequestCommand 
+        { 
+            get; 
+        }
 
 
         public FriendRequestsViewModel(IFriendsManagerService FriendsService, IWindowService WindowService)

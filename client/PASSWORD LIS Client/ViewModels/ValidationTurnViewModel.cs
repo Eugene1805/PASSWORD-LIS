@@ -9,11 +9,26 @@ namespace PASSWORD_LIS_Client.ViewModels
         private const string PassedTurnToken = "[]";
         private const string ClueSeparator = ", ";
 
-        public int TurnId { get; }
-        public string Word { get; }
-        public string Clues { get; }
-        public string Language { get; }
-        public bool IsPassed { get; }
+        public int TurnId 
+        { 
+            get; 
+        }
+        public string Word 
+        { 
+            get; 
+        }
+        public string Clues 
+        { 
+            get; 
+        }
+        public string Language 
+        { 
+            get; 
+        }
+        public bool IsPassed 
+        { 
+            get; 
+        }
 
         private bool penalizeSynonym;
         public bool PenalizeSynonym
@@ -29,13 +44,13 @@ namespace PASSWORD_LIS_Client.ViewModels
             set => SetProperty(ref penalizeMultiword, value);
         }
 
-        public ValidationTurnViewModel(IGrouping<int, TurnHistoryDTO> turnGroup, string language)
+        public ValidationTurnViewModel(IGrouping<int, TurnHistoryDTO> TurnGroup, string Language)
         {
-            var firstTurn = turnGroup.First();
+            var firstTurn = TurnGroup.First();
             TurnId = firstTurn.TurnId;
-            Language = language;
+            this.Language = Language;
 
-            if (Language.StartsWith(SpanishLanguageCode))
+            if (this.Language.StartsWith(SpanishLanguageCode))
             {
                 Word = firstTurn.Password.SpanishWord;
             }
@@ -44,7 +59,7 @@ namespace PASSWORD_LIS_Client.ViewModels
                 Word = firstTurn.Password.EnglishWord;
             }
 
-            var cluesList = turnGroup.Select(t => t.ClueUsed).ToList();
+            var cluesList = TurnGroup.Select(t => t.ClueUsed).ToList();
 
             IsPassed = cluesList.Contains(PassedTurnToken);
 

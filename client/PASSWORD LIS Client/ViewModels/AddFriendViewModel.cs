@@ -47,7 +47,10 @@ namespace PASSWORD_LIS_Client.ViewModels
             }
         }
 
-        public ICommand SendRequestCommand { get; }
+        public ICommand SendRequestCommand 
+        { 
+            get; 
+        }
 
         public AddFriendViewModel(IFriendsManagerService FriendsService, IWindowService WindowService) 
             : base(WindowService)
