@@ -30,7 +30,11 @@ namespace Test.ServicesTests
         [Fact]
         public void VerifyEmail_WhenCodeIsValid_ShouldCallRepositoryAndReturnTrue()
         {
-            var verificationDto = new EmailVerificationDTO { Email = "test@example.com", VerificationCode = "123456" };
+            var verificationDto = new EmailVerificationDTO 
+            { 
+                Email = "test@example.com", 
+                VerificationCode = "123456" 
+            };
 
             mockCodeService.Setup(s => s.ValidateCode(verificationDto.Email, verificationDto.VerificationCode,
                 CodeType.EmailVerification,true)).Returns(true);
@@ -48,8 +52,11 @@ namespace Test.ServicesTests
         [Fact]
         public void VerifyEmail_WhenCodeIsInvalid_ShouldReturnFalseAndNotCallRepository()
         {
-            var verificationDto = new EmailVerificationDTO { Email = "test@example.com", 
-                VerificationCode = "wrong-code" };
+            var verificationDto = new EmailVerificationDTO 
+            { 
+                Email = "test@example.com", 
+                VerificationCode = "wrong-code" 
+            };
 
             mockCodeService.Setup(s => s.ValidateCode(It.IsAny<string>(), It.IsAny<string>(), 
                 It.IsAny<CodeType>(),true)).Returns(false);
@@ -97,7 +104,11 @@ namespace Test.ServicesTests
         [Fact]
         public void VerifyEmail_WhenValidationThrows_ShouldBubbleExceptionAndNotCallRepository()
         {
-            var dto = new EmailVerificationDTO { Email = "e@x.com", VerificationCode = "X" };
+            var dto = new EmailVerificationDTO 
+            { 
+                Email = "e@x.com", 
+                VerificationCode = "X" 
+            };
             mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.VerificationCode, CodeType.EmailVerification, 
                 true)).Throws(new Exception("validation failure"));
 
@@ -108,7 +119,11 @@ namespace Test.ServicesTests
         [Fact]
         public void VerifyEmail_WhenRepositoryThrows_ShouldBubbleException()
         {
-            var dto = new EmailVerificationDTO { Email = "e@x.com", VerificationCode = "OK" };
+            var dto = new EmailVerificationDTO 
+            { 
+                Email = "e@x.com", 
+                VerificationCode = "OK" 
+            };
             mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.VerificationCode, CodeType.EmailVerification,
                 true)).Returns(true);
             mockAccountRepository.Setup(r => r.VerifyEmail(dto.Email)).Throws(new Exception("db failure"));
@@ -119,7 +134,11 @@ namespace Test.ServicesTests
         [Fact]
         public void VerifyEmail_WhenRepositoryReturnsFalse_ShouldReturnFalse()
         {
-            var dto = new EmailVerificationDTO { Email = "e@x.com", VerificationCode = "OK" };
+            var dto = new EmailVerificationDTO 
+            { 
+                Email = "e@x.com", 
+                VerificationCode = "OK" 
+            };
             mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.VerificationCode, CodeType.EmailVerification,
                 true)).Returns(true);
             mockAccountRepository.Setup(r => r.VerifyEmail(dto.Email)).Returns(false);
@@ -178,7 +197,10 @@ namespace Test.ServicesTests
         [InlineData("")]
         public void VerifyEmail_WithNullOrEmptyCode_ShouldReturnFalse(string? code)
         {
-            var dto = new EmailVerificationDTO { Email = "user@example.com", VerificationCode = code! };
+            var dto = new EmailVerificationDTO 
+            { 
+                Email = "user@example.com", VerificationCode = code! 
+            };
             mockCodeService.Setup(s => s.ValidateCode(dto.Email, dto.VerificationCode, CodeType.EmailVerification,
                 true)).Returns(false);
 
